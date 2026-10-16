@@ -1,0 +1,38 @@
+{
+  "test_time": "2026-10-10 23:58:29",
+  "video_file": "BACK_ROUNDING_00001672.mp4",
+  "video_full_path": "test_videos_benchmark/squats/BACK_ROUNDING_00001672.mp4",
+  "exercise": "squat",
+  "exercise_name_vi": "Gánh đùi (Squat V2 - Qualcomm)",
+  "evaluation": {
+    "exercise": "squat",
+    "exercise_name_vi": "Gánh đùi (Squat V2 - Qualcomm)",
+    "class_id": 1,
+    "class_code": "BACK_ROUNDING",
+    "class_name_vi": "Gù lưng / Đổ thân về trước",
+    "feedback_vi": "Lưng bị cong hoặc đổ người quá nhiều. Hãy ưỡn ngực, mắt nhìn thẳng và siết chặt cơ bụng.",
+    "is_correct": false,
+    "confidence": 0.4518868327140808,
+    "probabilities": {
+      "CORRECT": 0.07428788393735886,
+      "BACK_ROUNDING": 0.4518868327140808,
+      "KNEE_ALIGNMENT": 0.06867577135562897,
+      "SHALLOW_DEPTH": 0.40514954924583435
+    },
+    "raw_probabilities": {
+      "CORRECT": 0.07428787648677826,
+      "BACK_ROUNDING": 0.4518868029117584,
+      "KNEE_ALIGNMENT": 0.06867576390504837,
+      "SHALLOW_DEPTH": 0.40514951944351196
+    },
+    "latency_ms": 6.6,
+    "camera_view": "SIDE_VIEW",
+    "camera_view_vi": "QUAY NGANG (SIDE)",
+    "is_side_view": true,
+    "view_note": "Góc quay ngang: Đã kích hoạt bộ lọc che khuất (Bỏ qua lỗi trục gối; tập trung đo độ sâu & cột sống).",
+    "biomechanics": {
+      "min_knee_angle": 171.0,
+      "max_torso_lean": 2.0
+    }
+  }
+}

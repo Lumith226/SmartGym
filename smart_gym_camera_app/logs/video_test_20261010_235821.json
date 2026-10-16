@@ -1,0 +1,38 @@
+{
+  "test_time": "2026-10-10 23:58:21",
+  "video_file": "SHALLOW_DEPTH_00003948.mp4",
+  "video_full_path": "test_videos_benchmark/squats/SHALLOW_DEPTH_00003948.mp4",
+  "exercise": "squat",
+  "exercise_name_vi": "Gánh đùi (Squat V2 - Qualcomm)",
+  "evaluation": {
+    "exercise": "squat",
+    "exercise_name_vi": "Gánh đùi (Squat V2 - Qualcomm)",
+    "class_id": 3,
+    "class_code": "SHALLOW_DEPTH",
+    "class_name_vi": "Xuống chưa đủ độ sâu",
+    "feedback_vi": "Độ sâu chưa đạt mức song song. Hãy hạ hông sâu hơn để kích hoạt cơ mông và đùi sau.",
+    "is_correct": false,
+    "confidence": 0.5053568482398987,
+    "probabilities": {
+      "CORRECT": 0.1633489429950714,
+      "BACK_ROUNDING": 0.21094951033592224,
+      "KNEE_ALIGNMENT": 0.12034470587968826,
+      "SHALLOW_DEPTH": 0.5053568482398987
+    },
+    "raw_probabilities": {
+      "CORRECT": 0.1633489429950714,
+      "BACK_ROUNDING": 0.21094951033592224,
+      "KNEE_ALIGNMENT": 0.12034470587968826,
+      "SHALLOW_DEPTH": 0.5053568482398987
+    },
+    "latency_ms": 7.61,
+    "camera_view": "SIDE_VIEW",
+    "camera_view_vi": "QUAY NGANG (SIDE)",
+    "is_side_view": true,
+    "view_note": "Góc quay ngang: Đã kích hoạt bộ lọc che khuất (Bỏ qua lỗi trục gối; tập trung đo độ sâu & cột sống).",
+    "biomechanics": {
+      "min_knee_angle": 161.8,
+      "max_torso_lean": 2.0
+    }
+  }
+}

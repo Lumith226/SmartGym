@@ -1,0 +1,38 @@
+{
+  "test_time": "2026-10-10 23:57:07",
+  "video_file": "CORRECT_00002456.mp4",
+  "video_full_path": "test_videos_benchmark/squats/CORRECT_00002456.mp4",
+  "exercise": "squat",
+  "exercise_name_vi": "Gánh đùi (Squat V2 - Qualcomm)",
+  "evaluation": {
+    "exercise": "squat",
+    "exercise_name_vi": "Gánh đùi (Squat V2 - Qualcomm)",
+    "class_id": 1,
+    "class_code": "BACK_ROUNDING",
+    "class_name_vi": "Gù lưng / Đổ thân về trước",
+    "feedback_vi": "Lưng bị cong hoặc đổ người quá nhiều. Hãy ưỡn ngực, mắt nhìn thẳng và siết chặt cơ bụng.",
+    "is_correct": false,
+    "confidence": 0.7058390378952026,
+    "probabilities": {
+      "CORRECT": 0.17252235114574432,
+      "BACK_ROUNDING": 0.7058390378952026,
+      "KNEE_ALIGNMENT": 0.07952287793159485,
+      "SHALLOW_DEPTH": 0.04211568832397461
+    },
+    "raw_probabilities": {
+      "CORRECT": 0.17252235114574432,
+      "BACK_ROUNDING": 0.7058390378952026,
+      "KNEE_ALIGNMENT": 0.07952287793159485,
+      "SHALLOW_DEPTH": 0.04211568832397461
+    },
+    "latency_ms": 12.61,
+    "camera_view": "OBLIQUE_VIEW",
+    "camera_view_vi": "GÓC CHÉO 45°",
+    "is_side_view": false,
+    "view_note": "",
+    "biomechanics": {
+      "min_knee_angle": 148.0,
+      "max_torso_lean": 3.5
+    }
+  }
+}

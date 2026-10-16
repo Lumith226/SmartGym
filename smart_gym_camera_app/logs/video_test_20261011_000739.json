@@ -1,0 +1,35 @@
+{
+  "test_time": "2026-10-11 00:07:39",
+  "video_file": "SHALLOW_DEPTH_00174803.mp4",
+  "video_full_path": "test_videos_benchmark/pushups/SHALLOW_DEPTH_00174803.mp4",
+  "exercise": "push_up",
+  "exercise_name_vi": "Chống đẩy (Push-up V2 - Qualcomm)",
+  "evaluation": {
+    "exercise": "push_up",
+    "exercise_name_vi": "Chống đẩy (Push-up V2 - Qualcomm)",
+    "class_id": 1,
+    "class_code": "SHALLOW_DEPTH",
+    "class_name_vi": "Chống đẩy nông / Nửa vời",
+    "feedback_vi": "Khuỷu tay chưa gập đủ sâu. Hãy hạ ngực cách mặt sàn khoảng 5-10cm để tối ưu cơ ngực.",
+    "is_correct": false,
+    "confidence": 0.9153386950492859,
+    "probabilities": {
+      "CORRECT": 0.0788106620311737,
+      "SHALLOW_DEPTH": 0.9153386950492859,
+      "HIP_ALIGNMENT": 0.004791224375367165,
+      "HAND_PLACEMENT": 0.0010593965416774154
+    },
+    "raw_probabilities": {
+      "CORRECT": 0.0788106620311737,
+      "SHALLOW_DEPTH": 0.9153386950492859,
+      "HIP_ALIGNMENT": 0.004791224375367165,
+      "HAND_PLACEMENT": 0.0010593965416774154
+    },
+    "latency_ms": 6.74,
+    "camera_view": "FRONT_VIEW",
+    "camera_view_vi": "CHÍNH DIỆN (FRONT)",
+    "is_side_view": false,
+    "view_note": "",
+    "biomechanics": {}
+  }
+}

@@ -1,0 +1,38 @@
+{
+  "test_time": "2026-10-11 00:07:33",
+  "video_file": "CORRECT_00098461.mp4",
+  "video_full_path": "test_videos_benchmark/squats/CORRECT_00098461.mp4",
+  "exercise": "squat",
+  "exercise_name_vi": "Gánh đùi (Squat V2 - Qualcomm)",
+  "evaluation": {
+    "exercise": "squat",
+    "exercise_name_vi": "Gánh đùi (Squat V2 - Qualcomm)",
+    "class_id": 0,
+    "class_code": "CORRECT",
+    "class_name_vi": "Đúng chuẩn kỹ thuật",
+    "feedback_vi": "Rất tốt! Cột sống thẳng, đùi hạ ngang hoặc sâu hơn gối.",
+    "is_correct": true,
+    "confidence": 0.49416404962539673,
+    "probabilities": {
+      "CORRECT": 0.49416404962539673,
+      "BACK_ROUNDING": 0.015894390642642975,
+      "KNEE_ALIGNMENT": 0.4899415373802185,
+      "SHALLOW_DEPTH": 0.0
+    },
+    "raw_probabilities": {
+      "CORRECT": 0.4792729914188385,
+      "BACK_ROUNDING": 0.015415431000292301,
+      "KNEE_ALIGNMENT": 0.47517770528793335,
+      "SHALLOW_DEPTH": 0.030133826658129692
+    },
+    "latency_ms": 7.43,
+    "camera_view": "SIDE_VIEW",
+    "camera_view_vi": "QUAY NGANG (SIDE)",
+    "is_side_view": true,
+    "view_note": "Góc quay ngang: Đã kích hoạt bộ lọc che khuất (Bỏ qua lỗi trục gối; tập trung đo độ sâu & cột sống).",
+    "biomechanics": {
+      "min_knee_angle": 85.3,
+      "max_torso_lean": 1.7
+    }
+  }
+}

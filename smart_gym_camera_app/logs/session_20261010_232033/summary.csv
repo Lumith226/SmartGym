@@ -1,0 +1,3 @@
+﻿STT Rep,Thời gian,Nguồn (Video / Webcam),Bài tập,Góc nhìn Camera,Trạng thái,Kết quả đánh giá,Mã lỗi,Độ tin cậy (%),Lời khuyên HLV sửa lỗi,Độ trễ ONNX (ms),Số frame gốc,File tọa độ 17 khớp (.npy)
+1,23:21:02,CORRECT_00002456.mp4,Gánh đùi (Squat V2 - Qualcomm),GÓC CHÉO 45°,CÓ LỖI SAI,Gù lưng / Đổ thân về trước,BACK_ROUNDING,58.21%,"Lưng bị cong hoặc đổ người quá nhiều. Hãy ưỡn ngực, mắt nhìn thẳng và siết chặt cơ bụng.",22.07,66,rep_001_squat_BACK_ROUNDING_58pct.npy
+1,23:21:52,CORRECT_00002456.mp4,Gánh đùi (Squat V2 - Qualcomm),GÓC CHÉO 45°,CÓ LỖI SAI,Gù lưng / Đổ thân về trước,BACK_ROUNDING,58.21%,"Lưng bị cong hoặc đổ người quá nhiều. Hãy ưỡn ngực, mắt nhìn thẳng và siết chặt cơ bụng.",5.81,66,rep_001_squat_BACK_ROUNDING_58pct.npy

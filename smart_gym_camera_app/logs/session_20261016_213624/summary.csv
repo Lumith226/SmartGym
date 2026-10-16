@@ -1,0 +1,3 @@
+﻿STT Rep,Thời gian,Nguồn (Video / Webcam),Bài tập,Góc nhìn Camera,Trạng thái,Kết quả đánh giá,Mã lỗi,Độ tin cậy (%),Lời khuyên HLV sửa lỗi,Độ trễ ONNX (ms),Số frame gốc,File tọa độ 17 khớp (.npy)
+1,21:38:40,KNEE_ALIGNMENT_00219976.mp4,Gánh đùi (Squat V2 - Qualcomm),GÓC CHÉO 45°,ĐÚNG FORM,Đúng chuẩn kỹ thuật,CORRECT,68.24%,"Rất tốt! Cột sống thẳng, đùi hạ ngang hoặc sâu hơn gối.",7.12,49,rep_001_squat_CORRECT_68pct.npy
+2,21:38:45,KNEE_ALIGNMENT_00219976.mp4,Gánh đùi (Squat V2 - Qualcomm),GÓC CHÉO 45°,ĐÚNG FORM,Đúng chuẩn kỹ thuật,CORRECT,75.66%,"Rất tốt! Cột sống thẳng, đùi hạ ngang hoặc sâu hơn gối.",6.14,40,rep_002_squat_CORRECT_75pct.npy

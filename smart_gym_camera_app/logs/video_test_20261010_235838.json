@@ -1,0 +1,38 @@
+{
+  "test_time": "2026-10-10 23:58:38",
+  "video_file": "NARROW_STANCE_00002765.mp4",
+  "video_full_path": "test_videos_benchmark/squats/NARROW_STANCE_00002765.mp4",
+  "exercise": "squat",
+  "exercise_name_vi": "Gánh đùi (Squat V2 - Qualcomm)",
+  "evaluation": {
+    "exercise": "squat",
+    "exercise_name_vi": "Gánh đùi (Squat V2 - Qualcomm)",
+    "class_id": 2,
+    "class_code": "KNEE_ALIGNMENT",
+    "class_name_vi": "Sai trục gối / Chân quá hẹp",
+    "feedback_vi": "Khoảng cách hai chân quá hẹp hoặc gối sai trục. Hãy mở chân bằng vai và hướng gối theo mũi chân.",
+    "is_correct": false,
+    "confidence": 0.9859793782234192,
+    "probabilities": {
+      "CORRECT": 0.007109613157808781,
+      "BACK_ROUNDING": 0.002919805934652686,
+      "KNEE_ALIGNMENT": 0.9859793782234192,
+      "SHALLOW_DEPTH": 0.003991172183305025
+    },
+    "raw_probabilities": {
+      "CORRECT": 0.007109614089131355,
+      "BACK_ROUNDING": 0.0029198061674833298,
+      "KNEE_ALIGNMENT": 0.9859794974327087,
+      "SHALLOW_DEPTH": 0.003991172648966312
+    },
+    "latency_ms": 8.0,
+    "camera_view": "SIDE_VIEW",
+    "camera_view_vi": "QUAY NGANG (SIDE)",
+    "is_side_view": true,
+    "view_note": "Góc quay ngang: Đã kích hoạt bộ lọc che khuất (Bỏ qua lỗi trục gối; tập trung đo độ sâu & cột sống).",
+    "biomechanics": {
+      "min_knee_angle": 167.4,
+      "max_torso_lean": 2.1
+    }
+  }
+}
