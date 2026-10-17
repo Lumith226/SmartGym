@@ -1,0 +1,18 @@
+{
+  "m": {
+    "url": "https://download.openmmlab.com/mmpose/v1/projects/rtmposev1/onnx_sdk/rtmpose-m_simcc-body7_pt-body7_420e-256x192-e48f03d0_20230504.zip",
+    "archive_sha256": "f7fbb6c5c11a1bb70f3d445e4ddec5d144ea89ad5649c081ef976f9b24a0b741",
+    "model_sha256": "5c0a4bf67953e6d2ac43ce15e77dc9d5d354ae18430a47d2c5963a7bc5683e3c",
+    "archive_bytes": 50799818,
+    "pipeline_sha256": "212763bd04f0f883491f32db5fbaaf75ae50c756556650468b08868fb0e0d7f0",
+    "keypoints": "COCO 17; original image xy; SimCC axis-min score, not calibrated probability"
+  },
+  "s": {
+    "url": "https://download.openmmlab.com/mmpose/v1/projects/rtmposev1/onnx_sdk/rtmpose-s_simcc-body7_pt-body7_420e-256x192-acd4a1ef_20230504.zip",
+    "archive_sha256": "7673922e531014906ca4f0f239b7e233b740146a10b632deaa2a28d45470d802",
+    "model_sha256": "9aeb635b83f86aea45cf45d85798f7eba1a162de8e0d721c44e54fe5eebaf47d",
+    "archive_bytes": 20496303,
+    "pipeline_sha256": "212763bd04f0f883491f32db5fbaaf75ae50c756556650468b08868fb0e0d7f0",
+    "keypoints": "COCO 17; original image xy; SimCC axis-min score, not calibrated probability"
+  }
+}

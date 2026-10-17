@@ -1,0 +1,9 @@
+# Optional pretrained pose assets are installed explicitly by fetch_rtmpose.py.
+/smart_gym_camera_app/weights/rtmpose/
+/smart_gym_camera_app/weights/detectors/
+__pycache__/
+*.py[cod]
+.DS_Store
+.venv/
+/smart_gym_camera_app/artifacts/
+/smart_gym_camera_app/logs/

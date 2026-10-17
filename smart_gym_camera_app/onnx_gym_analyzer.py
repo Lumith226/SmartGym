@@ -13,7 +13,7 @@ import onnxruntime as ort
 CURRENT_DIR = os.path.dirname(os.path.abspath(__file__))
 WEIGHTS_DIR = os.path.join(CURRENT_DIR, 'weights')
 
-from enhanced_pose_processor import EnhancedPoseProcessor
+from enhanced_pose_processor import EnhancedPoseProcessor, sanitize_image_keypoints
 
 EXERCISE_CONFIG = {
     'squat': {
@@ -324,6 +324,8 @@ class ONNXGymAnalyzer:
             raw_tensor = rep_tensor.copy()
         else:
             raw_tensor = rep_tensor[0].copy()
+
+        raw_tensor = sanitize_image_keypoints(raw_tensor)
 
         # 1. Nhận diện góc nhìn camera trên tọa độ chuẩn hóa ảnh gốc [0, 1]
         view_info = self.detect_camera_view(raw_tensor)

@@ -9,6 +9,23 @@ Tích hợp 4 kỹ thuật cơ sinh học và thị giác máy tính:
 
 import numpy as np
 
+
+def sanitize_image_keypoints(keypoints: np.ndarray) -> np.ndarray:
+    """Mark missing image-space coordinates as invalid before filtering.
+
+    Some Ultralytics versions zero low-confidence coordinates while preserving
+    their confidence value. (0, 0) is therefore a missing-point sentinel here,
+    even when confidence exceeds our 0.25 threshold. A single zero axis remains
+    valid. Apply before root-centering, never to root-relative coordinates.
+    Supports (3, 17) frames and (3, T, 17) sequences without mutating the input.
+    """
+    out = np.asarray(keypoints, dtype=np.float32).copy()
+    if out.ndim not in (2, 3) or out.shape[0] != 3 or out.shape[-1] != 17:
+        raise ValueError("Expected image keypoints shaped (3, 17) or (3, T, 17)")
+    valid = np.isfinite(out).all(axis=0) & (out[2] > 0) & np.any(out[:2] != 0, axis=0)
+    out[:, ~valid] = 0.0
+    return out
+
 # 17 COCO Keypoints:
 # 0: Mũi, 1: Mắt T, 2: Mắt P, 3: Tai T, 4: Tai P
 # 5: Vai T, 6: Vai P, 7: Khuỷu T, 8: Khuỷu P, 9: Cổ tay T, 10: Cổ tay P
@@ -74,7 +91,7 @@ class EnhancedPoseProcessor:
         Xử lý 1 frame tọa độ shape (3, 17):
         kpts[0] = x, kpts[1] = y, kpts[2] = confidence
         """
-        cur = kpts.copy()
+        cur = sanitize_image_keypoints(kpts)
         conf = cur[2].copy()
 
         if self.prev_kpts is None:

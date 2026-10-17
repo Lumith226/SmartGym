@@ -1,0 +1,9 @@
+# Validated on Python 3.12 / macOS Intel. Choose matching CUDA wheels separately
+# when deploying on an NVIDIA host; RTMPose currently uses ONNX Runtime CPU.
+numpy==1.26.4
+opencv-python==4.11.0.86
+torch==2.2.2
+torchvision==0.17.2
+ultralytics==8.3.0
+onnxruntime==1.23.2
+pillow==13.0.0

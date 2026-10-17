@@ -8,7 +8,7 @@ Phím tắt:
 - [V]: Mở cửa sổ chọn file video từ máy tính
 - [C]: Chuyển về Camera trực tiếp (Webcam)
 - [P] hoặc [SPACE]: Tạm dừng / Tiếp tục phát video
-- [1-6]: Chuyển đổi giữa 6 bài tập
+- [1-7]: Chuyển đổi giữa 7 cấu hình bài tập
 - [M]: Bật / Tắt âm thanh thông báo
 - [R]: Phát lại video từ đầu / Reset rep count
 - [Q] hoặc [ESC]: Thoát ứng dụng
@@ -19,9 +19,16 @@ import sys
 import time
 import threading
 import argparse
-import winsound
+import json
+from functools import lru_cache
+from pathlib import Path
+try:
+    import winsound
+except ImportError:
+    winsound = None
 import cv2
 import numpy as np
+import torch
 from PIL import Image, ImageDraw, ImageFont
 
 if sys.platform == 'win32' and hasattr(sys.stdout, 'buffer'):
@@ -36,7 +43,8 @@ if CURRENT_DIR not in sys.path:
 from onnx_gym_analyzer import ONNXGymAnalyzer, EXERCISE_CONFIG
 from rep_tracker import ExerciseRepTracker
 from session_logger import SessionLogger
-from ultralytics import YOLO
+from pose_tracking import PoseStream
+from pose_backends.factory import add_pose_arguments, config_from_args, build_pose_backend, describe_backend
 
 # Cặp kết nối 17 khớp xương COCO
 SKELETON_PAIRS = [
@@ -61,7 +69,7 @@ SOUND_ENABLED = True
 
 def play_audio_feedback(is_correct: bool):
     """Phát âm thanh thông báo trong luồng nền (background thread)."""
-    if not SOUND_ENABLED:
+    if not SOUND_ENABLED or winsound is None:
         return
 
     def _sound_worker():
@@ -102,8 +110,11 @@ def pick_video_file() -> str:
         return ""
 
 
+@lru_cache(maxsize=32)
 def load_font(size: int = 20):
-    for font_name in ['arial.ttf', 'segoeui.ttf', 'tahoma.ttf']:
+    for font_name in ['arial.ttf', 'segoeui.ttf', 'tahoma.ttf',
+                      '/System/Library/Fonts/Supplemental/Arial.ttf',
+                      '/usr/share/fonts/truetype/dejavu/DejaVuSans.ttf']:
         try:
             return ImageFont.truetype(font_name, size)
         except Exception:
@@ -123,8 +134,9 @@ def draw_vietnamese_text(img_bgr, text, position, font_size=20, color_bgr=(255, 
     return cv2.cvtColor(np.array(pil_img), cv2.COLOR_RGB2BGR)
 
 
-def draw_skeleton(frame, kpts, width, height, conf_thresh=0.22):
+def draw_skeleton(frame, kpts, width, height, conf_thresh=0.22, inferred_mask=None):
     """Vẽ 17 khớp xương và các đường nối neon."""
+    inferred_mask = np.zeros(17, dtype=bool) if inferred_mask is None else inferred_mask
     pts = []
     for i in range(17):
         cx = int(kpts[0, i] * width)
@@ -134,12 +146,16 @@ def draw_skeleton(frame, kpts, width, height, conf_thresh=0.22):
 
     # Đường nối
     for p1, p2 in SKELETON_PAIRS:
-        if pts[p1][2] > conf_thresh and pts[p2][2] > conf_thresh:
-            cv2.line(frame, (pts[p1][0], pts[p1][1]), (pts[p2][0], pts[p2][1]), (0, 220, 255), 2, cv2.LINE_AA)
+        if ((pts[p1][2] > conf_thresh or inferred_mask[p1])
+                and (pts[p2][2] > conf_thresh or inferred_mask[p2])):
+            color = (145, 145, 145) if inferred_mask[p1] or inferred_mask[p2] else (0, 220, 255)
+            cv2.line(frame, (pts[p1][0], pts[p1][1]), (pts[p2][0], pts[p2][1]), color, 2, cv2.LINE_AA)
 
     # Khớp tròn
     for i, (cx, cy, conf) in enumerate(pts):
-        if conf > conf_thresh:
+        if inferred_mask[i]:
+            cv2.circle(frame, (cx, cy), 5, (145, 145, 145), 1, cv2.LINE_AA)
+        elif conf > conf_thresh:
             color = (0, 255, 0) if i in [5, 6, 11, 12] else (255, 100, 0)
             cv2.circle(frame, (cx, cy), 5, color, -1, cv2.LINE_AA)
             cv2.circle(frame, (cx, cy), 7, (255, 255, 255), 1, cv2.LINE_AA)
@@ -174,27 +190,54 @@ def main():
     parser = argparse.ArgumentParser(description="Smart Gym AI App (Camera & Video Mode)")
     parser.add_argument('--video', type=str, default=None, help='Đường dẫn file video kiểm thử (.mp4)')
     parser.add_argument('--exercise', type=str, default='squat', help='Tên bài tập: squat, push_up, pull_up, bench_pressing, situp, jump_jack')
+    add_pose_arguments(parser)
     args = parser.parse_args()
+    if args.video and not os.path.isfile(args.video):
+        parser.error(f'Không tìm thấy video: {args.video}')
+    try:
+        pose_config = config_from_args(args, device=0 if torch.cuda.is_available() else 'cpu')
+    except (ValueError, FileNotFoundError) as exc:
+        parser.error(str(exc))
+    pose_min_score = pose_config.confidence_threshold
 
     print("=" * 80)
     print("   KHỞI ĐỘNG SMART GYM APP - HỖ TRỢ CẢ WEBCAM VÀ TẢI VIDEO KIỂM THỬ")
     print("=" * 80)
 
-    # 1. Nạp YOLOv8-Pose
-    yolo_path = os.path.join(CURRENT_DIR, 'weights', 'yolov8n-pose.pt')
-    if not os.path.exists(yolo_path):
-        yolo_path = 'yolov8n-pose.pt'
-    print(f">>> Đang nạp YOLOv8-Pose: {yolo_path}")
-    pose_model = YOLO(yolo_path)
+    # 1. Build the requested pose pipeline from local assets only.
+    pose_detector = build_pose_backend(pose_config)
+    args.pose_backend = pose_config.canonical_backend
+    print(f'>>> Bộ lấy khớp: {args.pose_backend} | ngưỡng score: {pose_min_score} (không phải xác suất đã hiệu chuẩn)')
+    if pose_config.backend != 'yolo':
+        print(f'>>> RTMPose ONNX CPU: {args.rtmpose_model}')
+    if args.pose_backend == 'yolo-detect-rtmpose':
+        print(f'>>> YOLO-Detect: {args.person_model} | person score >= {args.person_conf}')
 
     # 2. Nạp ONNX Analyzer & Rep Tracker & Session Logger
     print(">>> Đang nạp engine ONNXGymAnalyzer & SessionLogger...")
     analyzer = ONNXGymAnalyzer()
     tracker = ExerciseRepTracker(analyzer)
     logger = SessionLogger()
+    Path(logger.session_dir, 'pose_backend.json').write_text(
+        json.dumps(describe_backend(pose_config), ensure_ascii=False, indent=2) + '\n', encoding='utf-8')
 
     # 3. Xác định nguồn phát ban đầu
     current_ex_key = analyzer.normalize_exercise(args.exercise)
+    pose_stream = PoseStream(current_ex_key, confidence_threshold=pose_min_score)
+    pose_ready = False
+    pending_target = [None]
+
+    def reset_session_pose(new_exercise=None):
+        nonlocal pose_ready
+        tracker.reset(new_exercise)
+        pose_stream.reset(current_ex_key)
+        pose_detector.reset()
+        pose_ready = False
+        pending_target[0] = None
+
+    def select_person(event, x, y, flags, userdata):
+        if event == cv2.EVENT_LBUTTONDOWN:
+            pending_target[0] = (x, y)
     input_source = 'webcam'
     video_path = None
     is_paused = False
@@ -216,17 +259,19 @@ def main():
     window_name = 'Smart Gym AI - Camera & Video Assessment (ONNX Runtime)'
     cv2.namedWindow(window_name, cv2.WINDOW_NORMAL)
     cv2.resizeWindow(window_name, 1280, 720)
+    cv2.setMouseCallback(window_name, select_person)
 
     print("\n>>> HƯỚNG DẪN ĐIỀU KHIỂN:")
     print("  [V]: Tải video từ máy tính lên (Mở hộp thoại chọn file .mp4, .avi...)")
     print("  [C]: Chuyển về chế độ Camera trực tiếp (Webcam)")
     print("  [P] hoặc [SPACE]: Tạm dừng / Tiếp tục phát video (hoặc Đánh giá thủ công)")
-    print("  [1-6]: Chuyển bài tập (1:Squat | 2:Push-up | 3:Pull-up | 4:Bench | 5:Sit-up | 6:Jump Jack)")
+    print("  [1-7]: " + " | ".join(item[2] for item in EXERCISES_LIST))
+    print("  Bấm vào người để chọn; mất dấu quá lâu cần bấm chọn lại hoặc [R] reset")
     print("  [M]: Bật / Tắt âm thanh thông báo")
     print("  [R]: Phát lại video từ đầu / Reset bộ đếm Reps")
     print("  [Q] hoặc [ESC]: Thoát ứng dụng\n")
 
-    tracker.reset(current_ex_key)
+    reset_session_pose(current_ex_key)
     active_alert = None
     alert_duration = 3.5
     last_frame = None
@@ -241,7 +286,7 @@ def main():
             if not ret:
                 if input_source == 'video':
                     # Nếu video kết thúc mà đang có rep dở dang (>= 10 frames) -> Tự động chốt đánh giá rep ngay!
-                    if len(tracker.current_rep_frames) >= 10 and not getattr(tracker, '_video_ended_evaluated', False):
+                    if pose_ready and len(tracker.current_rep_frames) >= 10 and not getattr(tracker, '_video_ended_evaluated', False):
                         tracker._video_ended_evaluated = True
                         forced = tracker.force_evaluate_current_buffer()
                         if forced:
@@ -297,7 +342,7 @@ def main():
                             continue
                         elif key in [ord('r'), ord('R')]:
                             cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-                            tracker.reset()
+                            reset_session_pose()
                             tracker._video_ended_evaluated = False
                             active_alert = None
                             continue
@@ -308,7 +353,7 @@ def main():
                                 input_source = 'video'
                                 video_path = chosen
                                 cap = cv2.VideoCapture(video_path)
-                                tracker.reset()
+                                reset_session_pose()
                                 tracker._video_ended_evaluated = False
                                 active_alert = None
                             continue
@@ -316,7 +361,7 @@ def main():
                             cap.release()
                             input_source = 'webcam'
                             cap = cv2.VideoCapture(0)
-                            tracker.reset()
+                            reset_session_pose()
                             tracker._video_ended_evaluated = False
                             active_alert = None
                             continue
@@ -350,47 +395,69 @@ def main():
         cur_view_color = getattr(tracker, 'cur_view_color', (180, 180, 180))
 
         if not is_paused:
-            results = pose_model(frame, verbose=False, device=0 if cv2.cuda.getCudaEnabledDeviceCount() > 0 else 'cpu')
-            norm_kpts = np.zeros((3, 17), dtype=np.float32)
+            if pending_target[0] is not None:
+                pose_stream.select_at(*pending_target[0])
+                pose_detector.reset()
+                pending_target[0] = None
+                tracker.reset_motion()
+                active_alert = None
+            if input_source == 'video':
+                source_fps = cap.get(cv2.CAP_PROP_FPS)
+                if not np.isfinite(source_fps) or source_fps <= 0:
+                    source_fps = 30.0
+                pose_timestamp = max(0.0, (cap.get(cv2.CAP_PROP_POS_FRAMES) - 1) / source_fps)
+            else:
+                pose_timestamp = time.monotonic()
+            detection = pose_detector.detect(frame, pose_timestamp, pose_stream)
+            candidates = detection.candidates
+            pose_frame = pose_stream.update(candidates, pose_timestamp, w, h)
+            pose_ready = pose_frame.ready
+            if pose_frame.reset_history:
+                tracker.reset_motion()
+                active_alert = None
+            norm_kpts = pose_frame.analysis
 
-            has_person = False
-            if results and len(results[0].keypoints) > 0:
-                kpts_data = results[0].keypoints.data[0].cpu().numpy()
-                if kpts_data.shape[0] == 17:
-                    has_person = True
-                    norm_kpts[0, :] = kpts_data[:, 0] / w
-                    norm_kpts[1, :] = kpts_data[:, 1] / h
-                    norm_kpts[2, :] = kpts_data[:, 2]
-
-                    # Phân tích nhanh góc quay camera thời gian thực
-                    sh_dx = abs(norm_kpts[0, 5] - norm_kpts[0, 6])
-                    hip_dx = abs(norm_kpts[0, 11] - norm_kpts[0, 12])
-                    if sh_dx < 0.11 and hip_dx < 0.09:
-                        cur_view_name = "QUAY NGANG (SIDE)"
-                        cur_view_color = (0, 220, 255)
-                    elif sh_dx > 0.18 and hip_dx > 0.12:
-                        cur_view_name = "CHÍNH DIỆN (FRONT)"
-                        cur_view_color = (0, 255, 100)
-                    else:
-                        cur_view_name = "GÓC CHÉO 45° (OBLIQUE)"
-                        cur_view_color = (255, 180, 0)
-                    tracker.cur_view_name = cur_view_name
-                    tracker.cur_view_color = cur_view_color
+            if pose_ready:
+                # Phân tích nhanh góc quay camera thời gian thực
+                sh_dx = abs(norm_kpts[0, 5] - norm_kpts[0, 6])
+                hip_dx = abs(norm_kpts[0, 11] - norm_kpts[0, 12])
+                if sh_dx < 0.11 and hip_dx < 0.09:
+                    cur_view_name = "QUAY NGANG (SIDE)"
+                    cur_view_color = (0, 220, 255)
+                elif sh_dx > 0.18 and hip_dx > 0.12:
+                    cur_view_name = "CHÍNH DIỆN (FRONT)"
+                    cur_view_color = (0, 255, 100)
+                else:
+                    cur_view_name = "GÓC CHÉO 45° (OBLIQUE)"
+                    cur_view_color = (255, 180, 0)
+                tracker.cur_view_name = cur_view_name
+                tracker.cur_view_color = cur_view_color
 
             # Xử lý cắt rep & lọc khử nhảy khớp do che khuất
-            if has_person:
-                track_info = tracker.process_frame(norm_kpts)
-                display_kpts = track_info.get('smoothed_kpts', norm_kpts)
-                draw_skeleton(frame, display_kpts, w, h)
+            if pose_ready:
+                track_info = tracker.process_frame(norm_kpts, prefiltered=True,
+                                                   model_keypoints=pose_frame.raw)
             else:
                 track_info = {
                     'exercise': current_ex_key,
                     'rep_count': tracker.rep_count,
-                    'state': 'NO PERSON',
+                    'state': (pose_frame.selection.state if pose_frame.selection.candidate is None
+                              else 'NEED CLEAR JOINTS'),
                     'indicator': 0.0,
-                    'last_result': tracker.last_result,
+                    'last_result': None,
                     'just_finished_rep': False
                 }
+            draw_skeleton(frame, pose_frame.display, w, h, inferred_mask=pose_frame.inferred)
+            tracking_text = (f"Target {pose_frame.selection.track_id or '-'} | "
+                             f"{args.pose_backend} | "
+                             f"{pose_frame.selection.state}")
+            quality_text = (f"Observed {int(pose_frame.observed.sum())}/17 | Ready: {pose_ready} | "
+                            f"ROI: {detection.recovered} | click person to select")
+            tracking_y = max(18, min(h - 140, 150))
+            cv2.putText(frame, tracking_text, (12, tracking_y),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.42, (0, 230, 230), 1, cv2.LINE_AA)
+            cv2.putText(frame, quality_text, (12, tracking_y + 18),
+                        cv2.FONT_HERSHEY_SIMPLEX, 0.42, (0, 230, 230), 1, cv2.LINE_AA)
 
             # Kiểm tra rep vừa hoàn thành
             if track_info.get('just_finished_rep') and track_info.get('last_result'):
@@ -467,7 +534,7 @@ def main():
         cv2.putText(frame, reps_text, (w - 380, 68), cv2.FONT_HERSHEY_SIMPLEX, 1.0, (0, 255, 0), 2, cv2.LINE_AA)
 
         # Trạng thái
-        st_val = tracker.state if not is_paused else "PAUSED"
+        st_val = (tracker.state if pose_ready else "CHỜ KHỚP RÕ") if not is_paused else "PAUSED"
         if is_paused:
             st_color = (0, 255, 255)
         elif tracker.state == 'READY':
@@ -485,7 +552,14 @@ def main():
         cv2.putText(frame, f"FPS: {fps:.1f}", (w - 110, 30), cv2.FONT_HERSHEY_SIMPLEX, 0.55, (180, 180, 180), 1, cv2.LINE_AA)
 
         # Banner cảnh báo & hướng dẫn lùi lại khi camera chưa thấy đủ toàn thân
-        if track_info.get('need_full_body') or tracker.state == 'CHỜ TOÀN THÂN':
+        if not pose_ready:
+            pose_hint = ("Đã mất dấu người tập quá lâu. Bấm vào người để chọn lại hoặc nhấn [R]."
+                         if pose_stream.selector.expired else
+                         "Chưa thấy đủ khớp để chấm. Chỉnh camera hoặc bấm chọn người tập. Khớp xám là suy đoán.")
+            frame = draw_vietnamese_text(frame,
+                pose_hint,
+                (20, 95), font_size=16, color_bgr=(0, 220, 255))
+        elif track_info.get('need_full_body') or tracker.state == 'CHỜ TOÀN THÂN':
             overlay_b = frame.copy()
             cv2.rectangle(overlay_b, (20, 80), (w - 20, 126), (15, 20, 40), -1)
             cv2.addWeighted(overlay_b, 0.85, frame, 0.15, 0, frame)
@@ -494,7 +568,7 @@ def main():
             frame = draw_vietnamese_text(frame, banner_msg, (40, 90), font_size=20, color_bgr=(0, 220, 255))
 
         # ---------------- BẢNG LỊCH SỬ REP GẦN NHẤT (Bottom Card) ----------------
-        res = tracker.last_result
+        res = tracker.last_result if pose_ready else None
         if res is not None:
             is_corr = res['is_correct']
             badge_color = (0, 220, 0) if is_corr else (0, 100, 255)
@@ -576,7 +650,7 @@ def main():
                 input_source = 'video'
                 video_path = chosen
                 cap = cv2.VideoCapture(video_path)
-                tracker.reset()
+                reset_session_pose()
                 active_alert = None
                 is_paused = False
                 print(f">>> ĐÃ CHUYỂN SANG PHÁT VIDEO: {chosen}")
@@ -586,7 +660,7 @@ def main():
             input_source = 'webcam'
             video_path = None
             cap = cv2.VideoCapture(0)
-            tracker.reset()
+            reset_session_pose()
             active_alert = None
             is_paused = False
             print(">>> ĐÃ CHUYỂN VỀ WEBCAM CAMERA 0")
@@ -597,7 +671,7 @@ def main():
         elif key in [ord(str(i)) for i in range(1, len(EXERCISES_LIST) + 1)]:
             idx = int(chr(key)) - 1
             current_ex_key = EXERCISES_LIST[idx][1]
-            tracker.reset(current_ex_key)
+            reset_session_pose(current_ex_key)
             active_alert = None
             print(f">>> Đã chọn bài tập: {EXERCISE_CONFIG[current_ex_key]['name_vi']}")
         elif key in [ord('m'), ord('M')]:
@@ -606,7 +680,7 @@ def main():
         elif key in [ord('r'), ord('R')]:
             if input_source == 'video':
                 cap.set(cv2.CAP_PROP_POS_FRAMES, 0)
-            tracker.reset()
+            reset_session_pose()
             active_alert = None
             print(">>> Đã reset số Reps và phát lại từ đầu.")
         elif key in [ord('l'), ord('L')]:
@@ -615,7 +689,7 @@ def main():
             if input_source == 'video':
                 is_paused = not is_paused
             else:
-                forced = tracker.force_evaluate_current_buffer()
+                forced = tracker.force_evaluate_current_buffer() if pose_ready else None
                 if forced:
                     forced_res, rep_32 = forced
                     is_corr = forced_res['is_correct']

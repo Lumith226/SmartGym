@@ -8,7 +8,7 @@ MODULE ĐẾM VÀ TỰ ĐỘNG CẮT REP ĐỘNG TÁC THỜI GIAN THỰC (REAL-T
 from collections import deque
 import numpy as np
 
-from enhanced_pose_processor import EnhancedPoseProcessor
+from enhanced_pose_processor import EnhancedPoseProcessor, sanitize_image_keypoints
 
 
 def calc_angle(p1, p2, p3):
@@ -72,11 +72,21 @@ class ExerciseRepTracker:
         """
         return self.pose_processor.process_frame(norm_kpts)
 
-    def process_frame(self, raw_norm_kpts: np.ndarray) -> dict:
+    def reset_motion(self):
+        """Discard an interrupted trajectory while preserving completed reps."""
+        completed = self.rep_count
+        self.reset()
+        self.rep_count = completed
+
+    def process_frame(self, raw_norm_kpts: np.ndarray, *, prefiltered=False,
+                      model_keypoints=None) -> dict:
         """
         Xử lý từng khung hình và cắt rep chính xác bằng cơ chế động học hỗn hợp.
         """
-        norm_kpts = self.smooth_kpts(raw_norm_kpts)
+        norm_kpts = (sanitize_image_keypoints(raw_norm_kpts) if prefiltered
+                     else self.smooth_kpts(raw_norm_kpts))
+        model_frame = (sanitize_image_keypoints(model_keypoints)
+                       if model_keypoints is not None else norm_kpts)
         kpts = norm_kpts[:2]  # (2, 17)
 
         # 5: vai T, 6: vai P, 7: khuỷu T, 8: khuỷu P, 9: cổ tay T, 10: cổ tay P
@@ -291,10 +301,10 @@ class ExerciseRepTracker:
         if start_rep and self.state == 'READY':
             # Bắt đầu rep: Lấy 5 frame đệm trước đó + frame hiện tại
             self.state = 'IN_REP'
-            self.current_rep_frames = list(self.pre_buffer) + [norm_kpts]
+            self.current_rep_frames = list(self.pre_buffer) + [model_frame.copy()]
             self.min_indicator_in_rep = self.indicator_value
         elif self.state == 'IN_REP':
-            self.current_rep_frames.append(norm_kpts)
+            self.current_rep_frames.append(model_frame.copy())
 
             # Giới hạn tối đa 90 frames (~3 giây) tránh kẹt trạng thái nếu đứng yên giữa chừng
             if len(self.current_rep_frames) > 90:
@@ -322,7 +332,7 @@ class ExerciseRepTracker:
 
         else:
             # Khi ở trạng thái READY: chỉ lưu rolling buffer 6 frames
-            self.pre_buffer.append(norm_kpts)
+            self.pre_buffer.append(model_frame.copy())
 
         return {
             'exercise': ex,
