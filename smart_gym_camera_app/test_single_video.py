@@ -33,7 +33,7 @@ LOGS_DIR = os.path.join(CURRENT_DIR, 'logs')
 os.makedirs(LOGS_DIR, exist_ok=True)
 
 from onnx_gym_analyzer import ONNXGymAnalyzer, EXERCISE_CONFIG
-from enhanced_pose_processor import EnhancedPoseProcessor
+from enhanced_pose_processor import EnhancedPoseProcessor, sanitize_image_keypoints
 
 
 def pick_video_file_dialog() -> str:
@@ -134,13 +134,14 @@ def main():
 
     raw_kpts_list = []
     for r in results:
-        if len(r.keypoints) > 0:
+        if (r.keypoints is not None and len(r.keypoints) > 0
+                and r.keypoints.data.shape[1:] == (17, 3)):
             k = r.keypoints.data[0].cpu().numpy()
             norm_k = np.zeros((3, 17), dtype=np.float32)
             norm_k[0, :] = k[:, 0] / w
             norm_k[1, :] = k[:, 1] / h
             norm_k[2, :] = k[:, 2]
-            raw_kpts_list.append(norm_k)
+            raw_kpts_list.append(sanitize_image_keypoints(norm_k))
         else:
             raw_kpts_list.append(np.zeros((3, 17), dtype=np.float32))
 

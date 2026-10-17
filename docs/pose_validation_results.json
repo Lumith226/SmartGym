@@ -1,0 +1,545 @@
+{
+  "schema_version": 1,
+  "date": "2026-10-17",
+  "branch": "codex/yolo-detect-rtmpose",
+  "base_commit": "d0e45db",
+  "scope": "Availability/latency and regression; no expert keypoint ground truth, therefore not accuracy.",
+  "current_validation": {
+    "unit_tests_passed": 84,
+    "retained_backends": [
+      "yolo",
+      "yolo-detect-rtmpose",
+      "rtmpose",
+      "yolo-pose-rtmpose"
+    ],
+    "real_inference_smoke_frames_per_backend": 12,
+    "unchanged_output_arrays": 27,
+    "classifier_weights_modified": false
+  },
+  "six_clip_comparison": {
+    "frames_per_backend": 896,
+    "roi_recovery": false,
+    "cpu_threads_per_runtime": 2,
+    "joint_thresholds": {
+      "yolo": 0.5,
+      "rtmpose": 0.3
+    },
+    "person_confidence": 0.25,
+    "person_nms_iou": 0.7,
+    "yolox_embedded_nms_iou": 0.65,
+    "environment": {
+      "platform": "macOS-26.7.1-x86_64-i386-64bit",
+      "python": "3.12.10",
+      "numpy": "1.26.4",
+      "opencv-python": "4.11.0.86",
+      "torch": "2.2.2",
+      "ultralytics": "8.3.0",
+      "onnxruntime": "1.23.2"
+    },
+    "timing_scope": "Warmed sequential CPU detection + pose + optional ROI retry; excludes decoding, tracking, classifier, rendering and GUI. Rotating arm order; not application FPS.",
+    "assets_sha256": {
+      "yolo": {
+        "yolo_pose": "c6fa93dd1ee4a2c18c900a45c1d864a1c6f7aba75d84f91648a30b7fb641d212"
+      },
+      "yolo-pose-rtmpose": {
+        "yolo_pose": "c6fa93dd1ee4a2c18c900a45c1d864a1c6f7aba75d84f91648a30b7fb641d212",
+        "rtmpose": "5c0a4bf67953e6d2ac43ce15e77dc9d5d354ae18430a47d2c5963a7bc5683e3c",
+        "rtmpose_pipeline": "212763bd04f0f883491f32db5fbaaf75ae50c756556650468b08868fb0e0d7f0"
+      },
+      "yolo-detect-rtmpose": {
+        "yolo_detect": "f59b3d833e2ff32e194b5bb8e08d211dc7c5bdf144b90d2c8412c47ccfc83b36",
+        "rtmpose": "5c0a4bf67953e6d2ac43ce15e77dc9d5d354ae18430a47d2c5963a7bc5683e3c",
+        "rtmpose_pipeline": "212763bd04f0f883491f32db5fbaaf75ae50c756556650468b08868fb0e0d7f0"
+      },
+      "yolox-rtmpose": {
+        "yolox_detect": "3dea6513388889f0fff4b77bf7a26013600321b9eb9ceb0e9a400a82572f5f23",
+        "yolox_pipeline": "69f4d8a396aa83a47f41e15e34f89a1b0806f36913d0f7f860d90ed7fd12c666",
+        "rtmpose": "5c0a4bf67953e6d2ac43ce15e77dc9d5d354ae18430a47d2c5963a7bc5683e3c",
+        "rtmpose_pipeline": "212763bd04f0f883491f32db5fbaaf75ae50c756556650468b08868fb0e0d7f0"
+      }
+    },
+    "totals": {
+      "yolo": {
+        "frames": 896,
+        "no_fullframe_person_frames": 55,
+        "longest_no_person_run": 14,
+        "fullframe_candidates": 1286,
+        "ready_frames": 679,
+        "no_target_frames": 85,
+        "ambiguous_frames": 5,
+        "reselect_required_frames": 0,
+        "history_resets": 33,
+        "observed_joint_frames": 11792,
+        "recovery_attempts": 0,
+        "recoveries": 0,
+        "ready_percent": 75.78125,
+        "inference_latency": {
+          "median_ms": 76.68478900041009,
+          "p95_ms": 115.3473499998654
+        }
+      },
+      "yolo-pose-rtmpose": {
+        "frames": 896,
+        "no_fullframe_person_frames": 55,
+        "longest_no_person_run": 14,
+        "fullframe_candidates": 1286,
+        "ready_frames": 735,
+        "no_target_frames": 84,
+        "ambiguous_frames": 5,
+        "reselect_required_frames": 0,
+        "history_resets": 23,
+        "observed_joint_frames": 12792,
+        "recovery_attempts": 0,
+        "recoveries": 0,
+        "ready_percent": 82.03125,
+        "inference_latency": {
+          "median_ms": 127.2014789997229,
+          "p95_ms": 212.09903175031286
+        }
+      },
+      "yolo-detect-rtmpose": {
+        "frames": 896,
+        "no_fullframe_person_frames": 109,
+        "longest_no_person_run": 32,
+        "fullframe_candidates": 997,
+        "ready_frames": 685,
+        "no_target_frames": 165,
+        "ambiguous_frames": 0,
+        "reselect_required_frames": 104,
+        "history_resets": 15,
+        "observed_joint_frames": 11807,
+        "recovery_attempts": 0,
+        "recoveries": 0,
+        "ready_percent": 76.45089285714286,
+        "inference_latency": {
+          "median_ms": 115.97892649979258,
+          "p95_ms": 162.66416825033048
+        }
+      },
+      "yolox-rtmpose": {
+        "frames": 896,
+        "no_fullframe_person_frames": 5,
+        "longest_no_person_run": 4,
+        "fullframe_candidates": 957,
+        "ready_frames": 651,
+        "no_target_frames": 126,
+        "ambiguous_frames": 0,
+        "reselect_required_frames": 92,
+        "history_resets": 18,
+        "observed_joint_frames": 12023,
+        "recovery_attempts": 0,
+        "recoveries": 0,
+        "ready_percent": 72.65625,
+        "inference_latency": {
+          "median_ms": 508.25941449966194,
+          "p95_ms": 679.5989504996669
+        }
+      }
+    },
+    "videos": [
+      {
+        "folder": "squats",
+        "video": "CORRECT_00002456.mp4",
+        "frames": 149,
+        "source_fps": 30.0,
+        "arms": {
+          "yolo": {
+            "ready_frames": 93,
+            "no_fullframe_person_frames": 0,
+            "no_target_frames": 0,
+            "reselect_required_frames": 0,
+            "inference_latency": {
+              "median_ms": 70.32545200036111,
+              "p95_ms": 83.55708219987717
+            }
+          },
+          "yolo-pose-rtmpose": {
+            "ready_frames": 105,
+            "no_fullframe_person_frames": 0,
+            "no_target_frames": 0,
+            "reselect_required_frames": 0,
+            "inference_latency": {
+              "median_ms": 101.61345199958305,
+              "p95_ms": 119.50759140036098
+            }
+          },
+          "yolo-detect-rtmpose": {
+            "ready_frames": 109,
+            "no_fullframe_person_frames": 0,
+            "no_target_frames": 0,
+            "reselect_required_frames": 0,
+            "inference_latency": {
+              "median_ms": 97.47744299966143,
+              "p95_ms": 118.42786659963167
+            }
+          },
+          "yolox-rtmpose": {
+            "ready_frames": 96,
+            "no_fullframe_person_frames": 0,
+            "no_target_frames": 0,
+            "reselect_required_frames": 0,
+            "inference_latency": {
+              "median_ms": 484.5506279998517,
+              "p95_ms": 566.4101760001358
+            }
+          }
+        }
+      },
+      {
+        "folder": "squats",
+        "video": "BACK_ROUNDING_00001672.mp4",
+        "frames": 155,
+        "source_fps": 30.0,
+        "arms": {
+          "yolo": {
+            "ready_frames": 155,
+            "no_fullframe_person_frames": 0,
+            "no_target_frames": 0,
+            "reselect_required_frames": 0,
+            "inference_latency": {
+              "median_ms": 90.65358699990611,
+              "p95_ms": 115.24144310033078
+            }
+          },
+          "yolo-pose-rtmpose": {
+            "ready_frames": 155,
+            "no_fullframe_person_frames": 0,
+            "no_target_frames": 0,
+            "reselect_required_frames": 0,
+            "inference_latency": {
+              "median_ms": 127.72565500017663,
+              "p95_ms": 161.03228469974053
+            }
+          },
+          "yolo-detect-rtmpose": {
+            "ready_frames": 155,
+            "no_fullframe_person_frames": 0,
+            "no_target_frames": 0,
+            "reselect_required_frames": 0,
+            "inference_latency": {
+              "median_ms": 124.34614300036628,
+              "p95_ms": 152.2069107005336
+            }
+          },
+          "yolox-rtmpose": {
+            "ready_frames": 155,
+            "no_fullframe_person_frames": 0,
+            "no_target_frames": 0,
+            "reselect_required_frames": 0,
+            "inference_latency": {
+              "median_ms": 611.2988169998061,
+              "p95_ms": 724.1277020005326
+            }
+          }
+        }
+      },
+      {
+        "folder": "pushups",
+        "video": "HIP_ALIGNMENT_00135411.mp4",
+        "frames": 149,
+        "source_fps": 30.0,
+        "arms": {
+          "yolo": {
+            "ready_frames": 111,
+            "no_fullframe_person_frames": 0,
+            "no_target_frames": 0,
+            "reselect_required_frames": 0,
+            "inference_latency": {
+              "median_ms": 71.91316500029643,
+              "p95_ms": 106.94296200035751
+            }
+          },
+          "yolo-pose-rtmpose": {
+            "ready_frames": 149,
+            "no_fullframe_person_frames": 0,
+            "no_target_frames": 0,
+            "reselect_required_frames": 0,
+            "inference_latency": {
+              "median_ms": 103.57758500049385,
+              "p95_ms": 146.9631533998836
+            }
+          },
+          "yolo-detect-rtmpose": {
+            "ready_frames": 149,
+            "no_fullframe_person_frames": 0,
+            "no_target_frames": 0,
+            "reselect_required_frames": 0,
+            "inference_latency": {
+              "median_ms": 98.9868030001162,
+              "p95_ms": 144.69254359974002
+            }
+          },
+          "yolox-rtmpose": {
+            "ready_frames": 149,
+            "no_fullframe_person_frames": 0,
+            "no_target_frames": 0,
+            "reselect_required_frames": 0,
+            "inference_latency": {
+              "median_ms": 493.55107700012013,
+              "p95_ms": 643.7607406005554
+            }
+          }
+        }
+      },
+      {
+        "folder": "jumping_jacks",
+        "video": "CORRECT_00003013.mp4",
+        "frames": 147,
+        "source_fps": 30.0,
+        "arms": {
+          "yolo": {
+            "ready_frames": 79,
+            "no_fullframe_person_frames": 55,
+            "no_target_frames": 55,
+            "reselect_required_frames": 0,
+            "inference_latency": {
+              "median_ms": 97.14205699947343,
+              "p95_ms": 137.29155640003228
+            }
+          },
+          "yolo-pose-rtmpose": {
+            "ready_frames": 67,
+            "no_fullframe_person_frames": 55,
+            "no_target_frames": 55,
+            "reselect_required_frames": 0,
+            "inference_latency": {
+              "median_ms": 121.99296399921877,
+              "p95_ms": 165.4181576994233
+            }
+          },
+          "yolo-detect-rtmpose": {
+            "ready_frames": 13,
+            "no_fullframe_person_frames": 103,
+            "no_target_frames": 134,
+            "reselect_required_frames": 104,
+            "inference_latency": {
+              "median_ms": 108.75066700009484,
+              "p95_ms": 171.11805059976177
+            }
+          },
+          "yolox-rtmpose": {
+            "ready_frames": 80,
+            "no_fullframe_person_frames": 4,
+            "no_target_frames": 4,
+            "reselect_required_frames": 0,
+            "inference_latency": {
+              "median_ms": 593.1185310000728,
+              "p95_ms": 744.1961530998924
+            }
+          }
+        }
+      },
+      {
+        "folder": "reverse_crunches",
+        "video": "CORRECT_00085688.mp4",
+        "frames": 149,
+        "source_fps": 30.0,
+        "arms": {
+          "yolo": {
+            "ready_frames": 101,
+            "no_fullframe_person_frames": 0,
+            "no_target_frames": 25,
+            "reselect_required_frames": 0,
+            "inference_latency": {
+              "median_ms": 70.34244299939019,
+              "p95_ms": 80.13776380012132
+            }
+          },
+          "yolo-pose-rtmpose": {
+            "ready_frames": 117,
+            "no_fullframe_person_frames": 0,
+            "no_target_frames": 24,
+            "reselect_required_frames": 0,
+            "inference_latency": {
+              "median_ms": 137.8707640005814,
+              "p95_ms": 186.58957799980269
+            }
+          },
+          "yolo-detect-rtmpose": {
+            "ready_frames": 121,
+            "no_fullframe_person_frames": 0,
+            "no_target_frames": 25,
+            "reselect_required_frames": 0,
+            "inference_latency": {
+              "median_ms": 128.17785599963827,
+              "p95_ms": 164.43528959989635
+            }
+          },
+          "yolox-rtmpose": {
+            "ready_frames": 27,
+            "no_fullframe_person_frames": 1,
+            "no_target_frames": 122,
+            "reselect_required_frames": 92,
+            "inference_latency": {
+              "median_ms": 489.8708290002105,
+              "p95_ms": 572.346767199815
+            }
+          }
+        }
+      },
+      {
+        "folder": "reverse_crunches",
+        "video": "NOT_RAISING_HIPS_00004206.mp4",
+        "frames": 147,
+        "source_fps": 30.0,
+        "arms": {
+          "yolo": {
+            "ready_frames": 140,
+            "no_fullframe_person_frames": 0,
+            "no_target_frames": 5,
+            "reselect_required_frames": 0,
+            "inference_latency": {
+              "median_ms": 87.09735200045543,
+              "p95_ms": 109.89194860057978
+            }
+          },
+          "yolo-pose-rtmpose": {
+            "ready_frames": 142,
+            "no_fullframe_person_frames": 0,
+            "no_target_frames": 5,
+            "reselect_required_frames": 0,
+            "inference_latency": {
+              "median_ms": 189.68478799979493,
+              "p95_ms": 249.21382399998035
+            }
+          },
+          "yolo-detect-rtmpose": {
+            "ready_frames": 138,
+            "no_fullframe_person_frames": 6,
+            "no_target_frames": 6,
+            "reselect_required_frames": 0,
+            "inference_latency": {
+              "median_ms": 126.49023799986026,
+              "p95_ms": 170.48627070053044
+            }
+          },
+          "yolox-rtmpose": {
+            "ready_frames": 144,
+            "no_fullframe_person_frames": 0,
+            "no_target_frames": 0,
+            "reselect_required_frames": 0,
+            "inference_latency": {
+              "median_ms": 600.5421979998573,
+              "p95_ms": 660.2730294005596
+            }
+          }
+        }
+      }
+    ],
+    "source_sha256": [
+      {
+        "file": "test_videos_benchmark/squats/CORRECT_00002456.mp4",
+        "sha256": "6610cbfb09f5454bcd27d45a5fc32d5fe9ca2113285ac507352434544dc45a7f"
+      },
+      {
+        "file": "test_videos_benchmark/squats/BACK_ROUNDING_00001672.mp4",
+        "sha256": "55e0ab09c6fd99b2abbdc43c378b65707906e7c8f537fc1363661e136cfda592"
+      },
+      {
+        "file": "test_videos_benchmark/pushups/HIP_ALIGNMENT_00135411.mp4",
+        "sha256": "473fd056befe5a91e918a909997271f2298a14ae0ec9cf66a5e5374eb3edab2e"
+      },
+      {
+        "file": "test_videos_benchmark/jumping_jacks/CORRECT_00003013.mp4",
+        "sha256": "87829902ffee0efdb2b6a0bb6c3a3212655b090a6d455a31a3da2052b38799bd"
+      },
+      {
+        "file": "test_videos_benchmark/reverse_crunches/CORRECT_00085688.mp4",
+        "sha256": "0c19bb3e2c5976661be1ad62d5535b92924be13ba559f7fac0bc6879837c9d3e"
+      },
+      {
+        "file": "test_videos_benchmark/reverse_crunches/NOT_RAISING_HIPS_00004206.mp4",
+        "sha256": "20ce6e408e008e08f65f6a422f9bb9b387b71113a3832225b63934a26a9acc50"
+      }
+    ],
+    "failures": []
+  },
+  "yolo_tracking_roi_audit": {
+    "videos": 80,
+    "frames": 11999,
+    "recovery_attempts": 576,
+    "recovery_accepted_frames": 96,
+    "totals": {
+      "full_frame": {
+        "frames": 11999,
+        "ready_frames": 8444,
+        "no_target_frames": 1997,
+        "ambiguous_frames": 31,
+        "reselect_required_frames": 649,
+        "history_resets": 243,
+        "observed_joint_frames": 147381,
+        "inferred_joint_frames": 9495,
+        "track_ids_acquired": 78
+      },
+      "with_recovery": {
+        "frames": 11999,
+        "ready_frames": 8497,
+        "no_target_frames": 1957,
+        "ambiguous_frames": 34,
+        "reselect_required_frames": 647,
+        "history_resets": 234,
+        "observed_joint_frames": 147900,
+        "inferred_joint_frames": 9646,
+        "track_ids_acquired": 78
+      },
+      "previous": {
+        "frames": 11999,
+        "ready_frames": 8585,
+        "no_target_frames": 1739,
+        "ambiguous_frames": 24,
+        "reselect_required_frames": 0,
+        "history_resets": 280,
+        "observed_joint_frames": 150200,
+        "inferred_joint_frames": 10407,
+        "track_ids_acquired": 83
+      }
+    },
+    "ready_gain_from_roi": 53,
+    "processing_failures": 0
+  },
+  "application_smoke_yolo_detect_rtmpose": {
+    "displayed": 420,
+    "updates": 413,
+    "ready_frames": 397,
+    "resets": 10,
+    "classifier_calls": 5,
+    "camera_mocked": true,
+    "native_gui_mocked": true,
+    "backend": "yolo-detect-rtmpose",
+    "events": [
+      "r",
+      "p",
+      "p",
+      "r",
+      "v",
+      "click",
+      "2",
+      "c",
+      "v",
+      "1",
+      "q"
+    ],
+    "canonical_backend": "yolo-detect-rtmpose",
+    "yolo_task": "detect",
+    "session_metadata_saved": true
+  },
+  "decision": {
+    "default_backend": "yolo",
+    "optional_backend": "yolo-detect-rtmpose",
+    "yolox_code_retained": false,
+    "reason": "YOLOX reduced frames without person boxes but regressed readiness on a lying clip and increased CPU latency."
+  },
+  "limitations": [
+    "Development clips, not an independent commercial validation set.",
+    "No expert box/joint/identity ground truth; readiness is not accuracy.",
+    "Shared CPU timing; native preprocessing differs between YOLO PT and YOLOX SDK.",
+    "No physical webcam/native GUI/GPU validation; CI has not run remotely."
+  ],
+  "raw_artifacts_workspace_relative": [
+    "diagnostics/yolox-rtmpose-20261017/benchmark-six",
+    "diagnostics/yolo-detect-rtmpose-20261017",
+    "diagnostics/pose-upgrade-20261017/audit-final-80",
+    "diagnostics/cleanup-20261017"
+  ],
+  "historical_documents_workspace_relative": "diagnostics/cleanup-20261017/documentation-history"
+}

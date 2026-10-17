@@ -1,0 +1,34 @@
+name: Pose pipeline contracts
+
+on:
+  push:
+    paths: ['smart_gym_camera_app/**', '.github/workflows/pose-checks.yml']
+  pull_request:
+    paths: ['smart_gym_camera_app/**', '.github/workflows/pose-checks.yml']
+
+permissions:
+  contents: read
+
+jobs:
+  unit-tests:
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    defaults:
+      run:
+        working-directory: smart_gym_camera_app
+    env:
+      PYTHONDONTWRITEBYTECODE: '1'
+      YOLO_CONFIG_DIR: /tmp/smartgym-yolo
+      MPLCONFIGDIR: /tmp/smartgym-matplotlib
+      OMP_NUM_THREADS: '2'
+      MKL_NUM_THREADS: '2'
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.12'
+          cache: pip
+          cache-dependency-path: smart_gym_camera_app/requirements.txt
+      - run: python -m pip install -r requirements.txt
+      - name: Test without downloading or loading model weights
+        run: python -m unittest test_pose_keypoints test_pose_tracking test_pose_detector test_pose_evaluation test_rtmpose tests.test_yolo_detect_rtmpose
