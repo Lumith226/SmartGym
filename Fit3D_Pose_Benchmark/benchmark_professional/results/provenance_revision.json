@@ -1,0 +1,21 @@
+{
+  "reevaluated_model": "RTMPose-m",
+  "rtmo_mask_reused": true,
+  "unchanged_model_rows": 576,
+  "checkpoint": "rtmpose-m_simcc-body7_pt-body7_420e-256x192-e48f03d0_20230504",
+  "gpu": "AMD Radeon RX 5600 XT / DirectML device 0 with CPU fallback",
+  "adapter_sha256": "240f6d99b32f96ab530d4b1c0f1fe756ae390298129070dbd70cec719152be98",
+  "artifact_sha256": "5c0a4bf67953e6d2ac43ce15e77dc9d5d354ae18430a47d2c5963a7bc5683e3c",
+  "detector_sha256": "4e376b60c8d5a3253d3e3076d84bf896184dbb7e370ad84096d7dc041a10541d",
+  "source_sha256": {
+    "MODEL_PROVENANCE.json": "90473e99cba6e947ffa3c45ea1ffec4aa562e793e14382be2dc01fce9c39a82e",
+    "INPUT_FINGERPRINTS.json": "d0d6da5be7f326031bb17715cdd1794ce8b9956a8f5609c2e3245d9d3b2e5677",
+    "all_measured_results.json": "cb325588ad7f19aa7fa628f8e56f8be8590137f260df4f276e774e50a078c927",
+    "speed_results.json": "b747d27438d9f6c440e9344c0a2dc9224dcc9161da012099b82662fd580b4967",
+    "occlusion\\results.json": "2e0900fbaa0ec0b81f6db42f22ecce052e80d54f7620ad533197afa97f4e7eb9"
+  },
+  "litepose_scope": "Historical heatmap-only adapter, exploratory and excluded from main ranks",
+  "speed_scope": "RTMPose rerun separately using the original 30-frame clip grids and protocol, other rows retained",
+  "bootstrap_seed": 20261104,
+  "bootstrap_resamples": 50000
+}

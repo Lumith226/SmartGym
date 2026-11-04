@@ -1,0 +1,17 @@
+[
+  {
+    "path": "E:\\do an\\Fit3D_Pose_Benchmark\\pose_benchmark\\sources\\hrnet_architecture.py",
+    "url": "https://raw.githubusercontent.com/leoxiaobin/deep-high-resolution-net.pytorch/master/lib/models/pose_hrnet.py",
+    "sha256": "c0f2f8a137836c6e8c489e4a1c46010bfce5308584e13d231565f7f90a2636f8"
+  },
+  {
+    "path": "E:\\do an\\Fit3D_Pose_Benchmark\\pose_benchmark\\sources\\hrnet_w32.yaml",
+    "url": "https://raw.githubusercontent.com/leoxiaobin/deep-high-resolution-net.pytorch/master/experiments/coco/hrnet/w32_256x192_adam_lr1e-3.yaml",
+    "sha256": "887e2df7a490d0d1e4eac1d3ffa6853e6416ff8f6539b67293456a5cfabbd3ff"
+  },
+  {
+    "path": "E:\\do an\\Fit3D_Pose_Benchmark\\pose_benchmark\\weights\\hrnet_w32_fp32.pth",
+    "url": "https://github.com/quic/aimet-model-zoo/releases/download/phase_2_march_artifacts/hrnet_posenet_FP32_state_dict.pth",
+    "sha256": "694704fe2ce6ffbafaee9e4f2f699a9881d0fcedf01a67d9311eb4101a91101c"
+  }
+]

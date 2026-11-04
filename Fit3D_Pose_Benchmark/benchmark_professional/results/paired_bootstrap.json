@@ -1,0 +1,46 @@
+[
+  {
+    "exercise": "squat",
+    "a": "RTMO-s",
+    "b": "HRNet",
+    "metric": "pck",
+    "delta": 0.013224758821841931,
+    "ci": [
+      -0.5437239074671663,
+      0.5611022929927447
+    ]
+  },
+  {
+    "exercise": "squat",
+    "a": "RTMO-s",
+    "b": "ViTPose-B",
+    "metric": "pck",
+    "delta": 0.026256119855071702,
+    "ci": [
+      -0.7688011193750288,
+      0.7946429351200308
+    ]
+  },
+  {
+    "exercise": "pushup",
+    "a": "RTMPose-m",
+    "b": "ViTPose-B",
+    "metric": "pck",
+    "delta": 0.03033548868129632,
+    "ci": [
+      -1.088904053152353,
+      1.2082777618519867
+    ]
+  },
+  {
+    "exercise": "pushup",
+    "a": "RTMO-s",
+    "b": "RTMPose-m",
+    "metric": "mae",
+    "delta": -0.53125,
+    "ci": [
+      -0.9375,
+      -0.03125
+    ]
+  }
+]

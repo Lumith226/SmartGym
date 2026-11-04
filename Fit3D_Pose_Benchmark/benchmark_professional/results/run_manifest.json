@@ -1,0 +1,1193 @@
+{
+  "subjects": [
+    "s03",
+    "s04",
+    "s05",
+    "s07",
+    "s08",
+    "s09",
+    "s10",
+    "s11"
+  ],
+  "stride": 2,
+  "clips": [
+    {
+      "id": "s03_squat_50591643",
+      "subject": "s03",
+      "exercise": "squat",
+      "camera": "50591643",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\videos\\50591643\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\camera_parameters\\50591643\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        405,
+        528,
+        663,
+        807,
+        952,
+        1090
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s03_squat_58860488",
+      "subject": "s03",
+      "exercise": "squat",
+      "camera": "58860488",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\videos\\58860488\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\camera_parameters\\58860488\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        405,
+        528,
+        663,
+        807,
+        952,
+        1090
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s03_squat_60457274",
+      "subject": "s03",
+      "exercise": "squat",
+      "camera": "60457274",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\videos\\60457274\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\camera_parameters\\60457274\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        405,
+        528,
+        663,
+        807,
+        952,
+        1090
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s03_squat_65906101",
+      "subject": "s03",
+      "exercise": "squat",
+      "camera": "65906101",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\videos\\65906101\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\camera_parameters\\65906101\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        405,
+        528,
+        663,
+        807,
+        952,
+        1090
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s03_pushup_50591643",
+      "subject": "s03",
+      "exercise": "pushup",
+      "camera": "50591643",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\videos\\50591643\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\camera_parameters\\50591643\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        244,
+        348,
+        451,
+        550,
+        658,
+        764
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s03_pushup_58860488",
+      "subject": "s03",
+      "exercise": "pushup",
+      "camera": "58860488",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\videos\\58860488\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\camera_parameters\\58860488\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        244,
+        348,
+        451,
+        550,
+        658,
+        764
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s03_pushup_60457274",
+      "subject": "s03",
+      "exercise": "pushup",
+      "camera": "60457274",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\videos\\60457274\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\camera_parameters\\60457274\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        244,
+        348,
+        451,
+        550,
+        658,
+        764
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s03_pushup_65906101",
+      "subject": "s03",
+      "exercise": "pushup",
+      "camera": "65906101",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\videos\\65906101\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\camera_parameters\\65906101\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s03\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        244,
+        348,
+        451,
+        550,
+        658,
+        764
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s04_squat_50591643",
+      "subject": "s04",
+      "exercise": "squat",
+      "camera": "50591643",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\videos\\50591643\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\camera_parameters\\50591643\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        335,
+        450,
+        579,
+        692,
+        825,
+        954
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s04_squat_58860488",
+      "subject": "s04",
+      "exercise": "squat",
+      "camera": "58860488",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\videos\\58860488\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\camera_parameters\\58860488\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        335,
+        450,
+        579,
+        692,
+        825,
+        954
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s04_squat_60457274",
+      "subject": "s04",
+      "exercise": "squat",
+      "camera": "60457274",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\videos\\60457274\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\camera_parameters\\60457274\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        335,
+        450,
+        579,
+        692,
+        825,
+        954
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s04_squat_65906101",
+      "subject": "s04",
+      "exercise": "squat",
+      "camera": "65906101",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\videos\\65906101\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\camera_parameters\\65906101\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        335,
+        450,
+        579,
+        692,
+        825,
+        954
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s04_pushup_50591643",
+      "subject": "s04",
+      "exercise": "pushup",
+      "camera": "50591643",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\videos\\50591643\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\camera_parameters\\50591643\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        191,
+        297,
+        408,
+        522,
+        624,
+        721
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s04_pushup_58860488",
+      "subject": "s04",
+      "exercise": "pushup",
+      "camera": "58860488",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\videos\\58860488\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\camera_parameters\\58860488\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        191,
+        297,
+        408,
+        522,
+        624,
+        721
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s04_pushup_60457274",
+      "subject": "s04",
+      "exercise": "pushup",
+      "camera": "60457274",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\videos\\60457274\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\camera_parameters\\60457274\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        191,
+        297,
+        408,
+        522,
+        624,
+        721
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s04_pushup_65906101",
+      "subject": "s04",
+      "exercise": "pushup",
+      "camera": "65906101",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\videos\\65906101\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\camera_parameters\\65906101\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s04\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        191,
+        297,
+        408,
+        522,
+        624,
+        721
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s05_squat_50591643",
+      "subject": "s05",
+      "exercise": "squat",
+      "camera": "50591643",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\videos\\50591643\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\camera_parameters\\50591643\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        354,
+        469,
+        571,
+        677,
+        781,
+        899
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s05_squat_58860488",
+      "subject": "s05",
+      "exercise": "squat",
+      "camera": "58860488",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\videos\\58860488\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\camera_parameters\\58860488\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        354,
+        469,
+        571,
+        677,
+        781,
+        899
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s05_squat_60457274",
+      "subject": "s05",
+      "exercise": "squat",
+      "camera": "60457274",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\videos\\60457274\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\camera_parameters\\60457274\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        354,
+        469,
+        571,
+        677,
+        781,
+        899
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s05_squat_65906101",
+      "subject": "s05",
+      "exercise": "squat",
+      "camera": "65906101",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\videos\\65906101\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\camera_parameters\\65906101\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        354,
+        469,
+        571,
+        677,
+        781,
+        899
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s05_pushup_50591643",
+      "subject": "s05",
+      "exercise": "pushup",
+      "camera": "50591643",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\videos\\50591643\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\camera_parameters\\50591643\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        242,
+        320,
+        388,
+        454,
+        524,
+        592
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s05_pushup_58860488",
+      "subject": "s05",
+      "exercise": "pushup",
+      "camera": "58860488",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\videos\\58860488\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\camera_parameters\\58860488\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        242,
+        320,
+        388,
+        454,
+        524,
+        592
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s05_pushup_60457274",
+      "subject": "s05",
+      "exercise": "pushup",
+      "camera": "60457274",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\videos\\60457274\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\camera_parameters\\60457274\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        242,
+        320,
+        388,
+        454,
+        524,
+        592
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s05_pushup_65906101",
+      "subject": "s05",
+      "exercise": "pushup",
+      "camera": "65906101",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\videos\\65906101\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\camera_parameters\\65906101\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s05\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        242,
+        320,
+        388,
+        454,
+        524,
+        592
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s07_squat_50591643",
+      "subject": "s07",
+      "exercise": "squat",
+      "camera": "50591643",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\videos\\50591643\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\camera_parameters\\50591643\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        275,
+        393,
+        474,
+        556,
+        633,
+        710
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s07_squat_58860488",
+      "subject": "s07",
+      "exercise": "squat",
+      "camera": "58860488",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\videos\\58860488\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\camera_parameters\\58860488\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        275,
+        393,
+        474,
+        556,
+        633,
+        710
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s07_squat_60457274",
+      "subject": "s07",
+      "exercise": "squat",
+      "camera": "60457274",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\videos\\60457274\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\camera_parameters\\60457274\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        275,
+        393,
+        474,
+        556,
+        633,
+        710
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s07_squat_65906101",
+      "subject": "s07",
+      "exercise": "squat",
+      "camera": "65906101",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\videos\\65906101\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\camera_parameters\\65906101\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        275,
+        393,
+        474,
+        556,
+        633,
+        710
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s07_pushup_50591643",
+      "subject": "s07",
+      "exercise": "pushup",
+      "camera": "50591643",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\videos\\50591643\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\camera_parameters\\50591643\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        257,
+        355,
+        411,
+        467,
+        527,
+        585
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s07_pushup_58860488",
+      "subject": "s07",
+      "exercise": "pushup",
+      "camera": "58860488",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\videos\\58860488\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\camera_parameters\\58860488\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        257,
+        355,
+        411,
+        467,
+        527,
+        585
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s07_pushup_60457274",
+      "subject": "s07",
+      "exercise": "pushup",
+      "camera": "60457274",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\videos\\60457274\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\camera_parameters\\60457274\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        257,
+        355,
+        411,
+        467,
+        527,
+        585
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s07_pushup_65906101",
+      "subject": "s07",
+      "exercise": "pushup",
+      "camera": "65906101",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\videos\\65906101\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\camera_parameters\\65906101\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s07\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        257,
+        355,
+        411,
+        467,
+        527,
+        585
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s08_squat_50591643",
+      "subject": "s08",
+      "exercise": "squat",
+      "camera": "50591643",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\videos\\50591643\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\camera_parameters\\50591643\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        363,
+        465,
+        577,
+        696,
+        810,
+        909
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s08_squat_58860488",
+      "subject": "s08",
+      "exercise": "squat",
+      "camera": "58860488",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\videos\\58860488\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\camera_parameters\\58860488\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        363,
+        465,
+        577,
+        696,
+        810,
+        909
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s08_squat_60457274",
+      "subject": "s08",
+      "exercise": "squat",
+      "camera": "60457274",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\videos\\60457274\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\camera_parameters\\60457274\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        363,
+        465,
+        577,
+        696,
+        810,
+        909
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s08_squat_65906101",
+      "subject": "s08",
+      "exercise": "squat",
+      "camera": "65906101",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\videos\\65906101\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\camera_parameters\\65906101\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        363,
+        465,
+        577,
+        696,
+        810,
+        909
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s08_pushup_50591643",
+      "subject": "s08",
+      "exercise": "pushup",
+      "camera": "50591643",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\videos\\50591643\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\camera_parameters\\50591643\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        163,
+        260,
+        325,
+        399,
+        476,
+        550
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s08_pushup_58860488",
+      "subject": "s08",
+      "exercise": "pushup",
+      "camera": "58860488",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\videos\\58860488\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\camera_parameters\\58860488\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        163,
+        260,
+        325,
+        399,
+        476,
+        550
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s08_pushup_60457274",
+      "subject": "s08",
+      "exercise": "pushup",
+      "camera": "60457274",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\videos\\60457274\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\camera_parameters\\60457274\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        163,
+        260,
+        325,
+        399,
+        476,
+        550
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s08_pushup_65906101",
+      "subject": "s08",
+      "exercise": "pushup",
+      "camera": "65906101",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\videos\\65906101\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\camera_parameters\\65906101\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s08\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        163,
+        260,
+        325,
+        399,
+        476,
+        550
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s09_squat_50591643",
+      "subject": "s09",
+      "exercise": "squat",
+      "camera": "50591643",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\videos\\50591643\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\camera_parameters\\50591643\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        370,
+        484,
+        609,
+        724,
+        832,
+        931
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s09_squat_58860488",
+      "subject": "s09",
+      "exercise": "squat",
+      "camera": "58860488",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\videos\\58860488\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\camera_parameters\\58860488\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        370,
+        484,
+        609,
+        724,
+        832,
+        931
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s09_squat_60457274",
+      "subject": "s09",
+      "exercise": "squat",
+      "camera": "60457274",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\videos\\60457274\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\camera_parameters\\60457274\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        370,
+        484,
+        609,
+        724,
+        832,
+        931
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s09_squat_65906101",
+      "subject": "s09",
+      "exercise": "squat",
+      "camera": "65906101",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\videos\\65906101\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\camera_parameters\\65906101\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        370,
+        484,
+        609,
+        724,
+        832,
+        931
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s09_pushup_50591643",
+      "subject": "s09",
+      "exercise": "pushup",
+      "camera": "50591643",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\videos\\50591643\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\camera_parameters\\50591643\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        202,
+        280,
+        343,
+        399,
+        453,
+        511
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s09_pushup_58860488",
+      "subject": "s09",
+      "exercise": "pushup",
+      "camera": "58860488",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\videos\\58860488\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\camera_parameters\\58860488\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        202,
+        280,
+        343,
+        399,
+        453,
+        511
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s09_pushup_60457274",
+      "subject": "s09",
+      "exercise": "pushup",
+      "camera": "60457274",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\videos\\60457274\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\camera_parameters\\60457274\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        202,
+        280,
+        343,
+        399,
+        453,
+        511
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s09_pushup_65906101",
+      "subject": "s09",
+      "exercise": "pushup",
+      "camera": "65906101",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\videos\\65906101\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\camera_parameters\\65906101\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s09\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        202,
+        280,
+        343,
+        399,
+        453,
+        511
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s10_squat_50591643",
+      "subject": "s10",
+      "exercise": "squat",
+      "camera": "50591643",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\videos\\50591643\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\camera_parameters\\50591643\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        376,
+        531,
+        676,
+        816,
+        979,
+        1128
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s10_squat_58860488",
+      "subject": "s10",
+      "exercise": "squat",
+      "camera": "58860488",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\videos\\58860488\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\camera_parameters\\58860488\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        376,
+        531,
+        676,
+        816,
+        979,
+        1128
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s10_squat_60457274",
+      "subject": "s10",
+      "exercise": "squat",
+      "camera": "60457274",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\videos\\60457274\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\camera_parameters\\60457274\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        376,
+        531,
+        676,
+        816,
+        979,
+        1128
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s10_squat_65906101",
+      "subject": "s10",
+      "exercise": "squat",
+      "camera": "65906101",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\videos\\65906101\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\camera_parameters\\65906101\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        376,
+        531,
+        676,
+        816,
+        979,
+        1128
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s10_pushup_50591643",
+      "subject": "s10",
+      "exercise": "pushup",
+      "camera": "50591643",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\videos\\50591643\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\camera_parameters\\50591643\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        250,
+        345,
+        444,
+        537,
+        644,
+        750
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s10_pushup_58860488",
+      "subject": "s10",
+      "exercise": "pushup",
+      "camera": "58860488",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\videos\\58860488\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\camera_parameters\\58860488\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        250,
+        345,
+        444,
+        537,
+        644,
+        750
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s10_pushup_60457274",
+      "subject": "s10",
+      "exercise": "pushup",
+      "camera": "60457274",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\videos\\60457274\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\camera_parameters\\60457274\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        250,
+        345,
+        444,
+        537,
+        644,
+        750
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s10_pushup_65906101",
+      "subject": "s10",
+      "exercise": "pushup",
+      "camera": "65906101",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\videos\\65906101\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\camera_parameters\\65906101\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s10\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        250,
+        345,
+        444,
+        537,
+        644,
+        750
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s11_squat_50591643",
+      "subject": "s11",
+      "exercise": "squat",
+      "camera": "50591643",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\videos\\50591643\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\camera_parameters\\50591643\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        635,
+        816,
+        997,
+        1184,
+        1368,
+        1543
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s11_squat_58860488",
+      "subject": "s11",
+      "exercise": "squat",
+      "camera": "58860488",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\videos\\58860488\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\camera_parameters\\58860488\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        635,
+        816,
+        997,
+        1184,
+        1368,
+        1543
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s11_squat_60457274",
+      "subject": "s11",
+      "exercise": "squat",
+      "camera": "60457274",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\videos\\60457274\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\camera_parameters\\60457274\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        635,
+        816,
+        997,
+        1184,
+        1368,
+        1543
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s11_squat_65906101",
+      "subject": "s11",
+      "exercise": "squat",
+      "camera": "65906101",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\videos\\65906101\\squat.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\camera_parameters\\65906101\\squat.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\joints3d_25\\squat.json",
+      "rep_boundaries": [
+        635,
+        816,
+        997,
+        1184,
+        1368,
+        1543
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s11_pushup_50591643",
+      "subject": "s11",
+      "exercise": "pushup",
+      "camera": "50591643",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\videos\\50591643\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\camera_parameters\\50591643\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        283,
+        390,
+        489,
+        594,
+        692,
+        802
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s11_pushup_58860488",
+      "subject": "s11",
+      "exercise": "pushup",
+      "camera": "58860488",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\videos\\58860488\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\camera_parameters\\58860488\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        283,
+        390,
+        489,
+        594,
+        692,
+        802
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s11_pushup_60457274",
+      "subject": "s11",
+      "exercise": "pushup",
+      "camera": "60457274",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\videos\\60457274\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\camera_parameters\\60457274\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        283,
+        390,
+        489,
+        594,
+        692,
+        802
+      ],
+      "split": "train_evaluation_only"
+    },
+    {
+      "id": "s11_pushup_65906101",
+      "subject": "s11",
+      "exercise": "pushup",
+      "camera": "65906101",
+      "video": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\videos\\65906101\\pushup.mp4",
+      "camera_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\camera_parameters\\65906101\\pushup.json",
+      "gt_file": "E:\\do an\\fit3d\\fit3d_train\\train\\s11\\joints3d_25\\pushup.json",
+      "rep_boundaries": [
+        283,
+        390,
+        489,
+        594,
+        692,
+        802
+      ],
+      "split": "train_evaluation_only"
+    }
+  ],
+  "models": [
+    "YOLOv8n-Pose",
+    "YOLO11n-Pose",
+    "YOLO26n-Pose",
+    "RTMPose-m",
+    "RTMO-s",
+    "ViTPose-B",
+    "HRNet",
+    "Lite-HRNet",
+    "MoveNet-Lightning",
+    "LitePose-Auto-S"
+  ],
+  "source_hashes": {
+    "onnx_gym_analyzer.py": "4d9e987fd2b1cf16d567f358dcddbf147c05aab024672ad1483b95f33cb5e5d5",
+    "rep_tracker.py": "55c1a88375d18be51e1277c47079b61b6fcbe7693df46861e311b78600671bbf",
+    "enhanced_pose_processor.py": "f2d89d4341eba5e64f95e9ab6ecfaebb5a7cde7eaa23432cb0f5d1d6e92d0a3f"
+  },
+  "pose_metric_scope": "all sampled frames in annotation window plus one second context",
+  "rep_count_scope": "complete annotation intervals only",
+  "temporal_sampling_hz": 25.0,
+  "precision": "FP32; no TTA, fine-tuning or quantization",
+  "gpu": "AMD Radeon RX 5600 XT; DirectML device 0",
+  "python": "3.12.14 (main, Aug 25 2026, 14:01:42) [MSC v.1944 64 bit (AMD64)]",
+  "reused_pilot": "160 audited model/clip predictions from results; original execution signatures retained",
+  "form_labels": "User confirmed no verified form-error labels available",
+  "protocol_version": "annotated_plus_50frames_v1"
+}

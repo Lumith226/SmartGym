@@ -1,0 +1,26 @@
+[
+  {
+    "model": "yolov8n-pose",
+    "status": "exported",
+    "sha256": "54cb912326273c0f3ad20d12ec877d7b22958fe3f22439d2fc3279ed4f9d69b1"
+  },
+  {
+    "model": "yolo11n-pose",
+    "status": "exported",
+    "sha256": "f23961f08c27cf52c07419bc849911c88a2d8a90ef91a768be3a152e37f8265e"
+  },
+  {
+    "model": "yolo26n-pose",
+    "status": "exported",
+    "sha256": "2a6d1a767f40e7dc26a8c60da970e9e5b06973a3ea6126a068f826d929a86096"
+  },
+  {
+    "model": "yolov8n",
+    "status": "exported",
+    "sha256": "4e376b60c8d5a3253d3e3076d84bf896184dbb7e370ad84096d7dc041a10541d"
+  },
+  {
+    "model": "litepose",
+    "status": "converted"
+  }
+]

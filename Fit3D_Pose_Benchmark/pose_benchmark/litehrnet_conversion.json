@@ -1,0 +1,8 @@
+{
+  "source": "litehrnet.onnx",
+  "input": "div",
+  "output": "heatmaps",
+  "learned_weights_changed": false,
+  "normalization": "RGB, (image-mean)/std in 0..255 units; standard MMPose input",
+  "reason": "exclude wrapper GatherND/argmax operations from GPU graph"
+}

@@ -1,0 +1,323 @@
+{
+  "models": [
+    {
+      "name": "YOLOv8n-Pose",
+      "path": "E:\\do an\\Fit3D_Pose_Benchmark\\pose_benchmark\\weights\\yolov8n-pose.onnx",
+      "source": "https://github.com/ultralytics/assets/releases/download/v8.4.0/yolov8n-pose.pt",
+      "sha256": "54cb912326273c0f3ad20d12ec877d7b22958fe3f22439d2fc3279ed4f9d69b1",
+      "bytes": 13484675,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "FLOAT, 1x3x640x640"
+        }
+      ],
+      "adapter": "yolo",
+      "trained_or_finetuned_in_this_work": false,
+      "quantized_in_this_work": false,
+      "evaluated_input_shape": [
+        1,
+        3,
+        640,
+        640
+      ]
+    },
+    {
+      "name": "YOLO11n-Pose",
+      "path": "E:\\do an\\Fit3D_Pose_Benchmark\\pose_benchmark\\weights\\yolo11n-pose.onnx",
+      "source": "https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo11n-pose.pt",
+      "sha256": "f23961f08c27cf52c07419bc849911c88a2d8a90ef91a768be3a152e37f8265e",
+      "bytes": 11811082,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "FLOAT, 1x3x640x640"
+        }
+      ],
+      "adapter": "yolo",
+      "trained_or_finetuned_in_this_work": false,
+      "quantized_in_this_work": false,
+      "evaluated_input_shape": [
+        1,
+        3,
+        640,
+        640
+      ]
+    },
+    {
+      "name": "YOLO26n-Pose",
+      "path": "E:\\do an\\Fit3D_Pose_Benchmark\\pose_benchmark\\weights\\yolo26n-pose.onnx",
+      "source": "https://github.com/ultralytics/assets/releases/download/v8.4.0/yolo26n-pose.pt",
+      "sha256": "2a6d1a767f40e7dc26a8c60da970e9e5b06973a3ea6126a068f826d929a86096",
+      "bytes": 12075777,
+      "inputs": [
+        {
+          "name": "images",
+          "type": "FLOAT, 1x3x640x640"
+        }
+      ],
+      "adapter": "yolo",
+      "trained_or_finetuned_in_this_work": false,
+      "quantized_in_this_work": false,
+      "evaluated_input_shape": [
+        1,
+        3,
+        640,
+        640
+      ]
+    },
+    {
+      "name": "RTMPose-m",
+      "path": "E:\\do an\\Fit3D_Pose_Benchmark\\pose_benchmark\\weights\\rtmpose_m.onnx",
+      "source": "https://download.openmmlab.com/mmpose/v1/projects/rtmposev1/onnx_sdk/rtmpose-m_simcc-body7_pt-body7_420e-256x192-e48f03d0_20230504.zip",
+      "sha256": "5c0a4bf67953e6d2ac43ce15e77dc9d5d354ae18430a47d2c5963a7bc5683e3c",
+      "bytes": 54330655,
+      "inputs": [
+        {
+          "name": "input",
+          "type": "FLOAT, batchx3x256x192"
+        }
+      ],
+      "adapter": "rtmpose",
+      "trained_or_finetuned_in_this_work": false,
+      "quantized_in_this_work": false,
+      "evaluated_input_shape": [
+        1,
+        3,
+        256,
+        192
+      ]
+    },
+    {
+      "name": "RTMO-s",
+      "path": "E:\\do an\\Fit3D_Pose_Benchmark\\pose_benchmark\\weights\\rtmo_s.onnx",
+      "source": "https://download.openmmlab.com/mmpose/v1/projects/rtmo/onnx_sdk/rtmo-s_8xb32-600e_body7-640x640-dac2bf74_20231211.zip",
+      "sha256": "d0703d40d19f3921da51ae725402d5fdae4d2478c7442072d3101bd396f370d8",
+      "bytes": 39617685,
+      "inputs": [
+        {
+          "name": "input",
+          "type": "FLOAT, batchx3x640x640"
+        }
+      ],
+      "adapter": "rtmo",
+      "trained_or_finetuned_in_this_work": false,
+      "quantized_in_this_work": false,
+      "evaluated_input_shape": [
+        1,
+        3,
+        640,
+        640
+      ]
+    },
+    {
+      "name": "ViTPose-B",
+      "path": "E:\\do an\\Fit3D_Pose_Benchmark\\pose_benchmark\\weights\\vitpose_base.onnx",
+      "source": "https://huggingface.co/onnx-community/vitpose-base-simple",
+      "sha256": "47af35f9acd4f6b36323c145c55e0618a5460a242eb28105ac30d34ddb1d584f",
+      "bytes": 343893670,
+      "inputs": [
+        {
+          "name": "pixel_values",
+          "type": "FLOAT, batch_sizexnum_channelsxheightxwidth"
+        }
+      ],
+      "adapter": "vitpose",
+      "trained_or_finetuned_in_this_work": false,
+      "quantized_in_this_work": false,
+      "evaluated_input_shape": [
+        1,
+        3,
+        256,
+        192
+      ]
+    },
+    {
+      "name": "HRNet",
+      "path": "E:\\do an\\Fit3D_Pose_Benchmark\\pose_benchmark\\weights\\hrnet_w32.onnx",
+      "source": "https://github.com/quic/aimet-model-zoo/releases/download/phase_2_march_artifacts/hrnet_posenet_FP32_state_dict.pth",
+      "sha256": "d1b68543df794e64b9dcb3a9dfd62bec63ebe696dcb80f66efe18063686a2eae",
+      "bytes": 114242907,
+      "inputs": [
+        {
+          "name": "image",
+          "type": "FLOAT, 1x3x256x192"
+        }
+      ],
+      "adapter": "heatmap",
+      "trained_or_finetuned_in_this_work": false,
+      "quantized_in_this_work": false,
+      "evaluated_input_shape": [
+        1,
+        3,
+        256,
+        192
+      ]
+    },
+    {
+      "name": "Lite-HRNet",
+      "path": "E:\\do an\\Fit3D_Pose_Benchmark\\pose_benchmark\\weights\\litehrnet_core.onnx",
+      "source": "https://huggingface.co/qualcomm/LiteHRNet",
+      "sha256": "1604300e0dfe14f9f3b179d81877e04f9d1d8877aef47b3a6a50b3ac5fedf1ac",
+      "bytes": 8106666,
+      "inputs": [
+        {
+          "name": "div",
+          "type": "FLOAT, 1x3x256x192"
+        }
+      ],
+      "adapter": "heatmap",
+      "trained_or_finetuned_in_this_work": false,
+      "quantized_in_this_work": false,
+      "evaluated_input_shape": [
+        1,
+        3,
+        256,
+        192
+      ]
+    },
+    {
+      "name": "MoveNet-Lightning",
+      "path": "E:\\do an\\Fit3D_Pose_Benchmark\\pose_benchmark\\weights\\movenet_lightning.onnx",
+      "source": "https://huggingface.co/onnx-community/movenet-lightning-web",
+      "sha256": "3c841c042a998dc102a13532deafca5a0554d2faaab4511fe977c63c26cc5538",
+      "bytes": 9366903,
+      "inputs": [
+        {
+          "name": "pixel_values",
+          "type": "UINT8, batch_sizex192x192x4"
+        }
+      ],
+      "adapter": "movenet",
+      "trained_or_finetuned_in_this_work": false,
+      "quantized_in_this_work": false,
+      "evaluated_input_shape": [
+        1,
+        192,
+        192,
+        4
+      ]
+    },
+    {
+      "name": "LitePose-Auto-S",
+      "path": "E:\\do an\\Fit3D_Pose_Benchmark\\pose_benchmark\\weights\\litepose.onnx",
+      "source": "https://huggingface.co/cansik/visiongraph",
+      "sha256": "f8a6a5e2c498428d123a530bc2581456c9e3e75052359de67680063cd0119b7f",
+      "bytes": 10903936,
+      "inputs": [
+        {
+          "name": "input.1",
+          "type": "FLOAT, 1x3x448x448"
+        }
+      ],
+      "adapter": "litepose",
+      "trained_or_finetuned_in_this_work": false,
+      "quantized_in_this_work": false,
+      "evaluated_input_shape": [
+        1,
+        3,
+        448,
+        448
+      ]
+    }
+  ],
+  "software": {
+    "numpy": "2.1.3",
+    "opencv-python": "5.0.0.93",
+    "onnx": "1.17.0",
+    "onnxruntime-directml": "1.24.4",
+    "torch": "2.15.0",
+    "ultralytics": "8.4.192",
+    "rtmlib": "0.0.16",
+    "matplotlib": "3.11.2"
+  },
+  "smartgym_source_hashes": {
+    "onnx_gym_analyzer.py": "4d9e987fd2b1cf16d567f358dcddbf147c05aab024672ad1483b95f33cb5e5d5",
+    "rep_tracker.py": "55c1a88375d18be51e1277c47079b61b6fcbe7693df46861e311b78600671bbf",
+    "enhanced_pose_processor.py": "f2d89d4341eba5e64f95e9ab6ecfaebb5a7cde7eaa23432cb0f5d1d6e92d0a3f"
+  },
+  "fixed_classifier_hashes": {
+    "best_stgcnpp_squat_v2.onnx": "eda1c8d8c200af79dedf52ab3bb9fb924702a0f5a1e086a6f77b27c504d3043a",
+    "best_stgcnpp_pushup_v2.onnx": "f44c53c435ef7febc95d8382507d586bd3dc3d33d02642942eaa297459f61d2a"
+  },
+  "conversion_notes": {
+    "Lite-HRNet": "Unchanged pretrained neural core extracted from the Qualcomm wrapper; host handles standard MMPose normalization/decoding. Numerical wrapper/core equivalence checked.",
+    "LitePose": "Community OpenVINO FP32 export converted to ONNX. Original folded BGR pixel preprocessing preserved. Single-person global heatmap peak decoding with two-stage heatmap averaging; no multi-person tag grouping.",
+    "HRNet": "Published FP32 checkpoint loaded strictly into original HRNet-W32 architecture, exported to ONNX.",
+    "ViTPose-B": "Community ONNX export of ViTPose-base-simple; not ViTPose++."
+  },
+  "joint_mapping": {
+    "COCO_indices": [
+      5,
+      6,
+      7,
+      8,
+      9,
+      10,
+      11,
+      12,
+      13,
+      14,
+      15,
+      16
+    ],
+    "Fit3D_indices": [
+      11,
+      14,
+      12,
+      15,
+      13,
+      16,
+      1,
+      4,
+      2,
+      5,
+      3,
+      6
+    ]
+  },
+  "shared_detector": {
+    "name": "YOLOv8n COCO person detector",
+    "path": "E:\\do an\\Fit3D_Pose_Benchmark\\pose_benchmark\\weights\\yolov8n.onnx",
+    "sha256": "4e376b60c8d5a3253d3e3076d84bf896184dbb7e370ad84096d7dc041a10541d",
+    "source": "Ultralytics pretrained yolov8n.pt exported to ONNX",
+    "selection": "largest-area person with score > 0.3; all top-down pose models use this same detector"
+  },
+  "benchmark_code_hashes": {
+    "adapters.py": "73c0611213c3371678ea0461f60926fa305d33f836223c6cb2b03220273b82a8",
+    "application.py": "ee35871cd2ce278e04b19fc1a9dccd58db1f882034af03aa6e017949a8db86ba",
+    "audit_dataset_scope.py": "cc563e4aac7f867a799513e9c8f29602b27238007c91f91169d8d1f32ac9d343",
+    "audit_hips.py": "84c6b4e85bb6ac6cf77ba23c5474043d9bef15b52a8c27d66c9c94b0752dc7b1",
+    "audit_predictions.py": "000fcb79e76fec2dfc24301462a68b4adef3ff0c3aadc7aca2cdf88146011980",
+    "camera_view.py": "6b0e74a9115492713608904d6d16421377f1be3fa732ffc86457db9bcb450c90",
+    "check_full_matrix.py": "4f188d56aaff25cb33e46c792a0959014e9ce21485a91c9d5c8ad64357314c17",
+    "dataset.py": "1b1c87aa63e8ce3af6526ed15d66e889e40c5960763b38d7e3ec9d5735ae18b9",
+    "discover_sources.py": "758775ee916a7449aa68766e7ca1ab7c8ac9ae0959c197f604948eb1e627e0ed",
+    "export_hrnet.py": "7c5132cba43ba36ade0e11fe1c3bf4690c9810ccb93c6ea697a4b423b1ecec8b",
+    "export_models.py": "3d5ac9c6c00a6fce3c82dad3d516541d9b347016674207a003a92455055bbd45",
+    "extract_litehrnet.py": "b423616cf854e91e51a8f9e3596be456b61e82ea61328c23e3156895b6ed8bc7",
+    "fetch_references.py": "ea5e5fff8bba30e79d4f608600acdc9b7aed5700bfc9f37e7c455e4acb5bf4bc",
+    "finalize_full.py": "2647fa6ed06e46d7c9296382d8fdccd1fcab92be80ce1e558d457e89c61f4ef6",
+    "finalize_workspace.py": "581b6aba7de1c79154218580da61463231a76c0878d7942ccb7f21995877519a",
+    "generate_report.py": "534ccc148317a31135ae2c888e1396438dc1d61a8391918d3cb1d1b9d8cc908e",
+    "initialize_full_run.py": "8722d48e79eaa02928200db02ff91374cfadaee9cfaeb34037a961244b777b87",
+    "inspect_dataset.py": "186c374b5c1ba11829e5e4a78b3b2e8a6fc37ee036ab056cf0c4a995997e64f6",
+    "metrics.py": "e5afef609baed6dd77c3173fed391df3bec48f19aac5c2d155a6ab8bfa7ce87c",
+    "prepare_models.py": "5a527c1ed016391f84632ed9833b77e5b0b32565e4d2e17e3da110b08039a78f",
+    "record_provenance.py": "082a74a8e8db4ae85cebc26db32812c0827356e8d279be03744ad8a56abe59b4",
+    "run_accuracy_groups.py": "4b26b67122b56b4012d8b19da33d2414540dada7e17ca1e0a1d665709617bce3",
+    "run_benchmark.py": "194c69b5237a7769363ed40e64041b4be8a73b68315610da5bddb4c7e675e547",
+    "run_occlusion.py": "6727bb275eef1eea82f994a01b414c0318069f1fad29bef2dfab212e69b40754",
+    "run_speed.py": "401f3edd075dfd17a5c5a2853b3123a7af63ee13ccf0568230eeb2fa89d2d361",
+    "supplement_report.py": "aba348b81421dfcf9bcdd7c79f6a75b2999663c96fa3c768db7cf84f18d08412",
+    "validate_conversions.py": "f441060941900d1c2a250b5a603e135d31598d413409146bc71f377e8ec3c357",
+    "verify_results.py": "b4dcfd6bdfb13053db58d689115e9085edd52bd400315c52587c1b5a987957ab",
+    "write_scope.py": "d5f8aa21d972389947becf1481a43bacfee60e77bf7917b796b4dbbf5183b1be"
+  },
+  "runner_hashes": {
+    "finish_full.ps1": "ed7f8610e0ac4917d2abed159009f4e613f9117e9802f99bb8cd986b7da71eb1",
+    "run_all.ps1": "f79ff0a263b796041a250636c24854b466afaa7265d87fd3a620b5af29ddc78f"
+  },
+  "execution_notes": "Unaffected non-ViT preprocessing was checked against the archived adapter before the ViTPose-only UDP/DARK correction. ViTPose measurements were rerun. Speed measurements use the final adapters for every model. SmartGym control files were relocated as byte-identical frozen copies. The additional accuracy work used two disjoint model worker groups after building the common detector cache. Published latency/FPS was measured separately in one sequential worker after both accuracy processes exited.",
+  "pilot_lineage": "PILOT_LINEAGE.json preserves the original 160 audited measurements and code hashes."
+}
