@@ -1,0 +1,34 @@
+{
+  "passed": true,
+  "physical_webcam_tested": false,
+  "source": "prerecorded browser fake camera + actual V4 GPU inference",
+  "live_responses": 191,
+  "camera_responses": 81,
+  "browser_metrics_short_run": {
+    "display-fps": "29.9",
+    "analysis-fps": "16.9",
+    "roundtrip-ms": "34 ms",
+    "rep-count": "02"
+  },
+  "javascript_errors": [],
+  "floor_model_checks": {
+    "push_up": {
+      "whole_video_labels": 21,
+      "live_labels": 21,
+      "video": "ELEVATED_HIPS_00003772.mp4"
+    },
+    "situp": {
+      "whole_video_labels": 19,
+      "live_labels": 19,
+      "video": "SHALLOW_RANGE_00022158.mp4"
+    }
+  },
+  "tested": [
+    "video live V4",
+    "whole-video V4",
+    "four exercise selections",
+    "fake-camera live V4",
+    "reset",
+    "mobile layout"
+  ]
+}

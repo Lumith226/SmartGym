@@ -1,0 +1,20 @@
+[
+  {
+    "exercise": "squat",
+    "video": "BACK_ROUNDING_00001672.mp4",
+    "label_count": 14,
+    "scope": "video",
+    "seconds": 0.71,
+    "thresholds_match_deployed": true,
+    "exact_match": true
+  },
+  {
+    "exercise": "jump_jack",
+    "video": "ARMS_INCOMPLETE_00001308.mp4",
+    "label_count": 29,
+    "scope": "video",
+    "seconds": 2.09,
+    "thresholds_match_deployed": true,
+    "exact_match": false
+  }
+]
