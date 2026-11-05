@@ -1,0 +1,78 @@
+<!doctype html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="theme-color" content="#102a2c">
+  <title>Smart Gym · Phòng tập V4</title>
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Crect width='40' height='40' rx='12' fill='%23174443'/%3E%3Cpath d='M10 13v14m5-19v24m10-24v24m5-19v14M15 20h10' stroke='%23baff83' stroke-width='3'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+  <header class="topbar">
+    <a class="brand" href="./" aria-label="Smart Gym"><span class="brand-symbol">S<span>G</span></span><span>smart<span class="brand-light">gym</span><small>PHÒNG TẬP THÔNG MINH</small></span></a>
+    <div class="top-right"><span class="local-tag"><i></i> Bản local</span><button id="settings-toggle" class="icon-button" title="Cấu hình kết nối" aria-label="Cấu hình kết nối">⚙</button></div>
+  </header>
+
+  <main>
+    <section class="heading-row">
+      <div><p class="eyebrow">KHÔNG GIAN TẬP LUYỆN / V4</p><h1>Quan sát chuyển động.<br><span>Hiểu cách bạn tập.</span></h1><p class="intro">Chọn bài, mở camera và theo dõi từng lượt tập.</p></div>
+      <div class="connection-card"><span id="server-dot" class="status-dot"></span><div><strong id="connection-status">Đang tìm server AI…</strong><small id="runtime-label">Web và server chạy riêng trên máy của bạn</small></div><button id="reconnect" class="text-button">Kết nối lại ↗</button></div>
+    </section>
+
+    <section id="settings-panel" class="settings-panel" hidden>
+      <label for="server-url">Địa chỉ server AI</label><input id="server-url" type="url" value="http://127.0.0.1:8001" spellcheck="false"><button id="save-server" class="small-button">Áp dụng</button>
+      <p>WEB: <strong id="web-address"></strong> · SERVER AI: <strong id="api-address">127.0.0.1:8001</strong></p>
+    </section>
+
+    <section class="exercise-section" aria-labelledby="exercise-heading">
+      <div class="section-caption"><h2 id="exercise-heading">01 <span>Chọn bài tập</span></h2><span>Phím tắt 1–4</span></div>
+      <div id="exercise-tabs" class="exercise-tabs" role="group" aria-label="Chọn bài tập"></div>
+    </section>
+
+    <div class="workspace">
+      <section class="workout-card">
+        <div class="card-header"><div><span class="tiny-label">02 / NGUỒN HÌNH</span><h2 id="selected-name">Squat <span class="version-pill">V4</span></h2></div><div class="source-switch" role="group" aria-label="Chọn nguồn"><button id="camera-source" class="active">Camera</button><button id="video-source">Tệp video</button></div></div>
+
+        <div class="source-options">
+          <div id="camera-options"><select id="camera-device" aria-label="Chọn camera"><option value="">Camera mặc định</option></select><button id="open-camera" class="small-button">Mở camera</button></div>
+          <div id="file-options" hidden><label class="file-button" for="video-file">＋ Chọn video</label><input id="video-file" type="file" accept="video/*" hidden><span id="file-name">MP4, WebM hoặc MOV</span></div>
+          <label class="mirror-option"><input type="checkbox" id="mirror" checked> Lật hình</label>
+        </div>
+
+        <div id="video-stage" class="video-stage">
+          <video id="preview" autoplay muted playsinline></video><canvas id="overlay" aria-hidden="true"></canvas>
+          <div id="empty-state" class="empty-state"><div class="camera-illustration"><span></span></div><h3>Sẵn sàng cho lượt tập đầu tiên</h3><p>Mở camera hoặc chọn một tệp video.<br>Giữ toàn thân trong khung hình để quan sát tốt hơn.</p><button id="empty-open" class="light-button">Mở camera <span>↗</span></button></div>
+          <div id="stage-badge" class="stage-badge" hidden><span class="pulse-dot"></span><span id="stage-label">CAMERA TRỰC TIẾP</span></div>
+          <div class="stage-bottom"><span id="pose-status">CHƯA CÓ NGUỒN HÌNH</span><span id="source-resolution">—</span></div>
+        </div>
+
+        <div class="metrics-strip">
+          <div class="rep-metric"><span id="rep-count">00</span><small>LƯỢT TẬP</small></div>
+          <div><strong id="display-fps">—</strong><small>FPS hình ảnh</small></div>
+          <div><strong id="analysis-fps">—</strong><small>FPS phân tích</small></div>
+          <div><strong id="roundtrip-ms">—</strong><small>Độ trễ kết quả</small></div>
+        </div>
+
+        <div class="actions"><button id="start-analysis" class="primary-button" disabled><span>▶</span> Bắt đầu phân tích</button><button id="pause-video" class="secondary-button" hidden>Tạm dừng video</button><button id="reset-session" class="secondary-button" disabled>↺ Đặt lại</button><button id="save-snapshot" class="icon-button" disabled title="Lưu ảnh quan sát" aria-label="Lưu ảnh quan sát">⇩</button></div>
+        <div id="notice" class="notice" role="status" aria-live="polite">Đang kết nối server. Bạn có thể chọn nguồn hình trước.</div>
+      </section>
+
+      <aside class="results-card">
+        <div class="card-header"><div><span class="tiny-label">03 / PHÂN TÍCH CHUYỂN ĐỘNG</span><h2>Kết quả quan sát</h2></div><span id="label-count" class="count-pill">14 nhãn</span></div>
+        <div class="result-view"><button id="live-view" class="active">Đoạn trực tiếp</button><button id="whole-view" disabled>Toàn video</button></div>
+        <div id="result-summary" class="result-summary"><span class="summary-icon">◎</span><div><strong id="summary-title">Đang chờ chuyển động</strong><p id="summary-text">Kết quả sẽ xuất hiện khi có đủ chuỗi khớp.</p></div></div>
+        <div class="result-tools"><span id="result-scope">Chưa có kết quả</span><button id="export-json" class="text-button" disabled>Lưu JSON ↓</button></div>
+        <div class="labels-scroll"><table class="label-table"><thead><tr><th>Nhãn quan sát</th><th>Điểm</th><th>Ngưỡng</th><th>AI</th></tr></thead><tbody id="label-rows"></tbody></table></div>
+        <div class="legend"><span><i class="legend-error"></i>Lỗi dự đoán</span><span><i class="legend-attribute"></i>Thuộc tính</span><span><i class="legend-muted"></i>Chưa áp dụng</span></div>
+        <p id="quality-note" class="quality-note">Điểm của các nhãn độc lập, không cộng thành 100%. Không báo lỗi chưa xác nhận toàn bộ động tác đúng.</p>
+        <div id="whole-video-tools" class="whole-video-tools" hidden><div><strong>Phân tích cả đoạn</strong><p>Đánh giá thêm các nhãn cần ngữ cảnh toàn video.</p></div><button id="analyze-whole" class="small-button" disabled>Phân tích video ↗</button></div>
+      </aside>
+    </div>
+
+    <section class="info-strip"><div><span>↗</span><p><strong>Hình ảnh và AI chạy độc lập</strong>Video hiển thị tại trình duyệt. Server trả tọa độ khớp và kết quả, không vẽ lại toàn màn hình.</p></div><div><span>◎</span><p><strong>Quan sát theo từng tiêu chí</strong>Nhãn tư thế và trạng thái được tách với lỗi. Màu khung xương không xác định khớp đúng hay sai.</p></div><div><span>⌁</span><p><strong>Đúng phiên bản mô hình</strong><span id="model-note">Phiên bản và số nhãn được đọc từ server AI.</span></p></div></section>
+    <footer><span>SMART GYM <b>V4</b></span><span>Trình duyệt hiển thị · Python xử lý AI · Dữ liệu chuyển trong phiên local</span></footer>
+  </main>
+  <script type="module" src="app.js"></script>
+</body>
+</html>
