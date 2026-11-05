@@ -1,0 +1,65 @@
+{
+  "exercise": "squat",
+  "exercise_name_vi": "Gánh đùi (Squat V4 - Multi-Head)",
+  "is_multihead": true,
+  "is_correct": false,
+  "class_code": "Độ sâu gập gối_Cột sống & Thân trên",
+  "class_name_vi": "Xuống chưa đủ sâu (Nông) (87%) & Gù lưng / Đổ người (74%)",
+  "feedback_vi": "Hãy hạ hông sâu hơn (đùi song song sàn) để kích hoạt cơ mông và đùi sau. Lưng bị cong hoặc đổ người quá nhiều. Hãy ưỡn ngực, mắt nhìn thẳng và siết chặt cơ bụng.",
+  "confidence": 0.8719,
+  "detected_errors": [
+    {
+      "name_vi": "Độ sâu gập gối",
+      "has_error": true,
+      "error_prob": 0.8719,
+      "status_msg": "Xuống chưa đủ sâu (Nông)",
+      "feedback": "Hãy hạ hông sâu hơn (đùi song song sàn) để kích hoạt cơ mông và đùi sau."
+    },
+    {
+      "name_vi": "Cột sống & Thân trên",
+      "has_error": true,
+      "error_prob": 0.735,
+      "status_msg": "Gù lưng / Đổ người",
+      "feedback": "Lưng bị cong hoặc đổ người quá nhiều. Hãy ưỡn ngực, mắt nhìn thẳng và siết chặt cơ bụng."
+    }
+  ],
+  "has_multiple_errors": true,
+  "error_count": 2,
+  "head_results": {
+    "depth": {
+      "name_vi": "Độ sâu gập gối",
+      "has_error": true,
+      "error_prob": 0.8719,
+      "status_msg": "Xuống chưa đủ sâu (Nông)",
+      "feedback": "Hãy hạ hông sâu hơn (đùi song song sàn) để kích hoạt cơ mông và đùi sau."
+    },
+    "back": {
+      "name_vi": "Cột sống & Thân trên",
+      "has_error": true,
+      "error_prob": 0.735,
+      "status_msg": "Gù lưng / Đổ người",
+      "feedback": "Lưng bị cong hoặc đổ người quá nhiều. Hãy ưỡn ngực, mắt nhìn thẳng và siết chặt cơ bụng."
+    },
+    "knee": {
+      "name_vi": "Chân & Đầu gối",
+      "has_error": false,
+      "error_prob": 0.1895,
+      "status_msg": "Chân mở chuẩn",
+      "feedback": "Khoảng cách hai chân quá hẹp hoặc gối bị sụp vào trong. Hãy mở chân bằng vai và hướng gối theo mũi chân."
+    }
+  },
+  "probabilities": {
+    "depth": 0.8719,
+    "back": 0.735,
+    "knee": 0.1895
+  },
+  "latency_ms": 474.91,
+  "camera_view": "SIDE",
+  "camera_view_vi": "GÓC NGHIÊNG NGANG (90°)",
+  "is_side_view": true,
+  "view_note": "",
+  "biomechanics": {
+    "min_knee_angle": 146.7,
+    "max_torso_lean": 3.0
+  }
+}

@@ -1,0 +1,304 @@
+I. TỔNG QUAN DỰ ÁN
+1.1. Đặt vấn đề
+Việc tập luyện thể hình sai tư thế không chỉ làm giảm hiệu quả tập luyện mà còn gây nguy cơ chấn thương nghiêm trọng. Tuy nhiên, chi phí thuê Huấn luyện viên cá nhân (PT) rất cao, khiến nhiều người tự tập luyện mà không có sự giám sát kỹ thuật. Các ứng dụng AI hỗ trợ tập luyện hiện nay đa phần chỉ dừng lại ở việc phân tích hình ảnh tĩnh hoặc so sánh góc độ đơn giản, bỏ qua các lỗi về nhịp độ (Tempo) và tính liên tục của chuyển động. Ngoài ra, việc thiếu sự giám sát thời gian thực khiến người tập dễ gặp chấn thương khi thực hiện các động tác phức tạp mà không được cảnh báo kịp thời.
+1.2. Mục tiêu đề tài
+Xây dựng hệ thống huấn luyện thể hình thông minh đa nền tảng (Web & Mobile) hỗ trợ người dùng tự tập luyện hiệu quả tại nhà.
+Nghiên cứu và ứng dụng các thuật toán Thị giác máy tính (Computer Vision) để trích xuất khung xương người tập từ Camera.
+Xây dựng mô hình AI phân tích dữ liệu chuỗi thời gian, nhận diện hành động và đưa ra cảnh báo lỗi kỹ thuật tức thì (Real-time Feedback).
+Cung cấp các công cụ theo dõi tiến trình tập luyện trực quan với các chỉ số dữ liệu cụ thể và cá nhân hóa kế hoạch tập.
+Tính năng BMI & sức khỏe người dùng: quản lý hồ sơ, tư vấn dinh dưỡng và kế hoạch tập dựa trên chỉ số cơ thể.
+1.3. Công nghệ sử dụng
+Frontend: ReactJS (Web), Flutter/Kotlin (Mobile App).
+Backend: Python Django (tích hợp Django Channels/WebSockets để xử lý thời gian thực).
+AI Core: YOLOv8-Pose (Pose Estimation), ST-GCN / LSTM (phân loại chất lượng động tác), DTW (đánh giá chuỗi chuyển động).
+Database: PostgreSQL.
+Hạ tầng: Docker, Git, Redis (message broker cho WebSocket).
+Model Optimization: ONNX Runtime / TensorRT để đạt ≥30 FPS real-time.
+
+II. PHÂN TÍCH TÍNH NĂNG VÀ PHÂN CHIA MODULE
+Dự án hiện tại đã có nền móng với module phân tích tư thế Squat cơ bản (YOLOv8-Pose + Rule-based). Để đủ để 3 thành viên mỗi người đảm nhận 1 module hoàn chỉnh (cả Backend lẫn Frontend), nhóm bổ sung và tổ chức lại thành 3 module độc lập như sau:
+
+MODULE 1: AI PHÂN TÍCH TƯ THẾ & CẢNH BÁO THỜI GIAN THỰC
+A. Mô tả tổng quan
+Module cốt lõi của hệ thống. Nhận luồng video từ camera/webcam, trích xuất khung xương (skeleton), tính toán góc khớp sinh cơ học theo thời gian thực, phân loại trạng thái tư thế và phát cảnh báo lỗi. Hỗ trợ nhiều bài tập: Squat, Deadlift, Push-up, Lunge, Shoulder Press.
+B. Tính năng chi tiết
+Nhận diện người tập và trích xuất 17 điểm khớp xương (Keypoint) bằng YOLOv8-Pose.
+Chuẩn hóa tư thế (Pose Normalization) dựa theo mid-hip và torso để loại bỏ ảnh hưởng chiều cao/khoảng cách camera.
+Làm mượt tín hiệu (Signal Smoothing) bằng Moving Average hoặc Bộ lọc Kalman để khử jitter keypoint.
+Tính toán góc khớp sinh cơ học bằng Vector Geometry & arctan2.
+Phân loại trạng thái động tác và đếm rep tự động bằng Máy trạng thái hữu hạn (FSM).
+So sánh chuỗi chuyển động với mẫu chuẩn bằng Dynamic Time Warping (DTW) để chấm điểm toàn bộ 1 rep.
+Phân tích chất lượng động tác nâng cao bằng mô hình ST-GCN (Spatial-Temporal GCN) được fine-tune trên dữ liệu gym.
+Phát cảnh báo âm thanh/hình ảnh ngay khi phát hiện lỗi kỹ thuật.
+Ghi log theo thời gian (Temporal Logging với cấu trúc Set) để tạo báo cáo sau buổi tập.
+Tối ưu suy luận model bằng ONNX Runtime để đạt ≥30 FPS.
+C. Công thức & Thuật toán AI cốt lõi
+① Tính góc khớp tại điểm B (arctan2):
+Cho 3 điểm: A(xA,yA) – điểm đầu, B(xB,yB) – đỉnh góc (tâm khớp), C(xC,yC) – điểm cuối.
+  α = arctan2(yA − yB,  xA − xB)
+  β = arctan2(yC − yB,  xC − xB)
+  θ (rad) = |β − α|
+  θ (degree) = θ × 180 / π
+  Nếu θ > 180°  →  θ = 360° − θ
+
+Áp dụng:
+  • Góc gối (Knee angle): A=Hip, B=Knee, C=Ankle
+  • Góc lưng (Back angle): A=Shoulder, B=Hip, C=Knee
+  • Góc khuỷu tay: A=Shoulder, B=Elbow, C=Wrist
+② Chuẩn hóa tư thế (Pose Normalization):
+  mid_hip = (hip_left + hip_right) / 2
+  torso_length = |shoulder_mid − mid_hip|
+  keypoint_normalized = (keypoint − mid_hip) / torso_length
+
+Mục đích: loại bỏ sự khác biệt chiều cao người dùng và khoảng cách đến camera.
+③ Bộ lọc Kalman 1D (Signal Smoothing):
+  Bước Predict:  x̂ₖ|ₖ₋₁ = x̂ₖ₋₁  ,  Pₖ|ₖ₋₁ = Pₖ₋₁ + Q
+  Bước Update:   Kₖ = Pₖ|ₖ₋₁ / (Pₖ|ₖ₋₁ + R)
+                 x̂ₖ = x̂ₖ|ₖ₋₁ + Kₖ(zₖ − x̂ₖ|ₖ₋₁)
+                 Pₖ = (1 − Kₖ) × Pₖ|ₖ₋₁
+
+  Q = nhiễu quá trình (process noise), R = nhiễu đo lường (measurement noise)
+  Áp dụng: làm mượt tọa độ (x,y) của từng keypoint giữa các frame.
+④ Máy trạng thái hữu hạn (FSM) – Đếm Rep:
+  Ví dụ Squat:
+  ĐỨNG  →(θ_knee < 160°)→  ĐANG XUỐNG  →(θ_knee < 90°)→  ĐÁY
+  ĐÁY   →(θ_knee > 90°)→   ĐANG LÊN    →(θ_knee > 160°)→ ĐỨNG  ✓ +1 rep
+
+  Điều kiện tư thế chuẩn (Squat):
+    • θ_back ≥ 60° (lưng không bị đổ về trước)
+    • θ_knee ≤ 90° ở điểm đáy (xuống đủ sâu)
+  Cảnh báo lỗi:
+    • θ_back < 60°  →  "ĐỔ LƯNG! NÂNG NGỰC LÊN!"
+    • 90° < θ_knee ≤ 160°  →  "XUỐNG NÔNG! HẠ HÔNG XUỐNG!"
+⑤ Dynamic Time Warping (DTW) – Chấm điểm Rep:
+  Input: chuỗi góc gối người dùng U = [u₁,u₂,...,uₙ]
+         chuỗi góc mẫu chuẩn    T = [t₁,t₂,...,tₘ]
+
+  DTW tìm đường cân chỉnh tối ưu D(i,j):
+    D(i,j) = d(uᵢ,tⱼ) + min( D(i-1,j), D(i,j-1), D(i-1,j-1) )
+    d(uᵢ,tⱼ) = |uᵢ − tⱼ|  (khoảng cách Euclidean)
+
+  Điểm kỹ thuật = max(0, 100 − DTW_distance / α) × 100
+  (α là hệ số chuẩn hóa, ví dụ α = 6 tương ứng với thực nghiệm)
+
+  Ví dụ thực nghiệm:
+    User A (chậm, đúng form): DTW = 89.47  →  Điểm: 91.1/100
+    User B (nhanh, sai form): DTW = 573.68 →  Điểm: 42.6/100
+D. API Backend (Django)
+POST /api/ai/analyze-frame/ – Phân tích 1 frame, trả về keypoints + feedback tức thì.
+WebSocket ws://api/ai/stream/{session_id}/ – Stream kết quả phân tích real-time.
+GET /api/ai/session/{id}/report/ – Lấy báo cáo sau buổi tập (lỗi, điểm, thống kê).
+GET /api/exercises/ – Danh sách bài tập và thông số ngưỡng chuẩn.
+POST /api/ai/upload-video/ – Phân tích video offline, trả về video đã đánh dấu lỗi.
+E. Frontend (ReactJS/Flutter)
+Trang Camera: Khung hình live stream với overlay skeleton, góc khớp và feedback màu sắc.
+Bộ đếm rep (Counter) và timer hiển thị real-time.
+Thanh điểm kỹ thuật động (gauge/progress bar) cập nhật sau mỗi rep.
+Trang Báo cáo: Timeline lỗi, biểu đồ góc khớp theo thời gian, gợi ý cải thiện.
+Trang thư viện bài tập: video hướng dẫn chuẩn + mô tả các lỗi thường gặp.
+
+MODULE 2: QUẢN LÝ NGƯỜI DÙNG, SỨC KHỎE & CÁ NHÂN HÓA KẾ HOẠCH TẬP
+A. Mô tả tổng quan
+Module quản lý hồ sơ sức khỏe người dùng và tự động tạo kế hoạch tập luyện cá nhân hóa. Tích hợp các thuật toán AI để tính toán chỉ số cơ thể (BMI, TDEE, thành phần cơ thể) và đề xuất lịch tập phù hợp với mục tiêu (tăng cơ/giảm mỡ). Đồng thời theo dõi tiến trình và cung cấp tư vấn dinh dưỡng cơ bản.
+B. Tính năng chi tiết
+Đăng ký/Đăng nhập (JWT Authentication), quản lý hồ sơ người dùng.
+Nhập và lưu trữ chỉ số sức khỏe: chiều cao, cân nặng, tuổi, giới tính, mục tiêu tập luyện.
+Tính toán và theo dõi BMI, BMR, TDEE theo công thức chuẩn y tế.
+AI đề xuất lịch tập cá nhân hóa dựa trên chỉ số cơ thể và mục tiêu (tăng cơ/giảm mỡ/duy trì).
+Quản lý kế hoạch tập luyện: weekly plan, set, rep, trọng lượng.
+Tư vấn dinh dưỡng cơ bản: calories mục tiêu, tỷ lệ P/C/F theo mục tiêu.
+Thông báo nhắc nhở tập luyện và đánh giá tiến trình.
+Lưu lịch sử chỉ số cơ thể và vẽ biểu đồ tiến trình theo tuần/tháng.
+C. Công thức AI & Tính toán chỉ số cơ thể
+① Tính BMI (Body Mass Index):
+  BMI = Cân nặng (kg) / [Chiều cao (m)]²
+
+  Phân loại (WHO):
+    BMI < 18.5  → Thiếu cân (Underweight)
+    18.5 ≤ BMI < 25.0  → Bình thường (Normal)
+    25.0 ≤ BMI < 30.0  → Thừa cân (Overweight)
+    BMI ≥ 30.0  → Béo phì (Obese)
+② Tính BMR (Basal Metabolic Rate) – Công thức Mifflin-St Jeor:
+  Nam:  BMR = 10 × W + 6.25 × H − 5 × A + 5
+  Nữ:   BMR = 10 × W + 6.25 × H − 5 × A − 161
+
+  (W = cân nặng kg, H = chiều cao cm, A = tuổi năm)
+
+  TDEE (Total Daily Energy Expenditure) = BMR × Activity Factor:
+    Ít vận động (Sedentary):          TDEE = BMR × 1.2
+    Nhẹ (1-3 ngày/tuần):              TDEE = BMR × 1.375
+    Vừa (3-5 ngày/tuần):              TDEE = BMR × 1.55
+    Tích cực (6-7 ngày/tuần):         TDEE = BMR × 1.725
+    Rất tích cực (2 lần/ngày):        TDEE = BMR × 1.9
+③ Công thức đề xuất Calories mục tiêu:
+  Mục tiêu giảm mỡ:  Target_cal = TDEE × 0.80  (thâm hụt 20%)
+  Mục tiêu tăng cơ:  Target_cal = TDEE × 1.10  (thặng dư 10%)
+  Mục tiêu duy trì:  Target_cal = TDEE
+
+  Tỷ lệ đa lượng (Macros) theo mục tiêu:
+    Tăng cơ:  Protein 30%, Carb 50%, Fat 20%
+    Giảm mỡ:  Protein 40%, Carb 35%, Fat 25%
+    Duy trì:  Protein 25%, Carb 50%, Fat 25%
+
+  Gram protein/ngày = (Target_cal × %Protein) / 4
+  Gram carb/ngày    = (Target_cal × %Carb) / 4
+  Gram fat/ngày     = (Target_cal × %Fat) / 9
+④ AI đề xuất kế hoạch tập (Rule-based Recommendation Engine):
+  Input: {BMI, Mục tiêu, Tần suất tập/tuần, Trình độ (Beginner/Intermediate/Advanced)}
+
+  Logic phân loại:
+    IF BMI > 27 AND mục_tiêu == "giảm mỡ"
+       → Tần suất cardio cao (3 cardio + 3 sức mạnh/tuần)
+       → Volume thấp, recovery cao
+    IF BMI < 20 AND mục_tiêu == "tăng cơ"
+       → Push-Pull-Legs split (6 ngày/tuần)
+       → Progressive overload: tăng 2.5-5kg/tuần
+    ELSE → Full-body (3 ngày/tuần), duy trì
+
+  Progressive Overload Score:
+    Nếu user hoàn thành ≥90% kế hoạch trong 2 tuần liên tiếp
+    → Tự động gợi ý tăng trọng lượng 2.5kg hoặc +1 set
+D. API Backend (Django)
+POST /api/auth/register/, /api/auth/login/ – Đăng ký/đăng nhập (JWT).
+GET/PUT /api/users/{id}/profile/ – Xem/cập nhật hồ sơ và chỉ số sức khỏe.
+GET /api/users/{id}/health-metrics/ – Lịch sử BMI, cân nặng theo thời gian.
+GET /api/users/{id}/plan/ – Kế hoạch tập được AI đề xuất.
+POST /api/users/{id}/plan/generate/ – Tái tạo kế hoạch mới dựa trên chỉ số cập nhật.
+GET /api/users/{id}/nutrition/ – Thông tin dinh dưỡng (calories, macros) theo ngày.
+E. Frontend (ReactJS/Flutter)
+Dashboard cá nhân: thẻ BMI, TDEE, mục tiêu calories/ngày hiển thị trực quan.
+Form nhập chỉ số sức khỏe với validation và phản hồi tức thì.
+Trang kế hoạch tập: lịch tuần dạng lưới (weekly calendar) với từng buổi tập.
+Biểu đồ tiến trình: đường cong BMI, cân nặng, và điểm kỹ thuật trung bình theo tuần.
+Trang dinh dưỡng: pie chart tỷ lệ macros, danh sách thực phẩm gợi ý.
+Thông báo push: nhắc tập luyện và milestone tiến trình.
+
+MODULE 3: THEO DÕI TIẾN TRÌNH, THỐNG KÊ & HỆ THỐNG QUẢN TRỊ
+A. Mô tả tổng quan
+Module theo dõi và phân tích dữ liệu tập luyện toàn diện theo thời gian. Tổng hợp dữ liệu từ Module 1 (điểm kỹ thuật, lỗi, rep) và Module 2 (chỉ số sức khỏe) để tính toán chỉ số hiệu suất tổng thể, tạo báo cáo trực quan và cung cấp hệ thống Admin quản trị nội dung.
+B. Tính năng chi tiết
+Lưu trữ và hiển thị lịch sử buổi tập: ngày, bài tập, số rep, điểm kỹ thuật, lỗi phát hiện.
+Tính toán và hiển thị chỉ số AI tổng hợp (Performance Score) theo tuần/tháng.
+Biểu đồ phân tích xu hướng: điểm kỹ thuật, tần suất lỗi, khối lượng tập (volume) theo thời gian.
+So sánh tiến trình của user giữa các tuần (Week-over-Week comparison).
+Hệ thống thành tích (Achievement/Badge): tự động mở khóa khi đạt mốc (100 rep không lỗi, 30 ngày liên tiếp, v.v.).
+Xuất báo cáo PDF cá nhân sau mỗi tháng tập luyện.
+Hệ thống Admin: quản lý danh mục bài tập, video hướng dẫn chuẩn, và cấu hình ngưỡng AI.
+Dashboard Admin: thống kê người dùng, bài tập phổ biến, phân bố lỗi kỹ thuật toàn hệ thống.
+Phát hiện hành vi bất thường (Anomaly Detection) sơ bộ: cảnh báo nếu user có dấu hiệu mất cân bằng cơ bắp (chênh lệch góc khớp trái/phải >15° liên tục).
+C. Công thức AI & Tính toán chỉ số tiến trình
+① Performance Score tổng hợp (Điểm hiệu suất buổi tập):
+  Cho mỗi buổi tập với N rep:
+    DTW_score_i = điểm DTW của rep thứ i  (0-100)
+    error_rate   = số giây phát hiện lỗi / tổng số giây tập × 100 (%)
+
+  Session_Score = (Σ DTW_score_i / N) × (1 − error_rate / 100)
+
+  Ví dụ:
+    N=10 rep, DTW_score_avg = 85, error_rate = 15%
+    Session_Score = 85 × (1 − 0.15) = 72.25 điểm
+
+  Weekly_Score = Σ Session_Score_j / số buổi trong tuần
+② Phân tích xu hướng lỗi kỹ thuật (Error Trend):
+  Với mỗi loại lỗi L (ví dụ "đổ lưng", "xuống nông"):
+    error_freq(L, week_k) = số lần lỗi L xuất hiện trong tuần k / tổng rep tuần k
+
+  Cải thiện (%) = (error_freq(L, week_k-1) − error_freq(L, week_k)) / error_freq(L, week_k-1) × 100
+
+  Nếu Cải thiện < 0 (lỗi tăng):  → Gửi cảnh báo và gợi ý bài tập corrective
+  Nếu Cải thiện > 20%:           → Trao thành tích "Tiến bộ vượt bậc"
+③ Phát hiện mất cân bằng cơ bắp (Asymmetry Detection):
+  Δ_knee = |θ_knee_left − θ_knee_right|
+  Δ_shoulder = |θ_shoulder_left − θ_shoulder_right|
+
+  Asymmetry_Score = (Δ_knee + Δ_shoulder) / 2
+
+  Ngưỡng cảnh báo:
+    Asymmetry_Score > 15°  → "Phát hiện mất cân bằng cơ trái/phải.
+                               Kiểm tra chấn thương hoặc tập Unilateral exercises."
+  Hệ thống theo dõi Asymmetry_Score qua 4 tuần liên tiếp để xác nhận xu hướng.
+④ Hệ thống thành tích (Achievement Scoring):
+  Mỗi thành tích được định nghĩa bởi điều kiện:
+    Badge "Squat Master":  Hoàn thành 500 rep Squat với Session_Score ≥ 80
+    Badge "30-Day Streak": Tập ≥1 buổi/ngày trong 30 ngày liên tiếp
+    Badge "Zero Error":    1 buổi tập với error_rate = 0%
+    Badge "Form Improver": Cải thiện lỗi >30% trong 2 tuần liên tiếp
+D. API Backend (Django)
+GET /api/users/{id}/history/ – Lịch sử tất cả buổi tập, phân trang.
+GET /api/users/{id}/history/{session_id}/ – Chi tiết 1 buổi tập (rep log, error log, điểm).
+GET /api/users/{id}/stats/weekly/ – Thống kê tuần: Weekly_Score, lỗi, rep, volume.
+GET /api/users/{id}/stats/trend/ – Xu hướng tiến trình theo tháng (JSON/Chart data).
+GET /api/users/{id}/achievements/ – Danh sách thành tích đã mở khóa.
+GET /api/users/{id}/report/monthly/ – Xuất báo cáo tháng dạng PDF.
+Admin: GET/POST/PUT/DELETE /api/admin/exercises/ – CRUD quản lý bài tập.
+Admin: GET /api/admin/dashboard/ – Thống kê toàn hệ thống.
+E. Frontend (ReactJS/Flutter)
+Trang lịch sử: danh sách thẻ buổi tập, có thể lọc theo ngày/bài tập/điểm.
+Chi tiết buổi tập: timeline lỗi, biểu đồ góc khớp từng rep, điểm DTW từng rep.
+Trang thống kê: dashboard analytics với biểu đồ đường (trend), bar chart (volume).
+Trang thành tích: gallery huy hiệu, progress bar tiến độ đến badge tiếp theo.
+Admin Panel (Web only): bảng quản lý bài tập với editor nội dung, upload video.
+Admin Dashboard: heatmap lỗi toàn hệ thống, biểu đồ phân bố người dùng.
+
+III. BẢNG PHÂN CHIA MODULE CHO 3 THÀNH VIÊN
+
+IV. KIẾN TRÚC HỆ THỐNG TỔNG THỂ
+Luồng dữ liệu tổng quát:
+  [Camera/Video Upload]
+        ↓
+  [Frontend - React/Flutter]
+        ↓ WebSocket / REST API
+  [Django Backend]
+    ├── AI Core Service (Module 1)
+    │     YOLOv8-Pose → Kalman → FSM → DTW → ST-GCN → Feedback
+    ├── User Service (Module 2)
+    │     BMI/TDEE Calculator → Recommendation Engine → Nutrition Advisor
+    └── Analytics Service (Module 3)
+          Performance Score → Error Trend → Achievement → Report Generator
+        ↓
+  [PostgreSQL Database]  +  [Redis - Message Broker]
+        ↓
+  [Docker Container Deploy]
+V. KẾT LUẬN
+Đồ án "Xây dựng Hệ thống Huấn luyện Thể hình Thông minh đa nền tảng tích hợp AI" được tổ chức thành 3 module rõ ràng:
+Module 1: Cốt lõi AI – Phân tích tư thế real-time với pipeline hoàn chỉnh từ YOLOv8-Pose → Kalman Filter → FSM → DTW → ST-GCN, cùng các công thức chấm điểm rõ ràng và minh bạch.
+Module 2: Quản lý người dùng và cá nhân hóa – Tính toán BMI/BMR/TDEE theo công thức y tế chuẩn, AI đề xuất kế hoạch tập và dinh dưỡng theo mục tiêu.
+Module 3: Analytics và Admin – Theo dõi tiến trình với Performance Score tổng hợp, phân tích xu hướng lỗi, phát hiện mất cân bằng cơ bắp và hệ thống thành tích gamification.
+Điểm nổi bật của đồ án là tất cả các bước AI chấm điểm đều có công thức toán học minh bạch (arctan2, Kalman, DTW scoring, Performance Score, Asymmetry Detection), đảm bảo tính khoa học và khả năng giải thích kết quả cho người dùng. Hệ thống kế thừa nền móng demo Squat hiện tại và mở rộng toàn diện sang 5 bài tập, đa người dùng, và triển khai sản phẩm thực tế.
+Thành viên | Module | Backend (Django) | Frontend (React/Flutter)
+Lưu Minh Thắng
+(Nhóm trưởng) | Module 1:
+AI Phân tích tư thế
+& cảnh báo real-time | • API AI analyze/stream
+• YOLOv8-Pose integration
+• FSM, DTW, ST-GCN
+• Kalman Filter
+• ONNX optimization
+• WebSocket server | • Trang Camera/Stream
+• Overlay skeleton & feedback
+• Bộ đếm rep
+• Báo cáo sau buổi tập
+• Thư viện bài tập
+Phan Hoàng An | Module 2:
+Quản lý người dùng
+& cá nhân hóa | • API Auth (JWT)
+• BMI/BMR/TDEE engine
+• Recommendation AI
+• Nutrition calculator
+• User profile/plan API | • Dashboard cá nhân
+• Form sức khỏe
+• Kế hoạch tập lịch tuần
+• Biểu đồ tiến trình
+• Trang dinh dưỡng
+Nguyễn Lưu Thanh Tùng | Module 3:
+Theo dõi tiến trình
+& Admin | • API lịch sử & thống kê
+• Performance Score engine
+• Error trend analysis
+• Asymmetry detection
+• Achievement system
+• Admin APIs | • Trang lịch sử
+• Analytics dashboard
+• Trang thành tích
+• Xuất báo cáo PDF
+• Admin panel

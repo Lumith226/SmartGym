@@ -1,0 +1,88 @@
+BÁO CÁO ĐỀ XUẤT CÁC CHỨC NĂNG ỨNG DỤNG AI
+CHO HỆ THỐNG SMART GYM AI
+Định hướng phát triển các phân hệ trí tuệ nhân tạo cho đồ án tốt nghiệp
+
+1. Tổng quan
+Hệ thống Smart Gym AI được định hướng xây dựng nhằm hỗ trợ người tập luyện thể hình thông qua phân tích video thời gian thực, đánh giá kỹ thuật động tác và cung cấp tư vấn cá nhân hóa. Theo thiết kế ban đầu, hệ thống sử dụng YOLOv8-Pose, Kalman Filter, FSM, DTW, ST-GCN và mô hình Qwen kết hợp RAG để tạo thành một quy trình AI khép kín.
+Mục tiêu của báo cáo này là hệ thống hóa các chức năng có thể ứng dụng AI trong dự án, đồng thời phân loại theo mức độ ưu tiên để lựa chọn phạm vi triển khai phù hợp với đồ án.
+2. Nhóm chức năng AI phân tích động tác – AI Pose Core
+Đây là phân hệ AI trung tâm của Smart Gym AI. Phân hệ xử lý luồng video từ camera, trích xuất khung xương, phân tích chuỗi chuyển động và đưa ra phản hồi về kỹ thuật.
+2.1. Quy trình hoạt động
+Camera → WebSocket → YOLOv8-Pose → Kalman Filter → Pose Normalization → tính góc khớp → FSM nhận diện pha và đếm rep → DTW chấm điểm → ST-GCN phân loại lỗi → Prescription Engine tạo cảnh báo.
+2.2. Giá trị của phân hệ
+Không chỉ đếm số lần tập mà còn đánh giá chất lượng từng rep.
+Có thể phát hiện lỗi kỹ thuật trong quá trình người dùng thực hiện động tác.
+Cho phép phản hồi gần như tức thời bằng hình ảnh và âm thanh.
+Tạo dữ liệu định lượng để phục vụ các phân hệ AI cá nhân hóa phía sau.
+3. AI Virtual Coach – Trợ lý huấn luyện viên ảo
+AI Virtual Coach là lớp AI ngôn ngữ giúp người dùng tương tác với hệ thống bằng ngôn ngữ tự nhiên. Thiết kế hiện tại sử dụng Qwen2.5-3B-Instruct tự host, BGE-M3 cho embedding và ChromaDB làm kho tri thức.
+3.1. Các chức năng đề xuất
+Giải đáp câu hỏi về bài tập, kỹ thuật và nguyên lý vận động dựa trên kho tri thức.
+Giải thích nguyên nhân người dùng bị trừ điểm kỹ thuật.
+Phân tích lỗi dựa trên dữ liệu thực tế của buổi tập.
+Tóm tắt kết quả một buổi tập bằng ngôn ngữ tự nhiên.
+Tư vấn giáo trình tập luyện dựa trên mục tiêu và lịch sử tập.
+Hỗ trợ xây dựng nội dung dinh dưỡng theo dữ liệu người dùng.
+Cho phép hội thoại nhiều lượt và sử dụng lịch sử trao đổi làm ngữ cảnh.
+3.2. Ví dụ
+Người dùng hỏi: “Tại sao hôm nay điểm squat của tôi thấp?” Hệ thống có thể truy xuất điểm DTW, số lần knee valgus, số lần xuống nông và kết quả các buổi trước, sau đó kết hợp với tài liệu trong ChromaDB để tạo câu trả lời cá nhân hóa.
+4. AI Recommendation – Đề xuất kế hoạch tập luyện
+Recommendation Engine có thể được nâng cấp thành một phân hệ AI sử dụng dữ liệu lịch sử để đề xuất kế hoạch phù hợp với từng người dùng.
+Phân tích lịch sử tập luyện và hiệu suất.
+Phân tích số rep, mức tải và điểm kỹ thuật.
+Phân tích xu hướng lỗi form.
+Đề xuất bài tập hoặc lịch tập phù hợp.
+Đề xuất điều chỉnh volume hoặc mức tải dựa trên hiệu suất thực tế.
+Theo dõi kết quả sau mỗi buổi để cập nhật đề xuất.
+Điểm nổi bật của chức năng này là tạo ra vòng lặp: dữ liệu buổi tập → AI phân tích → đề xuất → người dùng thực hiện → hệ thống tiếp tục thu thập dữ liệu. Nhờ đó hệ thống có tính cá nhân hóa cao hơn so với một lịch tập cố định.
+5. AI phân tích tiến trình
+Bên cạnh dashboard thống kê thông thường, dữ liệu từ các buổi tập có thể được AI tổng hợp thành nhận xét về xu hướng tiến bộ.
+Phân tích biến động Performance Score theo tuần/tháng.
+Phân tích tần suất từng loại lỗi.
+Xác định thời điểm hoặc điều kiện lỗi xuất hiện nhiều hơn.
+Tạo bản nhận xét tiến trình bằng ngôn ngữ tự nhiên.
+Tóm tắt điểm mạnh, điểm cần cải thiện và xu hướng của người dùng.
+Ví dụ
+Thay vì chỉ hiển thị “Knee Valgus: 18 → 15 → 12 → 10”, hệ thống có thể tạo một nhận xét như: “Tần suất lỗi knee valgus đang giảm qua các tuần. Tuy nhiên lỗi vẫn xuất hiện nhiều ở các rep cuối của set, vì vậy cần tiếp tục theo dõi sự ổn định của form khi mệt.”
+6. Kiến trúc tổng thể các chức năng AI
+Có thể tổ chức hệ thống thành năm lớp chức năng AI chính:
+AI Pose Core: nhận diện, theo dõi và đánh giá động tác.
+AI Virtual Coach: hỏi đáp và giải thích kết quả.
+AI Recommendation: đề xuất kế hoạch tập luyện cá nhân hóa.
+AI Progress Analysis: phân tích xu hướng tiến bộ.
+AI Feedback/Prescription: chuyển kết quả phân tích thành phản hồi trực tiếp cho người dùng.
+Luồng tổng quát: Camera → Pose AI → Motion Analysis → Error Detection + Scoring → User Training Data → Coach/Recommendation/Progress Analysis → Personalized Feedback.
+7. Mức độ ưu tiên triển khai
+8. Đề xuất phạm vi phù hợp cho đồ án
+Để bảo đảm tính khả thi, dự án nên tập trung sâu vào chuỗi chức năng cốt lõi thay vì triển khai quá nhiều mô hình AI độc lập. Phạm vi đề xuất là:
+1) Nhận diện pose thời gian thực bằng YOLOv8-Pose.
+2) Làm mượt và chuẩn hóa dữ liệu khung xương.
+3) Nhận diện pha và đếm rep bằng FSM.
+4) Chấm điểm động tác bằng DTW.
+5) Phân loại một số lỗi form bằng ST-GCN.
+6) Phản hồi lỗi ngay trên giao diện bằng Prescription Engine và TTS.
+7) AI Virtual Coach bằng Qwen + RAG.
+8) Recommendation và Progress Analysis ở mức mở rộng nếu còn thời gian.
+9. Kết luận
+Smart Gym AI có tiềm năng ứng dụng AI ở nhiều tầng khác nhau. Trong đó, Computer Vision đóng vai trò thu thập và hiểu chuyển động; các thuật toán DTW và ST-GCN biến dữ liệu chuyển động thành điểm số và lỗi kỹ thuật; Qwen + RAG biến dữ liệu tập luyện thành tư vấn cá nhân hóa; Recommendation và Progress Analysis tiếp tục sử dụng dữ liệu tích lũy để hỗ trợ người dùng trong các buổi tập tiếp theo.
+Nếu triển khai theo hướng này, hệ thống không chỉ là một ứng dụng đếm rep mà trở thành một nền tảng huấn luyện thông minh với chu trình khép kín: quan sát → đánh giá → giải thích → đề xuất → theo dõi tiến bộ.
+STT | Chức năng | Kỹ thuật AI/thuật toán | Đầu ra
+1 | Nhận diện khung xương | YOLOv8-Pose | 17 keypoints và confidence score
+2 | Lọc nhiễu chuyển động | Kalman Filter | Chuỗi tọa độ khớp ổn định
+3 | Chuẩn hóa tư thế | Pose Normalization | Tọa độ độc lập với chiều cao/khoảng cách camera
+4 | Tính góc khớp | Vector geometry + arctan2 | Góc gối, hông, khuỷu, thân trên
+5 | Nhận diện pha động tác | Finite State Machine | START, ECCENTRIC, BOTTOM, CONCENTRIC
+6 | Đếm số lần lặp | FSM + angular velocity | Số rep hợp lệ
+7 | Chấm điểm kỹ thuật | Dynamic Time Warping | Điểm kỹ thuật 0–100
+8 | Phân loại lỗi tư thế | ST-GCN | CORRECT, BACK_ROUNDING, KNEE_VALGUS, SHALLOW_DEPTH
+9 | Phát hiện bất đối xứng | So sánh góc trái/phải | Mức độ lệch của hai bên
+10 | Cảnh báo realtime | Prescription Engine + TTS | Cảnh báo hình ảnh và giọng nói
+Mức ưu tiên | Chức năng | Lý do
+Rất cao | Pose Estimation + Rep Counter | Là nền tảng dữ liệu cho toàn hệ thống.
+Rất cao | Phát hiện lỗi form realtime | Thể hiện rõ giá trị AI Computer Vision.
+Rất cao | DTW Scoring | Định lượng chất lượng động tác.
+Rất cao | ST-GCN | Thể hiện khả năng học sâu trên chuỗi không gian–thời gian.
+Rất cao | AI Virtual Coach + RAG | Tạo lớp AI ngôn ngữ cá nhân hóa.
+Cao | Recommendation | Tận dụng dữ liệu lịch sử để tạo giá trị cá nhân hóa.
+Cao | Progress Analysis | Tăng chiều sâu phân tích nhưng không cần thêm pipeline camera.
+Trung bình | Gamification | Có ích cho trải nghiệm nhưng không phải AI lõi.

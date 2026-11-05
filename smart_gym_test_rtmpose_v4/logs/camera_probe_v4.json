@@ -1,0 +1,31 @@
+{
+  "physical_device": "1080P Web Camera",
+  "device_indices": {
+    "0": "1080P Web Camera",
+    "1": "OBS Virtual Camera",
+    "2": "SplitCam Virtual Camera"
+  },
+  "status": {
+    "state": "error",
+    "message": "Không nhận được hình camera. Kiểm tra camera trong ứng dụng Camera của Windows rồi đóng ứng dụng đó; bấm C thử lại hoặc V chọn video.",
+    "index": 0,
+    "backend": "Media Foundation",
+    "frames_received": 0,
+    "attempts": [
+      {
+        "index": 0,
+        "backend": "DirectShow",
+        "stage": "opening_device",
+        "error": "Camera 0 (DirectShow) không phản hồi trong thời gian cho phép",
+        "seconds": 5.22
+      },
+      {
+        "index": 0,
+        "backend": "Media Foundation",
+        "stage": "opening_device",
+        "error": "Camera 0 (Media Foundation) không phản hồi trong thời gian cho phép",
+        "seconds": 5.05
+      }
+    ]
+  }
+}

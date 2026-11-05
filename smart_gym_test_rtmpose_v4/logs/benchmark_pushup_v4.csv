@@ -1,0 +1,21 @@
+﻿Video,Nhãn gốc,Dự đoán,Bỏ sót,Báo thừa,Khớp toàn bộ
+BUTT_SINKING_00005975.mp4,pushups - butt sinking; pushups - not visible,,pushups - butt sinking; pushups - not visible,,False
+CORRECT_00000818.mp4,pushups - 90 degrees; pushups - wide,pushups - 90 degrees; pushups - fast; pushups - wide,,pushups - fast,False
+CORRECT_00102902.mp4,pushups - deep; pushups - wide,pushups - deep; pushups - wide,,,True
+CORRECT_00129299.mp4,pushups - deep; pushups - wide,pushups - 90 degrees; pushups - wide,pushups - deep,pushups - 90 degrees,False
+CORRECT_00153623.mp4,pushups - 90 degrees; pushups - shoulder-width,pushups - 90 degrees; pushups - deep; pushups - wide,pushups - shoulder-width,pushups - deep; pushups - wide,False
+CORRECT_00230080.mp4,pushups - 90 degrees; pushups - wide,pushups - 90 degrees; pushups - wide,,,True
+ELEVATED_HIPS_00003772.mp4,pushups - 90 degrees; pushups - elevated hips; pushups - wide,pushups - 90 degrees; pushups - elevated hips; pushups - shallow; pushups - wide,,pushups - shallow,False
+HAND_PLACEMENT_00171224.mp4,pushups - deep; pushups - very wide,pushups - deep; pushups - very wide,,,True
+HAND_PLACEMENT_00239633.mp4,pushups - deep; pushups - narrow,pushups - butt sinking; pushups - deep; pushups - narrow; pushups - shoulder-width,,pushups - butt sinking; pushups - shoulder-width,False
+HAND_PLACEMENT_00293157.mp4,pushups - 90 degrees; pushups - moving head; pushups - very wide,pushups - 90 degrees; pushups - very wide,pushups - moving head,,False
+HIP_ALIGNMENT_00135411.mp4,pushups - 90 degrees; pushups - butt sinking; pushups - deep; pushups - wide,pushups - 90 degrees; pushups - butt sinking; pushups - deep; pushups - wide,,,True
+HIP_ALIGNMENT_00147725.mp4,pushups - 90 degrees; pushups - elevated hips; pushups - wide,pushups - elevated hips; pushups - shallow; pushups - wide,pushups - 90 degrees,pushups - shallow,False
+HIP_ALIGNMENT_00228465.mp4,pushups - elevated hips; pushups - insufficient; pushups - wide,pushups - elevated hips; pushups - shallow; pushups - wide,pushups - insufficient,pushups - shallow,False
+HIP_ALIGNMENT_00278567.mp4,pushups - elevated hips; pushups - insufficient; pushups - shoulder-width,pushups - waiting position,pushups - elevated hips; pushups - insufficient; pushups - shoulder-width,pushups - waiting position,False
+SHALLOW_DEPTH_00001357.mp4,pushups - elevated hips; pushups - head down; pushups - insufficient; pushups - very wide,pushups - 90 degrees; pushups - elevated hips; pushups - very wide; pushups - wide,pushups - head down; pushups - insufficient,pushups - 90 degrees; pushups - wide,False
+SHALLOW_DEPTH_00111365.mp4,pushups - shallow; pushups - wide,pushups - fast; pushups - insufficient; pushups - shallow; pushups - wide,,pushups - fast; pushups - insufficient,False
+SHALLOW_DEPTH_00174803.mp4,pushups - fast; pushups - shallow; pushups - wide,pushups - fast; pushups - shallow; pushups - shoulder-width; pushups - wide,,pushups - shoulder-width,False
+SHALLOW_DEPTH_00196221.mp4,pushups - fast; pushups - narrow; pushups - shallow,pushups - butt sinking; pushups - narrow; pushups - shallow,pushups - fast,pushups - butt sinking,False
+SHALLOW_DEPTH_00294837.mp4,pushups - shallow; pushups - shoulder-width,pushups - narrow,pushups - shallow; pushups - shoulder-width,pushups - narrow,False
+WIDE_HANDS_00001834.mp4,pushups - 90 degrees; pushups - very wide,pushups - insufficient; pushups - shallow; pushups - very wide; pushups - wide,pushups - 90 degrees,pushups - insufficient; pushups - shallow; pushups - wide,False

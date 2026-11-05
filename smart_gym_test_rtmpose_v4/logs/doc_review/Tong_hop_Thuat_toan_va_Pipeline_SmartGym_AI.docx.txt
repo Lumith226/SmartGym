@@ -1,0 +1,190 @@
+HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH VIỄN THÔNG
+KHOA CÔNG NGHỆ THÔNG TIN
+─────────── ★ ───────────
+BÁO CÁO KỸ THUẬT CHUYÊN SÂU
+TỔNG HỢP KIẾN TRÚC PIPELINE VÀ CÁC THUẬT TOÁN
+TRONG HỆ THỐNG SMART GYM AI (TEST & INFERENCE)
+Phân tích chi tiết quy trình xử lý thị giác, bộ lọc động học cơ sinh học,
+phân đoạn Rep thời gian thực và mô hình ST-GCN++ V2 Qualcomm
+
+1. KIẾN TRÚC TỔNG THỂ PIPELINE THỜI GIAN THỰC
+Quy trình 6 giai đoạn: Hệ thống Smart Gym AI hoạt động theo cơ chế Pipeline phân tầng (Layered Multi-Stage Architecture). Mỗi khung hình thu nhận từ Camera hoặc tệp video kiểm thử đều đi qua 6 giai đoạn xử lý kế tiếp nhau, đảm bảo độ trễ tổng thể đạt ngưỡng thời gian thực (35 – 45 FPS trên phần cứng thông thường) nhưng vẫn giữ được tính chuẩn xác cơ sinh học tối đa.
+[Giai đoạn 1: Thu nhận & Bù sáng thích ứng]
+   └─► OpenCV Stream (Camera/Video) ──► CLAHE + Gamma Correction (Khi phòng tối < 45)
+          │
+[Giai đoạn 2: Trích xuất 17 khớp xương 2D]
+   └─► YOLOv8n-Pose (12 - 18 ms) ──► Tọa độ (x, y, confidence)
+          │
+[Giai đoạn 3: Tinh chỉnh Cơ sinh học Nâng cao (Enhanced Pose Processor)]
+   ├─► Inpainting quán tính: Dự đoán tọa độ khi khớp bị nhòe/che khuất
+   ├─► Exercise-specific Filter: Khử lỗi gối bị tay che, cùi chỏ sát thân
+   ├─► Torso-Scaled Constancy: Ép xương đùi/cẳng chân theo chiều dài thân (bất biến cự ly)
+   └─► Selective EMA Smoothing: Khử rung lắc tọa độ khớp
+          │
+[Giai đoạn 4: Bộ đếm & Phân đoạn Rep Thời gian thực (Exercise Rep Tracker)]
+   ├─► Lower-Body Gate: Khóa rep khi đứng gần chỉ thấy nửa người (CHỜ TOÀN THÂN)
+   ├─► Pre-Buffer 6 frames: Lưu mượt mà pha bắt đầu
+   ├─► Descent Score Kinematics: Điểm số gập gối + hạ hông + gập thân
+   └─► False-Start Cancellation: Tự động hủy rep ảo khi lắc người / nhún nhẹ
+          │
+          ▼ [Khi hoàn tất 1 Rep hợp lệ]
+[Giai đoạn 5: Chuẩn hóa & Đánh giá Lỗi bằng AI ST-GCN++ V2]
+   ├─► Temporal Resampling: Nội suy chuỗi biến thiên về đúng 32 frames
+   ├─► Root-Centering: Trừ tâm hông và chia tỉ lệ thân trên
+   └─► ST-GCN++ ONNX Inference (6 - 8 ms): Phân loại xác suất 4 lớp (Đúng vs 3 Lỗi sai)
+          │
+[Giai đoạn 6: Chẩn đoán Cơ sinh học & Phản hồi Đa phương thức]
+   ├─► Camera View Classifier: Phân tích góc quay (Ngang, Chính diện, Chéo 45°)
+   ├─► Biomechanical Diagnostics: Đo góc gối cực tiểu, độ đổ lưng, cảnh báo góc khuất
+   └─► Multimodal UI: Banner Popup 4 giây, Âm thanh WinSound Beep, Log CSV & JSON
+2. CÁC THUẬT TOÁN TIỀN XỬ LÝ THỊ GIÁC & TRÍCH XUẤT TƯ THẾ
+2.1. Tự động bù sáng thích ứng (Adaptive Low-Light CLAHE & Gamma)
+Vấn đề giải quyết: Trong môi trường phòng gym gia đình hoặc góc tập thiếu sáng, camera webcam thông thường cho ảnh rất tối, khiến mạng nơ-ron nhận diện khớp bị mất dấu hoặc giảm mạnh độ tin cậy. Hệ thống tích hợp thuật toán bù sáng thích ứng hai tầng:
+Nguyên lý toán học: 1. Đánh giá độ sáng trung bình kênh xám: I_mean = mean(Gray(Frame)). Nếu I_mean >= 45.0/255, giữ nguyên khung hình để tối ưu tài nguyên.
+2. Nếu I_mean < 45.0, chuyển đổi ảnh sang không gian màu LAB (Luminance, A, B).
+3. Áp dụng CLAHE (Contrast Limited Adaptive Histogram Equalization) trên kênh Luminance (L) với clipLimit = 3.0, tileGridSize = (8, 8) nhằm tăng tương phản cục bộ mà không làm cháy sáng vùng sáng.
+4. Hiệu chỉnh phi tuyến Gamma thích ứng: gamma = clip(45.0 / (I_mean + 1e-3), 1.5, 2.2). Tạo bảng tra Look-Up Table (LUT) để biến đổi kênh L trước khi hợp nhất lại sang BGR.
+2.2. Ước lượng tư thế người 2D (YOLOv8n-Pose Keypoint Estimation)
+Mô hình nền tảng: Hệ thống sử dụng mô hình YOLOv8n-Pose (Nano) được tiền huấn luyện trên tập COCO Keypoints, tối ưu hóa độ trễ suy luận chỉ còn 12 – 16 ms trên GPU Nvidia hoặc 28 – 35 ms trên CPU hiện đại.
+Dữ liệu đầu ra: Đầu ra mỗi frame là một tensor tọa độ 17 khớp: (3, 17), trong đó mỗi khớp gồm [x_norm, y_norm, confidence]. Tọa độ được chuẩn hóa về dải [0.0, 1.0] bằng cách chia cho chiều rộng (W) và chiều cao (H) khung hình. Ngưỡng hiển thị xương (conf_thresh) được tối ưu ở mức 0.22, đảm bảo người dùng lùi xa 2.5 - 3 mét vẫn bắt trọn vẹn khớp cổ chân và gối.
+3. BỘ XỬ LÝ KHUNG XƯƠNG CƠ SINH HỌC (ENHANCED POSE PROCESSOR)
+Mục đích cốt lõi: Tọa độ trích xuất thô từ camera thường xuyên bị 3 vấn đề: rung giật pixel do cảm biến, khớp bị che khuất tạm thời (occlusion), và chiều dài chi thể bị co giãn bất thường khi đổi góc quay. Module EnhancedPoseProcessor giải quyết triệt để thông qua 4 thuật toán chuyên biệt:
+3.1. Ràng buộc độ dài xương theo tỷ lệ Thân trên (Torso-Scaled Bone Constraints)
+Nguyên lý giải phẫu: Đây là thuật toán đột phá giải quyết triệt để lỗi người dùng đứng gần thì có khớp nhưng lùi xa bị mất chân. Thay vì lưu khoảng cách pixel tĩnh (vốn bị sai lệch hoàn toàn khi di chuyển cự ly), hệ thống neo độ dài các xương sinh học theo Chiều dài thân trên (Torso Length - khoảng cách trung điểm vai đến trung điểm hông):
+Công thức toán học: L_torso = ||Mid_Shoulder - Mid_Hip||_2
+Giới hạn giải phẫu tối đa được kiểm soát theo tỉ lệ cơ thể chuẩn:
+  • Xương đùi (Hip -> Knee): L_thigh <= 1.35 * L_torso
+  • Xương cẳng chân (Knee -> Ankle): L_shin <= 1.30 * L_torso
+  • Xương bắp tay (Shoulder -> Elbow): L_arm <= 1.15 * L_torso
+  • Xương cẳng tay (Elbow -> Wrist): L_forearm <= 1.10 * L_torso
+Nếu vector khoảng cách giữa 2 khớp vượt ngưỡng tối đa cho phép, khớp con sẽ được chiếu co về vị trí giải phẫu: P_child = P_parent + (vec / ||vec||) * (L_max * 0.95).
+3.2. Ngoại suy quán tính & Smart Inpainting (Temporal Momentum Extrapolation)
+Cơ chế dự báo: Khi một khớp bị mờ nhòe hoặc che khuất tạm thời (confidence < 0.25):
+  • Nếu ở các frame trước đó, khớp đã từng được theo dõi ổn định (prev_valid = True): Vị trí mới được bù đắp bằng vector quán tính vận tốc với hệ số cản: P_pred = P_prev + Velocity * 0.85; đồng thời giảm dần độ tin cậy conf = prev_conf * 0.85.
+  • Nếu khớp chưa từng xuất hiện (ví dụ người dùng vừa bước vào khung hình): Tuyệt đối KHÔNG nội suy từ tọa độ rác (0, 0), mà cho phép khớp cập nhật ngay tức thì khi đạt conf >= 0.20.
+3.3. Bộ lọc che khuất chuyên biệt theo bài tập (Exercise-Specific Occlusion Filter)
+Quy tắc cơ sinh học: Mỗi bài tập có các kiểu che khuất đặc thù trong không gian 2D:
+  • Bài Squat: Cổ tay thường bắt chéo trước ngực hoặc đặt lên đùi, che mất khớp gối. Khi khoảng cách bàn tay - đầu gối < 0.038 và vận tốc gối nhảy vọt đột ngột (> 0.035), gối được cố định theo độ dịch chuyển của hông.
+  • Bài Push-up: Khuỷu tay gập sâu sát thân bị ngực che. Vận tốc khuỷu tay được ràng buộc đồng nhịp với vai.
+  • Bài Jumping Jack: Cổ tay vung vượt mép trên camera được kẹp biên không cho nhảy về tọa độ 0.
+3.4. Chuẩn hóa không gian Root-Centering theo tâm hông (Pelvis Normalization)
+Chuẩn hóa bất biến: Để mô hình ST-GCN++ có khả năng tổng quát hóa bất biến với vị trí người đứng trong khung hình (đứng bên trái, ở giữa, đứng gần hay đứng xa), toàn bộ tọa độ 17 khớp được tịnh tiến đưa tâm hông về gốc tọa độ (0, 0) và chia tỉ lệ cho chiều dài thân trên (Torso Length):
+  X'_i = (X_i - Mid_Hip_X) / L_torso
+  Y'_i = (Y_i - Mid_Hip_Y) / L_torso
+4. BỘ ĐẾM & PHÂN ĐOẠN REP THỜI GIAN THỰC (REAL-TIME REP TRACKER)
+Vai trò: Bộ phân đoạn Rep chịu trách nhiệm cắt chính xác khoảnh khắc bắt đầu và kết thúc của từng hiệp động tác từ luồng video liên tục. Đây là phần vừa được nâng cấp toàn diện nhằm triệt tiêu hoàn toàn hiện tượng nhảy rep ảo.
+4.1. Cổng kiểm tra điều kiện toàn thân (Lower-Body Validation Gate)
+Nguyên lý bảo vệ: Đối với các bài tập đòi hỏi chuyển động chân (Squat, Jumping Jack), nếu người tập đứng quá gần và camera chỉ ghi nhận thân trên (max(conf_knee) < 0.25 hoặc max(conf_hip) < 0.25):
+  • Hệ thống lập tức khóa máy trạng thái ở chế độ: [CHỜ TOÀN THÂN].
+  • Hiển thị banner cảnh báo màu vàng cam: '⚠️ Vui lòng lùi lại 2 - 3m để camera thấy rõ từ đầu đến chân!'.
+  • Khóa triệt để việc tính toán góc gối/hông, loại bỏ 100% rep ảo khi người dùng chỉ đứng nửa người trước camera.
+4.2. Điểm số hạ người tổng hợp (Descent Score Kinematics)
+Công thức động học: Để bắt trọn cả những rep squat chuẩn, squat nông lẫn các biến thể đổ thân gù lưng (Good-Morning Squat), hệ thống xây dựng điểm số hạ người kết hợp đa chỉ số:
+  • Độ gập gối (Knee Bend): knee_bend = max(0.0, (175.0° - k_ang) / 55.0°)
+  • Độ tụt hông (Hip Drop): hip_drop = max(0.0, (hip_y - baseline_hip_y) / L_torso)
+  • Độ gập hông (Hip Bend): hip_bend = max(0.0, (170.0° - hip_ang) / 45.0°)
+  ==> Điểm số tổng hợp: descent_score = max(knee_bend, 1.5 * hip_drop, 0.8 * hip_bend)
+4.3. Ngưỡng kích hoạt Rep & Cơ chế hủy False-Start (Triệt tiêu rung lắc)
+Cơ chế chuyển trạng thái: Bảng quy tắc điều khiển máy trạng thái hữu hạn (Finite State Machine - FSM):
+
+4.4. Lấy mẫu thời gian đồng nhất (Temporal Resampling 32 frames)
+Chuẩn hóa chuỗi thời gian: Tốc độ tập luyện của mỗi người là khác nhau: một rep có thể kéo dài từ 16 frames (tập nhanh) đến 75 frames (tập chậm). Để mạng ST-GCN++ xử lý ổn định, chuỗi frames thô được lấy mẫu đồng đều (Uniform Resampling) hoặc nội suy tuyến tính về đúng chuẩn T = 32 frames:
+  indices = np.linspace(0, total_frames - 1, 32, dtype=int)
+Tensor thu được có kích thước cố định (C=3, T=32, V=17, M=1) sẵn sàng cho suy luận ONNX.
+5. MÔ HÌNH HỌC SÂU ĐỒ THỊ KHÔNG-THỜI GIAN (ST-GCN++ V2 QUALCOMM)
+Kiến trúc mô hình: Mô hình cốt lõi dùng để phân loại lỗi sai kỹ thuật là phiên bản nâng cấp ST-GCN++ V2 (Spatio-Temporal Graph Convolutional Network Plus Plus) được huấn luyện trên tập dữ liệu chuẩn công nghiệp Qualcomm QEVD-FIT-300k.
+5.1. Cấu trúc khối ST-GCN Block
+Nguyên lý 2 chiều: Mỗi khối ST-GCN++ bao gồm hai thành phần tích chập song song:
+Công thức mạng: 1. Tích chập Đồ thị Không gian (Spatial Graph Convolution - GCN):
+   Biểu diễn 17 khớp xương người thành đồ thị G = (V, E). Ma trận kề tự thích ứng A_k được kết hợp giữa ma trận liên kết xương tự nhiên A_nat và ma trận trọng số học được B_learn:
+   H_spatial = sum_k ( (A_k + B_k) * X * W_k )
+   Điều này cho phép mô hình không chỉ nắm bắt mối liên hệ giữa các khớp nối liền nhau (đùi - gối - cổ chân) mà còn tự học tương quan giữa các khớp không nối liền (ví dụ: tay trái và gối phải khi giữ thăng bằng).
+
+2. Tích chập Thời gian Đa quy mô (Multi-Scale Temporal Convolution - MS-TCN):
+   Sử dụng các nhánh tích chập 1D với kích thước kernel khác nhau (kernel = 3, 5 kết hợp dilated convolution) để nắm bắt đặc trưng chuyển động ở cả nhịp nhanh, nhịp chậm và pha đổi hướng.
+
+3. Nhánh tắt dư (Residual Shortcut Connections) & Dropout (p = 0.5):
+   Giúp thông tin gradient lan truyền sâu mà không bị suy hao, tăng độ ổn định của mạng.
+5.2. Danh mục 4 mô hình V2 và các lớp phân loại kỹ thuật
+
+6. CHẨN ĐOÁN CƠ SINH HỌC & PHẢN HỒI ĐA PHƯƠNG THỨC
+6.1. Nhận diện góc quay Camera thời gian thực (Camera View Estimator)
+Thuật toán hình học: Góc đặt camera ảnh hưởng trực tiếp đến khả năng quan sát của mắt thần AI (ví dụ: góc quay chính diện không thể nhìn thấy lưng gù; góc quay ngang khó quan sát trục gối chụm). Hệ thống tự động phân loại góc quay mỗi frame:
+  • Chênh lệch vai dx_sh = |X_vai_T - X_vai_P|, chênh lệch hông dx_hip = |X_hong_T - X_hong_P|
+  • Nếu dx_sh < 0.11 VÀ dx_hip < 0.09 ==> QUAY NGANG (SIDE VIEW).
+  • Nếu dx_sh > 0.18 VÀ dx_hip > 0.12 ==> CHÍNH DIỆN (FRONT VIEW).
+  • Còn lại ==> GÓC CHÉO 45° (OBLIQUE VIEW).
+6.2. Cảnh báo góc khuất & Hướng dẫn HLV ảo (Coach Feedback)
+Logic kết hợp: Kết hợp giữa dự đoán của mạng ST-GCN++ và góc quay camera, hệ thống sinh lời nhắc thông minh:
+  • Nếu người tập thực hiện Squat ở góc chính diện (FRONT VIEW): Hệ thống kèm lời nhắc: '💡 Lưu ý: Góc chính diện khó quan sát độ sâu hông và lưng. Hãy chuyển sang góc nghiêng 45° hoặc quay ngang để chấm điểm lưng chuẩn nhất!'.
+  • Nếu người tập thực hiện Push-up ở góc quay ngang: Hệ thống lưu ý về khoảng cách đặt tay.
+6.3. Phản hồi đa phương thức (Âm thanh & Giao diện Modal)
+Đặc tả giao diện: 1. Phản hồi âm thanh đa luồng (WinSound Asynchronous Audio):
+   • ĐÚNG KỸ THUẬT: Phát chuỗi nốt bổng vui tươi (Beep 1046 Hz trong 130ms -> Beep 1318 Hz trong 220ms).
+   • CÓ LỖI SAI: Phát chuỗi nốt trầm cảnh báo (Beep 440 Hz trong 180ms -> Beep 349 Hz trong 280ms).
+   Âm thanh được chạy trong Worker Thread độc lập (`threading.Thread(daemon=True)`), không gây block UI hình ảnh.
+
+2. Giao diện trực quan nổi bật (Visual Alert Modal):
+   • Bật khung thông báo mờ trung tâm màn hình kích thước lớn trong đúng 4.0 giây.
+   • Thanh tiến trình đếm ngược (countdown bar) co ngắn dần về 0.
+   • Hiển thị chi tiết tên lỗi bằng tiếng Việt, hướng dẫn sửa từ HLV, độ tin cậy phần trăm và độ trễ ONNX ms.
+   • Tự động ghi lại lịch sử phân tích vào 2 file log: `video_test_history.csv` và `benchmark_test_log.json`.
+7. BẢNG TỔNG KẾT TOÀN BỘ CÁC THUẬT TOÁN & ĐỘ PHỨC TẠP
+
+📌 TÓM TẮT MỤC TIÊU CỦA TÀI LIỆU
+Báo cáo này tổng hợp đầy đủ và hệ thống hóa toàn bộ các thuật toán, công thức toán học, tham số cơ sinh học và quy trình thực thi (Pipeline) được triển khai trong phân hệ kiểm thử (Testing & Inference Pipeline) của ứng dụng Smart Gym Camera App. Tài liệu giải thích rõ cơ chế phối hợp đa tầng giữa: Thị giác máy tính (YOLOv8-Pose), Bộ lọc cơ sinh học (Kinematics), Máy trạng thái hữu hạn (FSM Rep Tracker) và Mạng đồ thị tích chập không-thời gian (ST-GCN++ V2).
+Trạng thái FSM | Điều kiện kích hoạt | Hành vi hệ thống | Mục đích cơ học
+READY
+(Chờ bài tập) | descent_score > 0.32
+VÀ (k_ang < 162° HOẶC hip_drop > 0.12) | Chuyển sang IN_REP.
+Lấy 6 frame pre-buffer. | Loại bỏ hoàn toàn rung lắc, dồn trọng tâm khi đứng yên.
+IN_REP
+(Đang thực hiện) | Cập nhật liên tục:
+min_knee_angle
+max_descent_score
+max_hip_drop | Thu thập frame chuỗi.
+Giới hạn tối đa 90 frames (~3 giây). | Ghi nhận độ sâu cực đại và biên độ chuyển động của hiệp.
+HOÀN THÀNH
+(Finish Rep) | 1. Đạt độ sâu: score >= 0.42 HOẶC min_ang <= 150° HOẶC hip_drop >= 0.18
+2. Đã đứng thẳng lại (k_ang >= 158°)
+3. Thời lượng >= 16 frames (>0.55s) | Rep_Count += 1.
+Đóng gói chuỗi frames.
+Kích hoạt AI ST-GCN++. | Chỉ công nhận rep khi có chuyển động đi xuống và đứng lên hoàn chỉnh.
+HỦY REP ẢO
+(False-Start Reset) | Người tập đã đứng thẳng lại (k_ang >= 160°) nhưng CHƯA TỪNG đạt độ sâu tối thiểu | Hủy chuỗi frame.
+Quay về READY.
+KHÔNG gọi mô hình AI. | Triệt tiêu 100% hiện tượng nhún nhẹ, cúi người nhầm được tính là rep.
+Bài tập | File Model ONNX | Độ chính xác (Val Acc) | Các lớp phân loại (1 Đúng + 3 Lỗi sai)
+Squat V2
+(Gánh đùi) | best_stgcnpp_squat_v2.onnx | 94.2% | • CORRECT (Đúng chuẩn)
+• BACK_ROUNDING (Gù lưng/Đổ thân)
+• KNEE_ALIGNMENT (Sai trục gối/Hẹp)
+• SHALLOW_DEPTH (Xuống nông)
+Push-up V2
+(Chống đẩy) | best_stgcnpp_pushup_v2.onnx | 96.5% | • CORRECT (Đúng chuẩn)
+• HIP_ALIGNMENT (Võng/Lệch hông)
+• HAND_PLACEMENT (Tay quá rộng/hẹp)
+• SHALLOW_DEPTH (Chống đẩy nửa vời)
+Jump Jack V2
+(Bật nhảy) | best_stgcnpp_jumpjack_v2.onnx | 98.1% | • CORRECT (Đúng chuẩn)
+• ARMS_INCOMPLETE (Tay chưa tới đỉnh)
+• LEGS_TOO_NARROW (Chân mở quá hẹp)
+• NOT_JUMPING (Không bật nhảy/Lệch nhịp)
+Sit-up / Crunch
+(Gập bụng) | best_stgcnpp_situp_v2.onnx | 92.8% | • CORRECT (Đúng chuẩn 90°)
+• SHALLOW_RANGE (Gập chưa tới 90°)
+• NOT_RAISING_HIPS (Chưa nâng hông)
+• HEAD_STRAIN (Gồng bẻ đốt sống cổ)
+Tên thuật toán / Kỹ thuật | Module thực thi | Loại thuật toán | Độ trễ (Latency) | Mục đích then chốt
+Adaptive CLAHE + Gamma | app.py | Computer Vision | ~ 1.2 ms | Tự động bù sáng phòng tối (<45/255) cho camera.
+YOLOv8n-Pose | app.py / YOLO | Deep Learning (CNN) | 12 - 16 ms | Trích xuất tọa độ 17 khớp COCO thời gian thực.
+Torso-Scaled Bone Constraints | enhanced_pose_processor.py | Biomechanics / Kinematics | < 0.05 ms | Khóa tỷ lệ xương đùi/chân theo thân, triệt tiêu mất chân khi lùi xa.
+Momentum Inpainting | enhanced_pose_processor.py | Kinematics / Dynamics | < 0.02 ms | Dự đoán phục hồi khớp khi bị mờ nhòe, che khuất.
+Root-Centering Normalization | enhanced_pose_processor.py | Spatial Transform | < 0.02 ms | Đưa tâm hông về gốc (0,0) và chia tỉ lệ thân trên.
+Lower-Body Gate | rep_tracker.py | Rule / Safety Gate | < 0.01 ms | Chuyển 'CHỜ TOÀN THÂN', khóa rep ảo khi chỉ đứng nửa người.
+Descent Score Kinematics | rep_tracker.py | Biomechanical Vector | < 0.02 ms | Tính độ hạ hông và gập gối để nhận diện bắt đầu rep.
+False-Start Cancellation | rep_tracker.py | Finite State Machine | < 0.01 ms | Hủy chuyển động nhún nhẹ/lắc người, triệt tiêu 100% rep ảo.
+Temporal Resampling (32f) | rep_tracker.py / analyzer | Interpolation | < 0.10 ms | Nội suy chuỗi khung xương bất kỳ về đúng 32 frames.
+Camera View Estimator | app.py / analyzer | Geometric Analysis | < 0.01 ms | Phân loại góc quay: Chính diện, Ngang, Chéo 45°.
+ST-GCN++ V2 Model | onnx_gym_analyzer.py | Graph Neural Network | 6 - 8 ms | Phân loại độ chuẩn xác và bắt 3 lỗi kỹ thuật động tác.
+Async Audio & Visual Modal | app.py / WinSound | Multimodal UI / Thread | 0 ms (Non-block) | Phát âm thanh trầm bổng và popup thông báo trong 4s.

@@ -1,0 +1,88 @@
+# BÁO CÁO KỸ THUẬT: PHÂN HỆ AI ĐÁNH GIÁ KỸ THUẬT SQUAT THỜI GIAN THỰC SỬ DỤNG MẠNG ĐỒ THỊ ST-GCN++
+
+---
+
+## 1. TÓM TẮT DỰ ÁN (EXECUTIVE SUMMARY)
+
+Phân hệ AI chịu trách nhiệm phát hiện và đánh giá tự động chất lượng động tác **Squat (Gánh đùi)** theo thời gian thực nhằm cảnh báo các sai phạm kỹ thuật nguy hiểm, giảm thiểu nguy cơ chấn thương cột sống và khớp gối cho người tập gym.
+
+Hệ thống được xây dựng theo **Kiến trúc 2 tầng (Two-Stage Pipeline)**:
+1. **Tầng 1 (Spatial Pose Estimation):** Sử dụng mô hình **YOLOv8n-Pose** để trích xuất tọa độ 17 điểm khớp xương chuẩn COCO theo thời gian thực từ luồng video.
+2. **Tầng 2 (Spatio-Temporal Action Assessment):** Sử dụng mạng tích chập đồ thị cải tiến **ST-GCN++ (Spatio-Temporal Graph Convolutional Network Plus Plus)** độc lập (Pure PyTorch) để phân loại động tác thành 4 lớp kỹ thuật:
+   * **`CORRECT` (0):** Động tác đúng chuẩn kỹ thuật y khoa.
+   * **`BACK_ROUNDING` (1):** Lỗi gù lưng / đổ thân người quá mức về phía trước.
+   * **`KNEE_VALGUS` (2):** Lỗi chụm hai đầu gối vào trong khi hạ hoặc nâng tạ.
+   * **`SHALLOW_DEPTH` (3):** Lỗi xuống chưa đủ độ sâu song song.
+
+### Kết quả then chốt đạt được:
+* **Tập dữ liệu thực nghiệm:** **1,550 reps Squat người thật** được trích xuất và phân đoạn từ bộ dữ liệu benchmark quốc tế **RepCount** (CVPR 2022).
+* **Độ chính xác kiểm thử (Test Accuracy):** **80.26%** trên 233 reps kiểm thử độc lập chưa từng thấy trong quá trình học.
+* **Kích thước mô hình:** **4.25 MB** (1,114,156 tham số), cực kỳ tối ưu cho việc deploy lên backend API.
+
+---
+
+## 2. PHƯƠNG PHÁP LUẬN DỮ LIỆU (DATA METHODOLOGY)
+
+Để giải quyết bài toán thiếu dữ liệu gán nhãn đúng/sai trong thị giác máy tính thể thao, dự án đã thiết kế giải pháp **Học bán giám sát (Weakly Supervised Learning) kết hợp Tri thức Cơ sinh học**:
+
+```mermaid
+flowchart LR
+    A["Kaggle squat_dataset<br>(47,442 dòng góc cơ sinh học)"] -->|Phân tích ranh giới quyết định| B["Bộ Ngưỡng Chuẩn (config_thresholds.json)<br>Gối: 62.9° | Thân: 104.9° | Lệch gối: 0.1007"]
+    C["RepCountA Video Dataset<br>(134 Video Squat người thật)"] -->|YOLOv8-Pose + Timestamp CSV| D["1,550 Chuỗi 17 Khớp Xương (3, T_raw, 17)"]
+    B & D -->|Gán nhãn Rule-based + Resample 32 frames| E["Dataset Đóng gói (data_joint.npy & label.pkl)<br>Shape: (1550, 3, 32, 17)"]
+    E -->|Huấn luyện với Class Weights| F["Mô hình ST-GCN++"]
+```
+
+### 2.1. Xác định Ngưỡng Chuẩn từ Tri thức Cơ sinh học (`squat_dataset`)
+Phân tích thống kê trên 47,442 khung hình của tập dữ liệu Kaggle để tìm ranh giới quyết định (*Decision Boundary*) giữa lớp Đúng (`Correct`) và các lớp Sai kỹ thuật:
+* **Ngưỡng độ sâu (Shallow Depth):** Trung vị góc gối lớp Đúng ($53.9^\circ$) so với lớp Nông ($71.9^\circ$) $\rightarrow$ Ngưỡng phân định: **$62.91^\circ$**.
+* **Ngưỡng độ đổ thân (Back Rounding / Lean):** Trung vị góc nghiêng thân lớp Đúng ($98.9^\circ$) so với lớp Gù lưng ($111.0^\circ$) $\rightarrow$ Ngưỡng phân định: **$104.91^\circ$**.
+* **Ngưỡng chụm gối (Knee Valgus):** Trung vị độ lệch ngang lớp Đúng ($0.0824$) so với lớp Chụm gối ($0.1191$) $\rightarrow$ Ngưỡng phân định: **$0.1007$**.
+
+### 2.2. Trích xuất và Gán nhãn trên 1,550 Reps Thực tế (`RepCountA`)
+* Sử dụng file annotation (`train.csv`, `valid.csv`, `test.csv`) xác định chính xác từng cặp khung hình bắt đầu và kết thúc của từng rep: $[L_1, L_2], [L_3, L_4], \dots$ trên 134 video.
+* Áp dụng YOLOv8-Pose để thu thập tọa độ $(x, y, \text{conf})$ của 17 điểm khớp COCO.
+* Áp dụng thuật toán nội suy thời gian (*Uniform Temporal Sampling*) đưa toàn bộ các rep về kích thước cố định **$T = 32$ frames**.
+
+#### Thống kê phân phối 1,550 reps thu được:
+| Mã nhãn | Tên lớp kỹ thuật | Số lượng Reps | Tỷ lệ (%) |
+| :---: | :--- | :---: | :---: |
+| **0** | **`CORRECT`** (Đúng chuẩn) | 355 reps | 22.9% |
+| **1** | **`BACK_ROUNDING`** (Gù lưng / Đổ thân) | 30 reps | 1.9% |
+| **2** | **`KNEE_VALGUS`** (Chụm gối) | 619 reps | 39.9% |
+| **3** | **`SHALLOW_DEPTH`** (Xuống nông) | 546 reps | 35.2% |
+| **TỔNG** | | **1,550 reps** | **100%** |
+
+---
+
+
+## 3. KẾT QUẢ THỰC NGHIỆM VÀ ĐÁNH GIÁ
+
+### 3.1. Quá trình Huấn luyện (Training Process)
+* **Số Epochs:** 60 | **Batch size:** 16 | **Optimizer:** AdamW ($lr = 10^{-3}$, weight decay $= 10^{-4}$).
+* **Learning Rate Scheduler:** Cosine Annealing LR ($T_{\max} = 60$, $\eta_{\min} = 10^{-5}$).
+* **Kỹ thuật xử lý mất cân bằng dữ liệu (Class Imbalance):** Áp dụng trọng số nghịch đảo tần suất trong hàm mất mát CrossEntropyLoss:
+  $$w = [1.09,\ \mathbf{12.92},\ 0.63,\ 0.71]$$
+* **Độ chính xác Validation cao nhất:** **90.52%**.
+
+### 3.2. Biểu đồ Đánh giá Thực nghiệm
+![Loss Curve và Accuracy](stgcn_squat_project/outputs/loss_curve.png)
+
+![Ma trận nhầm lẫn](stgcn_squat_project/outputs/confusion_matrix.png)
+
+### 3.3. Đánh giá chi tiết trên Tập Kiểm thử độc lập (Test Set - 233 reps)
+$$\text{Overall Accuracy} = \mathbf{80.26\%} \quad | \quad \text{Weighted F1-Score} = \mathbf{0.8043}$$
+
+| Lớp Kỹ thuật | Precision | Recall | F1-Score | Số lượng mẫu Test |
+| :--- | :---: | :---: | :---: | :---: |
+| **`CORRECT` (Đúng chuẩn)** | 70.0% | 79.3% | 0.74 | 53 |
+| **`BACK_ROUNDING` (Gù lưng)** | 20.0% | 20.0% | 0.20 | 5 |
+| **`KNEE_VALGUS` (Chụm gối)** | 82.1% | 83.9% | 0.83 | 93 |
+| **`SHALLOW_DEPTH` (Xuống nông)** | 90.4% | 80.5% | 0.85 | 82 |
+
+#### Phân tích chuyên sâu kết quả:
+* **Lỗi Xuống nông ($F_1 = 0.85$):** Đạt độ chuẩn xác cao nhất ($90.4\%$) do biên độ hạ hông và góc gối thể hiện sự biến thiên rất rõ nét trên chuỗi 32 frames.
+* **Lỗi Chụm gối ($F_1 = 0.83$):** Mô hình nhận diện cực kỳ nhạy bén nhờ ma trận thích ứng $A$ phát hiện nhanh sự co hẹp khoảng cách $X$ giữa 2 gối.
+* **Lỗi Gù lưng ($F_1 = 0.20$):** Số lượng mẫu test ít ($5$ mẫu) và hạn chế góc nhìn 2D (video quay trực diện làm mất thông tin chiều sâu $Z$ của độ uốn cột sống). Đây là giới hạn tự nhiên đã được dự liệu trước và có thể khắc phục bằng cách đặt camera ở góc nghiêng $45^\circ$.
+
+---

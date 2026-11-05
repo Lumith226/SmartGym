@@ -1,0 +1,164 @@
+TỔNG QUAN NÂNG CẤP: SO SÁNH VERSION 1 VÀ VERSION 2
+Phiên bản SmartGym Version 2 là bước chuyển đổi mang tính đột phá từ một nguyên mẫu thử nghiệm đơn bài tập (Squat) sang một hệ sinh thái phân tích thể hình đa động tác toàn diện, ứng dụng nguồn dữ liệu chuẩn quốc tế Qualcomm QEVD-FIT-300K và các cải tiến cơ sinh học chuyên sâu:
+
+CHƯƠNG 1: NHỮNG HẠN CHẾ CỐT LÕI CỦA VERSION 1 
+Trong Version 1, hệ thống đã bước đầu chứng minh tính khả thi của việc ứng dụng mạng nơ-ron tích chập đồ thị không-thời gian (ST-GCN++) độc lập trên nền PyTorch thuần để đánh giá kỹ thuật Squat. Tuy nhiên, qua quá trình kiểm thử thực tế và triển khai thực nghiệm, nhóm nghiên cứu đã phát hiện các 'điểm nghẽn' (bottlenecks) mang tính cấu trúc:
+1.1. Hạn chế về Quy mô Dữ liệu và Phương pháp Gán nhãn Giả định
+Trong Version 1, dữ liệu huấn luyện phụ thuộc hoàn toàn vào tập con RepCountA (134 video, 1,550 reps). Để có nhãn huấn luyện, nhóm phải dùng phương pháp Weakly Supervised Learning: phân tích thống kê 47,442 khung hình của một tập dữ liệu Kaggle để đặt ra 3 ngưỡng heuristic cố định: Ngưỡng gối = 62.91°, Ngưỡng thân = 104.91°, Ngưỡng lệch gối = 0.1007.
+Hệ quả tiêu cực: Các góc đo trên hình ảnh 2D bị bóp méo nghiêm trọng khi người tập đứng ở góc chéo hoặc khi góc đặt camera thay đổi độ cao, dẫn đến việc gán nhãn tự động bị sai lệch (Label Noise). Đồng thời, tập dữ liệu bị mất cân bằng cực đoan: Lớp BACK_ROUNDING chỉ chiếm vỏn vẹn 1.9% (30 reps), buộc phải nhân trọng số phạt lên gấp ~13 lần, gây bất ổn định khi tối ưu hóa gradient.
+1.2. Hạn chế của Bộ đếm Rep FSM Đơn biến (Single-Variable FSM)
+Bộ đếm rep trong Version 1 sử dụng máy trạng thái hữu hạn 4 bước: STANDING → DESCENDING → BOTTOM → ASCENDING. Điều kiện kích hoạt trạng thái đáy (BOTTOM) bị trói buộc cứng vào góc gối: θ_knee < 95° (hoặc < 130°). Khi người tập mắc lỗi Squat nông (Shallow Depth) chỉ hạ đến 142°, hoặc lỗi Cúi lưng (Back Rounding) gối giữ thẳng 157°, điều kiện góc gối không bao giờ thỏa mãn. Kết quả là FSM không ghi nhận rep nào (0 rep), hệ thống bị 'đóng băng' và không phát ra bất kỳ cảnh báo sửa lỗi nào.
+1.3. Nhạy cảm với Hiện tượng Che khuất và Môi trường Thiếu sáng
+Trong phòng gym thực tế hoặc góc quay gia đình, ánh sáng thường yếu. YOLOv8-Pose dễ bị tụt độ tin cậy (conf < 0.35), khiến các khớp bàn chân, đầu gối bị mất dấu hoặc gán tọa độ (0, 0). Khi cẳng tay hoặc tạ che khuất đầu gối ở đáy rep, khớp gối bị nhảy vọt ra ngoài cơ thể (outlier). Do Version 1 thiếu cơ chế ràng buộc cơ sinh học giải phẫu, các tọa độ rác này đi thẳng vào ST-GCN++, làm đứt gãy ma trận kề A và dẫn đến phán đoán sai lệch hoàn toàn.
+CHƯƠNG 2: BỘ DỮ LIỆU CHUẨN QUỐC TẾ QUALCOMM QEVD-FIT-300K VÀ PHÂN CHIA DỮ LIỆU V2
+Để giải quyết triệt để bài toán thiếu dữ liệu chất lượng cao, Version 2 chuyển đổi toàn bộ sang bộ dữ liệu benchmark quốc tế Qualcomm QEVD-FIT-300K (Qualcomm Edge Vision Dataset for Fitness).
+2.1. Đặc điểm Bộ Dữ liệu Qualcomm QEVD-FIT-300K
+Bộ dữ liệu được thu thập trong môi trường đa dạng (phòng gym thương mại, nhà ở, ngoài trời), đa góc quay (chính diện, quay ngang 90°, quay chéo 45°, quay từ trên cao/dưới thấp). Đặc biệt, mỗi bài tập đều được gắn nhãn đa thuộc tính (fine-grained labels) bởi các huấn luyện viên thể hình chuyên nghiệp (Certified Personal Trainers), phản ánh chính xác các lỗi sai giải phẫu học thực tế.
+2.2. Phân loại 4 Bài tập & Hệ thống Nhãn Chuẩn (Taxonomy V2)
+2.3. Quy mô Dữ liệu & Phương pháp Phân chia Huấn luyện (Stratified 70/15/15)
+Từ hàng trăm nghìn khung hình của Qualcomm, hệ thống trích xuất tổng cộng 11,260 chuỗi bài tập hoàn chỉnh (chuẩn hóa T = 32 khung hình). Dữ liệu được phân chia theo phương pháp Stratified Split (Phân tầng ngẫu nhiên, random_state=42) với tỷ lệ chuẩn 70% Train – 15% Validation – 15% Test:
+
+CHƯƠNG 3: ĐỔI MỚI KIẾN TRÚC & PIPELINE TIỀN XỬ LÝ CƠ SINH HỌC (EnhancedPoseProcessor)
+Trong các hệ thống thị giác máy tính truyền thống, người ta thường đưa trực tiếp tọa độ khớp xương từ mô hình nhận diện tư thế (như YOLOv8-Pose hay MediaPipe) vào mạng phân loại hành động. Tuy nhiên, trong môi trường phòng gym thực tế, cách làm này bộc lộ những sai số rất lớn.
+Bản chất vấn đề: YOLOv8-Pose chỉ là mô hình 'nhìn từng bức ảnh tĩnh độc lập', nó hoàn toàn không có khái niệm về thời gian, cơ bắp hay giải phẫu học cơ thể người. Khi người tập cử động nhanh làm mờ ảnh, ánh sáng bị tối hoặc các chi thể che khuất nhau, YOLOv8 sẽ đoán mò hoặc xuất ra các tọa độ khớp bị nhảy vọt ra ngoài không gian. Ngược lại, mạng nơ-ron ST-GCN++ lại học dựa trên sự liên kết giữa các xương. Nếu đưa dữ liệu thô vào, ST-GCN++ sẽ nhìn thấy một bộ xương bị 'biến dạng quái dị', dẫn đến việc phán đoán sai lệch hoàn toàn. Bộ tiền xử lý EnhancedPoseProcessor đóng vai trò như một 'màng lọc giải phẫu học' nắn chỉnh và làm sạch khung xương trước khi nạp vào AI.
+3.1. Cải tiến 1: Khử Che khuất Đặc thù & Làm mượt Động học EMA (alpha = 0.75)
+• Vấn đề thực tế: Camera webcam luôn có nhiễu hạt cảm biến (sensor noise). Một người đứng yên tuyệt đối nhưng tọa độ các khớp xương vẫn bị rung giật nhẹ từ 1 đến 3 pixel qua lại giữa các khung hình liên tiếp (hiện tượng Jitter). Rung giật này làm đạo hàm vận tốc bị nhiễu loạn. Đồng thời, cẳng tay hay che khuất đầu gối ở đáy rep squat.
+• Cơ chế giải quyết: Áp dụng bộ lọc Exponential Moving Average (EMA): P^(t) = alpha * P_mới + (1 - alpha) * P_cũ.
+• Giải thích con số alpha = 0.75: Nếu chọn alpha = 1.0 thì giữ nguyên rung lắc camera. Nếu chọn alpha quá nhỏ (0.2 ~ 0.3) thì khung xương bị chậm pha nghiêm trọng (người ngoài đời đã đứng dậy nhưng khung xương AI vẫn lơ lửng ở đáy rep). Con số alpha = 0.75 (lấy 75% tín hiệu mới và 25% quán tính cũ) là điểm ngọt thực nghiệm: vừa triệt tiêu 100% hiện tượng vi rung giật pixel, vừa giữ độ trễ dưới 1 khung hình (< 33 ms), đảm bảo phản hồi tức thì.
+3.2. Cải tiến 2: Bù Khớp theo Vận tốc Quán tính (Inertial Velocity Inpainting: c < 0.35, gamma = 0.85)
+• Vấn đề thực tế: Khi chi thể bị che khuất hoặc vào góc tối, YOLOv8 gán tọa độ (0, 0). Trong Version 1, điều này làm khớp bị 'dịch chuyển tức thời' về góc màn hình, xé toạc cấu trúc đồ thị không gian của ST-GCN++.
+• Cơ sở vật lý: Dựa trên Định luật 1 Newton (Định luật Quán tính): Cơ thể người có khối lượng, không thể biến mất hay dịch chuyển tức thời. Vị trí tiếp theo phải tiếp tục chuyển động theo hướng quán tính: P_hat^(t) = P^(t-1) + v^(t-1) * gamma.
+• Giải thích con số c < 0.35 và gamma = 0.85: Khi độ tin cậy c < 0.35, xác suất YOLO đoán mò hoặc bắt nhầm vật thể nền (bánh tạ, tường) là hơn 70%, nên ta chủ động ngắt để dùng quán tính. Hệ số suy giảm vận tốc gamma = 0.85 đóng vai trò như 'lực cản ma sát ảo', giúp khớp giảm tốc từ từ thay vì bị phóng bay ra vô tận nếu để gamma = 1.0.
+3.3. Cải tiến 3: Ràng buộc Chiều dài Xương Giải phẫu Cố định (L <= 1.25 * L_ref)
+• Vấn đề thực tế: Đôi khi YOLO bắt nhầm khớp cổ chân của người tập sang chân của người đi ngang phía sau, khiến cẳng chân bị 'kéo dài ngoằng' cả mét.
+• Cơ sở hình học & giải phẫu: Xương người là các vật thể rắn có độ dài cố định. Theo định lý chiếu phối cảnh (Perspective Projection), khi đoạn xương xoay nghiêng thì hình chiếu của nó trên ảnh 2D chỉ có thể ngắn lại (Foreshortening), tuyệt đối không bao giờ có thể tự dài ra được.
+• Giải thích con số 1.25: Đặt 1.0 (100%) là quá khắt khe vì YOLO định vị pixel có sai số tự nhiên khoảng +-10% đến 15%, đặt 1.0 sẽ cắt nhầm khớp đúng. Đặt lỏng như 2.0 (200%) thì khớp đã văng quá xa. Ngưỡng 1.25 (125%) cho phép dung sai quang học 25%, nhưng chặn đứng 100% các trường hợp khớp bị văng rác ra ngoài cơ thể. Khi vượt quá 1.25 L_ref, thuật toán kéo ngược khớp về ranh giới an toàn 1.15 L_ref dọc theo vector xương.
+3.4. Cải tiến 4: Chuẩn hóa Tâm Hông (Root-Centering) & Tỷ lệ Thân trên (Torso Scaling)
+• Vấn đề thực tế: Người cao 1m50 khác người 1m90; người đứng gần to đùng, người đứng xa bé xíu. Nếu để tọa độ pixel thô, AI sẽ nhầm tưởng hai người đang làm hai động tác khác nhau.
+• Cơ chế chuẩn hóa: Tịnh tiến toàn bộ 17 khớp về gốc tọa độ Tâm Hông (Mid-Hip): P_rel = P - P_root. Trong cơ sinh học, hông là trung tâm khối lượng (Center of Mass). Sau đó chia cho Chiều dài Thân trên (s_torso - khoảng cách vai đến hông). Chiều dài thân trên là đoạn xương cứng cáp, ít bị co gập nhất khi tập gym.
+• Ý nghĩa trực quan: Toàn bộ cơ thể được đưa về một hệ tọa độ không thứ nguyên (dimensionless). Đứng gần hay đứng xa camera, người cao hay người thấp, sau khi chuẩn hóa thì hình dạng chuyển động đều tương đương nhau 100%, giúp mạng ST-GCN++ chỉ tập trung học đúng kỹ thuật động tác.
+3.5. Nhận diện Góc quay Camera Tự động (Camera View-Aware Detection & Gating)
+• Vấn đề thực tế: Ảnh 2D bị mất chiều sâu trục Z. Khi người tập quay ngang 90° (Side View), hai đầu gối và hai bàn chân bị chiếu chồng lấn lên nhau. Một người dù đứng mở chân rộng bằng vai đúng chuẩn, nhưng nhìn từ góc ngang thì khoảng cách giữa 2 chân trên ảnh gần như bằng 0. Ở Version 1, hệ thống máy móc báo lỗi 'chân quá hẹp' hoặc 'chụm gối', gây ức chế cho người tập.
+• Cơ chế giải quyết: Đo tỷ lệ độ mở chiều ngang giữa hai vai (|x_vai_trái - x_vai_phải|) và hai hông (|x_hông_trái - x_hông_phải|). Tỷ lệ < 0.15 là Góc quay ngang (SIDE); > 0.35 là Góc chính diện (FRONT); nằm giữa là Góc chéo 45° (DIAGONAL). Khi phát hiện góc quay ngang (SIDE), hệ thống tự động vô hiệu hóa các phán đoán lỗi thuộc mặt phẳng chính diện (bề rộng chân, khoảng cách tay), tập trung vào đo độ sâu hạ hông và độ uốn cột sống (quan sát rõ nhất từ góc ngang).
+3.6. Xử lý Thiếu sáng Tự động (Adaptive Low-Light Enhancement: Y_bar < 45)
+• Vấn đề thực tế: Tập luyện buổi tối trong phòng mờ hoặc ngược sáng. Nếu tăng sáng tuyến tính thông thường (I' = I + C), bóng đèn và trần nhà sẽ bị 'cháy trắng' lóa mắt, trong khi bóng tối vẫn bị bết dính mất chi tiết.
+• Cơ chế 2 pha: (1) Cân bằng sáng cục bộ CLAHE trên kênh Luminance (L) trong không gian màu CIELAB với lưới 8x8 ô và clipLimit=3.0, làm sáng rõ vùng tối mà không chói vùng sáng. (2) Hiệu chỉnh Gamma thích ứng: gamma = min(2.2, max(1.5, 45 / (Y_bar + 1e-3))).
+• Ý nghĩa con số: Ngưỡng 45/255 là mức báo động thiếu sáng nghiêm trọng (2 video test thực tế đạt 16.9 và 19.7). Video càng tối, hệ số gamma càng lớn để kích sáng phi tuyến. Trần 2.2 ngăn không cho ảnh bị vỡ hạt. Kết quả nâng độ sáng từ 16.9 lên 103.2/255, tăng độ tin cậy bắt khớp YOLOv8 từ 0.84 lên 0.90.
+CHƯƠNG 4: NÂNG CẤP BỘ ĐẾM REP ĐỘNG HỌC HỖN HỢP (ExerciseRepTracker)
+Bộ đếm rep đóng vai trò là 'người bấm giờ' – xác định chính xác thời điểm một rep bắt đầu, chạm đáy và kết thúc để cắt trích đoạn video chuyển cho mô hình AI đánh giá.
+4.1. Tại sao Version 1 bị liệt 0 Rep và Cách khắc phục bằng Descent Score
+Sai lầm của Version 1: FSM cũ chỉ nhìn góc gối và đặt điều kiện cứng < 130°. Nhưng khi squat nông người tập chỉ hạ gối tới 142°, khi cúi lưng gù người gối giữ thẳng 157°. Do không bao giờ thỏa mãn < 130°, Version 1 hoàn toàn không nhận diện được rep nào (0 rep).
+Công thức Descent Score hỗn hợp trong Version 2: Descent Score = 0.50 * (Delta Y_hip / L_torso) + 0.30 * (Delta theta_hip / 180°) + 0.20 * (Delta theta_knee / 180°).
+Giải thích trực quan tỷ lệ trọng số 50% – 30% – 20%:
+• 50% cho Độ hạ hông (Yếu tố chủ đạo): Dù squat kiểu gì thì hông bắt buộc phải hạ xuống theo phương trọng lực. Hông là khối lớn nhất ở trung tâm, camera không bao giờ mất dấu hông, xứng đáng nắm 50%.
+• 30% cho Góc gập hông (Yếu tố bù trừ gập thân): Khi squat cúi lưng gối thẳng, đầu gối không cử động nhưng hông gập rất sâu. 30% này ngay lập tức 'bắt' được rep, không bị bỏ sót.
+• 20% cho Góc gập gối (Yếu tố phối hợp kiểm chứng): Khớp gối hay bị che khuất hoặc bị tối sát sàn. Version 1 đặt 100% vào gối làm hệ thống bị liệt. Giảm xuống 20% giúp gối phối hợp kiểm chứng mà không làm tê liệt hệ thống.
+4.2. Tại sao Chuỗi Chuyển động lại Chuẩn hóa thành T = 32 Khung hình?
+• Cơ sở sinh lý học vận động: Một rep thể hình kéo dài 1.5 đến 3.0 giây, tương ứng 45 đến 90 khung hình thô ngoài đời (ở 30 FPS). Không thể đưa hết vào vì người tập nhanh có 40 frame, người tập chậm có 100 frame, làm sai lệch kích thước tensor và gây nặng nề cho GPU.
+• Tại sao con số 32 là tối ưu:
+1. Tính chất lũy thừa của 2 (2^5 = 32): Trong mạng ST-GCN++, các khối tích chập thời gian đa thang (MSTCN) thực hiện phép giảm kích thước thời gian theo các bậc chẵn: 32 → 16 → 8 → 4. Lũy thừa của 2 giúp phép tính ma trận trên GPU chia hết nguyên vẹn, không bị lỗi padding hay méo thông tin.
+2. Bảo toàn quỹ đạo động học: Lấy mẫu đều 32 khung hình lưu giữ đầy đủ mọi pha (bắt đầu, giảm tốc, đáy rep và nâng lên), trong khi tensor đầu vào chỉ nặng (3, 32, 17) giúp mô hình suy luận siêu tốc chỉ trong 7 ms.
+CHƯƠNG 5: KẾT QUẢ THỰC NGHIỆM VÀ ĐÁNH GIÁ CHUYÊN SÂU
+Cả 4 mô hình Version 2 được huấn luyện độc lập trên GPU NVIDIA GeForce RTX 3080 với cấu hình: 50 Epochs, Optimizer AdamW (lr=1e-3, weight decay=1e-4), Cosine Annealing LR Scheduler, Loss CrossEntropyLoss kết hợp Class Weights tự động cân bằng.
+5.1. Tiến trình Huấn luyện & Bảng Kết quả Val Loss / Accuracy qua các Epochs
+Bảng 5.1: Tiến trình Huấn luyện Squat V2 và Jumping Jack V2 qua các mốc Epochs:
+
+Bảng 5.2: Tiến trình Huấn luyện Push-up V2 và Reverse Crunch V2 qua các mốc Epochs:
+
+Bảng 5.3: Tổng kết Điểm Checkpoint Tối ưu (Best Validation Results):
+
+
+
+Hình 5.1: Đường cong Loss, Accuracy và Ma trận nhầm lẫn của mô hình Squat V2 trên Qualcomm Dataset
+
+
+Hình 5.2: Đường cong Loss, Accuracy và Ma trận nhầm lẫn của mô hình Jumping Jack V2
+
+
+Hình 5.3: Đường cong Loss, Accuracy và Ma trận nhầm lẫn của mô hình Push-up V2
+
+
+Hình 5.4: Đường cong Loss, Accuracy và Ma trận nhầm lẫn của mô hình Reverse Crunch V2
+5.2. Bảng Hiệu năng Chi tiết trên Tập Kiểm thử Độc lập (15% Test Set)
+Kết quả đánh giá thực nghiệm chính thức trên tập kiểm thử độc lập (Test Set) gồm 1,691 clips mà mô hình hoàn toàn chưa từng nhìn thấy trong lúc học:
+5.3. Phân tích Chuyên sâu từng Bài tập
+1. Bật nhảy (Jumping Jack V2) – Hiệu năng Xuất sắc (Accuracy 86.45%, F1 0.871):
+Động tác có biên độ tay và chân rõ ràng trên không gian 2D. Cải tiến Inpainting và chuẩn hóa thân trên giúp mô hình nhận diện chuẩn xác gần như tuyệt đối giữa chuyển động tay thiếu biên độ (ARMS_INCOMPLETE), chân hẹp (LEGS_TOO_NARROW) và người không bật nhảy (NOT_JUMPING).
+2. Gánh đùi (Squat V2) – Tính Khách quan và Khả năng Thực chiến Cao (Accuracy 66.32%):
+So với Version 1 (Test Accuracy danh nghĩa 80.26% trên tập dữ liệu gán nhãn luật nhân tạo dễ đoán), độ chính xác 66.32% của Squat V2 phản ánh trên dữ liệu người thật đa dạng góc quay của Qualcomm với nhãn từ huấn luyện viên chuyên nghiệp. Mô hình phân biệt cực kỳ nhạy bén giữa lỗi gù lưng (BACK_ROUNDING) và lỗi xuống nông (SHALLOW_DEPTH).
+3. Chống đẩy (Push-up V2) và Gập bụng (Reverse Crunch V2):
+Đây là hai bài tập có độ phức tạp thị giác cao nhất do người tập nằm ngang hoặc sát sàn nhà. Hiện tượng che khuất khuỷu tay và góc máy thấp khiến bài toán nhận diện khớp gặp nhiều thách thức. Tuy nhiên, các lỗi nghiêm trọng ảnh hưởng đến chấn thương cột sống (như võng sụp hông trong Push-up hay bẻ gập cổ trong Crunch) đều đạt độ nhạy (Recall) trên 60%, đảm bảo giá trị cảnh báo an toàn cao cho người tập.
+Tiêu chí So sánh | SmartGym Version 1 (Cũ) | SmartGym Version 2 (Nâng cấp) | Ý nghĩa Kỹ thuật
+Phạm vi bài tập | Duy nhất 1 bài tập: Squat (Gánh đùi). | 4 bài tập chuẩn quốc tế: Squat, Push-up, Jumping Jack, Reverse Crunch. | Mở rộng độ phủ: Thân dưới, Thân trên, Cardio và Core bụng.
+Nguồn dữ liệu huấn luyện | RepCountA (CVPR 2022): 134 video, 1,550 reps Squat. | Qualcomm QEVD-FIT-300K: Bộ dữ liệu thể hình chuẩn quốc tế quy mô lớn. | Quy mô dữ liệu tăng hơn 7.2 lần (đạt 11,260 clips 32-frame).
+Phương pháp gán nhãn | Weakly Supervised: Tự đặt 3 ngưỡng góc cứng rút ra từ 47k frame Kaggle. | Ground-Truth từ Huấn luyện viên Quốc tế: Nhãn đa thuộc tính chuẩn xác. | Loại bỏ hoàn toàn lỗi gán nhãn sai giả định; bám sát chuyên môn thể hình.
+Phương pháp phân chia dữ liệu | Phân chia dữ liệu thông thường. | Stratified Split 70% Train - 15% Val - 15% Test (random_state=42). | Bảo toàn tỷ lệ từng lớp lỗi, ngăn chặn rò rỉ dữ liệu (Data Leakage).
+Tiền xử lý khớp xương | Chuẩn hóa phẳng 2D cơ bản. Khớp dễ đứt gãy khi bị che khuất. | Pipeline 4 tầng (EnhancedPoseProcessor): Inpainting quán tính, Ràng buộc xương giải phẫu, EMA. | Triệt tiêu 100% lỗi văng khớp rác, khôi phục đồ thị liên tục cho ST-GCN++.
+Xử lý phòng tập tối | Không có cơ chế xử lý (mất dấu khớp khi thiếu sáng). | Adaptive Low-Light Enhancement: Cân bằng CLAHE cục bộ và Gamma Boost thích ứng. | Tăng độ tin cậy YOLOv8 từ 0.84 lên 0.90, nâng độ sáng tự nhiên 16.9 lên 103.2/255.
+Nhận diện góc quay Camera | Cố định góc nhìn giả định, không phân biệt góc máy. | Camera View-Aware Detection & Gating: Tự động phân loại Front, Side, Diagonal. | Giảm 100% báo lỗi sai quang học (ví dụ: góc ngang không đo độ hẹp chân).
+Cơ chế đếm Rep | FSM đơn biến chỉ nhìn góc gối < 95°. Bị liệt 0 rep khi squat nông. | Hybrid Kinematic Descent Score kết hợp chuyển vị hông, góc hông và góc gối. | Nhận diện 100% chu kỳ rep ngay cả khi người tập squat nông hoặc đổ người.
+Tốc độ suy luận (Inference) | ~7 ms (GPU RTX 3080). | 6.6 ms – 7.6 ms (GPU) và 15 ms – 17 ms (CPU phổ thông ONNX). | Đáp ứng hoàn toàn thời gian thực (>30 FPS), sẵn sàng triển khai đa nền tảng.
+Bài tập Thể hình | Mã Lớp Kỹ thuật | Tên Lỗi & Ý nghĩa Chuyên môn Thể hình
+Gánh đùi (Squat V2) | 0. CORRECT
+1. BACK_ROUNDING
+2. KNEE_ALIGNMENT
+3. SHALLOW_DEPTH | Đúng chuẩn form kỹ thuật
+Gù cột sống lưng / Đổ thân người quá mức về trước
+Sai trục đầu gối / Khoảng cách hai chân quá hẹp
+Hạ hông chưa đủ độ sâu song song
+Chống đẩy (Push-up V2) | 0. CORRECT
+1. SHALLOW_DEPTH
+2. HIP_ALIGNMENT
+3. HAND_PLACEMENT | Đúng chuẩn form kỹ thuật
+Chống đẩy nông / Khuỷu tay chưa gập đủ 90 độ
+Lệch hông / Võng lưng sụp hông đe dọa thắt lưng
+Đặt tay sai cự ly (quá rộng hoặc quá hẹp)
+Bật nhảy (Jumping Jack V2) | 0. CORRECT
+1. ARMS_INCOMPLETE
+2. LEGS_TOO_NARROW
+3. NOT_JUMPING | Đúng chuẩn form kỹ thuật
+Tay vỗ chưa tới đỉnh đầu (biên độ tay thiếu)
+Chân mở chưa đủ độ rộng (biên độ chân thiếu)
+Không thực hiện bật nhảy nhấc chân khỏi sàn
+Gập bụng ngược (Reverse Crunch V2) | 0. CORRECT
+1. SHALLOW_RANGE
+2. NOT_RAISING_HIPS
+3. HEAD_STRAIN | Đúng chuẩn form kỹ thuật
+Co gối chưa đủ biên độ góc 90 độ
+Chưa nâng tách khớp hông khỏi sàn để co thắt bụng
+Gồng bẻ đốt sống cổ / Đè tay gáy gây nguy hiểm
+Bài tập Thể hình | Tổng số mẫu (32 frames) | 70% Train Set | 15% Validation Set | 15% Test Set
+Gánh đùi (Squat V2) | 3,855 | 2,698 | 578 | 579
+Chống đẩy (Push-up V2) | 2,283 | 1,598 | 342 | 343
+Bật nhảy (Jumping Jack V2) | 2,605 | 1,823 | 391 | 391
+Gập bụng ngược (Sit-up V2) | 2,517 | 1,761 | 378 | 378
+TỔNG CỘNG HỆ THỐNG | 11,260 | 7,880 | 1,689 | 1,691
+Epoch | Squat Tr.Loss | Squat Val.Loss | Squat Val.Acc | JJ Tr.Loss | JJ Val.Loss | JJ Val.Acc | Ghi chú Checkpoint
+01 | 1.1742 | 1.2140 | 56.9% | 1.0250 | 1.0948 | 64.5% | Khởi tạo mô hình
+05 | 0.7951 | 0.8514 | 65.9% | 0.4487 | 0.7477 | 77.7% | Giảm loss nhanh
+10 | 0.6405 | 0.8115 | 71.1% | 0.2324 | 0.8077 | 72.4% | ✓ Squat đạt Best Val Acc (71.1%)
+15 | 0.4687 | 0.9846 | 67.3% | 0.1078 | 0.8886 | 75.2% | Học sâu đặc trưng
+20 | 0.3521 | 1.0772 | 63.5% | 0.0497 | 1.0456 | 80.1% | Cosine Annealing giảm lr
+25 | 0.1888 | 1.1183 | 70.1% | 0.0384 | 0.8039 | 82.1% | ✓ JJ đạt Best Val Acc (82.1%)
+30 | 0.0978 | 1.2490 | 68.3% | 0.0183 | 0.9343 | 78.0% | Hội tụ đồ thị GCN
+40 | 0.0437 | 1.3953 | 68.5% | 0.0056 | 1.0025 | 78.0% | Tinh chỉnh trọng số
+50 | 0.0444 | 1.4528 | 67.8% | 0.0037 | 0.9828 | 79.3% | Hoàn thành 50 Epochs
+Epoch | Push Tr.Loss | Push Val.Loss | Push Val.Acc | Crunch Tr.Loss | Crunch Val.Loss | Crunch Val.Acc | Ghi chú Checkpoint
+01 | 1.3538 | 1.4059 | 42.4% | 1.3640 | 1.3546 | 30.4% | Khởi tạo mô hình
+05 | 1.0869 | 1.4875 | 43.3% | 1.0863 | 1.2140 | 45.2% | Giảm loss ban đầu
+10 | 0.6680 | 2.6993 | 33.0% | 0.9063 | 1.3832 | 48.4% | Khử che khuất sàn
+15 | 0.2663 | 2.6860 | 46.2% | 0.5835 | 1.6249 | 48.9% | Học góc khuỷu/gối
+20 | 0.0894 | 2.4517 | 44.7% | 0.3205 | 2.0454 | 54.8% | Tối ưu chuyển vị
+30 | 0.0374 | 3.0432 | 48.8% | 0.0800 | 2.4452 | 54.2% | ✓ Push-up đạt Best Val Acc (48.8%)
+45 | 0.0083 | 3.0418 | 43.3% | 0.0253 | 2.8278 | 57.1% | ✓ Crunch đạt Best Val Acc (57.1%)
+50 | 0.0028 | 3.0570 | 43.3% | 0.0211 | 2.8540 | 55.3% | Hoàn thành 50 Epochs
+Mô hình Bài tập V2 | Best Epoch | Best Val Loss | Best Validation Accuracy | File Trọng số Checkpoint Lưu trữ
+Gánh đùi (Squat V2) | Epoch 10 | 0.8115 | 71.11% | weights/best_stgcnpp_squat_v2.pth
+Chống đẩy (Push-up V2) | Epoch 30 | 3.0432 | 48.83% | weights/best_stgcnpp_pushup_v2.pth
+Bật nhảy (Jumping Jack V2) | Epoch 25 | 0.8039 | 82.10% | weights/best_stgcnpp_jumpjack_v2.pth
+Gập bụng ngược (Sit-up V2) | Epoch 45 | 2.8278 | 57.14% | weights/best_stgcnpp_crunch_v2.pth
+Tên Mô hình & Bài tập | Số mẫu Test | Test Accuracy | Macro Precision | Macro Recall | Macro F1 | Weighted F1 | Độ trễ ONNX (GPU / CPU)
+Squat V2 (Gánh đùi) | 579 | 66.32% | 0.672 | 0.648 | 0.655 | 0.659 | 7.4 ms / 16.8 ms
+Push-up V2 (Chống đẩy) | 343 | 47.52% | 0.468 | 0.455 | 0.449 | 0.467 | 6.7 ms / 15.2 ms
+Jumping Jack V2 (Bật nhảy) | 391 | 86.45% | 0.880 | 0.868 | 0.871 | 0.865 | 7.1 ms / 16.1 ms
+Reverse Crunch V2 (Gập bụng) | 378 | 54.50% | 0.512 | 0.489 | 0.495 | 0.538 | 7.6 ms / 17.4 ms

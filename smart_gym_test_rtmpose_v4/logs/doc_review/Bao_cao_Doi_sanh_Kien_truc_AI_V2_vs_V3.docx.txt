@@ -1,0 +1,75 @@
+1. Vấn đề Kỹ thuật Phát hiện sau Phiên bản V2
+Sau khi hoàn thành phiên bản V2 dựa trên bộ dữ liệu Qualcomm QEVD-FIT, nhóm tiến hành kiểm thử thực tế trên video và camera để đánh giá độ ổn định của hệ thống. Quá trình kiểm thử cho thấy 2 hạn chế kỹ thuật rõ rệt:
+
+1. Tỷ lệ bỏ sót lỗi kỹ thuật cao: Khi kiểm tra các video có lỗi sai tư thế rõ ràng như lưng cong gập, chống đẩy chưa đủ độ sâu hoặc tay mở chưa hết biên độ, hệ thống vẫn phân loại vào lớp đúng kỹ thuật (CORRECT). Kết quả dự đoán thiên lệch về lớp đúng làm giảm tính chính xác của hệ thống giám sát thể hình.
+
+2. Lỗi phân đoạn rep đối với người tập tốc độ chậm: Đối với người tập thực hiện động tác với chu kỳ dài từ 4 đến 6 giây mỗi rep, hoặc người có khoảng dừng ở vị trí thấp nhất (pause rep), thuật toán đếm rep thường tự động ngắt trạng thái và phân tách một động tác thành nhiều lần đếm không chính xác.
+2. Các Cải tiến Kỹ thuật Đã Triển khai ở Phiên bản V3
+2.1. Chuyển đổi mô hình trích xuất khung xương sang RTMPose-M SimCC
+Ở phiên bản V2, hệ thống sử dụng mô hình YOLOv8n-pose. Mô hình này có ưu điểm tốc độ xử lý nhanh nhưng độ ổn định tọa độ khớp giữa các frame liên tiếp chưa cao, tọa độ khớp có hiện tượng rung lắc và độ chính xác suy giảm khi xuất hiện che khuất bộ phận.
+Tại phiên bản V3, hệ thống chuyển sang sử dụng mô hình RTMPose-M SimCC từ thư viện OpenMMLab. Mô hình áp dụng kỹ thuật phân loại tọa độ 1D SimCC, giúp tăng độ chính xác định vị các điểm khớp và cải thiện rõ rệt độ mượt của chuỗi tọa độ theo thời gian.
+2.2. Loại bỏ các bộ lọc can thiệp tọa độ trước mô hình
+Trong phiên bản V2, nhóm thiết kế 4 thuật toán tiền xử lý gồm: ngoại suy vị trí khớp theo vận tốc quán tính khi độ tin cậy thấp, gán tọa độ khớp gối theo chuyển vị hông khi bị tay che, giới hạn tỷ lệ độ dài xương đùi theo thân trên và làm mượt EMA.
+Phân tích chi tiết cho thấy các bộ lọc này gây méo mó tín hiệu đặc trưng của lỗi sai:
+• Khi người tập gù lưng, chiều dài thân trên bị thu ngắn trên mặt phẳng ảnh 2D, bộ lọc tỷ lệ xương tự động kéo ngắn xương đùi làm mất đồng thời tín hiệu lưng cong và tín hiệu độ sâu.
+• Việc ngoại suy vị trí khớp bị che khuất tạo ra các tọa độ giả định không phản ánh đúng tư thế lệch lạc thực tế.
+• Bộ lọc làm mượt EMA làm suy giảm các dao động chuyển động nhanh vốn là đặc trưng nhận diện lỗi kỹ thuật.
+Do đó, phiên bản V3 loại bỏ hoàn toàn các bộ lọc trên, chỉ giữ lại bước lọc ngưỡng tin cậy thấp và chuẩn hóa tọa độ theo tâm hông và chiều dài thân trên (Root Centering).
+2.3. Tối ưu thuật toán đếm rep cho động tác chuyển động chậm
+• Tăng ngưỡng thời gian chờ của bộ đệm từ 90 frames (khoảng 3 giây) lên 240 frames (khoảng 8 giây ở 30 fps), cho phép bao quát toàn bộ chu kỳ chuyển động của người tập chậm mà không bị timeout.
+• Chuyển đổi điều kiện kết thúc rep từ ngưỡng tuyệt đối sang tỷ lệ phục hồi tương đối: Một rep được ghi nhận hoàn thành khi người tập phục hồi từ 65% đến 70% biên độ so với điểm thấp nhất đạt được trong chính rep đó, khắc phục lỗi đếm thừa rep.
+2.4. Trích xuất chuỗi cử động bằng thuật toán Active Motion Window
+Thay vì lấy mẫu đều 32 frame trên toàn bộ thời lượng video khiến chuỗi dữ liệu chứa nhiều frame đứng yên ở đầu và cuối clip, phiên bản V3 áp dụng thuật toán vi sai khung hình để xác định chính xác cửa sổ chuyển động thực của bài tập, đảm bảo 32 frame nạp vào mô hình tập trung vào pha vận động chính.
+2.5. Xóa bỏ luật ép xác suất theo góc quay camera
+Quy tắc gán cứng xác suất lỗi về 0% khi phát hiện góc quay ngang trong phiên bản V2 đã được gỡ bỏ hoàn toàn, trả lại quyền phân loại độc lập cho mô hình ST-GCN++.
+3. Bảng Tổng hợp Đối chiếu: Phiên bản V2 và Phiên bản V3
+4. Giải thích Nguyên nhân Biến động Chỉ số Accuracy giữa Hai Phiên bản
+Kết quả đánh giá trên tập kiểm thử độc lập cho thấy chỉ số Test Accuracy của phiên bản V2 dao động từ 91% đến 96%, trong khi phiên bản V3 dao động từ 58% đến 88% tùy từng bài tập cụ thể. Phân tích kỹ thuật chỉ ra 2 nguyên nhân cốt lõi của sự biến động này:
+
+1. Dữ liệu kiểm thử của phiên bản V2 bị đồng nhất hóa do các bộ lọc tiền xử lý: Ở phiên bản V2, toàn bộ dữ liệu trước khi nạp vào mô hình đều đi qua các thuật toán làm mượt EMA, ngoại suy khớp và nẹp độ dài xương. Quá trình này vô tình làm phẳng các biến động tự nhiên của cử động cơ thể, khiến dữ liệu trở nên lý tưởng hơn thực tế. Mô hình học trên phân phối đã qua chỉnh sửa dễ đạt độ chính xác cao trên tập kiểm thử nội bộ, nhưng khi gặp video có góc nghiêng, che khuất hoặc cử động phức tạp ngoài thực tế, hệ thống không nhận diện được lỗi sai.
+
+2. Dữ liệu kiểm thử của phiên bản V3 phản ánh đúng chuyển động thô thực tế: Ở phiên bản V3, mô hình học trực tiếp từ tọa độ khung xương nguyên bản không qua làm mượt nhân tạo. Kết quả kiểm thử phản ánh khách quan năng lực phân loại của mạng ST-GCN++ trên dữ liệu thực tế. Trên thực tế sử dụng, mô hình V3 có khả năng phát hiện đúng các trường hợp lỗi kỹ thuật cao hơn phiên bản V2 và giảm thiểu tình trạng nhận diện nhầm lỗi thành đúng form.
+
+3. Đặc điểm dán nhãn đa thuộc tính trong bộ dữ liệu gốc Qualcomm: Bộ dữ liệu QEVD-FIT đánh giá bài tập theo nhiều tiêu chí độc lập (ví dụ ở bài Jumping Jack đánh giá riêng biên độ tay từ mức 1 đến 4 và biên độ chân từ mức 1 đến 4). Việc ánh xạ tập nhãn đa chiều này về bài toán phân loại đơn nhãn 4 lớp bắt buộc hệ thống phải chọn một nhãn duy nhất cho các video tồn tại đồng thời cả yếu tố đúng và yếu tố sai, dẫn đến việc mô hình có thể nhận diện đúng lỗi ở một bộ phận nhưng bị tính là sai lệch so với nhãn phân lớp tổng thể.
+5. Kết quả Huấn luyện và Biểu đồ Đánh giá Mô hình V3
+Mô hình ST-GCN++ phiên bản V3 được huấn luyện trên toàn bộ dữ liệu gồm 11,200 video Qualcomm cho 4 bài tập. Dưới đây là các biểu đồ quá trình huấn luyện (Loss Curve) và ma trận nhầm lẫn (Confusion Matrix) được xuất ra sau khi huấn luyện:
+5.1. Bài tập Gánh đùi (Squat V3 - 3,840 video) - Test Accuracy: 71.5%
+
+
+Hình: Biểu đồ hàm mất mát (Loss Curve) bài tập Gánh đùi (Squat V3 - 3,840 video)
+
+
+Hình: Ma trận nhầm lẫn (Confusion Matrix) bài tập Gánh đùi (Squat V3 - 3,840 video)
+5.2. Bài tập Chống đẩy (Push-up V3 - 2,268 video) - Test Accuracy: 57.8%
+
+
+Hình: Biểu đồ hàm mất mát (Loss Curve) bài tập Chống đẩy (Push-up V3 - 2,268 video)
+
+
+Hình: Ma trận nhầm lẫn (Confusion Matrix) bài tập Chống đẩy (Push-up V3 - 2,268 video)
+5.3. Bài tập Bật nhảy (Jumping Jack V3 - 2,590 video) - Test Accuracy: 88.2%
+
+
+Hình: Biểu đồ hàm mất mát (Loss Curve) bài tập Bật nhảy (Jumping Jack V3 - 2,590 video)
+
+
+Hình: Ma trận nhầm lẫn (Confusion Matrix) bài tập Bật nhảy (Jumping Jack V3 - 2,590 video)
+5.4. Bài tập Gập bụng ngược (Crunch V3 - 2,502 video) - Test Accuracy: 69.1%
+
+
+Hình: Biểu đồ hàm mất mát (Loss Curve) bài tập Gập bụng ngược (Crunch V3 - 2,502 video)
+
+
+Hình: Ma trận nhầm lẫn (Confusion Matrix) bài tập Gập bụng ngược (Crunch V3 - 2,502 video)
+6. Định hướng Nghiên cứu Tiếp theo
+Dựa trên phân tích về cấu trúc nhãn đa thuộc tính của bộ dữ liệu Qualcomm, nhóm đề xuất định hướng tiếp theo nhằm nâng cấp hệ thống:
+1. Cải tiến kiến trúc mạng ST-GCN++ từ phân loại đơn nhãn (Multi-class Single-label) sang phân loại đa nhãn độc lập (Multi-label Classification), cho phép hệ thống đánh giá đồng thời và độc lập từng nhóm cơ quan vận động (nhánh tay, nhánh chân, nhánh thân người).
+2. Tích hợp giao diện hiển thị kết quả đánh giá phân tách theo từng tiêu chí kỹ thuật để cung cấp phản hồi chi tiết cho người sử dụng.
+Thành phần kỹ thuật | Phiên bản V2 | Phiên bản V3
+Mô hình trích xuất khung xương | YOLOv8n-pose | RTMPose-M SimCC
+Xử lý khớp bị che khuất | Ngoại suy tọa độ theo quán tính | Lọc bỏ khớp có độ tin cậy thấp (< 0.20)
+Ràng buộc độ dài xương | Giới hạn tỷ lệ chiều dài xương đùi | Không can thiệp, giữ nguyên tọa độ gốc
+Làm mượt tọa độ | Bộ lọc thông thấp EMA (alpha = 0.75) | Không áp dụng làm mượt nhân tạo
+Bộ đếm rep thời gian thực | Giới hạn 90 frames, ngưỡng kết thúc tĩnh | Giới hạn 240 frames, tỷ lệ phục hồi tương đối
+Lấy mẫu chuỗi 32 frame | Lấy đều toàn bộ chiều dài video | Quét động năng xác định Active Motion Window
+Quy tắc quyết định sau mô hình | Ép xác suất lỗi về 0% khi quay ngang | Phân loại trực tiếp từ phân phối xác suất của mô hình

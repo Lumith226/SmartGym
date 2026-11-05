@@ -1,0 +1,21 @@
+﻿Video,Nhãn gốc,Dự đoán,Bỏ sót,Báo thừa,Khớp toàn bộ
+BACK_ROUNDING_00001672.mp4,squats - back not straight; squats - shallow; squats - shoulder-width,squats - back not straight; squats - shallow; squats - shoulder-width,,,True
+BACK_ROUNDING_00058216.mp4,squats - back not straight; squats - shallow; squats - shoulder-width,squats - back not straight; squats - insufficient; squats - shallow; squats - shoulder-width,,squats - insufficient,False
+BACK_ROUNDING_00146833.mp4,squats - back not straight; squats - narrow; squats - shallow,squats - 90 degrees; squats - back not straight; squats - knees over toes; squats - shoulder-width,squats - narrow; squats - shallow,squats - 90 degrees; squats - knees over toes; squats - shoulder-width,False
+BACK_ROUNDING_00192361.mp4,squats - back not straight; squats - hold; squats - shallow; squats - shoulder-width,squats - 90 degrees; squats - hold; squats - shoulder-width,squats - back not straight; squats - shallow,squats - 90 degrees,False
+BACK_ROUNDING_00209743.mp4,squats - back not straight; squats - insufficient; squats - shoulder-width,squats - back not straight; squats - insufficient; squats - shoulder-width,,,True
+CORRECT_00002456.mp4,squats - 90 degrees; squats - no obvious issue; squats - shoulder-width,squats - 90 degrees; squats - no obvious issue; squats - shoulder-width,,,True
+CORRECT_00081184.mp4,squats - over 90 degrees; squats - plie; squats - wide,squats - knees over toes; squats - plie; squats - wide,squats - over 90 degrees,squats - knees over toes,False
+CORRECT_00098461.mp4,squats - no obvious issue; squats - over 90 degrees; squats - shoulder-width,squats - 90 degrees; squats - no obvious issue; squats - shoulder-width,squats - over 90 degrees,squats - 90 degrees,False
+CORRECT_00191981.mp4,squats - 90 degrees; squats - no obvious issue; squats - shoulder-width,squats - 90 degrees; squats - no obvious issue; squats - shoulder-width,,,True
+CORRECT_00239998.mp4,squats - 90 degrees; squats - no obvious issue; squats - wide,squats - 90 degrees; squats - no obvious issue; squats - wide,,,True
+KNEE_ALIGNMENT_00154750.mp4,squats - 90 degrees; squats - narrow; squats - no obvious issue,squats - knees over toes; squats - over 90 degrees; squats - shoulder-width,squats - 90 degrees; squats - narrow; squats - no obvious issue,squats - knees over toes; squats - over 90 degrees; squats - shoulder-width,False
+KNEE_ALIGNMENT_00173687.mp4,squats - 90 degrees; squats - narrow; squats - no obvious issue,squats - knees over toes; squats - over 90 degrees; squats - shoulder-width,squats - 90 degrees; squats - narrow; squats - no obvious issue,squats - knees over toes; squats - over 90 degrees; squats - shoulder-width,False
+KNEE_ALIGNMENT_00219976.mp4,squats - knees over toes; squats - over 90 degrees; squats - plie; squats - wide,squats - knees over toes; squats - over 90 degrees; squats - plie; squats - wide,,,True
+KNEE_ALIGNMENT_00267745.mp4,squats - 90 degrees; squats - knees over toes; squats - shoulder-width,squats - 90 degrees; squats - no obvious issue; squats - wide,squats - knees over toes; squats - shoulder-width,squats - no obvious issue; squats - wide,False
+KNEE_OVER_TOES_00002902.mp4,squats - knees over toes; squats - over 90 degrees; squats - shoulder-width,squats - 90 degrees; squats - knees over toes; squats - no obvious issue; squats - shoulder-width,squats - over 90 degrees,squats - 90 degrees; squats - no obvious issue,False
+NARROW_STANCE_00002765.mp4,squats - 90 degrees; squats - narrow; squats - no obvious issue,squats - 90 degrees; squats - narrow; squats - no obvious issue,,,True
+SHALLOW_DEPTH_00003948.mp4,squats - insufficient; squats - shoulder-width,squats - insufficient; squats - shoulder-width,,,True
+SHALLOW_DEPTH_00175981.mp4,squats - insufficient; squats - shoulder-width,squats - insufficient; squats - shoulder-width,,,True
+SHALLOW_DEPTH_00190954.mp4,squats - no obvious issue; squats - shallow; squats - shoulder-width,squats - no obvious issue; squats - shallow; squats - wide,squats - shoulder-width,squats - wide,False
+SHALLOW_DEPTH_00211137.mp4,squats - narrow; squats - no obvious issue; squats - shallow,squats - back not straight; squats - insufficient; squats - narrow; squats - no obvious issue; squats - shallow,,squats - back not straight; squats - insufficient,False

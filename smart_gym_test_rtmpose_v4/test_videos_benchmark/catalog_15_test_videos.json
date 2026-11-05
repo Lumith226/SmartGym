@@ -1,0 +1,934 @@
+{
+  "squat": [
+    {
+      "exercise": "squat",
+      "exercise_vi": "Gánh đùi (Squat)",
+      "filename": "CORRECT_00098461.mp4",
+      "original_video": "00098461.mp4",
+      "class_name": "CORRECT",
+      "class_name_vi": "Đúng chuẩn form kỹ thuật",
+      "label_id": 0,
+      "raw_labels": [
+        "squats - over 90 degrees",
+        "squats - shoulder-width",
+        "squats - no obvious issue"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\squats\\CORRECT_00098461.mp4",
+      "file_size_mb": 0.22
+    },
+    {
+      "exercise": "squat",
+      "exercise_vi": "Gánh đùi (Squat)",
+      "filename": "CORRECT_00191981.mp4",
+      "original_video": "00191981.mp4",
+      "class_name": "CORRECT",
+      "class_name_vi": "Đúng chuẩn form kỹ thuật",
+      "label_id": 0,
+      "raw_labels": [
+        "squats - 90 degrees",
+        "squats - shoulder-width",
+        "squats - no obvious issue"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\squats\\CORRECT_00191981.mp4",
+      "file_size_mb": 0.23
+    },
+    {
+      "exercise": "squat",
+      "exercise_vi": "Gánh đùi (Squat)",
+      "filename": "CORRECT_00081184.mp4",
+      "original_video": "00081184.mp4",
+      "class_name": "CORRECT",
+      "class_name_vi": "Đúng chuẩn form kỹ thuật",
+      "label_id": 0,
+      "raw_labels": [
+        "squats - over 90 degrees",
+        "squats - plie",
+        "squats - wide"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\squats\\CORRECT_00081184.mp4",
+      "file_size_mb": 0.17
+    },
+    {
+      "exercise": "squat",
+      "exercise_vi": "Gánh đùi (Squat)",
+      "filename": "CORRECT_00239998.mp4",
+      "original_video": "00239998.mp4",
+      "class_name": "CORRECT",
+      "class_name_vi": "Đúng chuẩn form kỹ thuật",
+      "label_id": 0,
+      "raw_labels": [
+        "squats - 90 degrees",
+        "squats - wide",
+        "squats - no obvious issue"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\squats\\CORRECT_00239998.mp4",
+      "file_size_mb": 0.4
+    },
+    {
+      "exercise": "squat",
+      "exercise_vi": "Gánh đùi (Squat)",
+      "filename": "BACK_ROUNDING_00058216.mp4",
+      "original_video": "00058216.mp4",
+      "class_name": "BACK_ROUNDING",
+      "class_name_vi": "Gù lưng / Đổ thân về trước",
+      "label_id": 1,
+      "raw_labels": [
+        "squats - back not straight",
+        "squats - shallow",
+        "squats - shoulder-width"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\squats\\BACK_ROUNDING_00058216.mp4",
+      "file_size_mb": 0.23
+    },
+    {
+      "exercise": "squat",
+      "exercise_vi": "Gánh đùi (Squat)",
+      "filename": "BACK_ROUNDING_00192361.mp4",
+      "original_video": "00192361.mp4",
+      "class_name": "BACK_ROUNDING",
+      "class_name_vi": "Gù lưng / Đổ thân về trước",
+      "label_id": 1,
+      "raw_labels": [
+        "squats - back not straight",
+        "squats - hold",
+        "squats - shallow",
+        "squats - shoulder-width"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\squats\\BACK_ROUNDING_00192361.mp4",
+      "file_size_mb": 0.25
+    },
+    {
+      "exercise": "squat",
+      "exercise_vi": "Gánh đùi (Squat)",
+      "filename": "BACK_ROUNDING_00209743.mp4",
+      "original_video": "00209743.mp4",
+      "class_name": "BACK_ROUNDING",
+      "class_name_vi": "Gù lưng / Đổ thân về trước",
+      "label_id": 1,
+      "raw_labels": [
+        "squats - back not straight",
+        "squats - insufficient",
+        "squats - shoulder-width"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\squats\\BACK_ROUNDING_00209743.mp4",
+      "file_size_mb": 0.26
+    },
+    {
+      "exercise": "squat",
+      "exercise_vi": "Gánh đùi (Squat)",
+      "filename": "BACK_ROUNDING_00146833.mp4",
+      "original_video": "00146833.mp4",
+      "class_name": "BACK_ROUNDING",
+      "class_name_vi": "Gù lưng / Đổ thân về trước",
+      "label_id": 1,
+      "raw_labels": [
+        "squats - back not straight",
+        "squats - narrow",
+        "squats - shallow"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\squats\\BACK_ROUNDING_00146833.mp4",
+      "file_size_mb": 0.34
+    },
+    {
+      "exercise": "squat",
+      "exercise_vi": "Gánh đùi (Squat)",
+      "filename": "KNEE_ALIGNMENT_00267745.mp4",
+      "original_video": "00267745.mp4",
+      "class_name": "KNEE_ALIGNMENT",
+      "class_name_vi": "Lỗi trục gối / Chân quá hẹp",
+      "label_id": 2,
+      "raw_labels": [
+        "squats - 90 degrees",
+        "squats - knees over toes",
+        "squats - shoulder-width"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\squats\\KNEE_ALIGNMENT_00267745.mp4",
+      "file_size_mb": 1.3
+    },
+    {
+      "exercise": "squat",
+      "exercise_vi": "Gánh đùi (Squat)",
+      "filename": "KNEE_ALIGNMENT_00154750.mp4",
+      "original_video": "00154750.mp4",
+      "class_name": "KNEE_ALIGNMENT",
+      "class_name_vi": "Lỗi trục gối / Chân quá hẹp",
+      "label_id": 2,
+      "raw_labels": [
+        "squats - narrow",
+        "squats - 90 degrees",
+        "squats - no obvious issue"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\squats\\KNEE_ALIGNMENT_00154750.mp4",
+      "file_size_mb": 0.23
+    },
+    {
+      "exercise": "squat",
+      "exercise_vi": "Gánh đùi (Squat)",
+      "filename": "KNEE_ALIGNMENT_00219976.mp4",
+      "original_video": "00219976.mp4",
+      "class_name": "KNEE_ALIGNMENT",
+      "class_name_vi": "Lỗi trục gối / Chân quá hẹp",
+      "label_id": 2,
+      "raw_labels": [
+        "squats - knees over toes",
+        "squats - over 90 degrees",
+        "squats - plie",
+        "squats - wide"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\squats\\KNEE_ALIGNMENT_00219976.mp4",
+      "file_size_mb": 0.21
+    },
+    {
+      "exercise": "squat",
+      "exercise_vi": "Gánh đùi (Squat)",
+      "filename": "KNEE_ALIGNMENT_00173687.mp4",
+      "original_video": "00173687.mp4",
+      "class_name": "KNEE_ALIGNMENT",
+      "class_name_vi": "Lỗi trục gối / Chân quá hẹp",
+      "label_id": 2,
+      "raw_labels": [
+        "squats - narrow",
+        "squats - 90 degrees",
+        "squats - no obvious issue"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\squats\\KNEE_ALIGNMENT_00173687.mp4",
+      "file_size_mb": 0.27
+    },
+    {
+      "exercise": "squat",
+      "exercise_vi": "Gánh đùi (Squat)",
+      "filename": "SHALLOW_DEPTH_00175981.mp4",
+      "original_video": "00175981.mp4",
+      "class_name": "SHALLOW_DEPTH",
+      "class_name_vi": "Xuống chưa đủ độ sâu",
+      "label_id": 3,
+      "raw_labels": [
+        "squats - insufficient",
+        "squats - shoulder-width"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\squats\\SHALLOW_DEPTH_00175981.mp4",
+      "file_size_mb": 0.14
+    },
+    {
+      "exercise": "squat",
+      "exercise_vi": "Gánh đùi (Squat)",
+      "filename": "SHALLOW_DEPTH_00211137.mp4",
+      "original_video": "00211137.mp4",
+      "class_name": "SHALLOW_DEPTH",
+      "class_name_vi": "Xuống chưa đủ độ sâu",
+      "label_id": 3,
+      "raw_labels": [
+        "squats - narrow",
+        "squats - shallow",
+        "squats - no obvious issue"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\squats\\SHALLOW_DEPTH_00211137.mp4",
+      "file_size_mb": 0.34
+    },
+    {
+      "exercise": "squat",
+      "exercise_vi": "Gánh đùi (Squat)",
+      "filename": "SHALLOW_DEPTH_00190954.mp4",
+      "original_video": "00190954.mp4",
+      "class_name": "SHALLOW_DEPTH",
+      "class_name_vi": "Xuống chưa đủ độ sâu",
+      "label_id": 3,
+      "raw_labels": [
+        "squats - shallow",
+        "squats - shoulder-width",
+        "squats - no obvious issue"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\squats\\SHALLOW_DEPTH_00190954.mp4",
+      "file_size_mb": 0.29
+    }
+  ],
+  "pushup": [
+    {
+      "exercise": "pushup",
+      "exercise_vi": "Chống đẩy (Push-up)",
+      "filename": "CORRECT_00129299.mp4",
+      "original_video": "00129299.mp4",
+      "class_name": "CORRECT",
+      "class_name_vi": "Đúng chuẩn form kỹ thuật",
+      "label_id": 0,
+      "raw_labels": [
+        "pushups - deep",
+        "pushups - wide"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\pushups\\CORRECT_00129299.mp4",
+      "file_size_mb": 0.28
+    },
+    {
+      "exercise": "pushup",
+      "exercise_vi": "Chống đẩy (Push-up)",
+      "filename": "CORRECT_00230080.mp4",
+      "original_video": "00230080.mp4",
+      "class_name": "CORRECT",
+      "class_name_vi": "Đúng chuẩn form kỹ thuật",
+      "label_id": 0,
+      "raw_labels": [
+        "pushups - 90 degrees",
+        "pushups - wide"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\pushups\\CORRECT_00230080.mp4",
+      "file_size_mb": 0.24
+    },
+    {
+      "exercise": "pushup",
+      "exercise_vi": "Chống đẩy (Push-up)",
+      "filename": "CORRECT_00102902.mp4",
+      "original_video": "00102902.mp4",
+      "class_name": "CORRECT",
+      "class_name_vi": "Đúng chuẩn form kỹ thuật",
+      "label_id": 0,
+      "raw_labels": [
+        "pushups - deep",
+        "pushups - wide"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\pushups\\CORRECT_00102902.mp4",
+      "file_size_mb": 0.46
+    },
+    {
+      "exercise": "pushup",
+      "exercise_vi": "Chống đẩy (Push-up)",
+      "filename": "CORRECT_00153623.mp4",
+      "original_video": "00153623.mp4",
+      "class_name": "CORRECT",
+      "class_name_vi": "Đúng chuẩn form kỹ thuật",
+      "label_id": 0,
+      "raw_labels": [
+        "pushups - 90 degrees",
+        "pushups - shoulder-width"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\pushups\\CORRECT_00153623.mp4",
+      "file_size_mb": 0.29
+    },
+    {
+      "exercise": "pushup",
+      "exercise_vi": "Chống đẩy (Push-up)",
+      "filename": "SHALLOW_DEPTH_00174803.mp4",
+      "original_video": "00174803.mp4",
+      "class_name": "SHALLOW_DEPTH",
+      "class_name_vi": "Xuống chưa đủ độ sâu",
+      "label_id": 1,
+      "raw_labels": [
+        "pushups - fast",
+        "pushups - shallow",
+        "pushups - wide"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\pushups\\SHALLOW_DEPTH_00174803.mp4",
+      "file_size_mb": 0.55
+    },
+    {
+      "exercise": "pushup",
+      "exercise_vi": "Chống đẩy (Push-up)",
+      "filename": "SHALLOW_DEPTH_00294837.mp4",
+      "original_video": "00294837.mp4",
+      "class_name": "SHALLOW_DEPTH",
+      "class_name_vi": "Xuống chưa đủ độ sâu",
+      "label_id": 1,
+      "raw_labels": [
+        "pushups - shallow",
+        "pushups - shoulder-width"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\pushups\\SHALLOW_DEPTH_00294837.mp4",
+      "file_size_mb": 0.23
+    },
+    {
+      "exercise": "pushup",
+      "exercise_vi": "Chống đẩy (Push-up)",
+      "filename": "SHALLOW_DEPTH_00111365.mp4",
+      "original_video": "00111365.mp4",
+      "class_name": "SHALLOW_DEPTH",
+      "class_name_vi": "Xuống chưa đủ độ sâu",
+      "label_id": 1,
+      "raw_labels": [
+        "pushups - shallow",
+        "pushups - wide"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\pushups\\SHALLOW_DEPTH_00111365.mp4",
+      "file_size_mb": 0.49
+    },
+    {
+      "exercise": "pushup",
+      "exercise_vi": "Chống đẩy (Push-up)",
+      "filename": "SHALLOW_DEPTH_00196221.mp4",
+      "original_video": "00196221.mp4",
+      "class_name": "SHALLOW_DEPTH",
+      "class_name_vi": "Xuống chưa đủ độ sâu",
+      "label_id": 1,
+      "raw_labels": [
+        "pushups - fast",
+        "pushups - narrow",
+        "pushups - shallow"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\pushups\\SHALLOW_DEPTH_00196221.mp4",
+      "file_size_mb": 0.22
+    },
+    {
+      "exercise": "pushup",
+      "exercise_vi": "Chống đẩy (Push-up)",
+      "filename": "HIP_ALIGNMENT_00135411.mp4",
+      "original_video": "00135411.mp4",
+      "class_name": "HIP_ALIGNMENT",
+      "class_name_vi": "Lệch hông / Võng lưng sụp hông",
+      "label_id": 2,
+      "raw_labels": [
+        "pushups - 90 degrees",
+        "pushups - butt sinking",
+        "pushups - deep",
+        "pushups - wide"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\pushups\\HIP_ALIGNMENT_00135411.mp4",
+      "file_size_mb": 0.39
+    },
+    {
+      "exercise": "pushup",
+      "exercise_vi": "Chống đẩy (Push-up)",
+      "filename": "HIP_ALIGNMENT_00278567.mp4",
+      "original_video": "00278567.mp4",
+      "class_name": "HIP_ALIGNMENT",
+      "class_name_vi": "Lệch hông / Võng lưng sụp hông",
+      "label_id": 2,
+      "raw_labels": [
+        "pushups - elevated hips",
+        "pushups - insufficient",
+        "pushups - shoulder-width"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\pushups\\HIP_ALIGNMENT_00278567.mp4",
+      "file_size_mb": 0.22
+    },
+    {
+      "exercise": "pushup",
+      "exercise_vi": "Chống đẩy (Push-up)",
+      "filename": "HIP_ALIGNMENT_00228465.mp4",
+      "original_video": "00228465.mp4",
+      "class_name": "HIP_ALIGNMENT",
+      "class_name_vi": "Lệch hông / Võng lưng sụp hông",
+      "label_id": 2,
+      "raw_labels": [
+        "pushups - elevated hips",
+        "pushups - insufficient",
+        "pushups - wide"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\pushups\\HIP_ALIGNMENT_00228465.mp4",
+      "file_size_mb": 0.31
+    },
+    {
+      "exercise": "pushup",
+      "exercise_vi": "Chống đẩy (Push-up)",
+      "filename": "HIP_ALIGNMENT_00147725.mp4",
+      "original_video": "00147725.mp4",
+      "class_name": "HIP_ALIGNMENT",
+      "class_name_vi": "Lệch hông / Võng lưng sụp hông",
+      "label_id": 2,
+      "raw_labels": [
+        "pushups - 90 degrees",
+        "pushups - elevated hips",
+        "pushups - wide"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\pushups\\HIP_ALIGNMENT_00147725.mp4",
+      "file_size_mb": 0.62
+    },
+    {
+      "exercise": "pushup",
+      "exercise_vi": "Chống đẩy (Push-up)",
+      "filename": "HAND_PLACEMENT_00293157.mp4",
+      "original_video": "00293157.mp4",
+      "class_name": "HAND_PLACEMENT",
+      "class_name_vi": "Đặt tay quá rộng hoặc hẹp",
+      "label_id": 3,
+      "raw_labels": [
+        "pushups - 90 degrees",
+        "pushups - moving head",
+        "pushups - very wide"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\pushups\\HAND_PLACEMENT_00293157.mp4",
+      "file_size_mb": 0.26
+    },
+    {
+      "exercise": "pushup",
+      "exercise_vi": "Chống đẩy (Push-up)",
+      "filename": "HAND_PLACEMENT_00171224.mp4",
+      "original_video": "00171224.mp4",
+      "class_name": "HAND_PLACEMENT",
+      "class_name_vi": "Đặt tay quá rộng hoặc hẹp",
+      "label_id": 3,
+      "raw_labels": [
+        "pushups - deep",
+        "pushups - very wide"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\pushups\\HAND_PLACEMENT_00171224.mp4",
+      "file_size_mb": 0.24
+    },
+    {
+      "exercise": "pushup",
+      "exercise_vi": "Chống đẩy (Push-up)",
+      "filename": "HAND_PLACEMENT_00239633.mp4",
+      "original_video": "00239633.mp4",
+      "class_name": "HAND_PLACEMENT",
+      "class_name_vi": "Đặt tay quá rộng hoặc hẹp",
+      "label_id": 3,
+      "raw_labels": [
+        "pushups - deep",
+        "pushups - narrow"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\pushups\\HAND_PLACEMENT_00239633.mp4",
+      "file_size_mb": 0.41
+    }
+  ],
+  "jump_jack": [
+    {
+      "exercise": "jump_jack",
+      "exercise_vi": "Bật nhảy (Jumping Jack)",
+      "filename": "CORRECT_00118973.mp4",
+      "original_video": "00118973.mp4",
+      "class_name": "CORRECT",
+      "class_name_vi": "Đúng chuẩn form kỹ thuật",
+      "label_id": 0,
+      "raw_labels": [
+        "jumping jacks - speed=1.25 rps",
+        "jumping jacks - arms_rom=4.0",
+        "jumping jacks - legs_rom=4.0"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\jumping_jacks\\CORRECT_00118973.mp4",
+      "file_size_mb": 0.34
+    },
+    {
+      "exercise": "jump_jack",
+      "exercise_vi": "Bật nhảy (Jumping Jack)",
+      "filename": "CORRECT_00130140.mp4",
+      "original_video": "00130140.mp4",
+      "class_name": "CORRECT",
+      "class_name_vi": "Đúng chuẩn form kỹ thuật",
+      "label_id": 0,
+      "raw_labels": [
+        "jumping jacks - speed=1.00 rps",
+        "jumping jacks - arms_rom=4.0",
+        "jumping jacks - legs_rom=3.0"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\jumping_jacks\\CORRECT_00130140.mp4",
+      "file_size_mb": 0.35
+    },
+    {
+      "exercise": "jump_jack",
+      "exercise_vi": "Bật nhảy (Jumping Jack)",
+      "filename": "CORRECT_00093922.mp4",
+      "original_video": "00093922.mp4",
+      "class_name": "CORRECT",
+      "class_name_vi": "Đúng chuẩn form kỹ thuật",
+      "label_id": 0,
+      "raw_labels": [
+        "jumping jacks - speed=0.50 rps",
+        "jumping jacks - arms_rom=3.0",
+        "jumping jacks - legs_rom=3.0"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\jumping_jacks\\CORRECT_00093922.mp4",
+      "file_size_mb": 0.36
+    },
+    {
+      "exercise": "jump_jack",
+      "exercise_vi": "Bật nhảy (Jumping Jack)",
+      "filename": "CORRECT_00045428.mp4",
+      "original_video": "00045428.mp4",
+      "class_name": "CORRECT",
+      "class_name_vi": "Đúng chuẩn form kỹ thuật",
+      "label_id": 0,
+      "raw_labels": [
+        "jumping jacks - speed=1.50 rps",
+        "jumping jacks - arms_rom=3.0",
+        "jumping jacks - legs_rom=3.0"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\jumping_jacks\\CORRECT_00045428.mp4",
+      "file_size_mb": 0.45
+    },
+    {
+      "exercise": "jump_jack",
+      "exercise_vi": "Bật nhảy (Jumping Jack)",
+      "filename": "ARMS_INCOMPLETE_00225496.mp4",
+      "original_video": "00225496.mp4",
+      "class_name": "ARMS_INCOMPLETE",
+      "class_name_vi": "Tay vỗ chưa tới đỉnh đầu",
+      "label_id": 1,
+      "raw_labels": [
+        "jumping jacks - only legs"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\jumping_jacks\\ARMS_INCOMPLETE_00225496.mp4",
+      "file_size_mb": 0.35
+    },
+    {
+      "exercise": "jump_jack",
+      "exercise_vi": "Bật nhảy (Jumping Jack)",
+      "filename": "ARMS_INCOMPLETE_00047444.mp4",
+      "original_video": "00047444.mp4",
+      "class_name": "ARMS_INCOMPLETE",
+      "class_name_vi": "Tay vỗ chưa tới đỉnh đầu",
+      "label_id": 1,
+      "raw_labels": [
+        "jumping jacks - only legs"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\jumping_jacks\\ARMS_INCOMPLETE_00047444.mp4",
+      "file_size_mb": 0.35
+    },
+    {
+      "exercise": "jump_jack",
+      "exercise_vi": "Bật nhảy (Jumping Jack)",
+      "filename": "ARMS_INCOMPLETE_00054824.mp4",
+      "original_video": "00054824.mp4",
+      "class_name": "ARMS_INCOMPLETE",
+      "class_name_vi": "Tay vỗ chưa tới đỉnh đầu",
+      "label_id": 1,
+      "raw_labels": [
+        "jumping jacks - only legs"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\jumping_jacks\\ARMS_INCOMPLETE_00054824.mp4",
+      "file_size_mb": 0.2
+    },
+    {
+      "exercise": "jump_jack",
+      "exercise_vi": "Bật nhảy (Jumping Jack)",
+      "filename": "ARMS_INCOMPLETE_00077786.mp4",
+      "original_video": "00077786.mp4",
+      "class_name": "ARMS_INCOMPLETE",
+      "class_name_vi": "Tay vỗ chưa tới đỉnh đầu",
+      "label_id": 1,
+      "raw_labels": [
+        "jumping jacks - speed=1.00 rps",
+        "jumping jacks - arms_rom=2.0",
+        "jumping jacks - legs_rom=2.0"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\jumping_jacks\\ARMS_INCOMPLETE_00077786.mp4",
+      "file_size_mb": 0.17
+    },
+    {
+      "exercise": "jump_jack",
+      "exercise_vi": "Bật nhảy (Jumping Jack)",
+      "filename": "LEGS_TOO_NARROW_00182716.mp4",
+      "original_video": "00182716.mp4",
+      "class_name": "LEGS_TOO_NARROW",
+      "class_name_vi": "Chân mở chưa đủ rộng",
+      "label_id": 2,
+      "raw_labels": [
+        "jumping jacks - only arms"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\jumping_jacks\\LEGS_TOO_NARROW_00182716.mp4",
+      "file_size_mb": 0.34
+    },
+    {
+      "exercise": "jump_jack",
+      "exercise_vi": "Bật nhảy (Jumping Jack)",
+      "filename": "LEGS_TOO_NARROW_00118551.mp4",
+      "original_video": "00118551.mp4",
+      "class_name": "LEGS_TOO_NARROW",
+      "class_name_vi": "Chân mở chưa đủ rộng",
+      "label_id": 2,
+      "raw_labels": [
+        "jumping jacks - only arms"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\jumping_jacks\\LEGS_TOO_NARROW_00118551.mp4",
+      "file_size_mb": 0.41
+    },
+    {
+      "exercise": "jump_jack",
+      "exercise_vi": "Bật nhảy (Jumping Jack)",
+      "filename": "LEGS_TOO_NARROW_00284394.mp4",
+      "original_video": "00284394.mp4",
+      "class_name": "LEGS_TOO_NARROW",
+      "class_name_vi": "Chân mở chưa đủ rộng",
+      "label_id": 2,
+      "raw_labels": [
+        "jumping jacks - speed=1.25 rps",
+        "jumping jacks - arms_rom=3.0",
+        "jumping jacks - legs_rom=2.0"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\jumping_jacks\\LEGS_TOO_NARROW_00284394.mp4",
+      "file_size_mb": 0.64
+    },
+    {
+      "exercise": "jump_jack",
+      "exercise_vi": "Bật nhảy (Jumping Jack)",
+      "filename": "LEGS_TOO_NARROW_00037781.mp4",
+      "original_video": "00037781.mp4",
+      "class_name": "LEGS_TOO_NARROW",
+      "class_name_vi": "Chân mở chưa đủ rộng",
+      "label_id": 2,
+      "raw_labels": [
+        "jumping jacks - only arms"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\jumping_jacks\\LEGS_TOO_NARROW_00037781.mp4",
+      "file_size_mb": 0.48
+    },
+    {
+      "exercise": "jump_jack",
+      "exercise_vi": "Bật nhảy (Jumping Jack)",
+      "filename": "NOT_JUMPING_00284792.mp4",
+      "original_video": "00284792.mp4",
+      "class_name": "NOT_JUMPING",
+      "class_name_vi": "Không bật nhảy",
+      "label_id": 3,
+      "raw_labels": [
+        "jumping jacks - not jumping"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\jumping_jacks\\NOT_JUMPING_00284792.mp4",
+      "file_size_mb": 0.51
+    },
+    {
+      "exercise": "jump_jack",
+      "exercise_vi": "Bật nhảy (Jumping Jack)",
+      "filename": "NOT_JUMPING_00096147.mp4",
+      "original_video": "00096147.mp4",
+      "class_name": "NOT_JUMPING",
+      "class_name_vi": "Không bật nhảy",
+      "label_id": 3,
+      "raw_labels": [
+        "jumping jacks - not jumping"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\jumping_jacks\\NOT_JUMPING_00096147.mp4",
+      "file_size_mb": 0.13
+    },
+    {
+      "exercise": "jump_jack",
+      "exercise_vi": "Bật nhảy (Jumping Jack)",
+      "filename": "NOT_JUMPING_00168189.mp4",
+      "original_video": "00168189.mp4",
+      "class_name": "NOT_JUMPING",
+      "class_name_vi": "Không bật nhảy",
+      "label_id": 3,
+      "raw_labels": [
+        "jumping jacks - not jumping"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\jumping_jacks\\NOT_JUMPING_00168189.mp4",
+      "file_size_mb": 0.18
+    }
+  ],
+  "crunch": [
+    {
+      "exercise": "crunch",
+      "exercise_vi": "Gập bụng ngược (Reverse Crunch)",
+      "filename": "CORRECT_00199257.mp4",
+      "original_video": "00199257.mp4",
+      "class_name": "CORRECT",
+      "class_name_vi": "Đúng chuẩn form kỹ thuật",
+      "label_id": 0,
+      "raw_labels": [
+        "reverse crunches - 90 degrees",
+        "reverse crunches - height=1",
+        "reverse crunches - slow"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\reverse_crunches\\CORRECT_00199257.mp4",
+      "file_size_mb": 0.2
+    },
+    {
+      "exercise": "crunch",
+      "exercise_vi": "Gập bụng ngược (Reverse Crunch)",
+      "filename": "CORRECT_00085688.mp4",
+      "original_video": "00085688.mp4",
+      "class_name": "CORRECT",
+      "class_name_vi": "Đúng chuẩn form kỹ thuật",
+      "label_id": 0,
+      "raw_labels": [
+        "reverse crunches - over 90 degrees",
+        "reverse crunches - height=5"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\reverse_crunches\\CORRECT_00085688.mp4",
+      "file_size_mb": 0.18
+    },
+    {
+      "exercise": "crunch",
+      "exercise_vi": "Gập bụng ngược (Reverse Crunch)",
+      "filename": "CORRECT_00112228.mp4",
+      "original_video": "00112228.mp4",
+      "class_name": "CORRECT",
+      "class_name_vi": "Đúng chuẩn form kỹ thuật",
+      "label_id": 0,
+      "raw_labels": [
+        "reverse crunches - over 90 degrees",
+        "reverse crunches - height=4"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\reverse_crunches\\CORRECT_00112228.mp4",
+      "file_size_mb": 0.4
+    },
+    {
+      "exercise": "crunch",
+      "exercise_vi": "Gập bụng ngược (Reverse Crunch)",
+      "filename": "CORRECT_00054695.mp4",
+      "original_video": "00054695.mp4",
+      "class_name": "CORRECT",
+      "class_name_vi": "Đúng chuẩn form kỹ thuật",
+      "label_id": 0,
+      "raw_labels": [
+        "reverse crunches - over 90 degrees",
+        "reverse crunches - height=5"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\reverse_crunches\\CORRECT_00054695.mp4",
+      "file_size_mb": 0.18
+    },
+    {
+      "exercise": "crunch",
+      "exercise_vi": "Gập bụng ngược (Reverse Crunch)",
+      "filename": "SHALLOW_RANGE_00127091.mp4",
+      "original_video": "00127091.mp4",
+      "class_name": "SHALLOW_RANGE",
+      "class_name_vi": "Co gối chưa đủ góc 90°",
+      "label_id": 1,
+      "raw_labels": [
+        "reverse crunches - below 90 degrees",
+        "reverse crunches - height=2"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\reverse_crunches\\SHALLOW_RANGE_00127091.mp4",
+      "file_size_mb": 0.38
+    },
+    {
+      "exercise": "crunch",
+      "exercise_vi": "Gập bụng ngược (Reverse Crunch)",
+      "filename": "SHALLOW_RANGE_00226490.mp4",
+      "original_video": "00226490.mp4",
+      "class_name": "SHALLOW_RANGE",
+      "class_name_vi": "Co gối chưa đủ góc 90°",
+      "label_id": 1,
+      "raw_labels": [
+        "reverse crunches - below 90 degrees",
+        "reverse crunches - height=1"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\reverse_crunches\\SHALLOW_RANGE_00226490.mp4",
+      "file_size_mb": 0.19
+    },
+    {
+      "exercise": "crunch",
+      "exercise_vi": "Gập bụng ngược (Reverse Crunch)",
+      "filename": "SHALLOW_RANGE_00022158.mp4",
+      "original_video": "00022158.mp4",
+      "class_name": "SHALLOW_RANGE",
+      "class_name_vi": "Co gối chưa đủ góc 90°",
+      "label_id": 1,
+      "raw_labels": [
+        "reverse crunches - below 90 degrees",
+        "reverse crunches - height=2"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\reverse_crunches\\SHALLOW_RANGE_00022158.mp4",
+      "file_size_mb": 0.29
+    },
+    {
+      "exercise": "crunch",
+      "exercise_vi": "Gập bụng ngược (Reverse Crunch)",
+      "filename": "SHALLOW_RANGE_00022865.mp4",
+      "original_video": "00022865.mp4",
+      "class_name": "SHALLOW_RANGE",
+      "class_name_vi": "Co gối chưa đủ góc 90°",
+      "label_id": 1,
+      "raw_labels": [
+        "reverse crunches - below 90 degrees",
+        "reverse crunches - height=2"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\reverse_crunches\\SHALLOW_RANGE_00022865.mp4",
+      "file_size_mb": 0.42
+    },
+    {
+      "exercise": "crunch",
+      "exercise_vi": "Gập bụng ngược (Reverse Crunch)",
+      "filename": "NOT_RAISING_HIPS_00187656.mp4",
+      "original_video": "00187656.mp4",
+      "class_name": "NOT_RAISING_HIPS",
+      "class_name_vi": "Chưa nâng hông tách sàn",
+      "label_id": 2,
+      "raw_labels": [
+        "reverse crunches - not raising hips"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\reverse_crunches\\NOT_RAISING_HIPS_00187656.mp4",
+      "file_size_mb": 0.31
+    },
+    {
+      "exercise": "crunch",
+      "exercise_vi": "Gập bụng ngược (Reverse Crunch)",
+      "filename": "NOT_RAISING_HIPS_00041838.mp4",
+      "original_video": "00041838.mp4",
+      "class_name": "NOT_RAISING_HIPS",
+      "class_name_vi": "Chưa nâng hông tách sàn",
+      "label_id": 2,
+      "raw_labels": [
+        "reverse crunches - not raising hips"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\reverse_crunches\\NOT_RAISING_HIPS_00041838.mp4",
+      "file_size_mb": 0.5
+    },
+    {
+      "exercise": "crunch",
+      "exercise_vi": "Gập bụng ngược (Reverse Crunch)",
+      "filename": "NOT_RAISING_HIPS_00004206.mp4",
+      "original_video": "00004206.mp4",
+      "class_name": "NOT_RAISING_HIPS",
+      "class_name_vi": "Chưa nâng hông tách sàn",
+      "label_id": 2,
+      "raw_labels": [
+        "reverse crunches - not raising hips",
+        "reverse crunches - thighs not moving"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\reverse_crunches\\NOT_RAISING_HIPS_00004206.mp4",
+      "file_size_mb": 0.18
+    },
+    {
+      "exercise": "crunch",
+      "exercise_vi": "Gập bụng ngược (Reverse Crunch)",
+      "filename": "NOT_RAISING_HIPS_00004841.mp4",
+      "original_video": "00004841.mp4",
+      "class_name": "NOT_RAISING_HIPS",
+      "class_name_vi": "Chưa nâng hông tách sàn",
+      "label_id": 2,
+      "raw_labels": [
+        "reverse crunches - not raising hips",
+        "reverse crunches - thighs not moving"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\reverse_crunches\\NOT_RAISING_HIPS_00004841.mp4",
+      "file_size_mb": 0.19
+    },
+    {
+      "exercise": "crunch",
+      "exercise_vi": "Gập bụng ngược (Reverse Crunch)",
+      "filename": "HEAD_STRAIN_00016676.mp4",
+      "original_video": "00016676.mp4",
+      "class_name": "HEAD_STRAIN",
+      "class_name_vi": "Gồng bẻ đốt sống cổ / Đè đầu",
+      "label_id": 3,
+      "raw_labels": [
+        "reverse crunches - head up",
+        "reverse crunches - over 90 degrees",
+        "reverse crunches - height=2"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\reverse_crunches\\HEAD_STRAIN_00016676.mp4",
+      "file_size_mb": 0.41
+    },
+    {
+      "exercise": "crunch",
+      "exercise_vi": "Gập bụng ngược (Reverse Crunch)",
+      "filename": "HEAD_STRAIN_00066582.mp4",
+      "original_video": "00066582.mp4",
+      "class_name": "HEAD_STRAIN",
+      "class_name_vi": "Gồng bẻ đốt sống cổ / Đè đầu",
+      "label_id": 3,
+      "raw_labels": [
+        "reverse crunches - head up",
+        "reverse crunches - over 90 degrees",
+        "reverse crunches - height=4"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\reverse_crunches\\HEAD_STRAIN_00066582.mp4",
+      "file_size_mb": 0.23
+    },
+    {
+      "exercise": "crunch",
+      "exercise_vi": "Gập bụng ngược (Reverse Crunch)",
+      "filename": "HEAD_STRAIN_00248106.mp4",
+      "original_video": "00248106.mp4",
+      "class_name": "HEAD_STRAIN",
+      "class_name_vi": "Gồng bẻ đốt sống cổ / Đè đầu",
+      "label_id": 3,
+      "raw_labels": [
+        "reverse crunches - 90 degrees",
+        "reverse crunches - feet down",
+        "reverse crunches - head up",
+        "reverse crunches - height=1"
+      ],
+      "dest_path": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_camera_app\\test_videos_benchmark\\reverse_crunches\\HEAD_STRAIN_00248106.mp4",
+      "file_size_mb": 0.2
+    }
+  ]
+}

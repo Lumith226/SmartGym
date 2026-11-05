@@ -1,0 +1,110 @@
+# BÁO CÁO TIẾN ĐỘ & NÂNG CẤP PHÂN HỆ AI (SMART GYM)
+## ĐỐI SOÁT & CẢI TIẾN TOÀN DIỆN: PHIÊN BẢN V2 (TUẦN TRƯỚC) VÀ PHIÊN BẢN V3 (TUẦN NÀY)
+
+* **Thời gian thực hiện**: Tuần 3 - Tháng 10/2026
+* **Đề tài**: Hệ thống Đánh giá Kỹ thuật Tập luyện Thể hình Thời gian thực
+* **Giảng viên hướng dẫn**: PGS. TS Trần Đình Quế
+
+---
+
+### 1. Bối cảnh và Lý do Cải tiến Tuần này
+
+Ở bản báo cáo tuần trước (Phiên bản V2), nhóm đã hoàn thành huấn luyện mô hình phân loại lỗi kỹ thuật dựa trên đồ thị không-thời gian (ST-GCN++) đối với 4 bài tập thể hình trên tập dữ liệu Qualcomm QEVD-FIT. Tuy nhiên, trong quá trình tích hợp vào hệ thống kiểm thử thời gian thực, nhóm ghi nhận hai vấn đề kỹ thuật lớn:
+
+1. **Hiện tượng nhận diện sai lệch (Bỏ sót lỗi kỹ thuật)**: Một số trường hợp người tập thực hiện sai biên độ hoặc sai tư thế rõ ràng (lưng gù, hạ trọng tâm chưa đủ độ sâu, tay không chạm đỉnh), nhưng hệ thống vẫn phân loại vào lớp Đúng kỹ thuật (CORRECT).
+2. **Hiện tượng phân đoạn Rep không chính xác ở tốc độ tập chậm**: Đối với các chuyển động kéo dài chu kỳ từ 4 đến 6 giây hoặc có thời gian giữ tĩnh (pause) tại điểm chuyển hướng, bộ đếm thường tách nhầm thành nhiều chu kỳ nhỏ không hoàn chỉnh.
+
+Nhóm đã tiến hành rà soát toàn bộ quy trình tiền xử lý, loại bỏ các can thiệp nhân tạo không phù hợp và thiết lập phiên bản V3 với dữ liệu thô nguyên bản.
+
+---
+
+### 2. Các Nâng cấp Kỹ thuật trong Phiên bản V3
+
+#### a) Chuyển đổi mô hình ước lượng tư thế sang RTMPose-M SimCC
+* Ở bản V2, hệ thống sử dụng YOLOv8n-pose. Mô hình này có ưu điểm về tốc độ suy luận nhưng độ ổn định tọa độ theo chuỗi thời gian chưa cao, biên độ rung lắc tọa độ khớp qua các khung hình còn lớn và dễ mất dấu khi khớp bị che khuất.
+* Ở bản V3, hệ thống chuyển sang RTMPose-M SimCC (OpenMMLab). Nhờ sử dụng biểu diễn tọa độ dựa trên phân phối xác suất SimCC thay vì hồi quy trực tiếp, RTMPose đạt độ chính xác giải phẫu vượt trội, quỹ đạo khớp mượt mà tự nhiên và duy trì độ tin cậy cao ngay cả ở các góc quay nghiêng.
+
+#### b) Loại bỏ 4 bộ lọc tiền xử lý can thiệp cứng
+Đây là thay đổi kỹ thuật cốt lõi trong tuần này. Ở bản V2, dữ liệu trích xuất từ camera được đưa qua 4 cơ chế hiệu chỉnh:
+* Ước lượng vị trí khớp bị che khuất dựa trên quán tính tuyến tính.
+* Ép cố định tọa độ khớp gối theo tỷ lệ hông.
+* Ràng buộc cứng chiều dài đoạn xương đùi.
+* Làm mượt tọa độ bằng bộ lọc trung bình động (EMA).
+
+Phân tích dữ liệu thực nghiệm cho thấy các bộ lọc này làm biến dạng động học tự nhiên:
+* Khi người tập gù lưng, hình chiếu cơ thể co ngắn; bộ lọc ràng buộc chiều dài xương đùi tự động co ngắn tọa độ đùi, vô tình xóa mất đặc trưng gù lưng và độ sâu của chuyển động.
+* Khi khớp bị che khuất do tư thế sai lệch, cơ chế bù quán tính lại ước tính khớp về quỹ đạo thông thường, che giấu đặc trưng lỗi.
+* Bộ lọc làm mượt làm suy giảm các biến thiên vận tốc và rung lắc cơ bắp tự nhiên vốn là dấu hiệu nhận diện của sự mất thăng bằng hoặc sai kỹ thuật.
+
+Ở bản V3, nhóm **loại bỏ hoàn toàn 4 bộ lọc can thiệp nói trên**, bảo toàn nguyên vẹn dữ liệu động học thô từ RTMPose để mạng nơ-ron học đúng phân phối đặc trưng thực tế.
+
+#### c) Cải tiến thuật toán phát hiện và phân đoạn Rep thời gian thực
+* **Mở rộng cửa sổ thời gian chờ tối đa**: Tăng từ 3.0 giây lên 8.0 giây (tương đương 240 khung hình tại 30 FPS), hỗ trợ các bài tập có chu kỳ dài hoặc có khoảng dừng có chủ đích.
+* **Cơ chế xác định điểm kết thúc dựa trên tỷ lệ phục hồi động**: Thay vì yêu cầu cơ thể phải trở về đúng góc duỗi ban đầu (180 độ), thuật toán xác định rep hoàn thành khi biên độ chuyển động hồi phục đạt ngưỡng 70% so với độ sâu cực đại đã ghi nhận của rep đó. Cơ chế này loại bỏ hiện tượng đếm thừa và thích ứng tốt với thể trạng từng cá nhân.
+
+#### d) Tích hợp thuật toán Cửa sổ Chuyển động Tích cực (Active Motion Window)
+Thay vì lấy mẫu đều 32 khung hình trên toàn bộ chiều dài video (thường bao gồm cả thời gian đứng chuẩn bị và nghỉ sau tập), thuật toán mới tính toán động năng tích lũy của các khớp trọng tâm để xác định chính xác thời điểm bắt đầu và kết thúc chu kỳ vận động thực. Nhờ đó, 32 khung hình đầu vào ST-GCN++ đều chứa thông tin động học hữu ích.
+
+#### e) Trả lại quyền quyết định hoàn toàn cho mạng nơ-ron
+Loại bỏ hoàn toàn các quy tắc gán cứng (if-else) từng được thiết lập ở bản V2 (như việc ép giảm xác suất lỗi khi góc camera nghiêng), đảm bảo kết quả phân loại là khách quan và xuất phát từ phân phối xác suất của mô hình.
+
+---
+
+### 3. Bảng Đối sánh Kiến trúc: Phiên bản V2 vs Phiên bản V3
+
+| Tiêu chí | Phiên bản V2 (Tuần trước) | Phiên bản V3 (Tuần này) |
+| :--- | :--- | :--- |
+| **Mô hình Pose Estimation** | YOLOv8n-pose (độ trôi khớp cao khi che khuất) | RTMPose-M SimCC (bắt khớp chính xác, ổn định chuỗi thời gian) |
+| **Xử lý điểm khuất (Occlusion)** | Dự đoán quán tính tuyến tính (nguy cơ sai lệch vị trí) | Giữ nguyên dữ liệu thô kèm điểm tin cậy (Confidence Score) |
+| **Ràng buộc chiều dài xương** | Áp dụng ngưỡng cắt cứng tỷ lệ chiều dài xương | Loại bỏ hoàn toàn; giữ nguyên biến dạng hình chiếu thực |
+| **Làm mượt tín hiệu** | Áp dụng bộ lọc EMA làm phẳng chuỗi tín hiệu | Không làm mượt; giữ nguyên biến thiên gia tốc tự nhiên |
+| **Phân đoạn chu kỳ (Rep)** | Giới hạn 3.0 giây, phụ thuộc mốc duỗi tuyệt đối | Mở rộng 8.0 giây, cơ chế phục hồi tương đối 70% |
+| **Trích xuất chuỗi thời gian** | Lấy mẫu đều toàn clip, bao gồm cả pha tĩnh | Cửa sổ chuyển động tích cực (Active Motion Window) |
+| **Quyết định phân loại** | Có can thiệp từ các quy tắc suy diễn thủ công | 100% dựa trên xác suất đầu ra của ST-GCN++ |
+
+---
+
+### 4. Phân tích Chỉ số Đánh giá Thực nghiệm
+
+Trên tập kiểm thử chuẩn, độ chính xác phân loại (Test Accuracy) giữa hai phiên bản được ghi nhận như sau:
+* **Phiên bản V2**: Ghi nhận độ chính xác từ 91% đến 96% trên cả 4 bài tập.
+* **Phiên bản V3**: Ghi nhận độ chính xác thực nghiệm từ 58% đến 88% (Squat: 71.5%, Pushup: 57.8%, Jumping Jack: 88.2%, Crunch: 69.1%).
+
+Sự khác biệt về mặt số liệu này phản ánh bản chất của quy trình tiền xử lý và đặc trưng dữ liệu:
+
+1. **Độ chính xác cao ở bản V2 bắt nguồn từ việc làm mượt dữ liệu quá mức**:  
+   Ở bản V2, việc áp dụng đồng thời các bộ lọc nắn khớp, ép tỷ lệ xương và làm mượt EMA đã loại bỏ phần lớn sự bất định của dữ liệu thực tế, đưa chuỗi tọa độ về dạng biểu diễn nhân tạo lý tưởng. Mô hình dễ dàng phân tách các lớp trên tập dữ liệu đã qua tiền xử lý dày đặc này, tạo ra chỉ số kiểm thử cao. Tuy nhiên, khi đối mặt với dữ liệu thực tế có rung lắc và che khuất, mô hình mất khả năng nhận diện các sai lệch tinh vi và có xu hướng phân loại nhầm về lớp chuẩn.
+
+2. **Chỉ số ở bản V3 phản ánh chính xác phân phối dữ liệu thực nghiệm**:  
+   Mô hình V3 được huấn luyện trực tiếp trên tọa độ thô nguyên bản. Dữ liệu chứa đầy đủ các yếu tố thực tế như góc máy đa dạng, che khuất một phần và gia tốc rung lắc của cơ thể. Độ chính xác 71.5% ở Squat và 88.2% ở Jumping Jack là kết quả học thực chất của mạng nơ-ron từ các đặc trưng động học không qua tinh chỉnh nhân tạo.
+
+3. **Ảnh hưởng của cơ chế đánh giá đa nhãn trong tập dữ liệu gốc**:  
+   Trong tập dữ liệu QEVD-FIT, một động tác thực tế có thể đồng thời vi phạm nhiều tiêu chí (ví dụ: hạ ngực đủ sâu nhưng hông bị võng, hoặc tay giơ đúng biên độ nhưng chân mở hẹp). Hiện tại, bài toán đang được mô hình hóa dưới dạng phân loại đơn nhãn (Single-label Classification) với 4 lớp loại trừ lẫn nhau. Khi người tập mắc nhiều lỗi cùng lúc, việc mô hình nhận diện lỗi ở bộ phận này có thể lệch với nhãn ưu tiên được gán trong bộ dữ liệu, làm giảm chỉ số chính xác tổng thể dù phân tích chuyển động vẫn hợp lý.
+
+---
+
+### 5. Kết quả Huấn luyện Thực nghiệm Phiên bản V3
+
+Dưới đây là liên kết đến các biểu đồ hàm mất mát (Loss Curve) và ma trận nhầm lẫn (Confusion Matrix) được lưu trữ sau quá trình huấn luyện:
+
+* **Bài tập Squat (Độ chính xác: 71.5%)**:
+  * [Biểu đồ Loss](file:///D:/1.E22CQCN03-B/GYM/stgcn_model_training/outputs/v3/loss_curve_best_stgcnpp_squat_v3.png)
+  * [Ma trận nhầm lẫn](file:///D:/1.E22CQCN03-B/GYM/stgcn_model_training/outputs/v3/confusion_matrix_best_stgcnpp_squat_v3.png)
+* **Bài tập Pushup (Độ chính xác: 57.8%)**:
+  * [Biểu đồ Loss](file:///D:/1.E22CQCN03-B/GYM/stgcn_model_training/outputs/v3/loss_curve_best_stgcnpp_pushup_v3.png)
+  * [Ma trận nhầm lẫn](file:///D:/1.E22CQCN03-B/GYM/stgcn_model_training/outputs/v3/confusion_matrix_best_stgcnpp_pushup_v3.png)
+* **Bài tập Jumping Jack (Độ chính xác: 88.2%)**:
+  * [Biểu đồ Loss](file:///D:/1.E22CQCN03-B/GYM/stgcn_model_training/outputs/v3/loss_curve_best_stgcnpp_jumpjack_v3.png)
+  * [Ma trận nhầm lẫn](file:///D:/1.E22CQCN03-B/GYM/stgcn_model_training/outputs/v3/confusion_matrix_best_stgcnpp_jumpjack_v3.png)
+* **Bài tập Crunch (Độ chính xác: 69.1%)**:
+  * [Biểu đồ Loss](file:///D:/1.E22CQCN03-B/GYM/stgcn_model_training/outputs/v3/loss_curve_best_stgcnpp_crunch_v3.png)
+  * [Ma trận nhầm lẫn](file:///D:/1.E22CQCN03-B/GYM/stgcn_model_training/outputs/v3/confusion_matrix_best_stgcnpp_crunch_v3.png)
+
+*(Chi tiết hình ảnh biểu đồ kích thước đầy đủ đã được nhúng trực tiếp trong tài liệu Word đính kèm).*
+
+---
+
+### 6. Kế hoạch Nghiên cứu Tiếp theo
+
+1. **Chuyển đổi kiến trúc sang mô hình Đa nhiệm / Đa nhãn (Multi-head / Multi-label ST-GCN++)**: Tách các nhánh đánh giá độc lập cho từng nhóm khớp (tay, chân, thân/hông) nhằm giải quyết triệt để vấn đề các lỗi kỹ thuật xuất hiện đồng thời.
+2. **Tối ưu hóa độ trễ thời gian thực**: Hoàn thiện pipeline tích hợp giữa bộ phát hiện chu kỳ rep và mô hình phân loại đa nhãn trên thiết bị người dùng.

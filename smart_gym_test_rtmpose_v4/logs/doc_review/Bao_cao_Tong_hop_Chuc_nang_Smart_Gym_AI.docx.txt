@@ -1,0 +1,78 @@
+BÁO CÁO TỔNG HỢP HỆ THỐNG SMART GYM AI
+PHẦN I: CÁC PHÂN HỆ TRÍ TUỆ NHÂN TẠO 
+1. AI Phân Tích Động Tác (AI Pose & Motion Analysis Core): Đảm nhận vai trò 'mắt thần' nhận diện thị giác máy tính, tính toán động lực học thời gian thực và phát hiện lỗi kỹ thuật.
+2. AI Trợ Lý Huấn Luyện Viên Ảo (AI Virtual Coach & RAG System): Đảm nhận vai trò 'bộ não tư vấn' xử lý ngôn ngữ tự nhiên, giải thích kết quả và tương tác cá nhân hóa với người dùng.
+1.1. AI PHÂN TÍCH ĐỘNG TÁC (AI POSE & MOTION ANALYSIS CORE)
+Phân hệ AI Phân Tích nhận luồng video thời gian thực từ camera (qua WebSocket) hoặc file video tải lên, trích xuất 17 điểm khớp xương (Keypoints) và phân tích chuỗi chuyển động theo thời gian.
+Bảng Tổng hợp Chức năng và Thuật toán của AI Phân Tích
+1.2. AI TRỢ LÝ HUẤN LUYỆN VIÊN ẢO (AI VIRTUAL COACH & RAG SYSTEM)
+Phân hệ AI Trợ Lý kết hợp Mô hình ngôn ngữ lớn (LLM) và Kho tri thức RAG để cung cấp khả năng tư vấn, giải thích lỗi sai và xây dựng chương trình tập luyện cá nhân hóa.
+Bảng Tổng hợp Chức năng và Thuật toán của AI Trợ Lý
+
+
+PHẦN II: CÁC CHỨC NĂNG HỆ THỐNG APP / WEB (SYSTEM & WEB/APP FEATURES)
+Các chức năng của ứng dụng Web/App được thiết kế nhằm khai thác tối đa sức mạnh của 2 Phân hệ AI, tạo nên trải nghiệm tương tác trực quan cho người dùng và công cụ quản trị cho Admin.
+2.1. Studio Tập Luyện Trực Tiếp (Live Workout Studio)
+Giao diện Màn hình Camera tương tác: Khung hình hiển thị live stream từ Webcam với overlay khung xương 17 điểm đổi màu thời gian thực (Xanh = Đạt, Vàng = Nhắc nhở, Đỏ = Phạm lỗi).
+Bảng chỉ số Real-time: Hộp hiển thị số Rep đã hoàn thành, góc khớp gối/lưng hiện tại, trạng thái FSM (Đứng, Đang xuống, Đáy, Đang lên).
+Thanh Điểm Kỹ Thuật Động (Live Score Bar): Cập nhật điểm DTW nhảy theo thời gian thực sau khi kết thúc mỗi rep.
+Phản hồi Cảnh báo Kép (Visual & Audio Warning): Hiệu ứng viền màn hình cảnh báo kết hợp phát âm thanh bằng giọng nói (TTS) để người tập điều chỉnh tư thế ngay lập tức.
+Trợ lý Góc Quay Camera (Camera Angle Assistant): Hướng dẫn kiểm tra khoảng cách và góc đặt camera chuẩn trước khi bấm bắt đầu tập.
+2.2. Phân Tích Video Tải Lên (Offline Video Processing)
+Tải file Video bài tập: Cho phép người dùng tải lên video bài tập có sẵn (MP4/MOV) để phân tích khi không thể tập trực tiếp trước camera.
+Xuất Video Gắn Nhãn (Annotated Video Export): Hệ thống xử lý ngầm và xuất ra video được vẽ sẵn khung xương, bảng góc khớp và các khoảnh khắc tô đỏ khi phạm lỗi.
+2.3. Xem Lại & Phân Tích Động Tác Chi Tiết (Post-Workout Motion Replay)
+Tua Video Khung Xương (Interactive Frame Scrubbing): Màn hình phát lại video buổi tập kết hợp khung xương đè lên từng frame.
+Thanh Timeline Đánh Dấu Lỗi (Error Timestamp Markers): Hiển thị trực quan các mốc thời gian xảy ra lỗi trên thanh tua video (e.g. Mốc 00:35 - Võng lưng, 01:10 - Gối chụm).
+Nút 'Hỏi AI Trợ Lý về Rep này': Người dùng nhấp vào một rep lỗi cụ thể, hệ thống tự động chuyển dữ liệu góc khớp của rep đó sang AI Trợ Lý để nhận phân tích chi tiết.
+2.4. Khung Làm Việc AI Trợ Lý (AI Virtual Coach Workspace)
+Cửa sổ Trò chuyện Tương tác: Cửa sổ chat AI nổi (Floating Widget) hoặc trang chuyên biệt.
+Gợi ý Câu hỏi Nhanh (Quick Prompt Cards): Tự động đề xuất các câu hỏi liên quan đến buổi tập vừa kết thúc (e.g. 'Tại sao ở rep thứ 4 tôi bị cảnh báo gối chụm?', 'Hãy gợi ý bài tập giãn cơ hông').
+Hiển thị Đa Phương Tiện: AI Trợ Lý phản hồi kèm biểu đồ mini, hình ảnh hoặc link video hướng dẫn bài tập chuẩn.
+2.5. Quản Lý Người Dùng & Chỉ Số Sức Khỏe (User & Health Profile)
+Xác thực an toàn: Đăng ký, đăng nhập bảo mật bằng JWT Authentication.
+Hồ sơ chỉ số sinh học: Quản lý thông tin chiều cao, cân nặng, độ tuổi, giới tính, mức độ vận động và mục tiêu (Tăng cơ / Giảm mỡ / Duy trì).
+Tính toán chỉ số y học: Tự động tính toán các chỉ số sức khỏe y học gồm BMI (Body Mass Index), BMR (Basal Metabolic Rate theo Mifflin-St Jeor), và TDEE (Total Daily Energy Expenditure).
+Biểu đồ biến động thể trạng: Lưu lịch sử chỉ số và vẽ biểu đồ diễn biến cân nặng, BMI theo tuần/tháng.
+2.6. Đề Xuất Kế Hoạch Tập Luyện & Dinh Dưỡng (Smart Planner & Nutrition)
+Lịch Tập Tuần Kéo-Thả (Interactive Drag & Drop Calendar): Hiển thị danh sách bài tập được AI đề xuất cho từng ngày trong tuần.
+Tự động tăng tải (Progressive Overload Logic): Gợi ý tăng mức tạ (+2.5 kg) hoặc tăng +1 set khi hoàn thành ≥ 90% kế hoạch trong 2 tuần liên tiếp.
+Bảng Dinh Dưỡng & Macros: Tính toán lượng Calories mục tiêu hàng ngày và tỷ lệ Protein/Carb/Fat. Gợi ý thực đơn chi tiết cho từng bữa ăn.
+2.7. Thống Kê Tiến Trình & Phân Tích Nâng Cao (Progress Analytics & Reports)
+Điểm Hiệu Suất Tổng Hợp (Performance Score): Điểm hiệu suất buổi tập Session Score = (Tổng điểm DTW / N) * (1 - Error Rate / 100).
+Biểu đồ xu hướng tiến trình: Thống kê chỉ số Performance Score, tổng khối lượng tạ (volume) qua các tuần.
+Bản đồ nhiệt tần suất lỗi (Error Frequency Heatmap): Phân tích các loại lỗi xuất hiện nhiều nhất để chỉ ra thói quen tập sai.
+Cảnh báo lệch cơ bắp kéo dài (Long-term Asymmetry Tracker): Giám sát sự chênh lệch góc khớp trái/phải qua nhiều buổi để cảnh báo nguy cơ lệch cơ hoặc chấn thương.
+Xuất Báo Cáo Định Kỳ (PDF Progress Report): Cho phép xuất báo cáo tổng kết tiến trình tập luyện hàng tháng dạng file PDF.
+2.8. Thành Tích & Gamification (Badges & Leaderboard)
+Bộ Huy hiệu Thành tích (Badges Gallery): Tự động mở khóa các huy hiệu (e.g. 'Squat Master', '30-Day Streak', 'Form Chuẩn 100%').
+Theo dõi Chuỗi ngày tập (Streak Counter): Đếm và hiển thị số ngày tập luyện liên tục.
+Bảng xếp hạng kỹ thuật (Technique Leaderboard): Xếp hạng người dùng dựa trên điểm kỹ thuật trung bình thay vì trọng lượng tạ nâng được.
+2.9. Quản Trị Hệ Thống (Admin Management Panel)
+Quản lý Thư viện Bài tập (Exercise Catalog CRUD): Quản lý danh mục bài tập, video hướng dẫn chuẩn và ngưỡng góc khớp mục tiêu.
+Cấu hình Ngưỡng AI (AI Threshold Tuning): Tinh chỉnh các tham số ngưỡng phát hiện lỗi của FSM, DTW, ST-GCN trực tiếp trên Web.
+Dashboard Thống kê Hệ thống: Thống kê tổng số người dùng, tần suất tập luyện, lỗi phổ biến nhất và hiệu năng mô hình (FPS, latency).
+
+
+STT | Chức năng | Kỹ thuật AI / Thuật toán / Mô hình | Đầu ra / Phản hồi chi tiết
+1 | Nhận diện khung xương | YOLOv8-Pose (ONNX Runtime / TensorRT) | Trích xuất 17 điểm khớp (Keypoints) + Confidence Score với tốc độ ≥ 30 FPS.
+2 | Lọc nhiễu chuyển động | Kalman Filter 1D / Moving Average | Chuỗi tọa độ khớp ổn định, khử hiện tượng rung giật (jitter) giữa các frame.
+3 | Chuẩn hóa tư thế | Pose Normalization (Scaling theo Torso & Mid-hip) | Tọa độ chuẩn hóa độc lập với chiều cao người dùng và khoảng cách/góc quay camera.
+4 | Tính góc khớp sinh cơ học | Hình học Vector (Vector Geometry) + arctan2 | Tính góc gối, góc hông, góc lưng, góc khuỷu tay, góc vai theo từng khung hình.
+5 | Nhận diện pha động tác | Finite State Machine (FSM) | Phân loại trạng thái chu kỳ: START -> ECCENTRIC -> BOTTOM -> CONCENTRIC.
+6 | Đếm số lần lặp (Rep) | FSM + Angular Velocity Thresholds | Đếm số rep hợp lệ tự động, kích hoạt chấm điểm khi hoàn thành mỗi rep.
+7 | Chấm điểm kỹ thuật | Dynamic Time Warping (DTW) | Thang điểm kỹ thuật 0 - 100 so sánh chuỗi góc khớp với mẫu chuyển động chuẩn.
+8 | Phân loại lỗi tư thế nâng cao | ST-GCN (Spatial-Temporal Graph ConvNet) | Nhận diện chính xác các lỗi phức tạp: BACK_ROUNDING (đổ lưng), KNEE_VALGUS (gối chụm), SHALLOW_DEPTH (xuống nông)...
+9 | Phát hiện bất đối xứng | Asymmetry Detection (So sánh góc trái/phải) | Đo lường mức độ lệch góc giữa hai bên cơ thể.
+10 | Cảnh báo thời gian thực | Prescription Engine + Text-to-Speech (TTS) | Tín hiệu hình ảnh (overlay màu xanh/vàng/đỏ) và phát âm thanh cảnh báo bằng giọng nói.
+11 | Phân tích nhịp độ (Tempo) | Angular Velocity & Frame Duration Analysis | Đo thời gian pha xuống/giữ/lên, cảnh báo khi người tập thực hiện quá nhanh.
+12 | Phát hiện mệt mỏi cơ học | Biomechanical Variance & Deviation Drift | Cảnh báo sự biến dạng form xuất hiện ở các rep cuối set do suy giảm sức bền.
+STT | Chức năng | Kỹ thuật AI / Thuật toán / Mô hình | Đầu ra / Phản hồi chi tiết
+1 | Hỏi đáp tri thức thể hình | Qwen2.5-3B-Instruct + RAG (ChromaDB + BGE-M3) | Trả lời chính xác các thắc mắc về kỹ thuật bài tập, nhóm cơ tác động, cơ chế hít thở.
+2 | Giải thích lý do bị trừ điểm | Dynamic Context Fusion Prompting (log DTW/ST-GCN) | Giải thích bằng ngôn ngữ tự nhiên nguyên nhân người dùng bị giảm điểm ở rep cụ thể.
+3 | Tóm tắt & Đánh giá buổi tập | LLM Session Summarization Engine | Bản tổng hợp đánh giá kết quả buổi tập, khen ngợi tiến bộ và chỉ ra điểm cần cải thiện.
+4 | Gợi ý bài tập sửa lỗi thói quen | RAG Knowledge Retrieval + Rule-based Mapping | Danh sách bài tập phục hồi (Corrective Exercises) và bài tập giãn cơ giúp khắc phục lỗi sai form.
+5 | Tư vấn dinh dưỡng cá nhân hóa | LLM Nutrition Reasoning Engine | Tính toán nhu cầu Calories/Macros, đề xuất thực đơn và tư vấn chọn thực phẩm theo mục tiêu.
+6 | Hội thoại đa lượt cá nhân hóa | Context Window Management & User Memory Vector | Duy trì ngữ cảnh cuộc trò chuyện liên tục, ghi nhớ lịch sử tập luyện và thói quen người dùng.
+7 | Đề xuất mức tải thông minh | Progressive Overload Rule Engine | Tự động phân tích hiệu suất 2 tuần liên tiếp để đưa ra mức tạ gợi ý cho buổi tập tới (+2.5 kg).
+8 | Nhận diện món ăn qua ản | Vision-Language Model (VLM / Qwen-VL) | Tự động nhận diện món ăn từ hình ảnh chụp bữa ăn và ước tính lượng Calories/Macros.

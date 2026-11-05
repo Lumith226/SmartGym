@@ -1,0 +1,43 @@
+[
+  {
+    "video": "CORRECT_00002456.mp4",
+    "frames_processed": 149,
+    "rep_count": 2,
+    "completed": [
+      {
+        "count": 1,
+        "labels": [
+          "depth_90",
+          "shoulder_width",
+          "no_obvious_issue"
+        ],
+        "scope": "rep"
+      },
+      {
+        "count": 2,
+        "labels": [
+          "depth_90",
+          "shoulder_width",
+          "no_obvious_issue"
+        ],
+        "scope": "rep"
+      }
+    ]
+  },
+  {
+    "video": "BACK_ROUNDING_00001672.mp4",
+    "frames_processed": 155,
+    "rep_count": 1,
+    "completed": [
+      {
+        "count": 1,
+        "labels": [
+          "shallow",
+          "back_not_straight",
+          "shoulder_width"
+        ],
+        "scope": "rep"
+      }
+    ]
+  }
+]

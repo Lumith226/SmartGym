@@ -1,0 +1,538 @@
+HỌC VIỆN CÔNG NGHỆ BƯU CHÍNH VIỄN THÔNG 
+KHOA CÔNG NGHỆ THÔNG TIN 1 
+ 
+ 
+ 
+ 
+BÁO CÁO ĐỒ ÁN TỐT NGHIỆP ĐẠI HỌC – 
+VERSION 1 
+ 
+Đề tài: Xây dựng hệ thống hỗ trợ tập luyện thể hình sử dụng 
+mạng nơ-ron tích chập đồ thị 
+ 
+                                        Giảng viên: PSG. TS Trần Đình Quế 
+                          Sinh viên thực hiện: Lưu Minh Thắng - B22DCVT524 
+                                                             Phan Hoàng An - B22DCAT006 
+                                                             Nguyễn Lưu Thanh Tùng - B22DCAT275 
+ 
+ 
+Hà Nội - 2026 
+ 
+ 
+ 
+ 
+MỞ ĐẦU 
+1. Lý do lựa chọn đề tài 
+Tập luyện thể thao, đặc biệt là các bài tập kháng lực như Squat, Deadlift, Push -up, 
+đang ngày càng trở nên phổ biến trong cộng đồng. Tuy nhiên, một nghiên cứu của 
+American Journal of Sports Medicine (2022) cho thấy hơn 70% chấn thương trong 
+phòng tập xuất phát từ kỹ thuật sai trong thời gian dài, mà phần lớn người tập không có 
+điều kiện thuê huấn luyện viên cá nhân (Personal Trainer) để được giám sát thường 
+xuyên. 
+Sự bùng nổ của trí tuệ nhân tạo, đặc biệt là Computer Vision và Deep Learning, đã 
+mở ra khả năng xây dựng các hệ thống hỗ trợ huấn luyện tự động, có khả năng phân 
+tích chuyển động của con người theo thời gian thực với độ chính xác cao. Sự kết hợp 
+giữa mô hình nhận diện tư thế (Pose Estimation), mạng nơ -ron đồ thị không-thời gian 
+(Spatial-Temporal Graph Convolutional Networks), cùng hệ thống Knowledge Graph 
+và RAG (Retrieval-Augmented Generation) hứa hẹn tạo ra một "huấn luyện viên AI" 
+có thể tư vấn chuyên sâu, có trích dẫn khoa học, phù hợp với từng cá nhân. 
+Xuất phát từ những lý do trên, nhóm nghiên cứu đề xuất đề tài: xây dựng hệ thống 
+SmartGym – một nền tảng phân tích và đánh giá kỹ thuật tập luyện thông minh, kết hợp 
+Deep Learning, Knowledge Graph và Retrieval-Augmented Generation. 
+2. Tổng quan vấn đề nghiên cứu 
+Bài toán đánh giá kỹ thuật tập luyện (Workout Technique Assessment) là một bài 
+toán liên ngành, kết hợp giữa Computer Vision, Human Action Recognition, 
+Biomechanics và Natural Language Processing. Các công trình nghiên cứu liên quan 
+bao gồm: 
+• Pose Estimation: OpenPose (CMU, 2018), MediaPipe Pose (Google), YOLOv8 -
+Pose (Ultralytics, 2023) – tập trung vào trích xu ất khung xương ngư ời t ừ 
+ảnh/video. 
+• Action Recognition trên đ ồ thị: ST -GCN (NeurIPS 2018), ST -GCN++ (CVPR 
+2022), AAGCN – sử dụng cấu trúc đồ thị để mô hình hóa quan hệ giữa các khớp 
+xương. 
+• RepCount Dataset (CVPR 2022): B ộ dữ liệu đếm và phân đo ạn lặp lại trong t ập 
+luyện, được dùng làm nền tảng xây dựng dữ liệu cho đề tài. 
+• Knowledge Graph trong y tế/thể thao: Các hệ thống như BioKG, SportKG thể hiện 
+khả năng liên kết tri thức y khoa và vận động học. 
+• RAG (Retrieval-Augmented Generation): Kỹ thuật kết hợp tìm kiếm ngữ nghĩa và 
+mô hình ngôn ng ữ lớn (LLM) đ ể sinh ra ph ản hồi có căn c ứ, tránh hi ện tượng 
+"hallucination". 
+3. Mục tiêu nghiên cứu 
+• Xây d ựng pipeline nh ận di ện tư th ế Squat theo th ời gian th ực v ới đ ộ trễ dưới 
+100ms/khung hình. 
+• Huấn luyện và tích hợp mô hình ST-GCN++ phân loại 4 lớp kỹ thuật: CORRECT, 
+BACK_ROUNDING, KNEE_VALGUS, SHALLOW_DEPTH. 
+• Xây dựng Knowledge Graph (Neo4j) lưu trữ tri thức về cơ bắp, lỗi kỹ thuật, bài tập 
+khắc phục và rủi ro chấn thương. 
+• Tích hợp hệ thống RAG (ChromaDB + Qwen2.5) đ ể AI Coach cung cấp tư vấn có 
+trích dẫn nguồn. 
+• Phát triển nền tảng web (Next.js + FastAPI) cho phép người dùng tập luyện và nhận 
+phản hồi theo thời gian thực. 
+4. Đối tượng và phạm vi nghiên cứu 
+Đối tượng nghiên cứu: Người tập gym tại Việt Nam, cụ thể là những người tập bài 
+Squat (gánh đòn) ở mức độ từ mới bắt đầu đến trung cấp. Đây là nhóm đối tượng dễ 
+mắc sai lỗi kỹ thuật nhất và có nhu cầu được phản hồi kịp thời cao nhất. 
+Phạm vi nghiên cứu: 
+• Bài t ập: Squat v ới góc nhìn t ừ camera phía trư ớc (frontal view) ho ặc bên hông 
+(sagittal view). 
+• Dữ liệu: Bộ dữ liệu RepCountA (134 video, 1,550 reps) t ừ bộ dữ liệu RepCount-
+CVPR2022. 
+• Mô hình AI: YOLOv8n -Pose và ST -GCN++ (Pure PyTorch, không dùng 
+mmaction2). 
+• Triển khai: Ứng dụng web chạy trên máy tính cá nhân, có hỗ trợ GPU/CPU ONNX. 
+• Không thuộc phạm vi: Ứng dụng mobile, bài tập ngoài Squat (ở phiên bản 1.0). 
+5. Phương pháp nghiên cứu 
+• Nghiên cứu tổng hợp tài li ệu: Khảo sát các bài báo khoa h ọc về Pose Estimation, 
+GCN, RAG và Knowledge Graph trong lĩnh vực y tế và thể thao. 
+• Phương pháp thực nghiệm: Thu thập dữ liệu thực tế, gán nhãn b ằng phương pháp 
+Weakly Supervised Learning, huấn luyện và đánh giá mô hình. 
+• Thiết kế hệ thống: Áp dụng kiến trúc Microservices, phân tích thi ết kế UML (Use 
+Case, Activity Diagram) và thiết kế cơ sở dữ liệu. 
+• Đánh giá th ực nghiệm: Đo lư ờng hiệu năng qua Accuracy, F1 -Score (Confusion 
+Matrix), độ trễ (Latency) và trải nghiệm người dùng (UX). 
+CHƯƠNG 1: CƠ SỞ LÝ THUYẾT 
+1.1. Tổng quan về Deep Learning trong nhận diện tư thế người 
+Deep Learning (Học sâu) là một nhánh của học máy (Machine Learning) sử dụng 
+các mạng nơ-ron nhiều tầng (Deep Neural Networks) để tự động học các đặc trưng phức 
+tạp từ dữ liệu thô, thay vì cần kỹ sư thiết kế đặc trưng thủ công. Trong lĩnh vực nhận 
+diện tư thế người (Human Pose Estimation), Deep Learning đã tạo ra cuộc cách mạng 
+khi cho phép máy tính trích xuất vị trí các khớp xương của con người từ một hình ảnh 
+đơn lẻ với độ chính xác cao. 
+Bài toán Pose Estimation về cơ bản là: cho một ảnh đầu vào I, dự đoán tọa độ (x, y, 
+confidence) của K điểm khớp xương (keypoints) trên cơ thể người. Tiêu chuẩn COCO 
+Keypoints sử dụng K=17, bao gồm: Mũi, Mắt (trái/phải), Tai (trái/phải), Vai (trái/phải), 
+Khuỷu tay (trái/phải), Cổ tay (trái/phải), Hông (trái/phải), Đầu gối (trái/phải), Cổ chân 
+(trái/phải). 
+Trong đề tài này, Deep Learning được ứng dụng ở hai tầng: (1) YOLOv8n -Pose 
+cho việc trích xuất keypoints từng khung hình, và (2) ST -GCN++ cho việc phân loại 
+chuỗi keypoints theo thời gian thành các lớp kỹ thuật tập luyện. Hai tầng này kết hợp 
+với nhau tạo thành một pipeline phân tích hoàn chỉnh từ pixel thô đến nhãn lỗi kỹ thuật 
+có ngữ nghĩa. 
+1.2. YOLOv8 – Nhận diện Đối tượng và Ước lượng Tư thế 
+1.2.1. Tổng quan kiến trúc YOLO 
+YOLO (You Only Look Once) là kiến trúc mạng nơ -ron tích chập (Convolutional 
+Neural Network – CNN) một giai đoạn nổi tiếng, được giới thiệu bởi Redmon et al. 
+(2016). Khác với các phương pháp hai giai đoạn như Faster R -CNN (cần đề xuất vùng 
+rồi mới phân loại), YOLO xử lý toàn bộ ảnh đầu vào chỉ một lần qua mạng nơ-ron, cho 
+phép phát hiện đối tượng với tốc độ thời gian thực. 
+Cơ chế hoạt động: YOLO chia ảnh thành lưới S×S ô (grid cells). Mỗi ô chịu trách 
+nhiệm dự đoán B bounding boxes và xác suất có mặt của đối tượng trong đó. Với 
+YOLOv8, kiến trúc được cải thiện đáng kể với CSP Backbone (Cross Stage Partial 
+Network), C2f Block, và đầu phát hiện không neo (Anchor-Free Detection Head), giúp 
+cân bằng tốt giữa tốc độ và độ chính xác. 
+1.2.2. YOLOv8n-Pose – Ước lượng Tư thế 
+YOLOv8n-Pose là biến thể của YOLOv8 được tối ưu cho bài toán Pose Estimation. 
+Mô hình "n" (nano) là phiên bản nhỏ nhất trong dòng YOLOv8, được lựa chọn trong đề 
+tài để cân bằng giữa tốc độ xử lý thời gian thực và độ chính xác trên thiết bị thông 
+thường (không có GPU cao cấp). 
+Kiến trúc YOLOv8n-Pose bao gồm ba phần chính: 
+• Backbone (CSPDarknet): Trích xuất đặc trưng đa tỷ lệ từ ảnh đầu vào, tạo ra feature 
+maps ở nhiều độ phân giải khác nhau (8×, 16×, 32× downsampling so v ới ảnh 
+gốc). 
+• Neck (PAN -FPN): Path Aggregation Network t ổng h ợp thông tin t ừ các feature 
+maps đa tỷ lệ, giúp phát hiện người ở nhiều kích thước khác nhau trong ảnh. 
+• Head (Keypoint Prediction): Với mỗi bounding box người được phát hiện, mô hình 
+dự đoán đồng thời 17 keypoints theo chuẩn COCO, mỗi keypoint bao gồm (x, y, 
+visibility_score). 
+Trong pipeline của đề tài, YOLOv8n -Pose chạy với batch_size=1 trên từng khung 
+hình video 640×480, đạt tốc độ >30 FPS trên GPU RTX 3080. Sau khi trích xuất 17 
+keypoints, các tọa độ được chuẩn hóa (normalize) dựa trên điểm Mid -Hip và chiều dài 
+thân người (Torso Length) để loại bỏ sự phụ thuộc vào vị trí và khoảng cách của người 
+tập với camera. 
+* Tham khảo: Jocher, G. et al. (2023). Ultralytics YOLOv8. 
+https://github.com/ultralytics/ultralytics 
+1.2.3. Chuẩn hóa Tọa độ Keypoints 
+Để mô hình ST -GCN++ không bị ảnh hưởng bởi vị trí và khoảng cách của người 
+tập với camera, nhóm áp dụng quy trình chuẩn hóa tọa độ như sau: 
+• Bước 1: Tính điểm gốc (origin) là Mid-Hip – trung điểm của hông trái và hông phải. 
+• Bước 2: Tính chiều dài thân người (Torso Length) = khoảng cách Euclidean từ Mid-
+Hip đến điểm giữa hai vai (Mid-Shoulder). 
+• Bước 3: D ịch chuyển (translate) t ất cả keypoints về gốc tọa độ Mid-Hip, rồi chia 
+cho Torso Length để chuẩn hóa về khoảng [0, 1]. 
+Kết quả là mỗi khung hình được biểu diễn bởi một vector 17×3 (x_norm, y_norm, 
+conf), hoàn toàn độc lập với kích thước ảnh và vị trí người tập. 
+1.3. Mạng Nơ-ron Đồ thị Không-Thời gian (ST-GCN++) 
+1.3.1. Mạng Nơ-ron Đồ thị (Graph Neural Network – GNN) 
+Mạng nơ-ron đồ thị (GNN) là lớp mô hình deep learning hoạt động trực tiếp trên 
+dữ liệu có cấu trúc đồ thị G = (V, E), trong đó V là tập các nút (nodes) và E là tập các 
+cạnh (edges). GNN học biểu diễn (embedding) cho mỗi nút bằng cách tổng hợp thông 
+tin từ các nút láng giềng – quá trình này gọi là Message Passing. 
+Trong bài toán nhận diện tư thế, bộ xương người tự nhiên có cấu trúc đồ thị: các 
+khớp xương là nút (17 nút theo chuẩn COCO), các xương (bones) là cạnh (16 cạnh, ví 
+dụ: Vai phải → Khuỷu tay phải → Cổ tay phải). Đây là lý do tại sao GNN phù hợp hơn 
+CNN thuần túy cho bài toán phân tích chuyển động. 
+1.3.2. ST-GCN – Spatial-Temporal Graph Convolutional Network 
+ST-GCN (Yan et al., AAAI 2018) là kiến trúc đầu tiên áp dụng GNN vào bài toán 
+nhận diện hành động từ keypoints. ST -GCN xây dựng một đồ thị không -thời gian 
+(Spatial-Temporal Graph) bằng cách: 
+• Spatial Edges (Cạnh không gian): Kết nối các khớp xương liền kề nhau trong cùng 
+một khung hình (theo cấu trúc xương người). Ví dụ: Hông → Gối → Cổ chân. 
+• Temporal Edges (C ạnh thời gian): K ết nối cùng m ột khớp xương gi ữa các khung 
+hình liền tiếp nhau. Ví dụ: Gối_frame_t → Gối_frame_{t+1}. 
+Phép tích chập đồ thị (Graph Convolution) tổng hợp thông tin từ cả hai loại cạnh, 
+cho phép mô hình học được cả pattern không gian (quan hệ giữa các khớp trong một 
+khoảnh khắc) lẫn pattern thời gian (sự thay đổi của tư thế theo thời gian). 
+1.3.3. ST-GCN++ – Cải tiến và Tối ưu hóa 
+ST-GCN++ (Duan et al., CVPR 2022) là phiên bản cải tiến đáng kể so với ST-GCN 
+gốc. Các cải tiến chính bao gồm: 
+• Partitioning Strategy t ốt hơn: Phân chia c ạnh theo 3 nhóm (root, centripetal, 
+centrifugal) thay vì 1 nhóm duy nh ất, giúp mô hình h ọc các pattern phong phú 
+hơn. 
+• Temporal Modeling m ạnh hơn: Thay th ế fixed temporal kernel b ằng Multi-Scale 
+Temporal Convolution (MSTCN) với nhiều kích thước kernel khác nhau (1, 3, 5, 
+7), giúp nắm bắt cả chuyển động nhanh lẫn chậm. 
+• Skeleton Pre-processing Pipeline: Hỗ trợ chuẩn hóa và xử lý keypoints đầu vào một 
+cách nhất quán. 
+Trong đề tài, nhóm xây dựng lại ST-GCN++ thuần PyTorch (không dùng thư viện 
+mmaction2) với các siêu tham số: 10 block GCN, input shape (B, 3, 32, 17) – tương 
+ứng Batch × Channels(x,y,conf) × 32 frames × 17 keypoints. Mô hình cuối cùng có 
+1,114,156 tham số, kích thước 4.25MB. 
+* Tham khảo: Duan, H. et al. (2022). Revisiting Skeleton -based Action 
+Recognition. CVPR 2022. 
+1.4. Lý thuyết Huấn luyện Mô hình và các Kỹ thuật Sử dụng 
+1.4.1. Finite State Machine (FSM) – Máy trạng thái hữu hạn 
+Để phát hiện ranh giới của từng rep (repetition) trong luồng video liên tục, nhóm sử 
+dụng Finite State Machine (FSM) – một mô hình tính toán gồm hữu hạn các trạng thái 
+và các luật chuyển trạng thái. FSM theo dõi pha chuyển động của người tập Squat qua 
+4 trạng thái: 
+Bảng 1.1. Các trạng thái trong FSM theo dõi Rep Squat 
+Trạng thái Điều kiện vào Mô tả 
+STANDING 
+(Đứng) 
+Góc gối > 155° Người tập đứng thẳng, chuẩn bị thực 
+hiện rep 
+DESCENDING 
+(Xuống) 
+Góc gối giảm dần & 
+Δθ < 0 
+Người tập đang hạ người xuống 
+BOTTOM (Đáy) Góc gối < 95° & tốc 
+độ ≈ 0 
+Tư thế thấp nhất của rep, điểm phân tích 
+chính 
+ASCENDING 
+(Lên) 
+Góc gối tăng dần & 
+Δθ > 0 
+Người tập đứng dậy, hoàn thành rep 
+ 
+Một rep hoàn chỉnh được xác định khi FSM trải qua chu kỳ: STANDING → 
+DESCENDING → BOTTOM → ASCENDING → STANDING. Khi phát hiện đảo 
+chiều vận tốc góc đầu gối (từ âm sang dương tại trạng thái BOTTOM), hệ thống cắt 32 
+frames xung quanh đáy rep và đưa vào ST-GCN++ để phân loại. 
+1.4.2. Weakly Supervised Learning – Học bán giám sát 
+Do việc gán nhãn từng frame video một cách thủ công (lỗi hay đúng) tốn kém công 
+sức, nhóm sử dụng phương pháp Weakly Supervised Learning: chỉ sử dụng nhãn ở cấp 
+độ rep (rep-level labels), không cần nhãn từng frame (frame-level labels). Quy trình gán 
+nhãn tự động: 
+• Bước 1 – Xác định ngưỡng từ dữ liệu Kaggle: Phân tích thống kê 47,442 khung hình 
+từ bộ dữ liệu squat_dataset để tìm ngưỡng quyết định (Decision Boundary) phân 
+biệt lớp Đúng và các lớp Sai. 
+• Bước 2 – Áp ngưỡng tự động: Ngưỡng gối 62.91°, ngư ỡng thân 104.91°, ngư ỡng 
+lệch gối 0.1007. Mỗi rep được gán nhãn tự động dựa trên góc đo đư ợc tại frame 
+đáy (BOTTOM frame). 
+• Bước 3 – Nội suy thời gian: Đưa t ất cả rep về kích thước cố định 32 frames b ằng 
+phép nội suy tuyến tính (Uniform Temporal Sampling), t ạo tensor đầu vào (B, 3, 
+32, 17). 
+1.4.3. Xử lý Mất Cân Bằng Dữ liệu (Class Imbalance) 
+Bộ dữ liệu có sự mất cân bằng nghiêm trọng (class imbalance): 
+BACK_ROUNDING chỉ chiếm 1.9% tổng số reps, trong khi KNEE_VALGUS chiếm 
+39.9%. Để khắc phục, nhóm tính trọng số lớp nghịch đảo tần suất (Inverse Frequency 
+Weighting) và tích hợp vào hàm mất mát CrossEntropyLoss: 
+Class Weights: w = [1.09, 12.92, 0.63, 0.71] cho [CORRECT, 
+BACK_ROUNDING, KNEE_VALGUS, SHALLOW_DEPTH]. Lớp 
+BACK_ROUNDING được nhân trọng số gấp ~13 lần để phạt nặng khi đoán sai 
+lớp này. 
+1.4.4. Cấu hình Huấn luyện và Tối ưu hóa 
+Mô hình được huấn luyện với cấu hình sau: 
+Bảng 1.2. Cấu hình huấn luyện mô hình ST-GCN++ 
+Siêu tham số Giá trị Lý do lựa chọn 
+Optimizer AdamW (lr=1e -3, 
+wd=1e-4) 
+Kết hợp Momentum + L2 
+Regularization, hiệu quả cho GNN 
+LR Scheduler Cosine Annealing 
+(T_max=60) 
+Giảm lr mượt mà, tránh local minima 
+cuối quá trình học 
+Epochs 60 Đủ để mô hình hội tụ, validation loss 
+ổn định từ epoch 45 
+Batch Size 16 Cân bằng giữa tốc độ và ổn định 
+gradient 
+Loss Function CrossEntropyLoss + 
+Class Weights 
+Xử lý mất cân bằng dữ liệu 
+Early Stopping Patience = 10 epochs Ngăn overfitting khi val_acc không 
+tăng 
+ 
+1.4.5. DTW (Dynamic Time Warping) – Tính điểm kỹ thuật 
+Sau khi phân loại lỗi, hệ thống tính điểm kỹ thuật cho mỗi rep dựa trên thuật toán 
+Dynamic Time Warping (DTW). DTW là thuật toán đo độ tương đồng giữa hai chuỗi 
+thời gian có thể khác nhau về độ dài và tốc độ. 
+Điểm DTW Score ∈ [0, 1] được tính bằng cách: (1) So sánh chuỗi 32 keyframes 
+của rep đang phân tích với một template chuẩn (rep đúng kỹ thuật), (2) Tính khoảng 
+cách DTW chuẩn hóa, (3) Ánh xạ về thang [0, 1] để dễ hiểu. Điểm Session Score tổng 
+thể = Avg(DTW_Score) × (1 - error_rate). 
+* Tham khảo: Berndt, D.J. & Clifford, J. (1994). Using Dynamic Time Warping 
+to Find Patterns in Time Series. KDD Workshop. 
+1.4.6. ONNX Runtime – Tối ưu hóa Suy luận 
+ONNX (Open Neural Network Exchange) là định dạng mở để biểu diễn mô hình 
+học máy, cho phép chuyển đổi mô hình giữa các framework (PyTorch, TensorFlow, 
+Caffe2) và tối ưu hóa suy luận (inference) trên nhiều phần cứng khác nhau. 
+Sau khi huấn luyện bằng PyTorch, nhóm export mô hình ST -GCN++ sang định 
+dạng ONNX và sử dụng ONNX Runtime để phục vụ suy luận trong môi trường 
+production. ONNX Runtime áp dụng các kỹ thuật tối ưu hóa như Graph Optimization, 
+Operator Fusion và Quantization,  giúp giảm độ trễ từ ~15ms (PyTorch) xuống ~7ms 
+(ONNX) trên cùng GPU RTX 3080. 
+1.5. Knowledge Graph và Neo4j 
+1.5.1. Khái niệm Knowledge Graph 
+Knowledge Graph (KG) – Đồ thị Tri thức – là một cơ sở tri thức cấu trúc hóa thông 
+tin dưới dạng đồ thị, trong đó các thực thể (Entities) là các nút và các quan hệ ngữ nghĩa 
+(Relations/Predicates) là các cạnh. Một triple (bộ ba) trong KG có dạng (Chủ thể – Quan 
+hệ – Đối tượng), ví dụ: (Squat – HAS_FAULT → Knee_Valgus) hoặc (Knee_Valgus – 
+CAUSED_BY → Weak_Glute_Medius). 
+Knowledge Graph cho phép hệ thống AI Coach không chỉ trả lời câu hỏi đơn giản 
+mà còn suy luận theo chuỗi: Lỗi gối → Nguyên nhân cơ bắp → Bài tập khắc phục → 
+Lịch trình phục hồi → Rủi ro chấn thương nếu không khắc phục. 
+Ontology của Knowledge Graph trong đề tài bao gồm 5 loại thực thể chính: 
+Bảng 1.3. Ontology của Knowledge Graph SmartGym 
+Thực thể (Node 
+Label) 
+Thuộc tính chính Ví dụ 
+Exercise (Bài tập) code, name_vi, category, 
+difficulty 
+Squat, Lunge, Hip Thrust 
+MuscleGroup (Nhóm 
+cơ) 
+code, name_vi, region 
+(upper/lower/core) 
+Gluteus Medius, Quadriceps 
+KinematicFault (Lỗi 
+kỹ thuật) 
+code, name_vi, 
+severity_level 
+KNEE_VALGUS, 
+BACK_ROUNDING 
+InjuryRisk (Rủi ro 
+chấn thương) 
+name_vi, body_part, 
+icd_code 
+Viêm gân bánh chè (ICD 
+M76.5) 
+CorrectiveAction 
+(Hành động khắc 
+phục) 
+code, name_vi, type, 
+duration_min 
+Banded Squat, Hip Abduction 
+ 
+1.5.2. Neo4j – Cơ sở Dữ liệu Đồ thị 
+Neo4j là hệ quản trị cơ sở dữ liệu đồ thị (Graph DBMS) hàng đầu, sử dụng ngôn 
+ngữ truy vấn Cypher để truy xuất dữ liệu đồ thị một cách tự nhiên và biểu đạt. Neo4j 
+lưu trữ dữ liệu dưới dạng native graph (không chuyển đổi sang bảng như SQL), đảm 
+bảo hiệu suất cao cho các truy vấn traversal (duyệt qua nhiều quan hệ). 
+Ví dụ truy vấn Cypher: Tìm tất cả bài tập khắc phục cho lỗi KNEE_VALGUS: 
+MATCH (f:KinematicFault {code: 'KNEE_VALGUS'}) -[:CORRECTED_BY]-
+>(a:CorrectiveAction) RETURN a.name_vi, a.priority ORDER BY a.priority 
+1.5.3. Hybrid Retrieval với RRF (Reciprocal Rank Fusion) 
+Để cung cấp ngữ cảnh toàn diện cho LLM, hệ thống sử dụng Hybrid Retrieval: kết 
+hợp kết quả từ cả Cypher Query (truy vấn cấu trúc KG) và ANN Search (tìm kiếm ngữ 
+nghĩa vector). Reciprocal Rank Fusion (RRF) là thuật toán hợp nhất hai danh sách kết 
+quả xếp hạ ng khác nhau thành một danh sách thống nhất mà không cần huấn luyện 
+thêm. 
+Công thức RRF: score(d) = Σ 1/(k + rank_i(d)), với k=60 là hằng số tránh chia cho 
+0 và rank_i(d) là thứ hạng của tài liệu d trong danh sách xếp hạng thứ i. Phương pháp 
+này được chứng minh hiệu quả hơn bất kỳ phương pháp đơn lẻ nào (Cormack et al., 
+2009). 
+1.6. Retrieval-Augmented Generation (RAG) và Mô hình Ngôn ngữ Lớn 
+1.6.1. Kiến trúc Transformer và Cơ chế Attention 
+Transformer (Vaswani et al., 2017) là kiến trúc mạng nơ -ron cách mạng hóa lĩnh 
+vực Xử lý Ngôn ngữ Tự nhiên (NLP). Thay vì sử dụng LSTM hay RNN (xử lý tuần tự, 
+khó song song hóa), Transformer sử dụng cơ chế Self -Attention để tính toán mức độ 
+liên quan giữa mọi cặp token trong chuỗi đầu vào đồng thời, cho phép song song hóa 
+cao và nắm bắt phụ thuộc tầm xa. 
+Công thức Self-Attention: Attention(Q, K, V) = softmax(QK^T / √d_k) × V, trong 
+đó Q (Query), K (Key), V (Value) là các ma trận chiếu tuyến tính của embedding đầu 
+vào và d_k là chiều của Key vector. Cơ chế Multi -Head Attention chạy nhiều luồng 
+attention song song, mỗi luồng học các pattern ngữ nghĩa khác nhau. 
+1.6.2. Qwen2.5 – Mô hình Ngôn ngữ Lớn 
+Qwen2.5 (Alibaba Cloud, 2024) là dòng mô hình ngôn ngữ lớn (Large Language 
+Model – LLM) đa năng, hỗ trợ tiếng Anh, tiếng Trung và một số ngôn ngữ khác. Trong 
+đề tài, nhóm sử dụng Qwen2.5-4B Instruct – phiên bản 4 tỷ tham số đã được fine -tune 
+cho bài toán hội thoại (Instruction Following), chạy được trên GPU với VRAM từ 8GB 
+trở lên. 
+Qwen2.5 được lựa chọn vì: 
+• Hỗ trợ tốt tiếng Việt và tiếng Anh (quan tr ọng vì Knowledge Base vi ết bằng tiếng 
+Anh nhưng người dùng giao tiếp tiếng Việt). 
+• Kích thước 4B tham số phù hợp để chạy trên server phổ thông (8-16GB VRAM). 
+• Hiệu suất tốt trên benchmark reasoning và question -answering so với các mô hình 
+cùng size. 
+1.6.3. Retrieval-Augmented Generation (RAG) 
+RAG (Lewis et al., NeurIPS 2020) là kỹ thuật kết hợp hai pha: (1) Retrieval – tìm 
+kiếm và truy xuất các đoạn văn bản liên quan từ kho tri thức ngoài (External Knowledge 
+Base), và (2) Generation – đưa các đoạn văn bản đó vào prompt của LLM cùng câu hỏi 
+gốc, để LLM sinh ra câu trả lời dựa trên bằng chứng thực. 
+Lợi ích của RAG so với LLM thuần túy: 
+• Tránh hallucination: Mô hình trả lời dựa trên dữ liệu thực tế được truy xuất, không 
+"bịa" thông tin. 
+• Cập nhật tri th ức dễ dàng: Chỉ cần cập nhật vector database, không c ần train l ại 
+LLM. 
+• Trích dẫn nguồn: Có thể chỉ ra chunk nào trong tài li ệu nào là nguồn gốc của từng 
+câu trả lời. 
+1.6.4. Vector Embedding và ChromaDB 
+Để thực hiện semantic search (tìm kiếm ngữ nghĩa), các đoạn văn bản (chunks) 
+trong tài liệu khoa học được chuyển đổi thành vector dày đặc (dense vectors) bằng mô 
+hình Embedding. Nhóm sử dụng Qwen3 -Embedding-0.6B – mô hình embedding nhẹ 
+từ Alibaba, cho vector 1024 chiều. 
+ChromaDB là vector database mã nguồn mở, cho phép lưu trữ và tìm kiếm ANN 
+(Approximate Nearest Neighbor) hiệu quả. Với mỗi câu hỏi từ người dùng, ChromaDB 
+tìm top-k (k=5) chunks gần nhất theo cosine similarity trong không gian vector, trả về 
+các đoạn bằng chứng khoa học liên quan nhất. 
+1.7. Các Framework và Công nghệ Phát triển Hệ thống 
+1.7.1. FastAPI – Backend Framework 
+FastAPI (Sebastián Ramírez, 2018) là framework Python hiệu suất cao để xây dựng 
+API, dựa trên Starlette (ASGI) và Pydantic (Data Validation). FastAPI hỗ trợ lập trình 
+bất đồng bộ (async/await) theo tiêu chuẩn ASGI, cho phép xử lý nhiều request đồng 
+thời mà không bị block – rất quan trọng cho luồng WebSocket streaming video. 
+Các đặc điểm nổi bật của FastAPI được sử dụng trong đề tài: 
+• WebSocket Native Support: Cho phép x ử lý kết nối WebSocket đ ể streaming kết 
+quả AI theo frame từ server về browser. 
+• Dependency Injection: H ệ thống DI giúp qu ản lý database session, authentication 
+token và AI model instances một cách sạch sẽ. 
+• Pydantic Models: T ự động validate d ữ liệu đ ầu vào/ra, sinh ra OpenAPI docs 
+(Swagger UI) tự động. 
+• BackgroundTasks: Cho phép thực hiện các tác vụ nặng (lưu snapshot ảnh, ghi DB) 
+mà không block response. 
+* Benchmark: FastAPI đạt ~45,000 requests/giây trên hardware trung bình, 
+ngang ngửa với NodeJS Express và nhanh hơn Django REST Framework ~3 -5 
+lần. 
+1.7.2. Next.js – Frontend Framework 
+Next.js (Vercel, 2016) là React framework hỗ trợ Server -Side Rendering (SSR), 
+Static Site Generation (SSG) và App Router (Next.js 13+). Trong đề tài, nhóm sử dụng 
+Next.js 16 với App Router để xây dựng frontend Single-Page Application có tốc độ tải 
+cao, SEO tốt và developer experience vượt trội. 
+Next.js được lựa chọn vì: 
+• App Router: Cho phép t ổ chức code theo route m ột cách tr ực quan (layout.tsx, 
+page.tsx), hỗ trợ nested layouts và parallel routes. 
+• WebSocket Client: Kết hợp với Hook React (useRef, useEffect) đ ể quản lý kết nối 
+WebSocket, render skeleton overlay lên HTML5 Canvas theo thời gian thực. 
+• TypeScript Native: Tích hợp sẵn TypeScript, giúp phát hi ện lỗi kiểu dữ liệu ở thời 
+gian compile, quan trọng khi xử lý dữ liệu keypoints phức tạp. 
+1.7.3. PostgreSQL và SQLAlchemy 
+PostgreSQL 16 là hệ quản trị cơ sở dữ liệu quan hệ (RDBMS) mã nguồn mở, nổi 
+tiếng với tính ổn định, hỗ trợ JSON/JSONB native, và hỗ trợ đầy đủ ACID transactions. 
+JSONB được sử dụng để lưu trữ dữ liệu linh hoạt như joint_angles (góc khớp tại từng 
+rep) và plan_json (kế hoạch tập luyện theo tuần). 
+SQLAlchemy 2.0 với async support (asyncpg driver) được sử dụng làm ORM 
+(Object-Relational Mapper), cho phép viết truy vấn database bằng Python Objects thay 
+vì SQL thuần túy, đồng thời hỗ trợ async/await để không block event loop của FastAPI. 
+1.7.4. WebSocket và Streaming Video 
+WebSocket (RFC 6455) là giao thức truyền thông hai chiều (full -duplex) trên một 
+kết nối TCP duy nhất, cho phép server và client trao đổi dữ liệu theo thời gian thực mà 
+không cần liên tục tạo lại HTTP request. Trong đề tài, WebSocket được sử dụng để: 
+• Chiều Client → Server: Browser g ửi từng khung hình camera (JPEG base64) v ới 
+tốc độ 10 frames/giây lên FastAPI server qua WebSocket. 
+• Chiều Server → Client: Sau khi xử lý AI, FastAPI gửi lại JSON kết quả (keypoints, 
+fault_code, DTW score, joint angles) về Browser để hiển thị overlay. 
+Luồng video không được upload toàn bộ lên server mà được xử lý theo streaming 
+từng frame, giảm thiểu băng thông và độ trễ tổng thể. 
+1.7.5. Docker và Containerization 
+Docker là nền tảng containerization, đóng gói ứng dụng và toàn bộ dependencies 
+vào một container độc lập (image), đảm bảo ứng dụng chạy nhất quán trên mọi môi 
+trường (development, staging, production). Docker Compose cho phép định nghĩa và 
+điều phối nhiều container (services) cùng lúc trong một file YAML duy nhất. 
+Trong đề tài, Docker Compose quản lý 6 services: PostgreSQL 16, Neo4j 5, 
+ChromaDB, FastAPI API Server, Next.js Frontend và Nginx Reverse Proxy, tất cả trong 
+một mạng nội bộ chia sẻ. 
+  
+CHƯƠNG 2: PHÂN TÍCH VÀ THIẾT KẾ HỆ THỐNG 
+2.1. Giới thiệu bài toán 
+Bài toán đặt ra là xây dựng một hệ thống web end -to-end cho phép người tập gym 
+thực hiện bài Squat trước camera, hệ thống tự động phát hiện và phân loại lỗi kỹ thuật 
+theo thời gian thực, đồng thời cung cấp phản hồi chi tiết và có trích dẫn khoa học thông 
+qua AI Coach. Hệ thống cần đáp ứng các yêu cầu: 
+• Thời gian thực: Pipeline từ khung hình đến kết quả phân loại phải hoàn thành trong 
+≤100ms. 
+• Độ chính xác: Mô hình ST -GCN++ đạt ≥78% Test Accuracy trên b ộ kiểm thử độc 
+lập. 
+• Tư vấn có căn cứ: AI Coach phải trích dẫn được nguồn gốc của từng khuyến nghị. 
+• Khả năng m ở rộng: H ệ thống có th ể thêm bài t ập m ới ch ỉ bằng cách c ập nh ật 
+Knowledge Graph. 
+2.2. Sơ đồ Use Case Tổng quan 
+Hệ thống SmartGym có 4 Actors chính tương tác với các use case được mô tả trong 
+hình 2.1: 
+• Trainee: Người dùng chính của hệ thống, thực hiện tập luyện và nhận phản hồi AI. 
+• AI System: Tác nhân h ệ thống bao g ồm các module AI Core (YOLOv8 + ST -
+GCN++) và trợ lý ảo (RAG + LLM). 
+• Admin: Quản lý thư viện bài tập, chỉnh sửa Knowledge Graph và giám sát hệ thống. 
+•  Thành viên: Admin và Trainee có chức năng giống thành viên nên kế thừa từ thành 
+viên. 
+Use Case tổng quan được mô tả dưới đây: 
+  
+Hình 2.1. Sơ đồ Use Case Tổng quan hệ thống SmartGym 
+2.3. Sơ đồ Use Case chi tiết 
+2.3.1. UC-01: Phân tích Tư thế Live (Live Workout Analysis) 
+Chức năng Phân tích Tư thế Live có các giao diện tương tác với người dùng: 
+• Đăng nhập -> đề xuất UC đăng nhập 
+• Chọn bài tập và góc camera -> đề xuất UC chọn bài tập 
+• Bật camera và phân tích -> đề xuất UC bật camera 
+• Chụp ảnh vi phạm -> đề xuất UC chụp ảnh lỗi 
+Đăng nhập, Chọn bài tập, Bật camera là bắt buộc mới hoàn thành được việc phân 
+tích, do đó UC Phân tích tư thế include các UC này. Việc chụp ảnh chỉ xảy ra khi mắc 
+lỗi nghiêm trọng, do đó UC chụp ảnh lỗi extend từ UC Phân tích tư thế. 
+
+ 
+Hình 2.2. Sơ đồ UC chi tiết Live Workout Analysis 
+2.3.2. UC-02: Tư vấn trợ lý ảo (AI Coach Consultation) 
+Trong chức năng Tư vấn trợ lý ảo, học viên phải tương tác với các giao diện: 
+• Xem lại lịch sử phiên tập -> đề xuất UC xem phiên tập 
+• Chọn chi tiết rep lỗi -> đề xuất UC chọn rep lỗi 
+• Hỏi trợ lý ảo -> đề xuất UC hỏi trợ lý ảo 
+Các UC trên đều bắt buộc thực hiện mới hoàn thành việc tư vấn cho một rep cụ thể 
+-> chúng đều bị include trong UC Tư vấn trợ lý ảo. 
+
+ 
+Hình 2.3. Biểu đồ UC AI Coach Consultation 
+2.3.3. UC-03: Upload Video Phân tích 
+Chức năng Upload Video Phân tích có các giao diện tương tác: 
+• Đăng nhập -> thống nhất với UC đăng nhập 
+• Tải video lên hệ thống -> đề xuất UC tải video 
+• Xem kết quả video đã phân tích -> đề xuất UC xem kết quả video 
+Đăng nhập, Tải video, Xem kết quả video là bắt buộc mới hoàn thành được phân 
+tích offline, do đó UC Upload Video include các UC này. 
+
+  
+Hình 2.4. Biểu đồ UC Upload Video Phân tích 
+2.3.4. UC-04: Lập Kế hoạch Tập luyện Thông minh 
+Chức năng Lập Kế hoạch Tập luyện có các giao diện tương tác: 
+• Đăng nhập -> thống nhất với UC đăng nhập 
+• Nhập mục tiêu và thông tin thể chất -> đề xuất UC nhập thông tin 
+• Xem và chỉnh sửa lịch tập -> đề xuất UC xem lịch tập 
+Tương tự, các bước nhập thông tin và xem lịch tập là bắt buộc, do đó UC Lập kế 
+hoạch include các UC con này. 
+
+Hình 2.5. Biểu đồ UC Lập kế hoạch tập luyện thông minh 
+2.3.4. UC-05: Theo dõi tiến trình 
+Chức năng Theo dõi tiến trình có các giao diện tương tác: 
+• Đăng nhập -> thống nhất với UC đăng nhập 
+• Xem tổng quan tiến trình -> đề xuất UC xem tổng quan 
+• Xem biểu đồ tiến độ -> đề xuất UC xem biểu đồ tiến độ 
+• Xem chi tiết phiên tập cũ -> đề xuất UC xem phiên tập cũ 
+Xem tổng quan là giao diện gốc. Xem biểu đồ tiến độ và Xem chi tiết phiên tập là 
+các tùy chọn mở rộng. Do đó chúng có quan hệ extend từ UC Xem tổng quan tiến trình. 
+
+ 
+Hình 2.6. Biểu đồ UC Theo dõi tiến trình 
+2.4. Kiến trúc Hệ thống Tổng thể 
+Hệ thống SmartGym được thiết kế theo kiến trúc phân tầng (Layered Architecture) 
+kết hợp Microservices, gồm 3 tầng chính: 
+• Tầng Giao diện (Presentation Layer): Next.js 16 SPA ch ạy trên browser. Bao g ồm 
+các trang: Landing Page, Auth (Login/Register), Dashboard và 4 trang chức năng 
+(Studio, Progress, Planner, Profile). Giao ti ếp với Backend qua HTTP REST và 
+WebSocket. 
+• Tầng Nghiệp vụ (Business Layer): FastAPI application server. Bao g ồm 4 Router 
+modules: Auth, Profile, Session (tích h ợp AI Core), Coach (tích h ợp KB+RAG). 
+Xử lý logic nghiệp vụ, validation, authentication. 
+• Tầng Dữ liệu (Data Layer): PostgreSQL 16 (dữ liệu người dùng và phiên tập), Neo4j 
+5 (Knowledge Graph), ChromaDB (Vector Database cho RAG). 
+ 

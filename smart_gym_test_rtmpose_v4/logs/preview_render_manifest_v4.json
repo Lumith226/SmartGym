@@ -1,0 +1,9 @@
+{
+  "rendered_benchmark_images": 40,
+  "source_sha256": {
+    "benchmark_squat_v4.json": "4daa1da8b83b6bd26f4a4758f9d6aa0270c3db74ba1ec468d2453b64581b103c",
+    "benchmark_jumpjack_v4.json": "caf702613ac214df47e2aa4c04f14a6ab9a8b721ae0a580a5abd4c0e7a46d983"
+  },
+  "inference_changed": false,
+  "thresholds_changed": false
+}

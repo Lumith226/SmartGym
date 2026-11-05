@@ -1,0 +1,21 @@
+﻿Video,Nhãn gốc,Dự đoán,Bỏ sót,Báo thừa,Khớp toàn bộ
+ARMS_INCOMPLETE_00001308.mp4,jumping jacks - arms_rom=1.0; jumping jacks - legs_rom=1.0,jumping jacks - only legs,jumping jacks - arms_rom=1.0; jumping jacks - legs_rom=1.0,jumping jacks - only legs,False
+ARMS_INCOMPLETE_00047444.mp4,jumping jacks - only legs,jumping jacks - only legs,,,True
+ARMS_INCOMPLETE_00054824.mp4,jumping jacks - only legs,jumping jacks - only legs,,,True
+ARMS_INCOMPLETE_00077786.mp4,jumping jacks - arms_rom=2.0; jumping jacks - legs_rom=2.0; jumping jacks - speed=1.00 rps,jumping jacks - arms_rom=2.0; jumping jacks - legs_rom=2.0; jumping jacks - speed=0.75 rps,jumping jacks - speed=1.00 rps,jumping jacks - speed=0.75 rps,False
+ARMS_INCOMPLETE_00225496.mp4,jumping jacks - only legs,jumping jacks - only legs,,,True
+CORRECT_00003013.mp4,jumping jacks - arms_rom=4.0; jumping jacks - legs_rom=2.0; jumping jacks - speed=1.00 rps,jumping jacks - arms_rom=2.0; jumping jacks - legs_rom=2.0; jumping jacks - speed=1.25 rps,jumping jacks - arms_rom=4.0; jumping jacks - speed=1.00 rps,jumping jacks - arms_rom=2.0; jumping jacks - speed=1.25 rps,False
+CORRECT_00045428.mp4,jumping jacks - arms_rom=3.0; jumping jacks - legs_rom=3.0; jumping jacks - speed=1.50 rps,jumping jacks - arms_rom=3.0; jumping jacks - legs_rom=4.0; jumping jacks - speed=1.25 rps; jumping jacks - speed=1.50 rps,jumping jacks - legs_rom=3.0,jumping jacks - legs_rom=4.0; jumping jacks - speed=1.25 rps,False
+CORRECT_00093922.mp4,jumping jacks - arms_rom=3.0; jumping jacks - legs_rom=3.0; jumping jacks - speed=0.50 rps,jumping jacks - arms_rom=3.0; jumping jacks - legs_rom=3.0; jumping jacks - legs_rom=4.0; jumping jacks - speed=0.50 rps,,jumping jacks - legs_rom=4.0,False
+CORRECT_00118973.mp4,jumping jacks - arms_rom=4.0; jumping jacks - legs_rom=4.0; jumping jacks - speed=1.25 rps,jumping jacks - arms_rom=3.0; jumping jacks - arms_rom=4.0; jumping jacks - legs_rom=4.0; jumping jacks - speed=1.25 rps,,jumping jacks - arms_rom=3.0,False
+CORRECT_00130140.mp4,jumping jacks - arms_rom=4.0; jumping jacks - legs_rom=3.0; jumping jacks - speed=1.00 rps,jumping jacks - arms_rom=4.0; jumping jacks - legs_rom=3.0; jumping jacks - speed=1.00 rps,,,True
+LEGS_TOO_NARROW_00037781.mp4,jumping jacks - only arms,jumping jacks - only arms,,,True
+LEGS_TOO_NARROW_00118551.mp4,jumping jacks - only arms,jumping jacks - only arms,,,True
+LEGS_TOO_NARROW_00182716.mp4,jumping jacks - only arms,jumping jacks - only arms,,,True
+LEGS_TOO_NARROW_00284394.mp4,jumping jacks - arms_rom=3.0; jumping jacks - legs_rom=2.0; jumping jacks - speed=1.25 rps,jumping jacks - arms_rom=3.0; jumping jacks - legs_rom=4.0; jumping jacks - speed=1.25 rps,jumping jacks - legs_rom=2.0,jumping jacks - legs_rom=4.0,False
+NOT_JUMPING_00001425.mp4,jumping jacks - not jumping,jumping jacks - not jumping,,,True
+NOT_JUMPING_00096147.mp4,jumping jacks - not jumping,jumping jacks - not jumping,,,True
+NOT_JUMPING_00168189.mp4,jumping jacks - not jumping,jumping jacks - not jumping,,,True
+NOT_JUMPING_00284792.mp4,jumping jacks - not jumping,jumping jacks - not jumping,,,True
+ONLY_ARMS_00000864.mp4,jumping jacks - only arms,jumping jacks - only arms,,,True
+ONLY_LEGS_00007403.mp4,jumping jacks - only legs,jumping jacks - only legs,,,True
