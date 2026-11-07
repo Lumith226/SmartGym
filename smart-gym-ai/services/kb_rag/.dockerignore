@@ -1,0 +1,6 @@
+.env
+__pycache__/
+tests/
+artifacts/
+data/raw/
+data/curated/

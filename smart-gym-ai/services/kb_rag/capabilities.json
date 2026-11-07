@@ -1,0 +1,12 @@
+{
+  "kb_version": "kb_a3a9fc4465797bf3",
+  "basis": "Developer inventory of published KB sources and relation types; not a list of question-answer pairs.",
+  "unsupported": {
+    "causal_assessment": "KB chỉ liên kết nhãn với tiêu chí kỹ thuật; chưa có bằng chứng xác định cơ yếu hoặc nguyên nhân bệnh lý từ nhãn hình ảnh.",
+    "personal_program": "KB chưa có quy tắc lập chương trình cá nhân theo tuần, mức tải và số hiệp/lần.",
+    "supplement_dose": "KB chưa có nguồn đã kiểm tra về liều bổ sung dinh dưỡng.",
+    "calorie_estimate": "KB chưa có mô hình hoặc công thức được kiểm chứng để ước lượng calo cá nhân.",
+    "personal_score": "Nhánh hỏi đáp chưa có nhật ký chấm điểm chính thức; chế độ Giải thích điểm cần kết quả video và bảng quy tắc của nhóm.",
+    "longitudinal_progress": "Chưa có lịch sử buổi tập có thời gian và thước đo ổn định để tính mức tiến bộ qua nhiều ngày."
+  }
+}

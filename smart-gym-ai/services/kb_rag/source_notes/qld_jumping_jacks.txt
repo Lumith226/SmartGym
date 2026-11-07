@@ -1,0 +1,13 @@
+Jumping jacks — ghi chú nguồn, chưa phải bản HTML gốc
+Nguồn: Health and Wellbeing Queensland
+URL: https://hw.qld.gov.au/physical-activity/jumping-jacks/
+Ngày đối chiếu: 04/11/2026
+Người soạn: phần khởi tạo KB SmartGym; cần nhóm duyệt chuyên môn.
+
+Trích đoạn ngắn để kiểm chứng thuật ngữ:
+"Jump your legs apart, landing with soft knees, while raising your arms overhead"
+
+Diễn giải từ hướng dẫn của nguồn:
+Bắt đầu với hai chân khép, gối hơi chùng và tay dọc hai bên thân. Khi bật nhảy, mở chân sang hai bên đồng thời đưa tay lên qua đầu. Tiếp đất với đầu gối mềm. Sau đó bật chân trở về vị trí ban đầu. Nguồn mô tả đây là vận động toàn thân và phối hợp động tác.
+
+Ghi chú thu thập: công cụ đọc web truy cập được nội dung, nhưng yêu cầu tải HTML trực tiếp nhận HTTP 403. File này ghi rõ phần diễn giải và trích đoạn; không được trình bày thành bản tải nguyên trang hoặc nghiên cứu thực nghiệm.

@@ -1,0 +1,1104 @@
+{
+  "version": "smartgym-v4-label-catalog-1",
+  "semantics": "Model annotations are observations, not diagnoses or proof of correct form.",
+  "exercises": {
+    "SQUAT": {
+      "model_exercise": "squat",
+      "schema_version": "qualcomm-squat-14-clipbatch-v1",
+      "model_sha256": "eb6f2cefefbdcba392c0f2eda3bbcf0f9df6f0c6d1877ee3fcd5ad801668eb04",
+      "contract_sha256": "d3a3de81466a190e7366aac833d936549d83b79c81143e82d1d5633c52c0c6b9",
+      "contract_file": "model_contracts/squat_v4_contract.json",
+      "frames": 64,
+      "context_size": 16,
+      "threshold_source": "validation_only",
+      "labels": [
+        {
+          "key": "depth_90",
+          "raw_label": "squats - 90 degrees",
+          "name_vi": "Gập gối 90°",
+          "kind": "attribute",
+          "threshold": 0.4,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "depth_over_90",
+          "raw_label": "squats - over 90 degrees",
+          "name_vi": "Gập gối vượt 90°",
+          "kind": "attribute",
+          "threshold": 0.8250000000000001,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "shallow",
+          "raw_label": "squats - shallow",
+          "name_vi": "Xuống nông",
+          "kind": "error",
+          "threshold": 0.5750000000000001,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [
+            "squat_range"
+          ],
+          "coverage": "partial",
+          "note_vi": "Nguồn mô tả giới hạn biên độ có điều kiện; chưa xác lập ngưỡng góc riêng cho nhãn Qualcomm."
+        },
+        {
+          "key": "insufficient",
+          "raw_label": "squats - insufficient",
+          "name_vi": "Biên độ chưa đủ",
+          "kind": "error",
+          "threshold": 0.30000000000000004,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [
+            "squat_range",
+            "squat_rise_together"
+          ],
+          "coverage": "partial",
+          "note_vi": "Nhãn lỗi do model dự đoán; không chứng minh nguyên nhân hoặc hậu quả."
+        },
+        {
+          "key": "back_not_straight",
+          "raw_label": "squats - back not straight",
+          "name_vi": "Lưng không thẳng",
+          "kind": "error",
+          "threshold": 0.325,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [
+            "squat_bracing",
+            "squat_back_flat"
+          ],
+          "coverage": "direct",
+          "note_vi": "Nhãn lỗi do model dự đoán; không chứng minh nguyên nhân hoặc hậu quả."
+        },
+        {
+          "key": "shoulder_width",
+          "raw_label": "squats - shoulder-width",
+          "name_vi": "Chân rộng bằng vai",
+          "kind": "attribute",
+          "threshold": 0.625,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "wide",
+          "raw_label": "squats - wide",
+          "name_vi": "Chân rộng",
+          "kind": "attribute",
+          "threshold": 0.5750000000000001,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "narrow",
+          "raw_label": "squats - narrow",
+          "name_vi": "Chân hẹp",
+          "kind": "attribute",
+          "threshold": 0.17500000000000002,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "plie",
+          "raw_label": "squats - plie",
+          "name_vi": "Kiểu đứng plié",
+          "kind": "attribute",
+          "threshold": 0.35,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "knees_over_toes",
+          "raw_label": "squats - knees over toes",
+          "name_vi": "Vị trí gối: nhãn gốc mâu thuẫn",
+          "kind": "attribute",
+          "threshold": 0.325,
+          "rep_supported": true,
+          "calibrated": true,
+          "coverage": "ambiguous",
+          "note_vi": "Tên nhãn và mô tả gốc được nhóm ghi nhận mâu thuẫn; chưa dùng nhãn này để kết luận gối vượt mũi chân là lỗi.",
+          "criterion_ids": []
+        },
+        {
+          "key": "no_obvious_issue",
+          "raw_label": "squats - no obvious issue",
+          "name_vi": "Không thấy vấn đề rõ ràng",
+          "kind": "positive",
+          "threshold": 0.4,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Nhận xét gốc của dữ liệu; không chứng minh toàn bộ động tác đúng."
+        },
+        {
+          "key": "not_visible",
+          "raw_label": "squats - not visible",
+          "name_vi": "Không nhìn thấy rõ",
+          "kind": "visibility",
+          "threshold": 0.75,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thông tin khả năng quan sát; ưu tiên kiểm tra khung hình trước khi góp ý."
+        },
+        {
+          "key": "hold",
+          "raw_label": "squats - hold",
+          "name_vi": "Giữ tư thế",
+          "kind": "context",
+          "threshold": 0.775,
+          "rep_supported": false,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Trạng thái của đoạn video; không tự diễn giải thành lỗi kỹ thuật."
+        },
+        {
+          "key": "starting_late",
+          "raw_label": "squats - starting late",
+          "name_vi": "Bắt đầu muộn",
+          "kind": "context",
+          "threshold": 0.9,
+          "rep_supported": false,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Trạng thái của đoạn video; không tự diễn giải thành lỗi kỹ thuật."
+        }
+      ]
+    },
+    "PUSHUP": {
+      "model_exercise": "push_up",
+      "schema_version": "qualcomm-pushup-21-128frames-context32-v1",
+      "model_sha256": "a61e117cd9563881cf0b1654f2f2c0c7c3733dfe802496bc59405556dd29226c",
+      "contract_sha256": "b7cc142e0a4820835ed1489426683c1862ee13d54961b2a0c8c77d0fc90e68a0",
+      "contract_file": "model_contracts/pushup_v4_contract.json",
+      "frames": 128,
+      "context_size": 32,
+      "threshold_source": "validation_only",
+      "labels": [
+        {
+          "key": "depth_90",
+          "raw_label": "pushups - 90 degrees",
+          "name_vi": "Khuỷu gập 90°",
+          "kind": "attribute",
+          "threshold": 0.6,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "too_deep",
+          "raw_label": "pushups - deep",
+          "name_vi": "Xuống quá sâu",
+          "kind": "error",
+          "threshold": 0.35,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [
+            "pushup_depth_control"
+          ],
+          "coverage": "partial",
+          "note_vi": "Chưa có ngưỡng an toàn cá nhân hoặc góc đo 2D chuẩn trong KB; không suy ra chấn thương."
+        },
+        {
+          "key": "shallow",
+          "raw_label": "pushups - shallow",
+          "name_vi": "Xuống nông",
+          "kind": "error",
+          "threshold": 0.5,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [
+            "pushup_depth_control",
+            "pushup_extension"
+          ],
+          "coverage": "partial",
+          "note_vi": "Nhãn lỗi do model dự đoán; không chứng minh nguyên nhân hoặc hậu quả."
+        },
+        {
+          "key": "insufficient",
+          "raw_label": "pushups - insufficient",
+          "name_vi": "Thực hiện chưa đầy đủ",
+          "kind": "error",
+          "threshold": 0.55,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [
+            "pushup_depth_control",
+            "pushup_extension"
+          ],
+          "coverage": "partial",
+          "note_vi": "Nhãn lỗi do model dự đoán; không chứng minh nguyên nhân hoặc hậu quả."
+        },
+        {
+          "key": "shoulder_width",
+          "raw_label": "pushups - shoulder-width",
+          "name_vi": "Tay rộng bằng vai",
+          "kind": "attribute",
+          "threshold": 0.55,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "wide",
+          "raw_label": "pushups - wide",
+          "name_vi": "Tay mở rộng",
+          "kind": "attribute",
+          "threshold": 0.6,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "very_wide",
+          "raw_label": "pushups - very wide",
+          "name_vi": "Đặt tay quá rộng",
+          "kind": "error",
+          "threshold": 0.5,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [
+            "pushup_hands"
+          ],
+          "coverage": "partial",
+          "note_vi": "Nguồn mô tả vị trí khởi đầu; các biến thể khoảng cách tay chưa được đánh giá riêng."
+        },
+        {
+          "key": "narrow",
+          "raw_label": "pushups - narrow",
+          "name_vi": "Đặt tay quá hẹp",
+          "kind": "error",
+          "threshold": 0.45000000000000007,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [
+            "pushup_hands"
+          ],
+          "coverage": "partial",
+          "note_vi": "Nhãn lỗi do model dự đoán; không chứng minh nguyên nhân hoặc hậu quả."
+        },
+        {
+          "key": "elevated_hips",
+          "raw_label": "pushups - elevated hips",
+          "name_vi": "Hông nâng quá cao",
+          "kind": "error",
+          "threshold": 0.775,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [
+            "pushup_hip_control"
+          ],
+          "coverage": "direct",
+          "note_vi": "Nhãn lỗi do model dự đoán; không chứng minh nguyên nhân hoặc hậu quả."
+        },
+        {
+          "key": "butt_sinking",
+          "raw_label": "pushups - butt sinking",
+          "name_vi": "Hông bị võng xuống",
+          "kind": "error",
+          "threshold": 0.15000000000000002,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [
+            "pushup_hip_control"
+          ],
+          "coverage": "direct",
+          "note_vi": "Nhãn lỗi do model dự đoán; không chứng minh nguyên nhân hoặc hậu quả."
+        },
+        {
+          "key": "legs_on_floor",
+          "raw_label": "pushups - legs on the floor",
+          "name_vi": "Chân nằm trên sàn",
+          "kind": "error",
+          "threshold": 0.325,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [
+            "pushup_alignment",
+            "pushup_knee_variant"
+          ],
+          "coverage": "partial",
+          "note_vi": "Cần xác nhận đang tập chống đẩy chuẩn hay biến thể chống đẩy gối; chưa coi mọi tiếp xúc chân/gối với sàn là cùng một lỗi."
+        },
+        {
+          "key": "side_to_side",
+          "raw_label": "pushups - side to side",
+          "name_vi": "Người dịch chuyển sang hai bên",
+          "kind": "error",
+          "threshold": 0.5,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [
+            "pushup_alignment"
+          ],
+          "coverage": "partial",
+          "note_vi": "Nhãn lỗi do model dự đoán; không chứng minh nguyên nhân hoặc hậu quả."
+        },
+        {
+          "key": "child_pose_cheat",
+          "raw_label": "pushups - child pose cheat",
+          "name_vi": "Chuyển sang tư thế em bé",
+          "kind": "error",
+          "threshold": 0.5,
+          "rep_supported": true,
+          "calibrated": true,
+          "coverage": "none",
+          "note_vi": "Chưa có tài liệu đủ rõ cho nhãn này trong ngữ cảnh phân đoạn bài tập; không tự kết luận tư thế nghỉ là nguyên nhân hay bệnh lý.",
+          "criterion_ids": []
+        },
+        {
+          "key": "sloppy",
+          "raw_label": "pushups - sloppy",
+          "name_vi": "Dáng tập thiếu ổn định",
+          "kind": "error",
+          "threshold": 0.45000000000000007,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [
+            "pushup_alignment"
+          ],
+          "coverage": "partial",
+          "note_vi": "Nhãn lỗi do model dự đoán; không chứng minh nguyên nhân hoặc hậu quả."
+        },
+        {
+          "key": "moving_head",
+          "raw_label": "pushups - moving head",
+          "name_vi": "Đầu chuyển động",
+          "kind": "attribute",
+          "threshold": 0.7000000000000001,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "head_down",
+          "raw_label": "pushups - head down",
+          "name_vi": "Đầu cúi xuống",
+          "kind": "attribute",
+          "threshold": 0.875,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "head_out_of_frame",
+          "raw_label": "pushups - head moving in an out of frame",
+          "name_vi": "Đầu ra vào khung hình",
+          "kind": "visibility",
+          "threshold": 0.5,
+          "rep_supported": false,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thông tin khả năng quan sát; ưu tiên kiểm tra khung hình trước khi góp ý."
+        },
+        {
+          "key": "waiting_position",
+          "raw_label": "pushups - waiting position",
+          "name_vi": "Tư thế chờ chống tay",
+          "kind": "context",
+          "threshold": 0.55,
+          "rep_supported": false,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Trạng thái của đoạn video; không tự diễn giải thành lỗi kỹ thuật."
+        },
+        {
+          "key": "early_stopping",
+          "raw_label": "pushups - early stopping",
+          "name_vi": "Dừng sớm",
+          "kind": "context",
+          "threshold": 0.5750000000000001,
+          "rep_supported": false,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Trạng thái của đoạn video; không tự diễn giải thành lỗi kỹ thuật."
+        },
+        {
+          "key": "fast",
+          "raw_label": "pushups - fast",
+          "name_vi": "Thực hiện nhanh",
+          "kind": "attribute",
+          "threshold": 0.525,
+          "rep_supported": false,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "not_visible",
+          "raw_label": "pushups - not visible",
+          "name_vi": "Không nhìn thấy rõ",
+          "kind": "visibility",
+          "threshold": 0.42500000000000004,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thông tin khả năng quan sát; ưu tiên kiểm tra khung hình trước khi góp ý."
+        }
+      ]
+    },
+    "JUMPING_JACK": {
+      "model_exercise": "jump_jack",
+      "schema_version": "qualcomm-jumpjack-29-128frames-context32-v1",
+      "model_sha256": "2af00a3ae132e3e684d44a04d49ed471e8e54f0d7ef71536aad0861535d7633f",
+      "contract_sha256": "51bdffbd1afbf4841440de095a2002e2c1b73ce5175364842ee257a3cfc81afb",
+      "contract_file": "model_contracts/jumpjack_v4_contract.json",
+      "frames": 128,
+      "context_size": 32,
+      "threshold_source": "validation_only",
+      "labels": [
+        {
+          "key": "only_arms",
+          "raw_label": "jumping jacks - only arms",
+          "name_vi": "Chỉ chuyển động tay",
+          "kind": "error",
+          "threshold": 0.5,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [
+            "jack_sync",
+            "jack_return"
+          ],
+          "coverage": "direct",
+          "note_vi": "Nhãn lỗi do model dự đoán; không chứng minh nguyên nhân hoặc hậu quả."
+        },
+        {
+          "key": "only_legs",
+          "raw_label": "jumping jacks - only legs",
+          "name_vi": "Chỉ chuyển động chân",
+          "kind": "error",
+          "threshold": 0.625,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [
+            "jack_sync",
+            "jack_return"
+          ],
+          "coverage": "direct",
+          "note_vi": "Nhãn lỗi do model dự đoán; không chứng minh nguyên nhân hoặc hậu quả."
+        },
+        {
+          "key": "not_jumping",
+          "raw_label": "jumping jacks - not jumping",
+          "name_vi": "Không bật nhảy",
+          "kind": "error",
+          "threshold": 0.475,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [
+            "jack_sync",
+            "jack_step_variant"
+          ],
+          "coverage": "partial",
+          "note_vi": "Cần phân biệt jumping jack chuẩn và biến thể bước chân step-out; không tự khuyến nghị tăng lực bật cho mọi người."
+        },
+        {
+          "key": "puppet_dance",
+          "raw_label": "jumping jacks - puppet dance",
+          "name_vi": "Chuyển động kiểu múa rối",
+          "kind": "error",
+          "threshold": 0.5,
+          "rep_supported": true,
+          "calibrated": true,
+          "coverage": "none",
+          "note_vi": "Nhãn mô tả riêng của dữ liệu; chưa có tiêu chí chuyên môn đủ rõ để diễn giải hoặc sửa bằng RAG.",
+          "criterion_ids": []
+        },
+        {
+          "key": "opposite",
+          "raw_label": "jumping jacks - opposite",
+          "name_vi": "Tay chân chuyển động ngược pha",
+          "kind": "error",
+          "threshold": 0.1,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [
+            "jack_sync",
+            "jack_return"
+          ],
+          "coverage": "direct",
+          "note_vi": "Nhãn lỗi do model dự đoán; không chứng minh nguyên nhân hoặc hậu quả."
+        },
+        {
+          "key": "not_synchronized",
+          "raw_label": "jumping jacks - not synchronized",
+          "name_vi": "Tay chân không đồng bộ",
+          "kind": "error",
+          "threshold": 0.17500000000000002,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [
+            "jack_sync",
+            "jack_return"
+          ],
+          "coverage": "direct",
+          "note_vi": "Nhãn lỗi do model dự đoán; không chứng minh nguyên nhân hoặc hậu quả."
+        },
+        {
+          "key": "single_repetition",
+          "raw_label": "jumping jacks - single repetition",
+          "name_vi": "Chỉ thực hiện một lần",
+          "kind": "context",
+          "threshold": 0.4,
+          "rep_supported": false,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Trạng thái của đoạn video; không tự diễn giải thành lỗi kỹ thuật."
+        },
+        {
+          "key": "early_stopping",
+          "raw_label": "jumping jacks - early stopping",
+          "name_vi": "Dừng sớm",
+          "kind": "context",
+          "threshold": 0.2,
+          "rep_supported": false,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Trạng thái của đoạn video; không tự diễn giải thành lỗi kỹ thuật."
+        },
+        {
+          "key": "arms_rom_1_0",
+          "raw_label": "jumping jacks - arms_rom=1.0",
+          "name_vi": "Tay: mức biên độ 1",
+          "kind": "attribute",
+          "threshold": 0.875,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Mức biên độ/mức nâng theo thang chú thích gốc; chưa có căn cứ chuyển thành góc giải phẫu hoặc chuẩn đúng/sai."
+        },
+        {
+          "key": "arms_rom_1_5",
+          "raw_label": "jumping jacks - arms_rom=1.5",
+          "name_vi": "Tay: mức biên độ 1.5",
+          "kind": "attribute",
+          "threshold": 0.45000000000000007,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Mức biên độ/mức nâng theo thang chú thích gốc; chưa có căn cứ chuyển thành góc giải phẫu hoặc chuẩn đúng/sai."
+        },
+        {
+          "key": "arms_rom_2_0",
+          "raw_label": "jumping jacks - arms_rom=2.0",
+          "name_vi": "Tay: mức biên độ 2",
+          "kind": "attribute",
+          "threshold": 0.30000000000000004,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Mức biên độ/mức nâng theo thang chú thích gốc; chưa có căn cứ chuyển thành góc giải phẫu hoặc chuẩn đúng/sai."
+        },
+        {
+          "key": "arms_rom_2_5",
+          "raw_label": "jumping jacks - arms_rom=2.5",
+          "name_vi": "Tay: mức biên độ 2.5",
+          "kind": "attribute",
+          "threshold": 0.5,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Mức biên độ/mức nâng theo thang chú thích gốc; chưa có căn cứ chuyển thành góc giải phẫu hoặc chuẩn đúng/sai."
+        },
+        {
+          "key": "arms_rom_3_0",
+          "raw_label": "jumping jacks - arms_rom=3.0",
+          "name_vi": "Tay: mức biên độ 3",
+          "kind": "attribute",
+          "threshold": 0.675,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Mức biên độ/mức nâng theo thang chú thích gốc; chưa có căn cứ chuyển thành góc giải phẫu hoặc chuẩn đúng/sai."
+        },
+        {
+          "key": "arms_rom_3_5",
+          "raw_label": "jumping jacks - arms_rom=3.5",
+          "name_vi": "Tay: mức biên độ 3.5",
+          "kind": "attribute",
+          "threshold": 0.42500000000000004,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Mức biên độ/mức nâng theo thang chú thích gốc; chưa có căn cứ chuyển thành góc giải phẫu hoặc chuẩn đúng/sai."
+        },
+        {
+          "key": "arms_rom_4_0",
+          "raw_label": "jumping jacks - arms_rom=4.0",
+          "name_vi": "Tay: mức biên độ 4",
+          "kind": "attribute",
+          "threshold": 0.17500000000000002,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Mức biên độ/mức nâng theo thang chú thích gốc; chưa có căn cứ chuyển thành góc giải phẫu hoặc chuẩn đúng/sai."
+        },
+        {
+          "key": "legs_rom_1_0",
+          "raw_label": "jumping jacks - legs_rom=1.0",
+          "name_vi": "Chân: mức biên độ 1",
+          "kind": "attribute",
+          "threshold": 0.875,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Mức biên độ/mức nâng theo thang chú thích gốc; chưa có căn cứ chuyển thành góc giải phẫu hoặc chuẩn đúng/sai."
+        },
+        {
+          "key": "legs_rom_1_5",
+          "raw_label": "jumping jacks - legs_rom=1.5",
+          "name_vi": "Chân: mức biên độ 1.5",
+          "kind": "attribute",
+          "threshold": 1.01,
+          "rep_supported": true,
+          "calibrated": false,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Mức biên độ/mức nâng theo thang chú thích gốc; chưa có căn cứ chuyển thành góc giải phẫu hoặc chuẩn đúng/sai."
+        },
+        {
+          "key": "legs_rom_2_0",
+          "raw_label": "jumping jacks - legs_rom=2.0",
+          "name_vi": "Chân: mức biên độ 2",
+          "kind": "attribute",
+          "threshold": 0.42500000000000004,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Mức biên độ/mức nâng theo thang chú thích gốc; chưa có căn cứ chuyển thành góc giải phẫu hoặc chuẩn đúng/sai."
+        },
+        {
+          "key": "legs_rom_2_5",
+          "raw_label": "jumping jacks - legs_rom=2.5",
+          "name_vi": "Chân: mức biên độ 2.5",
+          "kind": "attribute",
+          "threshold": 0.5,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Mức biên độ/mức nâng theo thang chú thích gốc; chưa có căn cứ chuyển thành góc giải phẫu hoặc chuẩn đúng/sai."
+        },
+        {
+          "key": "legs_rom_3_0",
+          "raw_label": "jumping jacks - legs_rom=3.0",
+          "name_vi": "Chân: mức biên độ 3",
+          "kind": "attribute",
+          "threshold": 0.525,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Mức biên độ/mức nâng theo thang chú thích gốc; chưa có căn cứ chuyển thành góc giải phẫu hoặc chuẩn đúng/sai."
+        },
+        {
+          "key": "legs_rom_3_5",
+          "raw_label": "jumping jacks - legs_rom=3.5",
+          "name_vi": "Chân: mức biên độ 3.5",
+          "kind": "attribute",
+          "threshold": 1.01,
+          "rep_supported": true,
+          "calibrated": false,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Mức biên độ/mức nâng theo thang chú thích gốc; chưa có căn cứ chuyển thành góc giải phẫu hoặc chuẩn đúng/sai."
+        },
+        {
+          "key": "legs_rom_4_0",
+          "raw_label": "jumping jacks - legs_rom=4.0",
+          "name_vi": "Chân: mức biên độ 4",
+          "kind": "attribute",
+          "threshold": 0.1,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Mức biên độ/mức nâng theo thang chú thích gốc; chưa có căn cứ chuyển thành góc giải phẫu hoặc chuẩn đúng/sai."
+        },
+        {
+          "key": "speed_0_25",
+          "raw_label": "jumping jacks - speed=0.25 rps",
+          "name_vi": "Tốc độ 0.25 lần/giây",
+          "kind": "attribute",
+          "threshold": 0.5,
+          "rep_supported": false,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "speed_0_50",
+          "raw_label": "jumping jacks - speed=0.50 rps",
+          "name_vi": "Tốc độ 0.5 lần/giây",
+          "kind": "attribute",
+          "threshold": 0.9,
+          "rep_supported": false,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "speed_0_75",
+          "raw_label": "jumping jacks - speed=0.75 rps",
+          "name_vi": "Tốc độ 0.75 lần/giây",
+          "kind": "attribute",
+          "threshold": 0.1,
+          "rep_supported": false,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "speed_1_00",
+          "raw_label": "jumping jacks - speed=1.00 rps",
+          "name_vi": "Tốc độ 1 lần/giây",
+          "kind": "attribute",
+          "threshold": 0.875,
+          "rep_supported": false,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "speed_1_25",
+          "raw_label": "jumping jacks - speed=1.25 rps",
+          "name_vi": "Tốc độ 1.25 lần/giây",
+          "kind": "attribute",
+          "threshold": 0.15000000000000002,
+          "rep_supported": false,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "speed_1_50",
+          "raw_label": "jumping jacks - speed=1.50 rps",
+          "name_vi": "Tốc độ 1.5 lần/giây",
+          "kind": "attribute",
+          "threshold": 0.4,
+          "rep_supported": false,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "speed_1_75",
+          "raw_label": "jumping jacks - speed=1.75 rps",
+          "name_vi": "Tốc độ 1.75 lần/giây",
+          "kind": "attribute",
+          "threshold": 1.01,
+          "rep_supported": false,
+          "calibrated": false,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        }
+      ]
+    },
+    "REVERSE_CRUNCH": {
+      "model_exercise": "situp",
+      "schema_version": "qualcomm-reverse-crunch-19-128frames-context32-v1",
+      "model_sha256": "b6150a5b98884df6e0e73e9dd0a85e78d160ff5c6f8eeb055fa98b39850520c7",
+      "contract_sha256": "7aadde0468a137d7a4aec8f85508db52acb34bd65783c451be867d7cacacabca",
+      "contract_file": "model_contracts/crunch_v4_contract.json",
+      "frames": 128,
+      "context_size": 32,
+      "threshold_source": "validation_only",
+      "labels": [
+        {
+          "key": "range_90",
+          "raw_label": "reverse crunches - 90 degrees",
+          "name_vi": "Co chân đến 90°",
+          "kind": "attribute",
+          "threshold": 0.475,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "range_over_90",
+          "raw_label": "reverse crunches - over 90 degrees",
+          "name_vi": "Co chân vượt 90°",
+          "kind": "attribute",
+          "threshold": 0.6,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "range_below_90",
+          "raw_label": "reverse crunches - below 90 degrees",
+          "name_vi": "Co chân chưa đến 90°",
+          "kind": "error",
+          "threshold": 0.325,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [
+            "crunch_start",
+            "crunch_control"
+          ],
+          "coverage": "partial",
+          "note_vi": "Chú thích biên độ của dataset không tự chứng minh góc khớp giải phẫu hoặc một mức bắt buộc cho mọi người."
+        },
+        {
+          "key": "not_raising_hips",
+          "raw_label": "reverse crunches - not raising hips",
+          "name_vi": "Chưa nâng hông khỏi sàn",
+          "kind": "error",
+          "threshold": 0.725,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [
+            "crunch_pelvis"
+          ],
+          "coverage": "direct",
+          "note_vi": "Nhãn lỗi do model dự đoán; không chứng minh nguyên nhân hoặc hậu quả."
+        },
+        {
+          "key": "extending_legs",
+          "raw_label": "reverse crunches - extending legs",
+          "name_vi": "Duỗi chân",
+          "kind": "attribute",
+          "threshold": 0.875,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "feet_down",
+          "raw_label": "reverse crunches - feet down",
+          "name_vi": "Bàn chân đặt trên sàn",
+          "kind": "attribute",
+          "threshold": 0.75,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "thighs_not_moving",
+          "raw_label": "reverse crunches - thighs not moving",
+          "name_vi": "Đùi không chuyển động",
+          "kind": "error",
+          "threshold": 0.8250000000000001,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [
+            "crunch_pelvis",
+            "crunch_control"
+          ],
+          "coverage": "partial",
+          "note_vi": "Nhãn lỗi do model dự đoán; không chứng minh nguyên nhân hoặc hậu quả."
+        },
+        {
+          "key": "head_up",
+          "raw_label": "reverse crunches - head up",
+          "name_vi": "Đầu nâng lên",
+          "kind": "attribute",
+          "threshold": 0.4,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "frontal",
+          "raw_label": "reverse crunches - frontal",
+          "name_vi": "Bàn chân hướng về camera",
+          "kind": "attribute",
+          "threshold": 0.65,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "not_moving",
+          "raw_label": "reverse crunches - not moving",
+          "name_vi": "Không chuyển động",
+          "kind": "context",
+          "threshold": 0.9,
+          "rep_supported": false,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Trạng thái của đoạn video; không tự diễn giải thành lỗi kỹ thuật."
+        },
+        {
+          "key": "getting_into_position",
+          "raw_label": "reverse crunches - getting into position",
+          "name_vi": "Đang vào tư thế",
+          "kind": "context",
+          "threshold": 0.55,
+          "rep_supported": false,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Trạng thái của đoạn video; không tự diễn giải thành lỗi kỹ thuật."
+        },
+        {
+          "key": "slow",
+          "raw_label": "reverse crunches - slow",
+          "name_vi": "Thực hiện chậm",
+          "kind": "attribute",
+          "threshold": 0.625,
+          "rep_supported": false,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "fast",
+          "raw_label": "reverse crunches - fast",
+          "name_vi": "Thực hiện nhanh",
+          "kind": "attribute",
+          "threshold": 0.35,
+          "rep_supported": false,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thuộc tính được dự đoán; không tự diễn giải thành lỗi hoặc kết luận đúng kỹ thuật."
+        },
+        {
+          "key": "not_visible",
+          "raw_label": "reverse crunches - not visible",
+          "name_vi": "Không nhìn thấy rõ",
+          "kind": "visibility",
+          "threshold": 0.5,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Thông tin khả năng quan sát; ưu tiên kiểm tra khung hình trước khi góp ý."
+        },
+        {
+          "key": "height_1",
+          "raw_label": "reverse crunches - height=1",
+          "name_vi": "Mức nâng 1",
+          "kind": "attribute",
+          "threshold": 0.625,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Mức biên độ/mức nâng theo thang chú thích gốc; chưa có căn cứ chuyển thành góc giải phẫu hoặc chuẩn đúng/sai."
+        },
+        {
+          "key": "height_2",
+          "raw_label": "reverse crunches - height=2",
+          "name_vi": "Mức nâng 2",
+          "kind": "attribute",
+          "threshold": 0.30000000000000004,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Mức biên độ/mức nâng theo thang chú thích gốc; chưa có căn cứ chuyển thành góc giải phẫu hoặc chuẩn đúng/sai."
+        },
+        {
+          "key": "height_3",
+          "raw_label": "reverse crunches - height=3",
+          "name_vi": "Mức nâng 3",
+          "kind": "attribute",
+          "threshold": 0.5,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Mức biên độ/mức nâng theo thang chú thích gốc; chưa có căn cứ chuyển thành góc giải phẫu hoặc chuẩn đúng/sai."
+        },
+        {
+          "key": "height_4",
+          "raw_label": "reverse crunches - height=4",
+          "name_vi": "Mức nâng 4",
+          "kind": "attribute",
+          "threshold": 0.375,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Mức biên độ/mức nâng theo thang chú thích gốc; chưa có căn cứ chuyển thành góc giải phẫu hoặc chuẩn đúng/sai."
+        },
+        {
+          "key": "height_5",
+          "raw_label": "reverse crunches - height=5",
+          "name_vi": "Mức nâng 5",
+          "kind": "attribute",
+          "threshold": 0.6,
+          "rep_supported": true,
+          "calibrated": true,
+          "criterion_ids": [],
+          "coverage": "metadata_only",
+          "note_vi": "Mức biên độ/mức nâng theo thang chú thích gốc; chưa có căn cứ chuyển thành góc giải phẫu hoặc chuẩn đúng/sai."
+        }
+      ]
+    }
+  }
+}

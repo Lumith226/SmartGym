@@ -1,0 +1,230 @@
+[
+  {
+    "id": "squat_bracing",
+    "exercise_code": "SQUAT",
+    "kind": "technique",
+    "text_vi": "Siết cơ lõi để hỗ trợ ổn định cột sống khi thực hiện squat.",
+    "source_id": "ace_squat",
+    "anchor": "stabilize your spine",
+    "labels": [
+      "BACK_ROUNDING"
+    ]
+  },
+  {
+    "id": "squat_knee_tracking",
+    "exercise_code": "SQUAT",
+    "kind": "technique",
+    "text_vi": "Trong hướng dẫn squat này, theo dõi đầu gối thẳng hướng với ngón chân thứ hai.",
+    "source_id": "ace_squat",
+    "anchor": "knees remain aligned",
+    "labels": [
+      "KNEE_ALIGNMENT",
+      "KNEE_VALGUS"
+    ]
+  },
+  {
+    "id": "squat_range",
+    "exercise_code": "SQUAT",
+    "kind": "technique",
+    "text_vi": "Giới hạn hạ người cần xét cùng khả năng giữ gót và tư thế thân; không suy ra một góc gối cố định phù hợp cho mọi người.",
+    "source_id": "ace_squat",
+    "anchor": "heels begin to lift",
+    "labels": [
+      "SHALLOW_DEPTH"
+    ]
+  },
+  {
+    "id": "pushup_hip_control",
+    "exercise_code": "PUSHUP",
+    "kind": "technique",
+    "text_vi": "Khi chống đẩy, giữ thân ổn định và tránh để lưng dưới võng hoặc hông nhô lên trong pha hạ và đẩy lên.",
+    "source_id": "ace_pushup",
+    "anchor": "hips to hike upwards",
+    "labels": [
+      "HIP_ALIGNMENT",
+      "HIP_TOO_HIGH",
+      "HIP_SAG"
+    ]
+  },
+  {
+    "id": "pushup_hands",
+    "exercise_code": "PUSHUP",
+    "kind": "technique",
+    "text_vi": "Hướng dẫn bắt đầu bằng hai bàn tay rộng bằng vai, điều chỉnh để duỗi thân và giữ đầu thẳng với cột sống.",
+    "source_id": "ace_pushup",
+    "anchor": "hands shoulder-width apart",
+    "labels": [
+      "HAND_PLACEMENT"
+    ]
+  },
+  {
+    "id": "crunch_pelvis",
+    "exercise_code": "REVERSE_CRUNCH",
+    "kind": "technique",
+    "text_vi": "Pha nâng của gập bụng ngược có chuyển động nâng hông khỏi thảm và cuộn xương chậu về phía lồng ngực.",
+    "source_id": "ace_reverse_crunch",
+    "anchor": "raise your hips off",
+    "labels": [
+      "NOT_RAISING_HIPS"
+    ]
+  },
+  {
+    "id": "crunch_control",
+    "exercise_code": "REVERSE_CRUNCH",
+    "kind": "technique",
+    "text_vi": "Hạ cột sống về thảm có kiểm soát và theo dõi vị trí gối so với hông khi trở lại tư thế ban đầu.",
+    "source_id": "ace_reverse_crunch",
+    "anchor": "in a controlled fashion",
+    "labels": [
+      "SHALLOW_RANGE"
+    ]
+  },
+  {
+    "id": "jack_coordination",
+    "exercise_code": "JUMPING_JACK",
+    "kind": "technique",
+    "text_vi": "Bật hai chân sang hai bên đồng thời nâng tay qua đầu, sau đó bật chân trở về tư thế bắt đầu.",
+    "source_id": "qld_jumping_jacks",
+    "anchor": "while raising your arms overhead",
+    "labels": [
+      "ARMS_INCOMPLETE",
+      "LEGS_TOO_NARROW",
+      "NOT_JUMPING"
+    ]
+  },
+  {
+    "id": "jack_landing",
+    "exercise_code": "JUMPING_JACK",
+    "kind": "technique",
+    "text_vi": "Khi bật nhảy dang tay chân, tiếp đất với đầu gối mềm theo hướng dẫn của nguồn.",
+    "source_id": "qld_jumping_jacks",
+    "anchor": "landing with soft knees",
+    "labels": []
+  },
+  {
+    "id": "squat_start_feet",
+    "exercise_code": "SQUAT",
+    "kind": "technique",
+    "text_vi": "Đặt chân hơi rộng hơn hông và mũi chân xoay nhẹ ra ngoài theo hướng dẫn squat này.",
+    "source_id": "ace_squat",
+    "anchor": "feet slightly wider than hip-width",
+    "labels": []
+  },
+  {
+    "id": "squat_back_flat",
+    "exercise_code": "SQUAT",
+    "kind": "technique",
+    "text_vi": "Trong pha hạ squat, tiếp tục giữ căng cơ lõi và cố gắng giữ lưng phẳng theo hướng dẫn của nguồn.",
+    "source_id": "ace_squat",
+    "anchor": "attempt to keep your back flat",
+    "labels": []
+  },
+  {
+    "id": "squat_rise_together",
+    "exercise_code": "SQUAT",
+    "kind": "technique",
+    "text_vi": "Khi đứng lên từ squat, hông và thân cùng nâng lên, gót giữ trên sàn và gối theo hướng ngón chân thứ hai.",
+    "source_id": "ace_squat",
+    "anchor": "hips and torso need to rise together",
+    "labels": []
+  },
+  {
+    "id": "pushup_alignment",
+    "exercise_code": "PUSHUP",
+    "kind": "technique",
+    "text_vi": "Với chống đẩy chuẩn trong nguồn, duỗi thân không gập ở hông hoặc gối, giữ thân ổn định và đầu thẳng với cột sống.",
+    "source_id": "ace_pushup",
+    "anchor": "without any bend at the hips or knees",
+    "labels": []
+  },
+  {
+    "id": "pushup_depth_control",
+    "exercise_code": "PUSHUP",
+    "kind": "technique",
+    "text_vi": "Ở biến thể chống đẩy trên sàn được ACE mô tả, pha hạ có kiểm soát, thân ổn định và dùng mốc ngực hoặc cằm chạm thảm/sàn. Đây là mốc của hướng dẫn, chưa đủ để xác định mức quá sâu hoặc ngưỡng góc 2D phù hợp cho từng người; không mặc định yêu cầu người có nhãn quá sâu phải hạ thêm.",
+    "source_id": "ace_pushup",
+    "anchor": "until your chest or chin touch the mat/floor",
+    "labels": []
+  },
+  {
+    "id": "pushup_extension",
+    "exercise_code": "PUSHUP",
+    "kind": "technique",
+    "text_vi": "Pha đẩy lên tiếp tục đến khi tay duỗi hết ở khuỷu trong khi giữ thân ổn định.",
+    "source_id": "ace_pushup",
+    "anchor": "arms are fully extended at the elbows",
+    "labels": []
+  },
+  {
+    "id": "pushup_knee_variant",
+    "exercise_code": "PUSHUP",
+    "kind": "technique",
+    "text_vi": "ACE cũng mô tả biến thể chống đẩy gối, duỗi thân từ gối và không gập hông; cần xác nhận biến thể trước khi diễn giải nhãn chân/gối chạm sàn.",
+    "source_id": "ace_knee_pushup",
+    "anchor": "full extension of your body from the knees",
+    "labels": []
+  },
+  {
+    "id": "crunch_start",
+    "exercise_code": "REVERSE_CRUNCH",
+    "kind": "technique",
+    "text_vi": "Trong vị trí bắt đầu gập bụng ngược của nguồn, nâng gối ở trên hông và giữ gối gập 90 độ; đây là mô tả kỹ thuật của nguồn, không phải xác nhận góc 3D đo từ video.",
+    "source_id": "ace_reverse_crunch",
+    "anchor": "raising your knees directly above your hips",
+    "labels": []
+  },
+  {
+    "id": "crunch_knee_stability",
+    "exercise_code": "REVERSE_CRUNCH",
+    "kind": "technique",
+    "text_vi": "Khi cuộn nâng hông, nguồn hướng dẫn tránh thay đổi góc gối trong pha nâng.",
+    "source_id": "ace_reverse_crunch",
+    "anchor": "Avoid any change in the angle of your knees",
+    "labels": []
+  },
+  {
+    "id": "jack_start",
+    "exercise_code": "JUMPING_JACK",
+    "kind": "technique",
+    "text_vi": "Bắt đầu jumping jack với hai chân khép và tay dọc hai bên thân theo nguồn NASM.",
+    "source_id": "nasm_jumping_jacks",
+    "anchor": "Stand with feet together",
+    "labels": []
+  },
+  {
+    "id": "jack_sync",
+    "exercise_code": "JUMPING_JACK",
+    "kind": "technique",
+    "text_vi": "Ở pha mở của jumping jack chuẩn, bật mở chân đồng thời đưa tay qua đầu, phối hợp chuyển động tay và chân.",
+    "source_id": "nasm_jumping_jacks",
+    "anchor": "Coordinate leg and arm movements",
+    "labels": []
+  },
+  {
+    "id": "jack_return",
+    "exercise_code": "JUMPING_JACK",
+    "kind": "technique",
+    "text_vi": "Trở lại vị trí chân khép đồng thời hạ tay về hai bên thân theo hướng dẫn NASM.",
+    "source_id": "nasm_jumping_jacks",
+    "anchor": "while lowering your arms to your sides",
+    "labels": []
+  },
+  {
+    "id": "jack_upright",
+    "exercise_code": "JUMPING_JACK",
+    "kind": "technique",
+    "text_vi": "Giữ thân thẳng và kiểm soát tư thế trong quá trình jumping jack theo nguồn.",
+    "source_id": "nasm_jumping_jacks",
+    "anchor": "Maintain upright posture",
+    "labels": []
+  },
+  {
+    "id": "jack_step_variant",
+    "exercise_code": "JUMPING_JACK",
+    "kind": "technique",
+    "text_vi": "NASM có mô tả biến thể step-out, bước chân thay cho bật nhảy; cần xác nhận biến thể trước khi áp tiêu chí không bật nhảy.",
+    "source_id": "nasm_jumping_jacks",
+    "anchor": "Beginners can perform step-out jacks",
+    "labels": []
+  }
+]

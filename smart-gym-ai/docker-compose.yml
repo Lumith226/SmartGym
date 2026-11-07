@@ -1,0 +1,120 @@
+version: "3.9"
+
+services:
+  # ── PostgreSQL ──────────────────────────────────────────────
+  postgres:
+    image: postgres:16-alpine
+    container_name: smartgym_postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: smartgym
+      POSTGRES_PASSWORD: smartgym123
+      POSTGRES_DB: smartgymdb
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartgym"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  # ── Neo4j (TV2) ─────────────────────────────────────────────
+  neo4j:
+    image: neo4j:5-community
+    container_name: smartgym_neo4j
+    restart: unless-stopped
+    environment:
+      NEO4J_AUTH: neo4j/neo4j123
+      NEO4J_PLUGINS: '["apoc"]'
+    volumes:
+      - neo4j_data:/data
+    ports:
+      - "7474:7474"   # HTTP Browser
+      - "7687:7687"   # Bolt
+    healthcheck:
+      test: ["CMD", "wget", "-q", "--spider", "http://localhost:7474"]
+      interval: 30s
+      timeout: 10s
+      retries: 5
+
+  # ── ChromaDB (TV2) ──────────────────────────────────────────
+  chromadb:
+    image: chromadb/chroma:latest
+    container_name: smartgym_chromadb
+    restart: unless-stopped
+    volumes:
+      - chromadb_data:/chroma/chroma
+    ports:
+      - "8001:8000"
+    environment:
+      CHROMA_SERVER_AUTH_CREDENTIALS_PROVIDER: ""
+      ALLOW_RESET: "true"
+
+  # ── FastAPI Backend ──────────────────────────────────────────
+  kb-rag:
+    build: ./services/kb_rag
+    restart: unless-stopped
+    environment:
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+      KB_LLM_PROVIDER: ollama
+      KB_INTERNAL_TOKEN: ${KB_INTERNAL_TOKEN:-}
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: neo4j123
+      KB_GRAPH_BACKEND: ${KB_GRAPH_BACKEND:-local}
+    volumes:
+      - ./services/kb_rag/data/index:/app/data/index:ro
+    ports:
+      - "127.0.0.1:8010:8010"
+
+  api:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: smartgym_api
+    restart: unless-stopped
+    environment:
+      DATABASE_URL: postgresql+asyncpg://smartgym:smartgym123@postgres:5432/smartgymdb
+      NEO4J_URI: bolt://neo4j:7687
+      CHROMADB_HOST: chromadb
+      CHROMADB_PORT: 8000
+      ALLOWED_ORIGINS: http://localhost:3000
+      DEBUG: "false"
+      KB_RAG_SERVICE_URL: http://kb-rag:8010
+      KB_RAG_INTERNAL_TOKEN: ${KB_INTERNAL_TOKEN:-}
+    volumes:
+      - ./backend:/app
+      - snapshots_data:/app/static/snapshots
+    ports:
+      - "8000:8000"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:8000/api/health"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # ── Next.js Frontend ─────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    container_name: smartgym_frontend
+    restart: unless-stopped
+    environment:
+      NEXT_PUBLIC_API_URL: http://localhost:8000
+      NEXT_PUBLIC_WS_URL: ws://localhost:8000
+    ports:
+      - "3000:3000"
+    depends_on:
+      - api
+
+volumes:
+  postgres_data:
+  neo4j_data:
+  chromadb_data:
+  snapshots_data:

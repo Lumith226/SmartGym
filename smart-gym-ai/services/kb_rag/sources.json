@@ -1,0 +1,198 @@
+[
+  {
+    "id": "ace_squat",
+    "title": "Bodyweight Squat",
+    "publisher": "American Council on Exercise",
+    "url": "https://www.acefitness.org/resources/everyone/exercise-library/135/bodyweight-squat/",
+    "file": "ace_squat.html",
+    "format": "html",
+    "exercise_codes": [
+      "SQUAT"
+    ],
+    "selector": "ace_steps",
+    "license": "Copyright ACE; keep original attribution; do not redistribute full source without checking rights."
+  },
+  {
+    "id": "ace_pushup",
+    "title": "Push-up",
+    "publisher": "American Council on Exercise",
+    "url": "https://www.acefitness.org/resources/everyone/exercise-library/41/push-up/",
+    "file": "ace_pushup.html",
+    "format": "html",
+    "exercise_codes": [
+      "PUSHUP"
+    ],
+    "selector": "ace_steps",
+    "license": "Copyright ACE; keep original attribution; do not redistribute full source without checking rights."
+  },
+  {
+    "id": "ace_reverse_crunch",
+    "title": "Reverse Ab Crunch",
+    "publisher": "American Council on Exercise",
+    "url": "https://www.acefitness.org/resources/everyone/exercise-library/76/reverse-crunch/",
+    "file": "ace_reverse_crunch.html",
+    "format": "html",
+    "exercise_codes": [
+      "REVERSE_CRUNCH"
+    ],
+    "selector": "ace_steps",
+    "license": "Copyright ACE; keep original attribution; do not redistribute full source without checking rights."
+  },
+  {
+    "id": "qld_jumping_jacks",
+    "title": "Jumping jacks — source notes",
+    "publisher": "Health and Wellbeing Queensland (upstream source)",
+    "url": "https://hw.qld.gov.au/physical-activity/jumping-jacks/",
+    "file": "qld_jumping_jacks.notes.txt",
+    "format": "txt",
+    "exercise_codes": [
+      "JUMPING_JACK"
+    ],
+    "local_note": "qld_jumping_jacks.txt",
+    "acquisition": "Developer notes from inspected publisher page: short exact excerpt plus Vietnamese paraphrase. Not a raw downloaded HTML page.",
+    "review_status": "developer_draft; domain_review_pending",
+    "license": "Short attributed excerpt and developer paraphrase; original publisher retains rights."
+  },
+  {
+    "id": "nsca_programming",
+    "title": "Foundations of Fitness Programming",
+    "publisher": "National Strength and Conditioning Association",
+    "url": "https://www.nsca.com/contentassets/8323553f698a466a98220b21d9eb9a65/foundationsoffitnessprogramming_201508.pdf",
+    "file": "nsca_foundations.pdf",
+    "format": "pdf",
+    "exercise_codes": [],
+    "optional": true,
+    "license": "Copyright NSCA; academic reference; obtain only with permitted access; do not redistribute full source without checking rights."
+  },
+  {
+    "id": "openstax_anatomy",
+    "title": "Anatomy and Physiology 2e",
+    "publisher": "OpenStax, Rice University",
+    "url": "https://openstax.org/details/books/anatomy-and-physiology-2e",
+    "file": "anatomy-and-physiology-2e_-_WEB.pdf",
+    "format": "pdf",
+    "manual_download": true,
+    "acquisition": "User-provided PDF; publisher, title, copyright and sections verified inside this file.",
+    "publication_year": 2026,
+    "verified_total_pdf_pages": 1347,
+    "copyright_pdf_page": 4,
+    "exercise_codes": [],
+    "page_ranges": [
+      [
+        353,
+        369
+      ],
+      [
+        385,
+        408
+      ],
+      [
+        425,
+        429
+      ],
+      [
+        433,
+        470
+      ]
+    ],
+    "page_sections": [
+      {
+        "start": 353,
+        "end": 357,
+        "title": "9.5 Types of Body Movements"
+      },
+      {
+        "start": 358,
+        "end": 369,
+        "title": "9.6 Anatomy of Selected Synovial Joints"
+      },
+      {
+        "start": 385,
+        "end": 386,
+        "title": "10.1 Overview of Muscle Tissues"
+      },
+      {
+        "start": 387,
+        "end": 391,
+        "title": "10.2 Skeletal Muscle"
+      },
+      {
+        "start": 392,
+        "end": 399,
+        "title": "10.3 Muscle Fiber Contraction and Relaxation"
+      },
+      {
+        "start": 400,
+        "end": 404,
+        "title": "10.4 Nervous System Control of Muscle Tension"
+      },
+      {
+        "start": 405,
+        "end": 405,
+        "title": "10.5 Types of Muscle Fibers"
+      },
+      {
+        "start": 406,
+        "end": 408,
+        "title": "10.6 Exercise and Muscle Performance"
+      },
+      {
+        "start": 425,
+        "end": 429,
+        "title": "11.1 Interactions of Skeletal Muscles, Their Fascicle Arrangement, and Their Lever Systems"
+      },
+      {
+        "start": 433,
+        "end": 443,
+        "title": "11.3 Axial Muscles of the Head, Neck, and Back"
+      },
+      {
+        "start": 444,
+        "end": 450,
+        "title": "11.4 Axial Muscles of the Abdominal Wall, and Thorax"
+      },
+      {
+        "start": 451,
+        "end": 461,
+        "title": "11.5 Muscles of the Pectoral Girdle and Upper Limbs"
+      },
+      {
+        "start": 462,
+        "end": 470,
+        "title": "11.6 Appendicular Muscles of the Pelvic Girdle and Lower Limbs"
+      }
+    ],
+    "license": "CC BY-NC-SA 4.0",
+    "attribution": "Access for free at openstax.org.",
+    "printed_page_note": "Selected content pages have a 16-page offset in this verified file. Stored pdf_page is always the 1-based file position."
+  },
+  {
+    "id": "ace_knee_pushup",
+    "title": "Bent Knee Push-up",
+    "publisher": "American Council on Exercise",
+    "url": "https://www.acefitness.org/resources/everyone/exercise-library/13/bent-knee-push-up/",
+    "file": "ace_knee_pushup.html",
+    "format": "html",
+    "exercise_codes": [
+      "PUSHUP"
+    ],
+    "selector": "ace_steps",
+    "license": "Copyright ACE; retain attribution; local academic reference."
+  },
+  {
+    "id": "nasm_jumping_jacks",
+    "title": "Jumping Jacks",
+    "publisher": "National Academy of Sports Medicine",
+    "url": "https://www.nasm.org/resource-center/exercise-library/jumping-jacks",
+    "file": "nasm_jumping_jacks.html",
+    "format": "html",
+    "exercise_codes": [
+      "JUMPING_JACK"
+    ],
+    "selector": "ace_steps",
+    "extra_headings": [
+      "Are jumping jacks appropriate for all fitness levels?"
+    ],
+    "license": "Copyright NASM; retain attribution; local academic reference."
+  }
+]

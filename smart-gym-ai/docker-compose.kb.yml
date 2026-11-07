@@ -1,0 +1,33 @@
+# Standalone: docker compose -f docker-compose.kb.yml up -d --build
+services:
+  kb-rag:
+    build: ./services/kb_rag
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:8010:8010"
+    environment:
+      OLLAMA_BASE_URL: http://host.docker.internal:11434
+      OLLAMA_CHAT_MODEL: ${OLLAMA_CHAT_MODEL:-qwen3:8b}
+      OLLAMA_EMBED_MODEL: qwen3-embedding:0.6b
+      KB_LLM_PROVIDER: ollama
+      KB_GRAPH_BACKEND: local
+      KB_INTERNAL_TOKEN: ${KB_INTERNAL_TOKEN:-}
+    volumes:
+      - ./services/kb_rag/data/index:/app/data/index:ro
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://127.0.0.1:8010/health')"]
+      interval: 20s
+      timeout: 5s
+      retries: 3
+  neo4j:
+    image: neo4j:5.26-community
+    restart: unless-stopped
+    ports:
+      - "127.0.0.1:7474:7474"
+      - "127.0.0.1:7687:7687"
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:-neo4j123}
+    volumes:
+      - kb_neo4j_data:/data
+volumes:
+  kb_neo4j_data:

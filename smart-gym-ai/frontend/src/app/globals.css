@@ -1,0 +1,122 @@
+@import "tailwindcss";
+
+:root {
+  --bg-primary: #0a0c10;
+  --bg-secondary: #13161f;
+  --border-color: #222736;
+  --text-primary: #f8fafc;
+  --text-secondary: #94a3b8;
+  --accent: #ff6b35; /* Orange accent */
+  --accent-glow: rgba(255, 107, 53, 0.4);
+  --cyan-accent: #00f0ff; /* Cyan for tech vibes */
+  --green-success: #22c55e;
+}
+
+* { box-sizing: border-box; }
+
+body {
+  background-color: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-montserrat), system-ui, sans-serif;
+  overflow-x: hidden;
+}
+
+/* Scrollbar */
+::-webkit-scrollbar { width: 8px; }
+::-webkit-scrollbar-track { background: var(--bg-primary); }
+::-webkit-scrollbar-thumb { background: var(--border-color); border-radius: 4px; }
+::-webkit-scrollbar-thumb:hover { background: #475569; }
+
+/* Buttons */
+.btn-primary {
+  background: linear-gradient(135deg, #ff8a00, #ff6b35);
+  color: white;
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 14px 32px;
+  border: none;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  box-shadow: 0 4px 15px var(--accent-glow);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.9rem;
+}
+.btn-primary:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 6px 20px rgba(255, 107, 53, 0.6);
+}
+
+.btn-secondary {
+  background: transparent;
+  color: var(--text-primary);
+  font-weight: 600;
+  border-radius: 8px;
+  padding: 14px 32px;
+  border: 2px solid var(--text-primary);
+  cursor: pointer;
+  transition: all 0.3s ease;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  font-size: 0.9rem;
+}
+.btn-secondary:hover {
+  background: rgba(255, 255, 255, 0.1);
+}
+
+/* Glass UI Elements */
+.glass-panel {
+  background: rgba(19, 22, 31, 0.7);
+  backdrop-filter: blur(16px);
+  border: 1px solid var(--border-color);
+  border-radius: 16px;
+}
+
+/* Animations */
+@keyframes float {
+  0% { transform: translateY(0px); }
+  50% { transform: translateY(-10px); }
+  100% { transform: translateY(0px); }
+}
+
+.animate-float {
+  animation: float 6s ease-in-out infinite;
+}
+
+/* Input Styles */
+.input-field {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 8px;
+  padding: 14px 16px;
+  color: var(--text-primary);
+  width: 100%;
+  font-family: inherit;
+  transition: all 0.2s;
+  outline: none;
+}
+.input-field:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 2px var(--accent-glow);
+}
+
+/* Feature Cards */
+.feature-card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border-color);
+  border-radius: 12px;
+  padding: 32px;
+  transition: all 0.3s ease;
+}
+.feature-card:hover {
+  border-color: var(--accent);
+  transform: translateY(-5px);
+  box-shadow: 0 10px 30px rgba(0,0,0,0.5);
+}
+
+/* Text Gradients */
+.text-gradient {
+  background: linear-gradient(90deg, #fff, #a1a1aa);
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}

@@ -1,0 +1,34 @@
+{
+  "SQUAT": {
+    "shallow":{"criterion_ids":["squat_range"],"coverage":"partial","note_vi":"Nguồn mô tả giới hạn biên độ có điều kiện; chưa xác lập ngưỡng góc riêng cho nhãn Qualcomm."},
+    "insufficient":{"criterion_ids":["squat_range","squat_rise_together"],"coverage":"partial"},
+    "back_not_straight":{"criterion_ids":["squat_bracing","squat_back_flat"],"coverage":"direct"},
+    "knees_over_toes":{"coverage":"ambiguous","note_vi":"Tên nhãn và mô tả gốc được nhóm ghi nhận mâu thuẫn; chưa dùng nhãn này để kết luận gối vượt mũi chân là lỗi."}
+  },
+  "PUSHUP": {
+    "too_deep":{"criterion_ids":["pushup_depth_control"],"coverage":"partial","note_vi":"Chưa có ngưỡng an toàn cá nhân hoặc góc đo 2D chuẩn trong KB; không suy ra chấn thương."},
+    "shallow":{"criterion_ids":["pushup_depth_control","pushup_extension"],"coverage":"partial"},
+    "insufficient":{"criterion_ids":["pushup_depth_control","pushup_extension"],"coverage":"partial"},
+    "very_wide":{"criterion_ids":["pushup_hands"],"coverage":"partial","note_vi":"Nguồn mô tả vị trí khởi đầu; các biến thể khoảng cách tay chưa được đánh giá riêng."},
+    "narrow":{"criterion_ids":["pushup_hands"],"coverage":"partial"},
+    "elevated_hips":{"criterion_ids":["pushup_hip_control"],"coverage":"direct"},
+    "butt_sinking":{"criterion_ids":["pushup_hip_control"],"coverage":"direct"},
+    "legs_on_floor":{"criterion_ids":["pushup_alignment","pushup_knee_variant"],"coverage":"partial","note_vi":"Cần xác nhận đang tập chống đẩy chuẩn hay biến thể chống đẩy gối; chưa coi mọi tiếp xúc chân/gối với sàn là cùng một lỗi."},
+    "side_to_side":{"criterion_ids":["pushup_alignment"],"coverage":"partial"},
+    "sloppy":{"criterion_ids":["pushup_alignment"],"coverage":"partial"},
+    "child_pose_cheat":{"coverage":"none","note_vi":"Chưa có tài liệu đủ rõ cho nhãn này trong ngữ cảnh phân đoạn bài tập; không tự kết luận tư thế nghỉ là nguyên nhân hay bệnh lý."}
+  },
+  "JUMPING_JACK": {
+    "only_arms":{"criterion_ids":["jack_sync","jack_return"],"coverage":"direct"},
+    "only_legs":{"criterion_ids":["jack_sync","jack_return"],"coverage":"direct"},
+    "not_jumping":{"criterion_ids":["jack_sync","jack_step_variant"],"coverage":"partial","note_vi":"Cần phân biệt jumping jack chuẩn và biến thể bước chân step-out; không tự khuyến nghị tăng lực bật cho mọi người."},
+    "opposite":{"criterion_ids":["jack_sync","jack_return"],"coverage":"direct"},
+    "not_synchronized":{"criterion_ids":["jack_sync","jack_return"],"coverage":"direct"},
+    "puppet_dance":{"coverage":"none","note_vi":"Nhãn mô tả riêng của dữ liệu; chưa có tiêu chí chuyên môn đủ rõ để diễn giải hoặc sửa bằng RAG."}
+  },
+  "REVERSE_CRUNCH": {
+    "range_below_90":{"criterion_ids":["crunch_start","crunch_control"],"coverage":"partial","note_vi":"Chú thích biên độ của dataset không tự chứng minh góc khớp giải phẫu hoặc một mức bắt buộc cho mọi người."},
+    "not_raising_hips":{"criterion_ids":["crunch_pelvis"],"coverage":"direct"},
+    "thighs_not_moving":{"criterion_ids":["crunch_pelvis","crunch_control"],"coverage":"partial"}
+  }
+}
