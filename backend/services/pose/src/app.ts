@@ -1,3 +1,5 @@
+import { X509Certificate } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import 'reflect-metadata';
 import { CanActivate, Catch, ExceptionFilter, ExecutionContext, HttpException, Module, type ArgumentsHost } from '@nestjs/common';
 import { NestFactory, Reflector } from '@nestjs/core';
@@ -15,6 +17,9 @@ import type { Request, Response } from './modules/pose-http.js';
 import { createPoseStatusModule } from './modules/pose-status.module.js';
 import { createPoseJobsModule } from './modules/analysis/pose-jobs.module.js';
 import { createPoseLiveModule } from './modules/live/pose-live.module.js';
+
+const selfProbeFingerprint = process.env.SMARTGYM_SELF_PROBE === 'true'
+  ? new X509Certificate(readFileSync('/run/secrets/client.crt')).fingerprint256 : undefined;
 
 @Catch()
 class Problems implements ExceptionFilter {
@@ -36,6 +41,7 @@ export async function createPoseApp(db: Database, storage: Storage, auth: AuthCo
       const req = context.switchToHttp().getRequest<Request>();
       const caller = reflector.get<'bff' | 'progress' | 'service'>('pose-caller', context.getHandler()) ?? 'bff';
       if (caller === 'service') {
+        if (process.env.SMARTGYM_SELF_PROBE === 'true' && req.socket.authorized && req.socket.remoteAddress === '127.0.0.1' && req.socket.getPeerCertificate().fingerprint256 === selfProbeFingerprint && req.url?.startsWith('/health/')) return true;
         if (!req.socket.authorized || ![...auth.bffFingerprints, ...auth.progressFingerprints].includes(req.socket.getPeerCertificate().fingerprint256)) reject(403, 'SERVICE_FORBIDDEN');
       } else req.actor = await authenticate(req, auth, caller);
       return true;

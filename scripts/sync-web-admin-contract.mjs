@@ -7,7 +7,8 @@ const names = new Set(['getCatalogAdminStats', 'listAdminExercises', 'createExer
   'listCmsContent', 'createCmsContent', 'getCmsContent', 'updateCmsContent', 'publishCmsContent', 'archiveCmsContent', 'restoreCmsContent',
   'listCmsRevisions', 'getCmsRevision', 'restoreCmsRevision',
   'createCatalogImport', 'getCatalogImport', 'applyCatalogImport', 'exportCatalogPublication',
-  'createCmsMediaUpload', 'getCmsMediaUpload', 'completeCmsMediaUpload', 'getCmsMediaPreview']);
+  'createCmsMediaUpload', 'getCmsMediaUpload', 'completeCmsMediaUpload', 'getCmsMediaPreview',
+  'listAdminPoseExerciseLinks', 'updateAdminPoseExerciseLink']);
 const schemaNames = new Set(['Problem']);
 const operations = [];
 const schemaName = content => content?.['application/json']?.schema?.$ref?.split('/').at(-1);

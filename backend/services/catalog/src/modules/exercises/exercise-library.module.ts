@@ -2,6 +2,8 @@ import { Controller, Get, Param, Query, Res, Module, Inject, HttpException } fro
 import type { Database } from '../../database.js';
 import { createHash } from 'node:crypto';
 import type { Exercise } from '../../import.js';
+import { listPoseLinks } from './pose-exercise-links.js';
+import { cachedExercise } from '../../public-cache.js';
 
 function invalid(message: string): never {
   throw new HttpException(message, 400);
@@ -11,6 +13,9 @@ export function createExerciseLibraryModule(database: Database) {
   @Controller()
   class ExerciseLibraryController {
     constructor(@Inject('DATABASE') private readonly database: Database) {}
+
+    @Get('api/v1/pose-exercise-links')
+    poseLinks() { return listPoseLinks(this.database, true); }
 
     @Get('api/v1/muscle-groups')
     async groups() {
@@ -74,7 +79,7 @@ export function createExerciseLibraryModule(database: Database) {
     async list(@Query() query: Record<string, unknown>, @Res({ passthrough: true }) response: any) {
       response.setHeader('Cache-Control', 'no-store');
       for (const key of Object.keys(query)) {
-        if (!['q', 'muscleGroupId', 'equipmentId', 'workoutType', 'focusArea', 'difficulty', 'limit', 'cursor', 'page'].includes(key) || typeof query[key] !== 'string') {
+        if (!['q', 'muscleGroupId', 'equipmentId', 'workoutType', 'focusArea', 'difficulty', 'limit', 'cursor', 'page', 'workoutTypes', 'equipmentIds', 'difficulties', 'sort'].includes(key) || typeof query[key] !== 'string') {
           invalid('Tham số truy vấn không hợp lệ');
         }
       }
@@ -98,7 +103,25 @@ export function createExerciseLibraryModule(database: Database) {
       if (query.difficulty !== undefined && !['1', '2', '3', '4', '5'].includes(String(query.difficulty))) {
         invalid('Độ khó không hợp lệ');
       }
-      const fingerprint = createHash('sha256').update(JSON.stringify([
+      const selected = (name: string, pattern: RegExp) => {
+        if (query[name] === undefined) return null;
+        const values = String(query[name]).split(',');
+        if (values.length > 20 || !values.every(value => pattern.test(value))) invalid('Bộ lọc không hợp lệ');
+        return values;
+      };
+      const types = selected('workoutTypes', /^(STRENGTH|CARDIO|HIIT|CORE|STRETCHING)$/);
+      const equipment = selected('equipmentIds', /^[a-z][a-z0-9_]{0,79}$/);
+      const difficulties = selected('difficulties', /^[1-5]$/)?.map(Number) ?? null;
+      const orders: Record<string, string> = {
+        default: 'id COLLATE "C"',
+        name: 'catalog_search_key(document->>\'nameVi\') COLLATE "C", id COLLATE "C"',
+        'diff-asc': 'coalesce((document->>\'difficulty\')::int, 1) ASC, id COLLATE "C"',
+        'diff-desc': 'coalesce((document->>\'difficulty\')::int, 1) DESC, id COLLATE "C"',
+      };
+      const sort = String(query.sort ?? 'default');
+      if (!Object.hasOwn(orders, sort) || (sort !== 'default' && query.cursor !== undefined)) invalid('Sắp xếp không hợp lệ');
+      const order = orders[sort];
+      const filters = [
         q,
         query.muscleGroupId ?? '',
         query.equipmentId ?? '',
@@ -106,7 +129,10 @@ export function createExerciseLibraryModule(database: Database) {
         query.focusArea ?? '',
         query.difficulty ?? '',
         limit,
-      ])).digest('hex');
+      ];
+      const fingerprint = createHash('sha256').update(JSON.stringify(
+        types || equipment || difficulties ? [...filters, types, equipment, difficulties] : filters,
+      )).digest('hex');
       let after = '';
       let expectedRevision: string | undefined;
       if (query.cursor !== undefined) {
@@ -121,11 +147,10 @@ export function createExerciseLibraryModule(database: Database) {
         } catch { invalid('Cursor không hợp lệ, hãy tải lại trang đầu'); }
       }
       const offset = query.cursor !== undefined ? 0 : (pageNumber - 1) * limit;
-      // Both subqueries share one PostgreSQL statement snapshot.
+      // Count and page share a single snapshot and the same filter predicates.
       const result = await this.database.query<{ revision: string; total: string; documents: Exercise[] }>(
-        `SELECT
-          coalesce((SELECT revision FROM publication_revisions ORDER BY aggregate_version DESC LIMIT 1), 'empty') AS revision,
-          (SELECT count(*)::text FROM exercises e
+        `WITH matching AS (
+          SELECT e.id, r.document FROM exercises e
             JOIN exercise_revisions r ON r.exercise_id=e.id AND r.version=e.current_published_version
             WHERE e.lifecycle='PUBLISHED'
               AND ($1::text IS NULL OR EXISTS(SELECT 1 FROM revision_muscle_groups g WHERE g.exercise_id=e.id AND g.version=r.version AND g.group_id=$1))
@@ -134,19 +159,16 @@ export function createExerciseLibraryModule(database: Database) {
               AND ($6::text IS NULL OR r.document->>'workoutType' = $6)
               AND ($7::text IS NULL OR r.document->>'focusArea' = $7)
               AND ($8::int IS NULL OR (r.document->>'difficulty')::int = $8)
-          ) AS total,
-          coalesce((SELECT jsonb_agg(page.document ORDER BY page.id COLLATE "C") FROM (
-            SELECT e.id,r.document FROM exercises e
-            JOIN exercise_revisions r ON r.exercise_id=e.id AND r.version=e.current_published_version
-            WHERE e.lifecycle='PUBLISHED'
-              AND ($1::text IS NULL OR EXISTS(SELECT 1 FROM revision_muscle_groups g WHERE g.exercise_id=e.id AND g.version=r.version AND g.group_id=$1))
-              AND ($2::text IS NULL OR EXISTS(SELECT 1 FROM revision_equipment g WHERE g.exercise_id=e.id AND g.version=r.version AND g.equipment_id=$2))
-              AND strpos(r.search_key,catalog_search_key($3))>0
-              AND e.id COLLATE "C" > $4 COLLATE "C"
-              AND ($6::text IS NULL OR r.document->>'workoutType' = $6)
-              AND ($7::text IS NULL OR r.document->>'focusArea' = $7)
-              AND ($8::int IS NULL OR (r.document->>'difficulty')::int = $8)
-            ORDER BY e.id COLLATE "C" OFFSET $9 LIMIT $5
+              AND ($10::text[] IS NULL OR r.document->>'workoutType' = ANY($10))
+              AND ($11::text[] IS NULL OR EXISTS(SELECT 1 FROM revision_equipment g
+                WHERE g.exercise_id=e.id AND g.version=r.version AND g.equipment_id = ANY($11)))
+              AND ($12::int[] IS NULL OR (r.document->>'difficulty')::int = ANY($12))
+          )
+          SELECT coalesce((SELECT revision FROM publication_revisions ORDER BY aggregate_version DESC LIMIT 1), 'empty') AS revision,
+          (SELECT count(*)::text FROM matching) AS total,
+          coalesce((SELECT jsonb_agg(page.document ORDER BY ${order}) FROM (
+            SELECT id, document FROM matching WHERE id COLLATE "C" > $4 COLLATE "C"
+            ORDER BY ${order} OFFSET $9 LIMIT $5
           ) page), '[]'::jsonb) AS documents`,
         [
           query.muscleGroupId ?? null,
@@ -158,6 +180,9 @@ export function createExerciseLibraryModule(database: Database) {
           query.focusArea ?? null,
           query.difficulty ? Number(query.difficulty) : null,
           offset,
+          types,
+          equipment,
+          difficulties,
         ],
       );
       const { revision, total: totalText, documents: rows } = result.rows[0];
@@ -178,7 +203,7 @@ export function createExerciseLibraryModule(database: Database) {
         pageSize: limit,
         totalCount,
         totalPages,
-        nextCursor: rows.length > limit
+        nextCursor: sort === 'default' && rows.length > limit
           ? Buffer.from(JSON.stringify({ after: page.at(-1)!.id, filter: fingerprint, revision })).toString('base64url')
           : null,
       };
@@ -188,18 +213,22 @@ export function createExerciseLibraryModule(database: Database) {
     async detail(@Param('slug') slug: string, @Res({ passthrough: true }) response: any) {
       response.setHeader('Cache-Control', 'no-store');
       if (slug.length > 100 || !/^[a-z0-9]+(?:-[a-z0-9]+)*$/.test(slug)) invalid('Slug không hợp lệ');
-      const result = await this.database.query<{ state: string; document: Exercise }>(
-        `SELECT h.state,r.document FROM slug_history h JOIN exercises e ON e.id=h.exercise_id
-          JOIN exercise_revisions r ON r.exercise_id=e.id AND r.version=e.current_published_version
+      const result = await this.database.query<{ state: string; id: string; version: number }>(
+        `SELECT h.state,e.id,e.current_published_version AS version FROM slug_history h JOIN exercises e ON e.id=h.exercise_id
           WHERE h.slug=$1 AND e.lifecycle='PUBLISHED'`, [slug],
       );
       const row = result.rows[0];
       if (!row) throw new HttpException('Không tìm thấy bài tập', 404);
+      const document = await cachedExercise(row.id, row.version, async () =>
+        (await this.database.query<{ document: Exercise }>(
+          'SELECT document FROM exercise_revisions WHERE exercise_id=$1 AND version=$2', [row.id, row.version],
+        )).rows[0]?.document);
+      if (!document) throw new HttpException('Không tìm thấy bài tập', 404);
       if (row.state === 'ALIAS') {
-        response.status(308).header('Location', '/api/v1/exercises/' + row.document.slug);
+        response.status(308).header('Location', '/api/v1/exercises/' + document.slug);
         return;
       }
-      return row.document;
+      return document;
     }
   }
 

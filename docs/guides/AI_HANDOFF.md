@@ -41,7 +41,7 @@ Lệnh kiểm bàn giao so khớp hash model và hợp đồng bốn động tá
 
 | Phần | Cách xác nhận |
 |---|---|
-| Pose | Đăng nhập vào [Phòng tập AI](https://127.0.0.1:3100/). Chờ trạng thái **Server AI đã sẵn sàng**. Trong tab Network của trình duyệt, `GET /api/pose-studio/exercises` phải trả danh sách có `squat`, `push_up`, `jump_jack`, `situp`. Chọn đúng động tác và chạy camera hoặc tải clip phù hợp để xác nhận kết quả phân tích. |
+| Pose | Đăng nhập vào [Phòng tập](https://127.0.0.1:3100/). Chờ trạng thái **Server AI đã sẵn sàng**. Trong tab Network của trình duyệt, `GET /api/pose-studio/exercises` phải trả danh sách có `squat`, `push_up`, `jump_jack`, `situp`. Chọn đúng động tác và chạy camera hoặc tải clip phù hợp để xác nhận kết quả phân tích. |
 | RAG | Mở [Hỏi đáp](https://127.0.0.1:3100/hoi-dap), hỏi nội dung có trong chỉ mục và kiểm tra câu trả lời cùng nguồn mở được. Nếu RAG báo chưa sẵn sàng, xem log bằng lệnh bên dưới, kiểm tra phiên bản chỉ mục, model Ollama và trạng thái `kb_ready` theo runbook. |
 
 ```powershell

@@ -1,4 +1,5 @@
 import type { Metadata } from 'next';
+import { redirect } from 'next/navigation';
 import {
   catalog,
   libraryQuery,
@@ -28,7 +29,7 @@ export async function generateMetadata({ searchParams }: Props): Promise<Metadat
 export default async function ExercisesDirectoryPage({ searchParams }: Props) {
   const query = libraryQuery(await searchParams);
   const apiQuery = new URLSearchParams(query);
-  apiQuery.set('limit', '24');
+  apiQuery.set('limit', '9');
 
   const [groupsResponse, equipmentResponse, facetsResponse, exercisesResponse, poseResponse] =
     await Promise.allSettled([
@@ -52,12 +53,18 @@ export default async function ExercisesDirectoryPage({ searchParams }: Props) {
   const exercisesData =
     exercisesResponse.status === 'fulfilled' ? exercisesResponse.value : undefined;
 
-  const initialExercises: ExerciseCard[] = exercisesData?.items || [];
-  const totalCount = facets?.total ?? exercisesData?.totalCount ?? initialExercises.length;
+  const results = exercisesData as { items: ExerciseCard[]; totalCount: number; totalPages: number; page: number; pageSize: number } | undefined;
+  if (results && results.page > results.totalPages) {
+    query.delete('cursor');
+    if (results.totalPages === 1) query.delete('page');
+    else query.set('page', String(results.totalPages));
+    redirect('/bai-tap' + (query.size ? '?' + query : ''));
+  }
+  const totalCount = facets?.total ?? results?.totalCount ?? 0;
 
   return (
     <ExerciseLibraryClient
-      initialExercises={initialExercises}
+      results={results}
       muscleGroups={groups.map(g => ({ id: g.id, labelVi: g.labelVi, slug: g.id }))}
       equipmentList={equipment}
       facets={facets}

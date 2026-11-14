@@ -1,3 +1,5 @@
+import { X509Certificate } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import 'reflect-metadata';
 import { CanActivate, Catch, ExceptionFilter, ExecutionContext, HttpException, Module, type ArgumentsHost } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
@@ -14,6 +16,9 @@ import { Summaries } from './modules/summary/summary.js';
 import { createProgressLogsModule } from './modules/logs/logs.module.js';
 import { createProgressSummaryModule } from './modules/summary/summary.module.js';
 import { createProgressHealthModule } from './modules/progress-health.module.js';
+
+const selfProbeFingerprint = process.env.SMARTGYM_SELF_PROBE === 'true'
+  ? new X509Certificate(readFileSync('/run/secrets/client.crt')).fingerprint256 : undefined;
 
 type Response={status(code:number):Response;json(value:unknown):void;setHeader(name:string,value:string):void};
 @Catch()
@@ -32,7 +37,8 @@ export async function createProgressApp(db:Database,auth:AuthConfig,catalog:Cata
   const logs=new Logs(db,catalog,workout,now,pose);
   const summaries=new Summaries(db);
   class OwnerGuard implements CanActivate{async canActivate(c:ExecutionContext){const req=c.switchToHttp().getRequest<ProgressRequest>();req.actor=await authenticate(req,auth);return true;}}
-  class ProbeGuard implements CanActivate{canActivate(c:ExecutionContext){const req=c.switchToHttp().getRequest<ProgressRequest>();if(!req.socket.authorized||!auth.bffFingerprints.includes(req.socket.getPeerCertificate().fingerprint256))reject(403,'SERVICE_FORBIDDEN');return true;}}
+  class ProbeGuard implements CanActivate{canActivate(c:ExecutionContext){const req=c.switchToHttp().getRequest<ProgressRequest>();if (process.env.SMARTGYM_SELF_PROBE === 'true' && req.socket.authorized && req.socket.remoteAddress === '127.0.0.1' && req.socket.getPeerCertificate().fingerprint256 === selfProbeFingerprint) return true;
+      if(!req.socket.authorized||!auth.bffFingerprints.includes(req.socket.getPeerCertificate().fingerprint256))reject(403,'SERVICE_FORBIDDEN');return true;}}
 
   @Module({
     imports: [

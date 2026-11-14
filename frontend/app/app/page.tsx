@@ -15,7 +15,7 @@ const shortcuts = [
   { href: '/app/lich', label: 'Lịch tập', detail: 'Xem và sắp xếp các buổi tập', icon: CalendarDays },
   { href: '/app/nhat-ky', label: 'Nhật ký tập luyện', detail: 'Ghi lại bài tập, số rep và mức tạ', icon: ClipboardList },
   { href: '/app/tien-do', label: 'Tiến độ tập luyện', detail: 'Xem số buổi, số rep và khối lượng tập', icon: ChartNoAxesColumn },
-  { href: '/', label: 'Phòng tập AI', detail: 'Phân tích động tác và kỹ thuật thời gian thực', icon: ScanLine },
+  { href: '/', label: 'Phòng tập', detail: 'Phân tích động tác và kỹ thuật thời gian thực', icon: ScanLine },
   { href: '/bai-tap', label: 'Khám phá thư viện bài tập', detail: 'Tìm bài tập theo nhóm cơ và dụng cụ', icon: Library },
 ];
 

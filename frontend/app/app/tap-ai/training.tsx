@@ -80,7 +80,7 @@ export function ResultView({ id }: { id: string }) {
       )}
       <p>
         <Link href="/" className="text-sm font-semibold text-primary hover:underline">
-          Về phòng tập AI
+          Về phòng tập
         </Link>
       </p>
     </section>

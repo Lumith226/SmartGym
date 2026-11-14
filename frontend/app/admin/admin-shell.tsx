@@ -6,6 +6,7 @@ import { usePathname } from 'next/navigation';
 import {
   ArrowDownUp,
   ArrowLeft,
+  Camera,
   Dumbbell,
   Image,
   Layers,
@@ -29,6 +30,7 @@ const navigation = [
       { href: '/admin', label: 'Tổng quan', icon: LayoutGrid },
       { href: '/admin/bai-tap', label: 'Kho bài tập', icon: Dumbbell },
       { href: '/admin/bai-tap/moi', label: 'Thêm bài tập', icon: Plus },
+      { href: '/admin/phong-tap', label: 'Phòng tập', icon: Camera },
     ],
   },
   {
@@ -57,6 +59,7 @@ function getBreadcrumb(pathname: string) {
   if (pathname.startsWith('/admin/noi-dung/media')) return 'Danh mục / Media';
   if (pathname === '/admin/bai-tap/moi') return 'Biên tập / Thêm bài tập';
   if (pathname.startsWith('/admin/bai-tap')) return 'Biên tập / Kho bài tập';
+  if (pathname.startsWith('/admin/phong-tap')) return 'Biên tập / Phòng tập';
   if (pathname.startsWith('/admin/nhap-xuat')) return 'Vận hành / Nhập & Xuất';
   if (pathname.startsWith('/admin/nhat-ky')) return 'Vận hành / Nhật ký kiểm toán';
   return 'Quản trị nội dung';

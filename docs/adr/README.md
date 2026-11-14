@@ -13,6 +13,7 @@ ADR ghi lại quyết định, lý do và hệ quả. Tra cách chạy ở [Oper
 | [0005](0005-web-auth-bff.md) | Node HTTPS BFF, IP từ socket và mTLS đến Identity | Web |
 | [0024](0024-frontend-ui-stack.md) | Tailwind, component nội bộ trên Radix và state nhẹ | Giao diện Web |
 | [0025](0025-authjs-google-account-linking.md) | Auth.js cho đăng nhập và liên kết Google với tài khoản đã xác minh | Web và Identity |
+| [0026](0026-compose-observability-and-redis.md) | Probe, giới hạn, telemetry, circuit breaker và Redis | Docker Compose cục bộ |
 
 ## Catalog và CMS
 

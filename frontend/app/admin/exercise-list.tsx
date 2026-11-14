@@ -4,7 +4,7 @@ import * as React from 'react';
 import Link from 'next/link';
 import { Archive, ChevronLeft, ChevronRight, Dumbbell, Eye, EyeOff, Globe, PencilLine, RotateCcw } from 'lucide-react';
 import { Button } from '../../components/ui/button';
-import { dateLabel, type Exercise, type Page } from './cms';
+import { cms, CmsError, dateLabel, errorMessage, type Exercise, type Page } from './cms';
 import { cn } from '../../lib/utils';
 import { DeleteArchivedExercise } from './delete-exercise';
 import { cmsFilter, cmsInput, cmsPanel, cmsTableHead } from './cms-design';
@@ -69,17 +69,59 @@ export function ExerciseList({
   if (!recent) params.set('page', String(page));
   const { data, error, retry } = useCmsPage<Page<Exercise> & { pagination?: ExercisePagination }>('/exercises?' + params);
   const [notice, setNotice] = React.useState('');
-  const [selection, setSelection] = React.useState<string[]>([]);
+  const [selection, setSelection] = React.useState(new Map<string, Exercise>());
+  const [selectingAll, setSelectingAll] = React.useState(false);
+  const selectionLoad = React.useRef<AbortController>(null);
   const [request, setRequest] = React.useState<ActionRequest>();
   const [result, setResult] = React.useState<ActionResult>();
   const [statsVersion, setStatsVersion] = React.useState(0);
   const items = data?.items ?? [];
-  const selected = items.filter(item => selection.includes(item.id));
-  const allSelected = items.length > 0 && selected.length === items.length;
+  const selected = Array.from(selection.values());
+  const total = data?.pagination?.total ?? items.length;
+  const allSelected = total > 0 && selected.length === total && items.every(item => selection.has(item.id));
   const pageCheckbox = React.useRef<HTMLInputElement>(null);
   React.useEffect(() => {
     if (pageCheckbox.current) pageCheckbox.current.indeterminate = selected.length > 0 && !allSelected;
-  }, [selected.length, allSelected]);
+  }, [data, selected.length, allSelected]);
+  React.useEffect(() => () => selectionLoad.current?.abort(), []);
+
+  async function selectAll() {
+    if (selectingAll || selectionLoad.current) return;
+    setNotice('');
+    if (total === items.length) {
+      setSelection(new Map(items.map(item => [item.id, item])));
+      return;
+    }
+    const controller = new AbortController();
+    selectionLoad.current = controller;
+    setSelectingAll(true);
+    try {
+      const query = new URLSearchParams(first);
+      const matches = new Map<string, Exercise>();
+      let cursor: string | null;
+      do {
+        const { data: batch } = await cms<Page<Exercise>>('/exercises?' + query, { signal: controller.signal });
+        for (const item of batch.items) matches.set(item.id, item);
+        cursor = batch.nextCursor;
+        if (cursor && (cursor === query.get('cursor') || matches.size >= total || batch.items.length === 0)) {
+          throw new CmsError(400, 'INVALID_CURSOR');
+        }
+        if (cursor) query.set('cursor', cursor);
+      } while (cursor);
+      if (matches.size !== total || items.some(item => !matches.has(item.id))) {
+        throw new CmsError(400, 'INVALID_CURSOR');
+      }
+      if (!controller.signal.aborted) setSelection(matches);
+    } catch (error) {
+      if (!controller.signal.aborted) {
+        setNotice('Chưa chọn được toàn bộ bài tập. ' + errorMessage(error));
+        retry();
+      }
+    } finally {
+      selectionLoad.current = null;
+      if (!controller.signal.aborted) setSelectingAll(false);
+    }
+  }
 
   function refresh() {
     retry();
@@ -89,7 +131,7 @@ export function ExerciseList({
   function complete(next: ActionResult) {
     setRequest(undefined);
     setNotice('');
-    setSelection(next.failed.map(item => item.exercise.id));
+    setSelection(new Map(next.failed.map(({ exercise }) => [exercise.id, exercise])));
     setResult(next);
     refresh();
   }
@@ -141,23 +183,29 @@ export function ExerciseList({
         </div>
       ) : (
         <div className="overflow-x-auto">
-          {!recent && selected.length > 0 && <div className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-3">
-            <span className="mr-2 text-sm font-medium">Đã chọn {selected.length} bài</span>
+          {!recent && (selectingAll || selected.length > 0) && <div className="flex flex-wrap items-center gap-2 border-b border-border px-4 py-3">
+            <span role="status" className="mr-2 text-sm font-medium">
+              {selectingAll ? 'Đang chọn tất cả bài tập…' : `Đã chọn ${selected.length} bài`}
+            </span>
             {listActions.map(action => {
               const eligible = selected.filter(item => canApply(action, item));
               if (!eligible.length) return null;
-              return <Button key={action} type="button" variant="outline" size="sm"
+              return <Button key={action} type="button" variant="outline" size="sm" disabled={selectingAll}
                 className={action === 'delete' ? 'text-destructive' : undefined}
                 onClick={() => setRequest({ action, exercises: eligible })}>{actionLabels[action]} ({eligible.length})</Button>;
             })}
-            <Button type="button" variant="ghost" size="sm" onClick={() => setSelection([])}>Bỏ chọn</Button>
+            <Button type="button" variant="ghost" size="sm" disabled={selectingAll} onClick={() => setSelection(new Map())}>Bỏ chọn</Button>
           </div>}
           <table className="w-full min-w-[660px] text-left text-sm" aria-label="Danh sách bài tập">
             <thead className={cmsTableHead}>
               <tr>
                 {!recent && <th scope="col" className="w-10 pl-4">
-                  <input ref={pageCheckbox} type="checkbox" aria-label="Chọn tất cả bài trên trang" className="size-4 accent-primary"
-                    checked={allSelected} onChange={event => setSelection(event.target.checked ? items.map(item => item.id) : [])} />
+                  <input ref={pageCheckbox} type="checkbox" aria-label="Chọn tất cả bài tập" title={search || status ? 'Chọn tất cả bài khớp bộ lọc' : 'Chọn tất cả bài trong kho'}
+                    className="size-4 accent-primary" disabled={selectingAll} checked={allSelected}
+                    onChange={event => {
+                      if (event.target.checked) void selectAll();
+                      else setSelection(new Map());
+                    }} />
                 </th>}
                 {['Bài tập', 'Nhóm cơ chính', 'Trạng thái', 'Cập nhật', 'Thao tác'].map(title => <th key={title} scope="col" className="px-4 py-3 font-medium">{title}</th>)}
               </tr>
@@ -169,9 +217,14 @@ export function ExerciseList({
                 return <tr key={exercise.id} className="hover:bg-muted/50 transition-colors group">
                   {!recent && <td className="pl-4">
                     <input type="checkbox" aria-label={'Chọn ' + exercise.nameVi} className="size-4 accent-primary"
-                      checked={selection.includes(exercise.id)} onChange={event => {
+                      disabled={selectingAll} checked={selection.has(exercise.id)} onChange={event => {
                         const checked = event.target.checked;
-                        setSelection(previous => checked ? [...previous, exercise.id] : previous.filter(id => id !== exercise.id));
+                        setSelection(previous => {
+                          const next = new Map(previous);
+                          if (checked) next.set(exercise.id, exercise);
+                          else next.delete(exercise.id);
+                          return next;
+                        });
                       }} />
                   </td>}
                   <th scope="row" className="px-4 py-3 font-normal">
@@ -211,11 +264,22 @@ export function ExerciseList({
                     {!recent && rowActions.filter(action => canApply(action, exercise)).map(action => {
                       const Icon = actionIcons[action];
                       return <button key={action} type="button" aria-label={actionLabels[action] + ' ' + exercise.nameVi}
-                        title={actionLabels[action]} className={rowAction} onClick={() => setRequest({ action, exercises: [exercise] })}>
+                        title={actionLabels[action]} className={rowAction} disabled={selectingAll}
+                        onClick={() => setRequest({ action, exercises: [exercise] })}>
                         <Icon aria-hidden="true" className="size-4" />
                       </button>;
                     })}
-                    {!recent && exercise.status === 'ARCHIVED' && <DeleteArchivedExercise exercise={exercise} onDeleted={name => { setNotice('Đã xóa bài tập: ' + name); setResult(undefined); toast.success('Đã xóa bài tập', name); refresh(); }} />}
+                    {!recent && !selectingAll && exercise.status === 'ARCHIVED' && <DeleteArchivedExercise exercise={exercise} onDeleted={name => {
+                      setSelection(previous => {
+                        const next = new Map(previous);
+                        next.delete(exercise.id);
+                        return next;
+                      });
+                      setNotice('Đã xóa bài tập: ' + name);
+                      setResult(undefined);
+                      toast.success('Đã xóa bài tập', name);
+                      refresh();
+                    }} />}
                   </td>
                 </tr>;
               })}

@@ -1,8 +1,10 @@
+import { context, propagation } from '@opentelemetry/api';
 import { randomUUID } from 'node:crypto';
 import { HttpException } from '@nestjs/common';
 import { Database, SqlClient } from '../../database.js';
 import { hashPassword, verifyPassword, isLegacyPasswordHash, hashSecret, opaqueSecret, IdentityKeys } from './crypto.js';
 import { correlationId } from '../../request-context.js';
+import { findSessionOwner, rememberSessionOwner } from './session-index.js';
 
 const DAY = 86400000;
 export function denied(code: string, status: number): never { throw new HttpException({ code }, status); }
@@ -51,8 +53,10 @@ export class Identity {
     const envelope = { id: eventId, type: 'identity.email-action.requested.v1', producer: 'identity', schemaVersion: 1,
       aggregateId: id, aggregateVersion: 1, occurredAt: now.toISOString(), correlationId: requestId,
       data: { deliveryRef: id, purpose, expiresAt: expires.toISOString() } };
-    await client.query(`INSERT INTO outbox_events(event_id,type,schema_version,aggregate_id,aggregate_version,occurred_at,correlation_id,payload,available_at)
-      VALUES($1,$2,1,$3,1,$4,$5,$6::jsonb,$4)`, [eventId, envelope.type, id, now, requestId, JSON.stringify(envelope)]);
+    const traceHeaders: Record<string, string> = {};
+    propagation.inject(context.active(), traceHeaders);
+    await client.query(`INSERT INTO outbox_events(event_id,type,schema_version,aggregate_id,aggregate_version,occurred_at,correlation_id,payload,available_at,traceparent)
+      VALUES($1,$2,1,$3,1,$4,$5,$6::jsonb,$4,$7)`, [eventId, envelope.type, id, now, requestId, JSON.stringify(envelope), traceHeaders.traceparent ?? null]);
   }
   async register(body: Record<string, string>) {
     const email = body.email.toLowerCase(), encoded = await hashPassword(body.password), now = this.now();
@@ -157,13 +161,17 @@ export class Identity {
   }
   private async session<T>(handle: string | undefined, action: (client: SqlClient, user: User, expires: Date) => Promise<T>): Promise<T> {
     if (!handle || !/^[A-Za-z0-9_-]{43}$/.test(handle)) denied('UNAUTHENTICATED', 401);
-    return this.database.transaction(async client => {
-      const hash = hashSecret(handle!);
-      const candidate = (await client.query<{ user_id: string }>('SELECT user_id FROM sessions WHERE secret_hash=$1', [hash])).rows[0];
+    const hash = hashSecret(handle);
+    const cachedOwner = await findSessionOwner(hash);
+    let owner;
+    const result = await this.database.transaction(async client => {
+      const candidate = cachedOwner ? { user_id: cachedOwner }
+        : (await client.query<{ user_id: string }>('SELECT user_id FROM sessions WHERE secret_hash=$1', [hash])).rows[0];
       if (!candidate) denied('UNAUTHENTICATED', 401);
+      owner = candidate.user_id;
       const user = (await client.query<User>('SELECT * FROM users WHERE id=$1 FOR UPDATE', [candidate.user_id])).rows[0];
       const session = (await client.query<{ id: string; expires_at: Date; last_seen_at: Date; revoked_at: Date | null; credential_version: number; current_version: number }>(
-        'SELECT s.*,c.credential_version AS current_version FROM sessions s JOIN credentials c ON c.user_id=s.user_id WHERE s.secret_hash=$1 FOR UPDATE OF s', [hash])).rows[0];
+        'SELECT s.*,c.credential_version AS current_version FROM sessions s JOIN credentials c ON c.user_id=s.user_id WHERE s.secret_hash=$1 AND s.user_id=$2 FOR UPDATE OF s', [hash, candidate.user_id])).rows[0];
       const now = this.now();
       if (!user || user.status !== 'ACTIVE' || !user.email_verified_at || !session || session.revoked_at ||
         new Date(session.expires_at) <= now || new Date(session.last_seen_at).getTime() + DAY <= now.getTime() ||
@@ -171,6 +179,8 @@ export class Identity {
       await client.query('UPDATE sessions SET last_seen_at=$2 WHERE id=$1', [session.id, now]);
       return action(client, user, new Date(session.expires_at));
     });
+    if (owner && !cachedOwner) rememberSessionOwner(hash, owner);
+    return result;
   }
   getMe(handle?: string) { return this.session(handle, async (_client, user) => this.profile(user)); }
   introspect(handle: string) { return this.session(handle, async (_client, user, expires) => this.options.keys.assertion(user.id, user.role, this.now(), expires)); }

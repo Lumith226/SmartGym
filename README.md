@@ -1,6 +1,6 @@
 # SmartGym Web
 
-SmartGym là nền tảng tập luyện tiếng Việt gồm thư viện bài tập và bản đồ cơ, quản lý chương trình và lịch tập, nhật ký tiến độ, phòng tập Pose AI, trợ lý hỏi đáp và CMS quản trị nội dung.
+SmartGym là nền tảng tập luyện tiếng Việt gồm thư viện bài tập và bản đồ cơ, quản lý chương trình và lịch tập, nhật ký tiến độ, phòng tập, trợ lý hỏi đáp và CMS quản trị nội dung.
 
 ## Chạy trên máy mới
 

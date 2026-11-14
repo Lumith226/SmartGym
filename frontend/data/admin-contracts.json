@@ -89,6 +89,86 @@
         }
       }
     },
+    "PoseExerciseLinkList": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "items"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "poseId",
+              "exerciseId",
+              "nameVi",
+              "slug",
+              "published",
+              "enabled"
+            ],
+            "properties": {
+              "poseId": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,63}$"
+              },
+              "exerciseId": {
+                "anyOf": [
+                  {
+                    "type": "string",
+                    "pattern": "^[a-z][a-z0-9_]{0,79}$"
+                  },
+                  {
+                    "type": "null"
+                  }
+                ]
+              },
+              "nameVi": {
+                "type": "string"
+              },
+              "slug": {
+                "type": "string"
+              },
+              "published": {
+                "type": "boolean"
+              },
+              "enabled": {
+                "type": "boolean"
+              }
+            }
+          }
+        }
+      }
+    },
+    "PoseExerciseLinkUpdate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "poseId"
+      ],
+      "properties": {
+        "poseId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,63}$"
+        },
+        "exerciseId": {
+          "anyOf": [
+            {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,79}$"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "enabled": {
+          "type": "boolean"
+        }
+      }
+    },
     "ExerciseAdminDetailPage": {
       "type": "object",
       "additionalProperties": false,
@@ -2705,6 +2785,45 @@
         400,
         401,
         403,
+        503
+      ],
+      "pathParameters": {},
+      "queries": {},
+      "headers": {},
+      "etag": false,
+      "location": false
+    },
+    {
+      "path": "/api/v1/admin/pose-exercise-links",
+      "method": "GET",
+      "status": 200,
+      "output": "PoseExerciseLinkList",
+      "errors": [
+        400,
+        401,
+        403,
+        409,
+        422,
+        503
+      ],
+      "pathParameters": {},
+      "queries": {},
+      "headers": {},
+      "etag": false,
+      "location": false
+    },
+    {
+      "path": "/api/v1/admin/pose-exercise-links",
+      "method": "PUT",
+      "status": 200,
+      "input": "PoseExerciseLinkUpdate",
+      "output": "PoseExerciseLinkList",
+      "errors": [
+        400,
+        401,
+        403,
+        409,
+        422,
         503
       ],
       "pathParameters": {},

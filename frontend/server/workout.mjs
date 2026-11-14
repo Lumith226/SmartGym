@@ -53,10 +53,10 @@ async function publicExercises(query) {
   let size=0;const chunks=[];
   for await(const chunk of res.body??[]){size+=chunk.length;if(size>2*1024*1024)throw unavailable();chunks.push(chunk);}
   if(res.status!==200)throw unavailable();
-  const {items,nextCursor}=JSON.parse(Buffer.concat(chunks).toString());
+  const {items,nextCursor,page,pageSize,totalCount,totalPages}=JSON.parse(Buffer.concat(chunks).toString());
   const summaries=items.map(({id,slug,nameVi,nameEn,summary,primaryMuscleIds,equipmentIds,media})=>
     ({id,slug,nameVi,nameEn,summary,primaryMuscleIds,equipmentIds,media}));
-  return {status:200,headers:{},body:{items:summaries,nextCursor}};
+  return {status:200,headers:{},body:{items:summaries,nextCursor,page,pageSize,totalCount,totalPages}};
 }
 export async function handleWorkout(req,res,webOrigin) {
   try {

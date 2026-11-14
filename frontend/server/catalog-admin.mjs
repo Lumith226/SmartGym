@@ -5,6 +5,7 @@ import addFormats from 'ajv-formats';
 import contract from '../data/admin-contracts.json' with { type: 'json' };
 import { AuthError, adminAssertionForSession } from './identity-client.mjs';
 import { problem, readJson, requireSameOrigin } from './auth.mjs';
+import { readPoseCapabilities } from './pose-capabilities.mjs';
 
 const ajv = new Ajv2020({ strict: true });
 addFormats(ajv);
@@ -27,7 +28,8 @@ const publicCodes = new Set(['ADMIN_REQUIRED', 'UNAUTHENTICATED', 'NOT_FOUND', '
   'REGION_KEY_UNAVAILABLE', 'MEDIA_SOURCE_INVALID', 'MEDIA_UPLOAD_NOT_READY', 'VARIANT_PARENT_IMMUTABLE',
   'IMPORT_PACKAGE_NOT_REGISTERED', 'IMPORT_MANIFEST_MISMATCH', 'IMPORT_NOT_READY', 'IMPORT_BASE_CHANGED',
   'CATALOG_IMPORT_NOT_CONFIGURED', 'CATALOG_IMPORT_PACKAGE_UNAVAILABLE', 'EXPORT_EXPIRED', 'EXPORT_WITHDRAWN', 'EXPORT_NOT_RETAINED',
-  'MEDIA_UPLOAD_LIMIT', 'MEDIA_TOO_LARGE', 'MEDIA_TYPE_UNSUPPORTED', 'MEDIA_UPLOAD_REJECTED', 'UPLOAD_EXPIRED', 'MEDIA_RIGHTS_REVOKED']);
+  'MEDIA_UPLOAD_LIMIT', 'MEDIA_TOO_LARGE', 'MEDIA_TYPE_UNSUPPORTED', 'MEDIA_UPLOAD_REJECTED', 'UPLOAD_EXPIRED', 'MEDIA_RIGHTS_REVOKED',
+  'POSE_LINK_EXERCISE_NOT_PUBLIC', 'POSE_LINK_EXERCISE_IN_USE']);
 const etag = /^"v[1-9][0-9]{0,9}"$/;
 const location = /^\/api\/v1\/admin\/exercises\/[a-z][a-z0-9_]{0,79}$/;
 const unavailable = () => new AuthError(503, 'CATALOG_ADMIN_UNAVAILABLE');
@@ -131,6 +133,10 @@ export async function handleCatalogAdmin(req, res, webOrigin) {
         body = await readJson(req, 512 * 1024);
         if (operation.input ? !validate(operation.input, body) : !body || Array.isArray(body) || typeof body !== 'object' || Object.keys(body).length) {
           throw new AuthError(422, 'VALIDATION_ERROR');
+        }
+        if (operation.input === 'PoseExerciseLinkUpdate' && body.exerciseId !== undefined && body.exerciseId !== null) {
+          const capabilities = await readPoseCapabilities().catch(() => { throw new AuthError(503, 'POSE_UNAVAILABLE'); });
+          if (!capabilities.some(item => item.id === body.poseId)) throw new AuthError(422, 'POSE_EXERCISE_UNSUPPORTED');
         }
       }
     }

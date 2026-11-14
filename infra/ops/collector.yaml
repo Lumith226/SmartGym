@@ -1,0 +1,38 @@
+receivers:
+  otlp:
+    protocols:
+      grpc: {endpoint: "0.0.0.0:4317"}
+      http: {endpoint: "0.0.0.0:4318"}
+extensions:
+  health_check: {endpoint: "0.0.0.0:13133", path: /ready}
+processors:
+  batch: {}
+  attributes/privacy:
+    actions:
+      - {key: url.query, action: delete}
+      - {key: url.full, action: delete}
+      - {key: http.url, action: delete}
+      - {key: http.target, action: delete}
+      - {key: db.statement, action: delete}
+      - {key: db.query.text, action: delete}
+      - {key: http.request.header.cookie, action: delete}
+      - {key: http.request.header.authorization, action: delete}
+exporters:
+  otlp_http/metrics: {endpoint: "http://127.0.0.1:9090/api/v1/otlp"}
+  otlp_http/traces: {endpoint: "http://127.0.0.1:4418"}
+  otlp_http/logs: {endpoint: "http://127.0.0.1:3100/otlp"}
+service:
+  extensions: [health_check]
+  pipelines:
+    traces:
+      receivers: [otlp]
+      processors: [attributes/privacy, batch]
+      exporters: [otlp_http/traces]
+    metrics:
+      receivers: [otlp]
+      processors: [attributes/privacy, batch]
+      exporters: [otlp_http/metrics]
+    logs:
+      receivers: [otlp]
+      processors: [attributes/privacy, batch]
+      exporters: [otlp_http/logs]

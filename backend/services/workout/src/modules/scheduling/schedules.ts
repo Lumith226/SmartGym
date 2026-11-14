@@ -1,3 +1,4 @@
+import { context, propagation } from '@opentelemetry/api';
 import { HttpException } from '@nestjs/common';
 import { randomUUID } from 'node:crypto';
 import { Temporal } from '@js-temporal/polyfill';
@@ -48,9 +49,11 @@ export async function occurrenceEvent(db: SqlClient, id: string) {
     data: { occurrenceId: row.id, userId: row.owner_user_id, status: row.status, startAt: row.starts_at.toISOString(),
       endAt: row.ends_at.toISOString(), timeZone: row.time_zone } };
   if (!validEvent(event)) throw new Error('Invalid Workout event');
-  await db.query(`INSERT INTO outbox_events(event_id,type,schema_version,aggregate_id,aggregate_version,occurred_at,correlation_id,payload)
-    VALUES($1,$2,$3,$4,$5,$6,$7,$8)`, [event.id, event.type, event.schemaVersion, event.aggregateId, event.aggregateVersion,
-    event.occurredAt, event.correlationId, JSON.stringify(event)]);
+  const traceHeaders: Record<string, string> = {};
+  propagation.inject(context.active(), traceHeaders);
+  await db.query(`INSERT INTO outbox_events(event_id,type,schema_version,aggregate_id,aggregate_version,occurred_at,correlation_id,payload,traceparent)
+    VALUES($1,$2,$3,$4,$5,$6,$7,$8,$9)`, [event.id, event.type, event.schemaVersion, event.aggregateId, event.aggregateVersion,
+    event.occurredAt, event.correlationId, JSON.stringify(event), traceHeaders.traceparent ?? null]);
 }
 
 function pagination(query: Record<string, unknown>, fields: string[]) {

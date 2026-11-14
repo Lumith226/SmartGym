@@ -130,11 +130,11 @@ export function RagDock({
     <div className="pointer-events-auto mx-auto w-full max-w-3xl">
       {/* Khung hội thoại mở rộng lên trên (chỉ hiện khi đã có tin nhắn) */}
       {expanded && (turns.length > 0 || pending || error) && (
-        <div className="mb-2 overflow-hidden rounded-2xl border border-foreground/10 bg-card/90 text-foreground shadow-2xl backdrop-blur-xl">
-          <div className="flex items-center justify-between border-b border-foreground/10 px-4 py-2 text-xs text-foreground/60">
-            <span className="inline-flex items-center gap-1.5">
-              <MessageSquare size={13} />
-              <span>Trợ lý SmartGym · trả lời có nguồn</span>
+        <div className="mb-2 overflow-hidden rounded-2xl border border-border/80 bg-card/95 text-foreground shadow-2xl backdrop-blur-2xl">
+          <div className="flex items-center justify-between border-b border-border/80 px-4 py-2.5 text-xs text-muted-foreground">
+            <span className="inline-flex items-center gap-1.5 font-semibold text-foreground">
+              <MessageSquare size={13} className="text-primary" />
+              <span>Trợ lý SmartGym · Trả lời có nguồn</span>
             </span>
             <div className="flex items-center gap-1">
               <button
@@ -145,7 +145,7 @@ export function RagDock({
                   setError('');
                   setPending(false);
                 }}
-                className="cursor-pointer rounded-md px-2 py-0.5 text-[11px] hover:bg-foreground/10 hover:text-foreground"
+                className="cursor-pointer rounded-md px-2 py-0.5 text-[11px] hover:bg-muted hover:text-foreground"
               >
                 Xóa
               </button>
@@ -153,7 +153,7 @@ export function RagDock({
                 type="button"
                 aria-label="Thu gọn hội thoại"
                 onClick={() => setExpanded(false)}
-                className="cursor-pointer rounded-md p-1 hover:bg-foreground/10 hover:text-foreground"
+                className="cursor-pointer rounded-md p-1 hover:bg-muted hover:text-foreground"
               >
                 <ChevronDown size={14} />
               </button>
@@ -165,26 +165,26 @@ export function RagDock({
                 <div
                   className={cn(
                     'max-w-[88%] rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed',
-                    turn.role === 'user' ? 'bg-[#0a84ff] text-white' : 'bg-foreground/10 text-foreground/95',
+                    turn.role === 'user' ? 'bg-[#6366f1] text-white shadow-xs' : 'bg-muted/80 text-foreground',
                   )}
                 >
                   <p className="m-0 whitespace-pre-wrap">{turn.content}</p>
                   {turn.answer && turn.answer.user_notices.length > 0 && (
-                    <ul className="m-0 mt-1.5 list-disc pl-4 text-[11px] text-foreground/60">
+                    <ul className="m-0 mt-1.5 list-disc pl-4 text-[11px] text-muted-foreground">
                       {turn.answer.user_notices.map((n, k) => (
                         <li key={k}>{n}</li>
                       ))}
                     </ul>
                   )}
                   {turn.answer && turn.answer.references.length > 0 && (
-                    <details className="mt-2 text-[11px] text-foreground/70">
-                      <summary className="cursor-pointer select-none">
+                    <details className="mt-2 text-[11px] text-muted-foreground">
+                      <summary className="cursor-pointer select-none font-semibold text-primary">
                         {turn.answer.references.length} nguồn tham khảo
                       </summary>
                       <ol className="m-0 mt-1 space-y-1 pl-4">
                         {turn.answer.references.map(ref => (
                           <li key={ref.number} value={ref.number}>
-                            <strong className="text-foreground/90">{ref.title}</strong>
+                            <strong className="text-foreground">{ref.title}</strong>
                             {ref.publisher && <> — {ref.publisher}</>}
                             {ref.pdf_page !== null && <> · tr. {ref.pdf_page}</>}
                             {ref.url && (
@@ -195,7 +195,7 @@ export function RagDock({
                                   href={ref.url}
                                   target="_blank"
                                   rel="noopener noreferrer"
-                                  className="text-[#64d2ff]"
+                                  className="text-primary font-semibold hover:underline"
                                 >
                                   Mở nguồn
                                 </a>
@@ -211,15 +211,15 @@ export function RagDock({
             ))}
             {pending && (
               <div className="flex">
-                <div className="rounded-2xl bg-foreground/10 px-3.5 py-2 text-[13px] text-foreground/70">
+                <div className="rounded-2xl bg-muted px-3.5 py-2 text-[13px] text-muted-foreground">
                   Đang tìm bằng chứng và chuẩn bị trả lời…
                 </div>
               </div>
             )}
             {error && (
-              <p role="alert" className="m-0 text-xs text-[#ff9f0a]">
+              <p role="alert" className="m-0 text-xs text-amber-500">
                 {error}{' '}
-                <Link href="/dang-nhap?next=%2F" className="text-[#64d2ff]">
+                <Link href="/dang-nhap?next=%2F" className="text-primary font-semibold hover:underline">
                   Đăng nhập
                 </Link>
               </p>
@@ -236,7 +236,7 @@ export function RagDock({
               key={s}
               type="button"
               onClick={() => void send(s)}
-              className="cursor-pointer rounded-full border border-foreground/15 bg-background/60 px-3 py-1 text-[11.5px] text-foreground/80 backdrop-blur-md transition-colors hover:bg-background/75 hover:text-foreground"
+              className="cursor-pointer rounded-full border border-border/80 bg-card/85 px-3 py-1 text-[11.5px] text-foreground/80 backdrop-blur-md transition-all hover:border-primary/40 hover:bg-card hover:text-foreground shadow-xs"
             >
               {s}
             </button>
@@ -244,15 +244,15 @@ export function RagDock({
         </div>
       )}
 
-      {/* Ô nhập chat kiểu Claude / Codex */}
+      {/* Ô nhập chat kiểu Clean SmartGym */}
       <form
         onSubmit={e => {
           e.preventDefault();
           void send(message);
         }}
-        className="!m-0 flex items-end gap-2 !rounded-2xl !border !border-foreground/15 !bg-card/90 !p-2 !shadow-2xl backdrop-blur-xl"
+        className="!m-0 flex items-end gap-2 !rounded-2xl !border !border-border/80 !bg-card/95 !p-2 !shadow-2xl backdrop-blur-2xl"
       >
-        <span className="mb-1.5 ml-2 text-foreground/50">
+        <span className="mb-1.5 ml-2 text-primary">
           <Sparkles size={16} />
         </span>
         <textarea
@@ -273,14 +273,14 @@ export function RagDock({
           }}
           placeholder="Hỏi SmartGym về kỹ thuật, bài tập thay thế hoặc nhận xét buổi tập…"
           aria-label="Câu hỏi cho trợ lý SmartGym"
-          className="!m-0 max-h-32 min-h-9 flex-1 resize-none !border-0 !bg-transparent !px-1 !py-2 text-[13.5px] !text-foreground !shadow-none outline-none placeholder:text-foreground/40 focus:!ring-0"
+          className="!m-0 max-h-32 min-h-9 flex-1 resize-none !border-0 !bg-transparent !px-1 !py-2 text-[13.5px] !text-foreground !shadow-none outline-none placeholder:text-muted-foreground focus:!ring-0"
         />
         {onToggleMinimize && (
           <button
             type="button"
             onClick={onToggleMinimize}
             title="Thu gọn thanh chat để nhìn rõ toàn thân"
-            className="mb-1 inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-foreground/50 hover:bg-foreground/10 hover:text-foreground"
+            className="mb-1 inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
           >
             <ChevronDown size={16} />
           </button>
@@ -289,7 +289,7 @@ export function RagDock({
           type="submit"
           disabled={pending || message.trim().length < 2}
           aria-label="Gửi câu hỏi"
-          className="!m-0 inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center !rounded-full !border-0 !bg-foreground !p-0 !text-background transition-opacity disabled:!bg-foreground/15 disabled:!text-foreground/40"
+          className="!m-0 inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center !rounded-full !border-0 !bg-[#6366f1] hover:!bg-[#4f46e5] !p-0 !text-white transition-all shadow-xs disabled:!bg-muted disabled:!text-muted-foreground"
         >
           {pending ? <X size={15} /> : <ArrowUp size={16} strokeWidth={2.4} />}
         </button>

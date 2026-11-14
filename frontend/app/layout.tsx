@@ -5,7 +5,7 @@ import { Toaster } from '../components/ui/toaster';
 import './globals.css';
 
 export const metadata: Metadata = {
-  title: 'SmartGym — Phòng tập AI & Thư viện bài tập',
+  title: 'SmartGym — Phòng tập & Thư viện bài tập',
   description: 'Quay trực tiếp qua Camera hoặc gửi Video phân tích động tác bằng AI.',
 };
 

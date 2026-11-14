@@ -1,5 +1,11 @@
 # Hạ tầng, triển khai và vận hành
 
+## Liên kết bài tập với Phòng tập
+
+Trong CMS, mở **Phòng tập**, chọn một động tác lấy từ Pose Engine và tìm bài tập đang công bố để liên kết. Mỗi động tác có một bài liên kết và mỗi bài liên kết với một động tác. Nút trên thư viện và trang chi tiết mở phòng tập với mã động tác đã chọn. Khi gỡ liên kết, gỡ công bố bài hoặc Pose Engine ngừng hỗ trợ động tác, nút được ẩn khi tải lại trang. CMS vẫn cho gỡ liên kết đã lưu khi Pose Engine gián đoạn.
+
+Catalog sở hữu liên kết trong migration 011. Migration chuyển các ánh xạ mã cũ nếu bài tương ứng đang công bố. Web hỏi danh sách Pose Engine khi mở CMS hoặc bấm **Cập nhật danh sách**, rồi kiểm lại động tác trước khi ghi qua API quản trị Catalog.
+
 Tài liệu thiết kế cho `OPS-001` và `SYS-001`. [Kiến trúc](../design/ARCHITECTURE.md), [database](../design/DATABASE.md), [bảo mật](../design/SECURITY.md) và [test plan](../planning/TEST_PLAN.md) là nguồn chi tiết. Mọi lệnh, artifact và cấu hình thực thi thuộc Development.
 
 ## Chatbot Web T27
@@ -406,3 +412,20 @@ GC operator chỉ xóa catalog_exports có expires_at≤now() trong database Cat
 - Theo dõi số import lỗi/đang chạy, media quarantine, 409/412, thời gian publish, outbox lag, cache purge và Catalog head freshness. Log dùng job ID, content ID/revision và correlation ID.
 - Import validate trước, apply nháp khi base versions khớp. Nếu thất bại, giữ public revision, đọc báo cáo theo provenance và revalidate snapshot đã sửa. Khi đã publish nhầm, restore dữ liệu revision đúng thành nháp và publish revision mới. Không reset sequence hoặc sửa outbox đã phát. Archive/thu hồi quyền media thực hiện deny và purge theo runbook, giữ audit.
 - Khi broker lỗi, publication vẫn commit cùng outbox. Replay giữ event ID và version. Provider RAG dùng head/snapshot để reconcile; Catalog không truy cập index provider. Khi invalidation lỗi, retry purge và để TTL bù. Backup Catalog DB cùng manifest object version, khôi phục trong staging và đối chiếu checksum/ref trước mở traffic.
+
+## Vận hành và giám sát cục bộ
+
+Docker Compose đặt trần CPU, RAM và PID cho từng container. Dùng `docker stats` lúc rảnh và khi chạy video hoặc sinh câu trả lời để chỉnh `SMARTGYM_<SERVICE>_MEMORY` và `SMARTGYM_<SERVICE>_CPUS`. Các mức mặc định là điểm khởi đầu. Kiểm tra `docker compose ps -a` để phân biệt container đang chờ sẵn sàng, đang lỗi probe và bootstrap đã hoàn tất. Healthcheck của các API mTLS dùng certificate của chính container và quyền đọc probe giới hạn ở loopback. Worker và relay cập nhật heartbeat sau vòng xử lý.
+
+Để bật metrics, log tập trung và trace trên Compose cục bộ, đặt biến trước khi khởi động hoặc tạo lại service:
+
+```powershell
+$env:SMARTGYM_OTEL_DISABLED = 'false'
+docker compose --env-file .env -f infra/compose.yaml --profile observability up -d --build
+```
+
+Mở Grafana tại `http://127.0.0.1:3030`. Dashboard **SmartGym Operations** hiển thị tốc độ request, p95, RSS và tuổi outbox. Dùng Explore để truy vấn log Loki theo service hoặc trace trong Tempo. Prometheus đánh giá rule mất tín hiệu Web, tăng lỗi, độ trễ và outbox tồn lâu. Alertmanager gom cảnh báo tại `http://127.0.0.1:9093`. Cấu hình email hoặc webhook riêng khi cần gửi ra ngoài.
+
+Redis chạy trong mạng riêng của Web, Catalog và Identity. Web dùng bộ đếm chat và lease theo người dùng hoặc IP. Catalog cache revision public bất biến sau khi truy vấn con trỏ công bố trong PostgreSQL. Identity dùng Redis làm chỉ mục từ hash phiên đến owner, còn PostgreSQL xác minh phiên, quyền, thời hạn và trạng thái thu hồi mỗi lần. Catalog và Identity fallback về PostgreSQL khi Redis gián đoạn. Chat dùng Redis khi được cấu hình và trả lỗi tạm thời khi Redis gián đoạn.
+
+Circuit breaker tách kiểm tra readiness khỏi request sinh câu trả lời của RAG. Sau ba lần lỗi liên tiếp, breaker ngắt trong 15 giây và sau đó chỉ cho một lần thăm dò. Giới hạn này theo từng tiến trình Web. Dùng `pnpm check:contracts` và `node --test tests/integration/resilience.test.mjs` để kiểm hợp đồng và luồng mở, thăm dò, phục hồi.

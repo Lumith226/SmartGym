@@ -23,7 +23,7 @@ import { cn } from '../../lib/utils';
 import { Button } from '../../components/ui/button';
 
 interface Props {
-  initialExercises: ExerciseCard[];
+  results?: { items: ExerciseCard[]; totalCount: number; totalPages: number; page: number; pageSize: number };
   muscleGroups: TaxonomyItem[];
   equipmentList: TaxonomyItem[];
   facets?: CatalogFacets;
@@ -48,7 +48,7 @@ const DIFFICULTY_LEVELS: { id: 1 | 2 | 3 | 4 | 5; label: string; text: string; b
 ];
 
 export function ExerciseLibraryClient({
-  initialExercises,
+  results,
   muscleGroups,
   equipmentList,
   facets,
@@ -58,17 +58,42 @@ export function ExerciseLibraryClient({
   const router = useRouter();
   const searchParams = useSearchParams();
 
-  // State bộ lọc & hiển thị
-  const [activeMuscle, setActiveMuscle] = React.useState<string>(
-    searchParams.get('muscle') || 'all',
-  );
-  const [searchQuery, setSearchQuery] = React.useState<string>(
-    searchParams.get('q') || '',
-  );
-  const [sortBy, setSortBy] = React.useState<string>('popular');
+  const activeMuscle = searchParams.get('muscleGroupId') ?? 'all';
+  const urlQuery = searchParams.get('q') ?? '';
+  const [searchQuery, setSearchQuery] = React.useState(urlQuery);
+  const searchTimer = React.useRef<ReturnType<typeof setTimeout> | undefined>(undefined);
+  const composing = React.useRef(false);
+  const submittedQuery = React.useRef<string | undefined>(undefined);
+  const sortBy = searchParams.get('sort') ?? '';
   const [viewMode, setViewMode] = React.useState<'grid' | 'list'>('grid');
-  const [drawerOpen, setDrawerOpen] = React.useState<boolean>(false);
-  const [currentPage, setCurrentPage] = React.useState<number>(1);
+  const [drawerOpen, setDrawerOpen] = React.useState(false);
+  const [pending, startTransition] = React.useTransition();
+
+  React.useEffect(() => {
+    if (submittedQuery.current === urlQuery) {
+      submittedQuery.current = undefined;
+      return;
+    }
+    clearTimeout(searchTimer.current);
+    setSearchQuery(urlQuery);
+  }, [urlQuery]);
+  React.useEffect(() => () => clearTimeout(searchTimer.current), []);
+
+  function navigate(changes: Record<string, string>, query = searchQuery) {
+    clearTimeout(searchTimer.current);
+    const next = new URLSearchParams(searchParams);
+    next.delete('cursor');
+    next.delete('page');
+    const q = query.trim();
+    for (const [key, value] of Object.entries({ q, ...changes })) {
+      if (value) next.set(key, value);
+      else next.delete(key);
+    }
+    if (next.toString() === searchParams.toString()) return;
+    submittedQuery.current = q === urlQuery ? undefined : q;
+    startTransition(() => router.replace('/bai-tap' + (next.size ? '?' + next : ''), { scroll: false }));
+  }
+
   const [previewExercise, setPreviewExercise] = React.useState<ExerciseCard | null>(null);
   const previewPoseId = previewExercise && Object.hasOwn(poseLinks, previewExercise.id) ? poseLinks[previewExercise.id] : undefined;
 
@@ -154,10 +179,16 @@ export function ExerciseLibraryClient({
     pillsContainerRef.current?.scrollBy({ left: offset, behavior: 'smooth' });
   };
 
-  // Bộ lọc nâng cao trong Drawer
-  const [selectedTypes, setSelectedTypes] = React.useState<WorkoutType[]>([]);
-  const [selectedEquipment, setSelectedEquipment] = React.useState<string[]>([]);
-  const [selectedDifficulties, setSelectedDifficulties] = React.useState<number[]>([]);
+  const listParam = (name: string, legacy: string) =>
+    (searchParams.get(name) ?? searchParams.get(legacy) ?? '').split(',').filter(Boolean);
+  const selectedTypes = listParam('workoutTypes', 'workoutType');
+  const selectedEquipment = listParam('equipmentIds', 'equipmentId');
+  const selectedDifficulties = listParam('difficulties', 'difficulty').map(Number);
+
+  function toggleFilter<T extends string | number>(key: string, legacy: string, selected: T[], value: T) {
+    const values = selected.includes(value) ? selected.filter(item => item !== value) : [...selected, value];
+    navigate({ [key]: values.join(','), [legacy]: '' });
+  }
 
   // Bản đồ tên nhóm cơ và dụng cụ để hiển thị nhãn thân thiện
   const muscleMap = React.useMemo(() => {
@@ -177,7 +208,7 @@ export function ExerciseLibraryClient({
     const allPill = {
       id: 'all',
       label: 'Tất cả',
-      count: facets?.total ?? totalCount ?? initialExercises.length,
+      count: facets?.total ?? totalCount,
     };
 
     const groupPills = muscleGroups.map(g => ({
@@ -187,100 +218,19 @@ export function ExerciseLibraryClient({
     }));
 
     return [allPill, ...groupPills];
-  }, [muscleGroups, facets, totalCount, initialExercises.length]);
+  }, [muscleGroups, facets, totalCount]);
 
-  // Lọc 100% bài tập thật từ backend Catalog API
-  const filteredExercises = React.useMemo(() => {
-    return initialExercises.filter(item => {
-      // 1. Nhóm cơ
-      if (activeMuscle !== 'all') {
-        const hasPrimary = item.primaryMuscleIds?.includes(activeMuscle);
-        const hasSecondary = item.secondaryMuscleIds?.includes(activeMuscle);
-        if (!hasPrimary && !hasSecondary) return false;
-      }
-
-      // 2. Tìm kiếm từ khóa
-      if (searchQuery.trim()) {
-        const query = searchQuery.trim().toLowerCase();
-        const searchCorpus = (
-          item.nameVi +
-          ' ' +
-          (item.nameEn || '') +
-          ' ' +
-          (item.summary || '') +
-          ' ' +
-          (item.primaryMuscleIds || []).map(id => muscleMap.get(id) || id).join(' ')
-        ).toLowerCase();
-        if (!searchCorpus.includes(query)) return false;
-      }
-
-      // 3. Loại hình bài tập
-      if (
-        selectedTypes.length > 0 &&
-        item.workoutType &&
-        !selectedTypes.includes(item.workoutType)
-      ) {
-        return false;
-      }
-
-      // 4. Độ khó
-      if (
-        selectedDifficulties.length > 0 &&
-        item.difficulty &&
-        !selectedDifficulties.includes(item.difficulty)
-      ) {
-        return false;
-      }
-
-      // 5. Dụng cụ
-      if (selectedEquipment.length > 0) {
-        const hasEquip = item.equipmentIds?.some(id => selectedEquipment.includes(id));
-        if (!hasEquip) return false;
-      }
-
-      return true;
-    });
-  }, [
-    initialExercises,
-    activeMuscle,
-    searchQuery,
-    selectedTypes,
-    selectedDifficulties,
-    selectedEquipment,
-    muscleMap,
-  ]);
-
-  // Sắp xếp bài tập thật
-  const sortedExercises = React.useMemo(() => {
-    const list = [...filteredExercises];
-    if (sortBy === 'diff-asc') {
-      list.sort((a, b) => (a.difficulty || 1) - (b.difficulty || 1));
-    } else if (sortBy === 'diff-desc') {
-      list.sort((a, b) => (b.difficulty || 1) - (a.difficulty || 1));
-    } else if (sortBy === 'name') {
-      list.sort((a, b) => a.nameVi.localeCompare(b.nameVi, 'vi'));
-    }
-    return list;
-  }, [filteredExercises, sortBy]);
-
-  // Phân trang
-  const PAGE_SIZE = 9;
-  const totalFilteredCount = sortedExercises.length;
-  const totalPages = Math.max(1, Math.ceil(totalFilteredCount / PAGE_SIZE));
-  const paginatedExercises = sortedExercises.slice(
-    (currentPage - 1) * PAGE_SIZE,
-    currentPage * PAGE_SIZE,
-  );
+  const PAGE_SIZE = results?.pageSize ?? 9;
+  const totalFilteredCount = results?.totalCount ?? 0;
+  const totalPages = results?.totalPages ?? 1;
+  const currentPage = results?.page ?? 1;
+  const paginatedExercises = results?.items ?? [];
 
   function resetAllFilters() {
-    setActiveMuscle('all');
+    clearTimeout(searchTimer.current);
     setSearchQuery('');
-    setSortBy('popular');
-    setSelectedTypes([]);
-    setSelectedDifficulties([]);
-    setSelectedEquipment([]);
-    setCurrentPage(1);
-    router.replace('/bai-tap');
+    submittedQuery.current = urlQuery ? '' : undefined;
+    startTransition(() => router.replace('/bai-tap', { scroll: false }));
   }
 
   const currentPillObj = quickMusclePills.find(p => p.id === activeMuscle);
@@ -317,13 +267,27 @@ export function ExerciseLibraryClient({
                 className="pointer-events-none absolute left-3 top-1/2 -translate-y-1/2 text-[#94a3b8] dark:text-[#596277]"
               />
               <input
-                type="text"
+                type="search"
+                aria-label="Tìm bài tập"
+                maxLength={100}
                 value={searchQuery}
-                onChange={e => {
-                  setSearchQuery(e.target.value);
-                  setCurrentPage(1);
+                onChange={event => {
+                  const value = event.target.value;
+                  setSearchQuery(value);
+                  clearTimeout(searchTimer.current);
+                  if (!composing.current) searchTimer.current = setTimeout(() => navigate({}, value), 300);
                 }}
-                placeholder="Tìm theo tên bài, nhóm cơ, dụng cụ..."
+                onCompositionStart={() => { composing.current = true; clearTimeout(searchTimer.current); }}
+                onCompositionEnd={event => {
+                  composing.current = false;
+                  const value = event.currentTarget.value;
+                  clearTimeout(searchTimer.current);
+                  searchTimer.current = setTimeout(() => navigate({}, value), 300);
+                }}
+                onKeyDown={event => {
+                  if (event.key === 'Enter' && !event.nativeEvent.isComposing) navigate({});
+                }}
+                placeholder="Tìm theo tên tiếng Việt hoặc tiếng Anh…"
                 className="h-[38px] w-full rounded-[10px] border border-[#e2e8f0] bg-white pl-9 pr-14 text-[13px] text-[#0f172a] placeholder-[#94a3b8] transition-all focus:border-[#4f46e5] focus:outline-none focus:ring-2 focus:ring-[#4f46e5]/15 dark:border-[#232736] dark:bg-[#12141c] dark:text-[#f1f3f9] dark:placeholder-[#596277] dark:focus:border-[#6366f1]"
               />
               <span className="pointer-events-none absolute right-2.5 top-1/2 -translate-y-1/2 rounded-[4px] border border-[#e2e8f0] bg-[#f8fafc] px-1.5 py-0.5 font-mono text-[10px] text-[#94a3b8] dark:border-[#232736] dark:bg-[#191d28] dark:text-[#596277]">
@@ -394,10 +358,10 @@ export function ExerciseLibraryClient({
                 <button
                   key={pill.id}
                   type="button"
+                  disabled={pending}
                   onClick={() => {
                     if (hasMovedPillsRef.current) return;
-                    setActiveMuscle(pill.id);
-                    setCurrentPage(1);
+                    navigate({ muscleGroupId: pill.id === 'all' ? '' : pill.id });
                   }}
                   className={cn(
                     'inline-flex shrink-0 items-center gap-1.5 rounded-full border px-3.5 py-1.5 text-[12.5px] font-semibold transition-all duration-150',
@@ -459,7 +423,7 @@ export function ExerciseLibraryClient({
               <span>{currentPillObj?.label}</span>
               <button
                 type="button"
-                onClick={() => setActiveMuscle('all')}
+                onClick={() => navigate({ muscleGroupId: '' })}
                 className="hover:opacity-75"
                 aria-label="Xóa bộ lọc nhóm cơ"
               >
@@ -475,10 +439,12 @@ export function ExerciseLibraryClient({
             <span>Sắp xếp:</span>
             <select
               value={sortBy}
-              onChange={e => setSortBy(e.target.value)}
+              disabled={pending}
+              aria-label="Sắp xếp bài tập"
+              onChange={e => navigate({ sort: e.target.value })}
               className="h-8 rounded-[6px] border border-[#e2e8f0] bg-white px-2.5 text-[12px] font-semibold text-[#0f172a] outline-none focus:border-[#4f46e5] dark:border-[#232736] dark:bg-[#151822] dark:text-[#f1f3f9] dark:focus:border-[#6366f1]"
             >
-              <option value="popular">Phổ biến nhất</option>
+              <option value="">Mặc định</option>
               <option value="diff-asc">Độ khó tăng dần</option>
               <option value="diff-desc">Độ khó giảm dần</option>
               <option value="name">Tên A-Z</option>
@@ -519,7 +485,12 @@ export function ExerciseLibraryClient({
 
       {/* ─── 3. CONTENT AREA & EXERCISE CARDS GRID ─── */}
       <main className="flex-1 px-7 py-6">
-        {paginatedExercises.length === 0 ? (
+        {pending && <p role="status" className="mb-3 text-sm text-muted-foreground">Đang cập nhật kết quả…</p>}
+        {!results ? (
+          <p role="alert" className="rounded-xl border border-border bg-card p-5 text-sm">
+            Chưa tải được bài tập. <button type="button" className="text-primary underline" onClick={() => startTransition(() => router.refresh())}>Thử lại</button>
+          </p>
+        ) : paginatedExercises.length === 0 ? (
           <div className="flex flex-col items-center justify-center rounded-2xl border border-dashed border-[#e2e8f0] bg-white py-16 text-center dark:border-[#232736] dark:bg-[#151822]">
             <Dumbbell className="h-10 w-10 text-[#94a3b8] mb-3 stroke-[1.5]" />
             <p className="text-sm font-semibold text-[#0f172a] dark:text-[#f1f3f9]">
@@ -591,7 +562,11 @@ export function ExerciseLibraryClient({
                       SMARTGYM · SPEC #{specNo}
                     </div>
 
-                    {Object.hasOwn(poseLinks, exercise.id) && <span className="absolute bottom-3 right-3 z-10 rounded bg-slate-900 px-2 py-1 text-xs font-medium text-white">Pose AI</span>}
+                    {Object.hasOwn(poseLinks, exercise.id) && <Link
+                      href={'/?exercise=' + encodeURIComponent(poseLinks[exercise.id])}
+                      onClick={event => event.stopPropagation()}
+                      aria-label={`Tập tại phòng tập: ${exercise.nameVi}`}
+                      className="absolute bottom-3 right-3 z-10 rounded bg-slate-900 px-2 py-1 text-xs font-medium text-white hover:underline">Phòng tập</Link>}
 
                     {/* Artwork: Nếu có ảnh media thật thì hiển thị ảnh, nếu không thì hiển thị vector blueprint */}
                     <div className="relative z-1 flex h-[82%] w-[82%] max-h-[190px] items-center justify-center transition-transform duration-300 group-hover:scale-105">
@@ -700,7 +675,11 @@ export function ExerciseLibraryClient({
                       <div className="text-[12px] italic text-[#94a3b8] dark:text-[#596277]">
                         {exercise.nameEn || exercise.slug}
                       </div>
-                      {Object.hasOwn(poseLinks, exercise.id) && <span className="text-xs font-medium text-primary">Pose AI</span>}
+                      {Object.hasOwn(poseLinks, exercise.id) && <Link
+                        href={'/?exercise=' + encodeURIComponent(poseLinks[exercise.id])}
+                        onClick={event => event.stopPropagation()}
+                        aria-label={`Tập tại phòng tập: ${exercise.nameVi}`}
+                        className="text-xs font-medium text-primary hover:underline">Phòng tập</Link>}
                     </div>
                     <div className="font-mono text-xs text-[#475569] dark:text-[#9098ac]">
                       {exercise.summary}
@@ -724,8 +703,8 @@ export function ExerciseLibraryClient({
           <div className="flex items-center gap-1.5">
             <button
               type="button"
-              disabled={currentPage <= 1}
-              onClick={() => setCurrentPage(p => Math.max(1, p - 1))}
+              disabled={pending || currentPage <= 1}
+              onClick={() => navigate({ page: String(currentPage - 1) })}
               className="inline-flex h-[34px] items-center justify-center rounded-[6px] border border-[#e2e8f0] bg-white px-3 text-[12.5px] font-semibold text-[#475569] transition-all hover:bg-[#f3f6fc] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#232736] dark:bg-[#151822] dark:text-[#9098ac]"
             >
               ← Trước
@@ -737,7 +716,9 @@ export function ExerciseLibraryClient({
                 <button
                   key={page}
                   type="button"
-                  onClick={() => setCurrentPage(page)}
+                  disabled={pending}
+                  aria-current={active ? 'page' : undefined}
+                  onClick={() => navigate({ page: String(page) })}
                   className={cn(
                     'inline-flex h-[34px] min-w-[34px] items-center justify-center rounded-[6px] border px-2.5 font-mono text-[12.5px] font-bold transition-all',
                     active
@@ -752,8 +733,8 @@ export function ExerciseLibraryClient({
 
             <button
               type="button"
-              disabled={currentPage >= totalPages}
-              onClick={() => setCurrentPage(p => Math.min(totalPages, p + 1))}
+              disabled={pending || currentPage >= totalPages}
+              onClick={() => navigate({ page: String(currentPage + 1) })}
               className="inline-flex h-[34px] items-center justify-center rounded-[6px] border border-[#e2e8f0] bg-white px-3 text-[12.5px] font-semibold text-[#475569] transition-all hover:bg-[#f3f6fc] disabled:cursor-not-allowed disabled:opacity-40 dark:border-[#232736] dark:bg-[#151822] dark:text-[#9098ac]"
             >
               Sau →
@@ -802,15 +783,9 @@ export function ExerciseLibraryClient({
                         <div className="flex items-center gap-2.5">
                           <input
                             type="checkbox"
+                            disabled={pending}
                             checked={checked}
-                            onChange={() => {
-                              setSelectedTypes(prev =>
-                                checked
-                                  ? prev.filter(t => t !== type.id)
-                                  : [...prev, type.id],
-                              );
-                              setCurrentPage(1);
-                            }}
+                            onChange={() => toggleFilter('workoutTypes', 'workoutType', selectedTypes, type.id)}
                             className="h-4 w-4 rounded accent-[#4f46e5]"
                           />
                           <span className="font-medium">{type.label}</span>
@@ -841,15 +816,9 @@ export function ExerciseLibraryClient({
                         <div className="flex items-center gap-2.5">
                           <input
                             type="checkbox"
+                            disabled={pending}
                             checked={checked}
-                            onChange={() => {
-                              setSelectedDifficulties(prev =>
-                                checked
-                                  ? prev.filter(d => d !== level.id)
-                                  : [...prev, level.id],
-                              );
-                              setCurrentPage(1);
-                            }}
+                            onChange={() => toggleFilter('difficulties', 'difficulty', selectedDifficulties, level.id)}
                             className="h-4 w-4 rounded accent-[#4f46e5]"
                           />
                           <span className="font-medium">{level.label}</span>
@@ -881,15 +850,9 @@ export function ExerciseLibraryClient({
                           <div className="flex items-center gap-2.5">
                             <input
                               type="checkbox"
+                              disabled={pending}
                               checked={checked}
-                              onChange={() => {
-                                setSelectedEquipment(prev =>
-                                  checked
-                                    ? prev.filter(e => e !== item.id)
-                                    : [...prev, item.id],
-                                );
-                                setCurrentPage(1);
-                              }}
+                              onChange={() => toggleFilter('equipmentIds', 'equipmentId', selectedEquipment, item.id)}
                               className="h-4 w-4 rounded accent-[#4f46e5]"
                             />
                             <span className="font-medium">{item.labelVi}</span>
@@ -915,11 +878,7 @@ export function ExerciseLibraryClient({
               </button>
               <button
                 type="button"
-                onClick={() => {
-                  setSelectedTypes([]);
-                  setSelectedDifficulties([]);
-                  setSelectedEquipment([]);
-                }}
+                onClick={() => navigate({ workoutTypes: '', workoutType: '', difficulties: '', difficulty: '', equipmentIds: '', equipmentId: '' })}
                 className="rounded-[8px] border border-[#e2e8f0] px-4 py-2.5 text-[13px] font-medium text-[#475569] hover:bg-slate-100 dark:border-[#232736] dark:text-[#9098ac]"
               >
                 Xóa
@@ -1053,7 +1012,7 @@ export function ExerciseLibraryClient({
                 className="inline-flex h-[38px] sm:h-[40px] items-center gap-2 rounded-[10px] bg-gradient-to-r from-[#6366f1] to-[#4f46e5] px-4 sm:px-5 text-[12.5px] sm:text-[13px] font-bold text-white shadow-[0_4px_16px_rgba(99,102,241,0.35)] transition-all hover:scale-[1.02] hover:shadow-[0_6px_22px_rgba(99,102,241,0.5)]"
               >
                 <Sparkles size={15} />
-                <span>Tập với Pose AI</span>
+                <span>Tập tại phòng tập</span>
               </Link>}
             </div>
           </div>

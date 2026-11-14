@@ -68,7 +68,18 @@ export function libraryQuery(params: CatalogParams) {
   if (typeof params.difficulty === 'string' && DIFFICULTIES.has(params.difficulty)) {
     query.set('difficulty', params.difficulty);
   }
-  if (typeof params.page === 'string' && /^[1-9][0-9]{0,2}$/.test(params.page) && params.page !== '1') {
+  for (const [key, valid] of [
+    ['workoutTypes', (value: string) => WORKOUT_TYPES.has(value)],
+    ['difficulties', (value: string) => DIFFICULTIES.has(value)],
+    ['equipmentIds', (value: string) => idPattern.test(value)],
+  ] as const) {
+    const raw = params[key];
+    if (typeof raw !== 'string') continue;
+    const values = [...new Set(raw.split(',').filter(valid))].slice(0, 20);
+    if (values.length) query.set(key, values.join(','));
+  }
+  if (typeof params.sort === 'string' && ['diff-asc', 'diff-desc', 'name'].includes(params.sort)) query.set('sort', params.sort);
+  if (typeof params.page === 'string' && /^[1-9][0-9]{0,3}$/.test(params.page) && params.page !== '1') {
     query.set('page', params.page);
   }
   if (typeof params.cursor === 'string' && /^[A-Za-z0-9_-]{1,1024}$/.test(params.cursor)) query.set('cursor', params.cursor);

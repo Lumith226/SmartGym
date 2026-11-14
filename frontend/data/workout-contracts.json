@@ -64,6 +64,22 @@
         "nextCursor"
       ],
       "properties": {
+        "page": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "pageSize": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "totalCount": {
+          "type": "integer",
+          "minimum": 0
+        },
+        "totalPages": {
+          "type": "integer",
+          "minimum": 1
+        },
         "items": {
           "type": "array",
           "items": {
@@ -810,6 +826,61 @@
           "type": "string",
           "minLength": 1,
           "maxLength": 1024
+        },
+        "page": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9999
+        },
+        "workoutType": {
+          "type": "string",
+          "enum": [
+            "STRENGTH",
+            "CARDIO",
+            "HIIT",
+            "CORE",
+            "STRETCHING"
+          ]
+        },
+        "focusArea": {
+          "type": "string",
+          "enum": [
+            "FULL_BODY",
+            "UPPER_BODY",
+            "LOWER_BODY",
+            "ABS"
+          ]
+        },
+        "difficulty": {
+          "type": "string",
+          "enum": [
+            "1",
+            "2",
+            "3",
+            "4",
+            "5"
+          ]
+        },
+        "workoutTypes": {
+          "type": "string",
+          "pattern": "^(STRENGTH|CARDIO|HIIT|CORE|STRETCHING)(,(STRENGTH|CARDIO|HIIT|CORE|STRETCHING)){0,19}$"
+        },
+        "equipmentIds": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}(,[a-z][a-z0-9_]{0,79}){0,19}$"
+        },
+        "difficulties": {
+          "type": "string",
+          "pattern": "^[1-5](,[1-5]){0,19}$"
+        },
+        "sort": {
+          "type": "string",
+          "enum": [
+            "default",
+            "name",
+            "diff-asc",
+            "diff-desc"
+          ]
         }
       },
       "requiredQueries": [],

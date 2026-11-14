@@ -1,13 +1,19 @@
+import { X509Certificate } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import { Controller, Get, Module, Req, HttpException } from '@nestjs/common';
 import { TLSSocket } from 'node:tls';
 import { Database } from '../database.js';
 import { NotificationConfig } from '../config.js';
+
+const selfProbeFingerprint = process.env.SMARTGYM_SELF_PROBE === 'true'
+  ? new X509Certificate(readFileSync('/run/secrets/client.crt')).fingerprint256 : undefined;
 
 export function createNotificationHealthModule(db: Database, config: Pick<NotificationConfig, 'probeFingerprints'>, consumerReady: () => boolean) {
   @Controller('health')
   class HealthController{
     private authorize(request:{socket:TLSSocket}){
       const socket=request.socket;
+if (process.env.SMARTGYM_SELF_PROBE === 'true' && request.socket.authorized && request.socket.remoteAddress === '127.0.0.1' && request.socket.getPeerCertificate().fingerprint256 === selfProbeFingerprint) return;
       if(!socket.authorized||!config.probeFingerprints.includes(socket.getPeerCertificate().fingerprint256))throw new HttpException({code:'SERVICE_FORBIDDEN'},403);
     }
     @Get('live') live(@Req() req:{socket:TLSSocket}){this.authorize(req);return{status:'alive'};}

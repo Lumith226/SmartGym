@@ -1,3 +1,4 @@
+import { writeFile } from 'node:fs/promises';
 import { connectDatabase } from './database.js';
 import { ScheduleMaterializer } from './modules/scheduling/materializer.js';
 
@@ -14,6 +15,7 @@ async function main() {
     while (!stopped) {
       try {
         const result = await worker.tick();
+        if (process.env.SMARTGYM_WORKER_HEARTBEAT === 'true') await writeFile('/tmp/smartgym-worker-ready', '');
         if (result.failed) console.error('Workout projection failed; retry scheduled');
         if (result.processed === 20) continue;
       } catch { console.error('Workout projection unavailable; retry pending'); }

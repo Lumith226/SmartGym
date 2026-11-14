@@ -25,6 +25,9 @@ export function BodyMap3D({ groups, activeId, onSelect, onHover }: BodyMap3DProp
   const [currentView, setCurrentView] = React.useState<'front' | 'back' | 'side'>('front');
   const [autoRotate, setAutoRotate] = React.useState(false);
 
+  // Lưu theme hiện tại vào Ref để luôn đọc đúng và phản ứng tức thì
+  const isDarkRef = React.useRef(false);
+
   // Lưu callbacks & props vào ref để không làm re-run useEffect khi re-render
   const onSelectRef = React.useRef(onSelect);
   onSelectRef.current = onSelect;
@@ -50,6 +53,13 @@ export function BodyMap3D({ groups, activeId, onSelect, onHover }: BodyMap3DProp
   const dirLight2Ref = React.useRef<any>(null);
   const rimLightRef = React.useRef<any>(null);
   const neutralMatRef = React.useRef<any>(null);
+  const shadowPlaneRef = React.useRef<any>(null);
+
+  // Helper kiểm tra theme chuẩn xác
+  function checkIsDark(): boolean {
+    if (typeof document === 'undefined') return false;
+    return document.documentElement.classList.contains('dark');
+  }
 
   // 1. Tải Three.js và OrbitControls từ vendor nội bộ
   React.useEffect(() => {
@@ -88,8 +98,9 @@ export function BodyMap3D({ groups, activeId, onSelect, onHover }: BodyMap3DProp
       const width = container.clientWidth || 600;
       const height = container.clientHeight || 560;
 
-      // Detect theme (dark or light)
-      const isDark = document.documentElement.classList.contains('dark');
+      // Đồng bộ trạng thái Dark/Light mode
+      const isDark = checkIsDark();
+      isDarkRef.current = isDark;
 
       // Scene
       const scene = new THREE.Scene();
@@ -108,7 +119,7 @@ export function BodyMap3D({ groups, activeId, onSelect, onHover }: BodyMap3DProp
       renderer.shadowMap.type = THREE.PCFSoftShadowMap;
       if (THREE.ACESFilmicToneMapping) {
         renderer.toneMapping = THREE.ACESFilmicToneMapping;
-        renderer.toneMappingExposure = isDark ? 1.0 : 0.95;
+        renderer.toneMappingExposure = isDark ? 1.0 : 0.88;
       }
       container.innerHTML = '';
       container.appendChild(renderer.domElement);
@@ -125,23 +136,35 @@ export function BodyMap3D({ groups, activeId, onSelect, onHover }: BodyMap3DProp
       controls.target.set(0, 1.0, 0);
       controlsRef.current = controls;
 
-      // Ánh sáng cân bằng chuẩn Studio (Không bị lóa trắng ở Light Mode)
-      const ambientLight = new THREE.AmbientLight(isDark ? 0x1e2436 : 0xffffff, isDark ? 1.2 : 0.75);
+      // ── Ánh sáng Studio chuẩn xác (Khắc phục hoàn toàn lỗi lóa trắng ở Light Mode) ──
+      // Ambient Light: Dịu nhẹ để giữ lại chiều sâu bóng đổ của từng múi cơ
+      const ambientLight = new THREE.AmbientLight(
+        isDark ? 0x1e2436 : 0xe2e8f0,
+        isDark ? 0.95 : 0.5,
+      );
       scene.add(ambientLight);
       ambientLightRef.current = ambientLight;
 
-      const dirLight1 = new THREE.DirectionalLight(0xffffff, isDark ? 1.2 : 0.75);
-      dirLight1.position.set(2, 4, 3);
+      // Key Light: Đèn chính chiếu từ góc trên trước mặt
+      const dirLight1 = new THREE.DirectionalLight(0xffffff, isDark ? 1.1 : 0.65);
+      dirLight1.position.set(3, 4, 3);
       scene.add(dirLight1);
       dirLight1Ref.current = dirLight1;
 
-      const dirLight2 = new THREE.DirectionalLight(isDark ? 0x38bdf8 : 0x94a3b8, isDark ? 0.5 : 0.35);
-      dirLight2.position.set(-2, 3, -2);
+      // Fill Light: Đèn phụ bù sáng góc chéo
+      const dirLight2 = new THREE.DirectionalLight(
+        isDark ? 0x38bdf8 : 0x94a3b8,
+        isDark ? 0.35 : 0.25,
+      );
+      dirLight2.position.set(-3, 2, -1);
       scene.add(dirLight2);
       dirLight2Ref.current = dirLight2;
 
       // Rim light tím Indigo thương hiệu SmartGym
-      const rimLight = new THREE.DirectionalLight(0x6366f1, isDark ? 1.8 : 0.5);
+      const rimLight = new THREE.DirectionalLight(
+        isDark ? 0x6366f1 : 0x818cf8,
+        isDark ? 1.4 : 0.4,
+      );
       rimLight.position.set(0, 3, -3);
       scene.add(rimLight);
       rimLightRef.current = rimLight;
@@ -157,6 +180,7 @@ export function BodyMap3D({ groups, activeId, onSelect, onHover }: BodyMap3DProp
       const mouse = new THREE.Vector2();
 
       function onPointerMove(event: PointerEvent) {
+        const currentDark = isDarkRef.current;
         const rect = renderer.domElement.getBoundingClientRect();
         mouse.x = ((event.clientX - rect.left) / rect.width) * 2 - 1;
         mouse.y = -((event.clientY - rect.top) / rect.height) * 2 + 1;
@@ -174,14 +198,14 @@ export function BodyMap3D({ groups, activeId, onSelect, onHover }: BodyMap3DProp
             renderer.domElement.style.cursor = 'pointer';
             const grp = groupsRef.current.find(g => g.id === muscleId) || null;
             onHoverRef.current?.(grp);
-            updateMeshVisuals(activeIdRef.current, muscleId, isDark);
+            updateMeshVisuals(activeIdRef.current, muscleId, currentDark);
           }
         } else {
           if (hoveredMeshRef.current) {
             hoveredMeshRef.current = null;
             renderer.domElement.style.cursor = 'default';
             onHoverRef.current?.(null);
-            updateMeshVisuals(activeIdRef.current, undefined, isDark);
+            updateMeshVisuals(activeIdRef.current, undefined, currentDark);
           }
         }
       }
@@ -200,7 +224,7 @@ export function BodyMap3D({ groups, activeId, onSelect, onHover }: BodyMap3DProp
       function onPointerUp(event: PointerEvent) {
         const dist = Math.hypot(event.clientX - pointerStartX, event.clientY - pointerStartY);
         const duration = performance.now() - pointerStartTime;
-        // Nếu chuột di chuyển quá 5px hoặc giữ chuột lâu hơn 400ms -> người dùng đang kéo xoay OrbitControls, không chọn nhóm cơ
+        // Nếu chuột di chuyển quá 5px hoặc giữ chuột lâu hơn 400ms -> người dùng đang kéo xoay OrbitControls
         if (dist > 5 || duration > 400) return;
 
         const rect = renderer.domElement.getBoundingClientRect();
@@ -261,14 +285,16 @@ export function BodyMap3D({ groups, activeId, onSelect, onHover }: BodyMap3DProp
 
   // 3. Cập nhật màu sắc khi activeId thay đổi
   React.useEffect(() => {
-    const isDark = document.documentElement.classList.contains('dark');
+    const isDark = checkIsDark();
+    isDarkRef.current = isDark;
     updateMeshVisuals(activeId, hoveredMeshRef.current?.userData?.muscleId, isDark);
   }, [activeId]);
 
   // 4. Lắng nghe thay đổi theme Sáng / Tối để đổi màu vật liệu và ánh sáng ngay lập tức
   React.useEffect(() => {
     function handleThemeChange() {
-      const isDark = document.documentElement.classList.contains('dark');
+      const isDark = checkIsDark();
+      isDarkRef.current = isDark;
       applyTheme(isDark);
     }
 
@@ -288,28 +314,31 @@ export function BodyMap3D({ groups, activeId, onSelect, onHover }: BodyMap3DProp
   // Hàm áp dụng theme cho ánh sáng và vật liệu 3D
   function applyTheme(isDark: boolean) {
     if (ambientLightRef.current) {
-      ambientLightRef.current.color.setHex(isDark ? 0x1e2436 : 0xffffff);
-      ambientLightRef.current.intensity = isDark ? 1.2 : 0.75;
+      ambientLightRef.current.color.setHex(isDark ? 0x1e2436 : 0xe2e8f0);
+      ambientLightRef.current.intensity = isDark ? 0.95 : 0.5;
     }
     if (dirLight1Ref.current) {
       dirLight1Ref.current.color.setHex(0xffffff);
-      dirLight1Ref.current.intensity = isDark ? 1.2 : 0.75;
+      dirLight1Ref.current.intensity = isDark ? 1.1 : 0.65;
     }
     if (dirLight2Ref.current) {
       dirLight2Ref.current.color.setHex(isDark ? 0x38bdf8 : 0x94a3b8);
-      dirLight2Ref.current.intensity = isDark ? 0.5 : 0.35;
+      dirLight2Ref.current.intensity = isDark ? 0.35 : 0.25;
     }
     if (rimLightRef.current) {
-      rimLightRef.current.color.setHex(0x6366f1);
-      rimLightRef.current.intensity = isDark ? 1.8 : 0.5;
+      rimLightRef.current.color.setHex(isDark ? 0x6366f1 : 0x818cf8);
+      rimLightRef.current.intensity = isDark ? 1.4 : 0.4;
     }
     if (neutralMatRef.current) {
-      neutralMatRef.current.color.setHex(isDark ? 0x161a26 : 0x334155);
-      neutralMatRef.current.roughness = isDark ? 0.55 : 0.6;
-      neutralMatRef.current.metalness = isDark ? 0.2 : 0.1;
+      neutralMatRef.current.color.setHex(isDark ? 0x161a26 : 0x475569);
+      neutralMatRef.current.roughness = isDark ? 0.55 : 0.75;
+      neutralMatRef.current.metalness = isDark ? 0.2 : 0.08;
+    }
+    if (shadowPlaneRef.current) {
+      shadowPlaneRef.current.material.opacity = isDark ? 0.35 : 0.16;
     }
     if (rendererRef.current) {
-      rendererRef.current.toneMappingExposure = isDark ? 1.0 : 0.95;
+      rendererRef.current.toneMappingExposure = isDark ? 1.0 : 0.88;
     }
     updateMeshVisuals(activeIdRef.current, hoveredMeshRef.current?.userData?.muscleId, isDark);
   }
@@ -341,9 +370,10 @@ export function BodyMap3D({ groups, activeId, onSelect, onHover }: BodyMap3DProp
   }
 
   // Cập nhật shader/material màu nhóm cơ
-  function updateMeshVisuals(selectedId?: string, hoveredId?: string, isDark = true) {
+  function updateMeshVisuals(selectedId?: string, hoveredId?: string, isDark?: boolean) {
     const THREE = window.THREE;
     if (!THREE) return;
+    const dark = typeof isDark === 'boolean' ? isDark : isDarkRef.current;
 
     muscleMeshesRef.current.forEach((meshes, mId) => {
       const isSelected = selectedId === mId;
@@ -354,23 +384,23 @@ export function BodyMap3D({ groups, activeId, onSelect, onHover }: BodyMap3DProp
           // Nhóm cơ Active: Tím Indigo đậm phát sáng
           mesh.material.color.setHex(0x4f46e5);
           mesh.material.emissive.setHex(0x6366f1);
-          mesh.material.emissiveIntensity = isDark ? 0.7 : 0.5;
-          mesh.material.roughness = 0.2;
+          mesh.material.emissiveIntensity = dark ? 0.7 : 0.45;
+          mesh.material.roughness = 0.25;
         } else if (isHovered) {
           // Nhóm cơ Hover: Tím Indigo sáng
           mesh.material.color.setHex(0x6366f1);
           mesh.material.emissive.setHex(0x818cf8);
-          mesh.material.emissiveIntensity = isDark ? 0.5 : 0.35;
-          mesh.material.roughness = 0.25;
+          mesh.material.emissiveIntensity = dark ? 0.45 : 0.3;
+          mesh.material.roughness = 0.3;
         } else {
           // Nhóm cơ Idle:
-          // Ở chế độ Sáng (Light): Dùng Slate-500 (0x64748b) để có độ tương phản tuyệt đẹp trên nền sáng và rõ khối múi cơ
-          // Ở chế độ Tối (Dark): Dùng Slate đậm (0x242a3b)
-          mesh.material.color.setHex(isDark ? 0x242a3b : 0x64748b);
-          mesh.material.emissive.setHex(isDark ? 0x10131d : 0x000000);
-          mesh.material.emissiveIntensity = isDark ? 0.05 : 0.0;
-          mesh.material.roughness = isDark ? 0.45 : 0.5;
-          mesh.material.metalness = isDark ? 0.2 : 0.1;
+          // Ở Chế độ Sáng (Light): Dùng Slate-500 (0x64748b) với độ nhám roughness 0.65 để triệt tiêu specular lóa trắng
+          // Ở Chế độ Tối (Dark): Dùng Slate đậm (0x242a3b)
+          mesh.material.color.setHex(dark ? 0x242a3b : 0x64748b);
+          mesh.material.emissive.setHex(dark ? 0x10131d : 0x000000);
+          mesh.material.emissiveIntensity = dark ? 0.05 : 0.0;
+          mesh.material.roughness = dark ? 0.45 : 0.65;
+          mesh.material.metalness = dark ? 0.2 : 0.08;
         }
       });
     });
@@ -380,10 +410,11 @@ export function BodyMap3D({ groups, activeId, onSelect, onHover }: BodyMap3DProp
   function buildHumanFigure(scene: any, THREE: any, isDark: boolean) {
     muscleMeshesRef.current.clear();
 
+    // Vật liệu khung xương / trục trung tính (Head, Neck, Torso Base, Pelvis, Feet)
     const neutralMat = new THREE.MeshStandardMaterial({
-      color: isDark ? 0x161a26 : 0x334155,
-      roughness: isDark ? 0.55 : 0.6,
-      metalness: isDark ? 0.2 : 0.1,
+      color: isDark ? 0x161a26 : 0x475569,
+      roughness: isDark ? 0.55 : 0.75,
+      metalness: isDark ? 0.2 : 0.08,
     });
     neutralMatRef.current = neutralMat;
 
@@ -400,8 +431,8 @@ export function BodyMap3D({ groups, activeId, onSelect, onHover }: BodyMap3DProp
     function createMuscleMat() {
       return new THREE.MeshStandardMaterial({
         color: isDark ? 0x242a3b : 0x64748b,
-        roughness: isDark ? 0.45 : 0.5,
-        metalness: isDark ? 0.2 : 0.1,
+        roughness: isDark ? 0.45 : 0.65,
+        metalness: isDark ? 0.2 : 0.08,
       });
     }
 
@@ -570,7 +601,7 @@ export function BodyMap3D({ groups, activeId, onSelect, onHover }: BodyMap3DProp
     registerMuscle('calves', calfR);
     scene.add(calfR);
 
-    // Feet
+    // Bàn chân (Feet)
     const footGeo = new THREE.BoxGeometry(0.08, 0.06, 0.16);
     const footL = new THREE.Mesh(footGeo, neutralMat);
     footL.position.set(-0.11, 0.12, 0.05);
@@ -579,12 +610,26 @@ export function BodyMap3D({ groups, activeId, onSelect, onHover }: BodyMap3DProp
     const footR = new THREE.Mesh(footGeo, neutralMat);
     footR.position.set(0.11, 0.12, 0.05);
     scene.add(footR);
+
+    // ── Bóng đổ tiếp đất mềm mại (Ground Contact Shadow) ──
+    const shadowGeo = new THREE.PlaneGeometry(0.7, 0.7);
+    const shadowMat = new THREE.MeshBasicMaterial({
+      color: 0x000000,
+      transparent: true,
+      opacity: isDark ? 0.35 : 0.16,
+      depthWrite: false,
+    });
+    const shadowPlane = new THREE.Mesh(shadowGeo, shadowMat);
+    shadowPlane.rotation.x = -Math.PI / 2;
+    shadowPlane.position.set(0, 0.08, 0.04);
+    shadowPlaneRef.current = shadowPlane;
+    scene.add(shadowPlane);
   }
 
   return (
     <div className="relative flex h-full w-full flex-col items-center justify-center overflow-hidden select-none">
       {/* Floating Controls Bar 3D */}
-      <div className="absolute bottom-5 left-1/2 z-20 -translate-x-1/2 flex items-center gap-1 rounded-xl border border-border/80 bg-card/85 p-1 shadow-md backdrop-blur-xl">
+      <div className="absolute bottom-5 left-1/2 z-20 -translate-x-1/2 flex items-center gap-1 rounded-xl border border-border/80 bg-card/90 p-1 shadow-lg shadow-black/5 dark:shadow-black/25 backdrop-blur-xl">
         <button
           type="button"
           onClick={() => setCameraAngle('front')}

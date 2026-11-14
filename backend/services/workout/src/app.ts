@@ -1,3 +1,5 @@
+import { X509Certificate } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import 'reflect-metadata';
 import { CanActivate, Catch, ExceptionFilter, ExecutionContext, HttpException, Module, type ArgumentsHost } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
@@ -14,6 +16,9 @@ import type { Response } from './modules/workout-http.js';
 import { createWorkoutPlansModule } from './modules/plans/plans.module.js';
 import { createWorkoutSchedulingModule } from './modules/scheduling/scheduling.module.js';
 import { createWorkoutHealthModule } from './modules/workout-health.module.js';
+
+const selfProbeFingerprint = process.env.SMARTGYM_SELF_PROBE === 'true'
+  ? new X509Certificate(readFileSync('/run/secrets/client.crt')).fingerprint256 : undefined;
 
 @Catch()
 class Problems implements ExceptionFilter {
@@ -42,6 +47,7 @@ export async function createWorkoutApp(db: Database, auth: AuthConfig, catalog: 
   class ProbeGuard implements CanActivate {
     canActivate(context: ExecutionContext) {
       const req = context.switchToHttp().getRequest<WorkoutRequest>();
+if (process.env.SMARTGYM_SELF_PROBE === 'true' && req.socket.authorized && req.socket.remoteAddress === '127.0.0.1' && req.socket.getPeerCertificate().fingerprint256 === selfProbeFingerprint) return true;
       if (!req.socket.authorized || !auth.bffFingerprints.includes(req.socket.getPeerCertificate().fingerprint256)) reject(403, 'SERVICE_FORBIDDEN');
       return true;
     }

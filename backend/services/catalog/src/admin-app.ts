@@ -20,6 +20,7 @@ import { createAdminRevisionsModule } from './modules/revisions/admin-revisions.
 import { createAdminMediaModule } from './modules/media/admin-media.module.js';
 import { createCatalogReferencesModule } from './modules/exercises/catalog-references.module.js';
 import { createCatalogFeedModule } from './modules/feed/catalog-feed.module.js';
+import { createPoseExerciseLinksModule } from './modules/exercises/pose-exercise-links.js';
 
 export async function createAdminApp(database: Database, config: AdminConfig, mediaConfig?: ReturnType<typeof loadMediaConfig>) {
   const catalog = new AdminCatalog(database, mediaConfig?.publicOrigin);
@@ -33,6 +34,7 @@ export async function createAdminApp(database: Database, config: AdminConfig, me
     imports: [
       createCatalogTransfersModule(imports, adminGuard),
       createAdminExercisesModule(catalog, adminGuard),
+      createPoseExerciseLinksModule(database, adminGuard),
       createAdminContentModule(support, adminGuard),
       createAdminRevisionsModule(catalog, support, adminGuard),
       createAdminMediaModule(media, adminGuard),

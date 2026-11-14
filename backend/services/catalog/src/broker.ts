@@ -1,3 +1,4 @@
+import { context, propagation } from '@opentelemetry/api';
 import { connect, ChannelModel, ConfirmChannel } from 'amqplib';
 import { readFile } from 'node:fs/promises';
 import { Publisher } from './modules/feed/outbox.js';
@@ -26,8 +27,10 @@ export class ConfirmPublisher implements Publisher {
       const timer=setTimeout(()=>{finish(new Error('Confirm timeout'));void this.channel.close().catch(()=>{});},5000);
       this.channel.on('return',onReturn);
       try {
+        const headers: Record<string, string> = {};
+        propagation.inject(context.active(), headers);
         this.channel.publish('smartgym.events.v1',String(event.type),Buffer.from(JSON.stringify(event)),{
-          persistent:true,mandatory:true,contentType:'application/json',messageId:String(event.id),type:String(event.type),appId:'catalog',
+          headers,persistent:true,mandatory:true,contentType:'application/json',messageId:String(event.id),type:String(event.type),appId:'catalog',
         },error=>finish(error||returned?new Error('Unroutable or nacked'):undefined));
       } catch(error){finish(error);}
     });

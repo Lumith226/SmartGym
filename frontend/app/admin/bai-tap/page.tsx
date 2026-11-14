@@ -28,7 +28,7 @@ export default async function AdminExercises({
       <CmsHeading title="Kho bài tập" description="Quản lý bài tập, bản nháp và nội dung đang hiển thị trong thư viện."
         action={<Link href="/admin/bai-tap/moi" className={cmsAction}><PlusCircle className="size-4" /> Thêm bài tập</Link>} />
       <ExerciseList
-        key={JSON.stringify([search, status, sort, page])}
+        key={JSON.stringify([search, status, sort])}
         {...{ search, status, sort, page, muscleLabels }}
         stats={<AdminStatsCards groups={groups?.length} equipment={equipment?.length} />}
       />

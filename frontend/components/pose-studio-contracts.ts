@@ -10,13 +10,14 @@ export type V4LabelContract = {
 };
 
 export type V4ExerciseConfig = {
-  id: 'squat' | 'push_up' | 'jump_jack' | 'situp';
+  id: string;
   name: string;
   subtitle: string;
   version: string;
   label_count: number;
   catalogSlug: string;
   labels: V4LabelContract[];
+  enabled?: boolean;
 };
 
 export const POSE_SKELETON_PAIRS: [number, number][] = [

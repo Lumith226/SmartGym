@@ -122,6 +122,22 @@ test('Catalog CMS over PostgreSQL and real mTLS/JWKS', { timeout: 120000 }, asyn
   const pub = slug => fetch(publicOrigin + '/api/v1/exercises/' + slug, { redirect: 'manual', signal: AbortSignal.timeout(5000) });
   const importHead = async () => (await database.query('SELECT revision,aggregate_version FROM publication_revisions ORDER BY aggregate_version DESC LIMIT 1')).rows[0];
 
+  await t.test('Pose links are admin-managed and only published exercises are exposed', async () => {
+    const linkPath = '/pose-exercise-links';
+    const published = await (await fetch(publicOrigin + '/api/v1/exercises?limit=1')).json();
+    const exerciseId = published.items[0].id;
+    const put = (poseId, exerciseId) => ({ method: 'PUT', body: { poseId, exerciseId } });
+    const links = () => fetch(publicOrigin + '/api/v1/pose-exercise-links').then(response => response.json());
+    await apiCall(linkPath, { ...put('fixture_pose', exerciseId), auth: assertion(actor, 'USER') }, 403);
+    await apiCall(linkPath, put('fixture_pose', 'does_not_exist'), 409);
+    const saved = await apiCall(linkPath, put('fixture_pose', exerciseId), 200, 'PoseExerciseLinkList');
+    assert.ok(saved.body.items.some(row => row.poseId === 'fixture_pose' && row.exerciseId === exerciseId));
+    assert.ok((await links()).items.some(row => row.poseId === 'fixture_pose' && row.published));
+    await apiCall(linkPath, put('fixture_other', exerciseId), 409);
+    await apiCall(linkPath, put('fixture_pose', null), 200, 'PoseExerciseLinkList');
+    assert.ok(!(await links()).items.some(row => row.poseId === 'fixture_pose'));
+  });
+
   await t.test('Catalog verifies mTLS and JWT claims before accessing admin data', async () => {
     await assert.rejects(call(base, { caller: null }));
     await apiCall(base, { caller: 'notification' }, 403);

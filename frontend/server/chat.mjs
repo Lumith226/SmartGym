@@ -12,6 +12,7 @@ import {
 } from './identity-client.mjs';
 import { problem, readJson, requireSameOrigin } from './auth.mjs';
 import { loadPoseLiveConfig } from './pose-live.mjs';
+import { claimSharedChat, createCircuitBreaker } from './resilience.mjs';
 
 /** @typedef {'knowledge' | 'score' | 'summary' | 'practice'} ChatTask */
 /** @typedef {{message: string, task: ChatTask, poseResultIds?: string[], videoState?: 'none' | 'selected' | 'analyzing', conversation?: {role: 'user' | 'assistant', content: string}[]}} ChatRequest */
@@ -375,6 +376,8 @@ export function createChatHandler({
 } = {}) {
   /** @type {Map<string, {until: number, count: number, active: boolean}>} */
   const limits = new Map();
+  const healthBreaker = createCircuitBreaker({ clock });
+  const generationBreaker = createCircuitBreaker({ clock });
   let active = 0;
   /** @param {string} key */
   function claim(key) {
@@ -434,15 +437,23 @@ export function createChatHandler({
       const key = principal
         ? 'owner:' + principal.userId
         : 'ip:' + req.socket.remoteAddress;
-      release = claim(key);
+      release = process.env.SMARTGYM_REDIS_URL
+        ? await claimSharedChat(key, deadlineMs)
+        : claim(key);
       const signal = controller.signal,
         config = await within(configuration, signal);
       signal.throwIfAborted();
-      const health = await call(config, '/health', {
-        signal,
-        timeout: 5000,
-        limit: 16384,
-      });
+      const health = await healthBreaker(
+        () =>
+          call(config, '/health', {
+            signal,
+            timeout: 5000,
+            limit: 16384,
+          }),
+        (response) =>
+          response.status !== 200 || field(response.body, 'kb_ready') !== true,
+        () => res.destroyed,
+      );
       if (health.status !== 200 || field(health.body, 'kb_ready') !== true)
         throw fail(503, 'RAG_NOT_READY');
       if (field(health.body, 'runtime_revision') !== config.revision)
@@ -527,12 +538,17 @@ export function createChatHandler({
           source_id: records[0]?.source_id ?? null,
         },
       };
-      const upstream = await call(config, '/v1/chatbot', {
-        method: 'POST',
-        body: payload,
-        signal,
-        timeout: deadlineMs,
-      });
+      const upstream = await generationBreaker(
+        () =>
+          call(config, '/v1/chatbot', {
+            method: 'POST',
+            body: payload,
+            signal,
+            timeout: deadlineMs,
+          }),
+        (response) => response.status >= 500,
+        () => res.destroyed,
+      );
       signal.throwIfAborted();
       if (upstream.status !== 200)
         throw fail(

@@ -1,3 +1,4 @@
+import { writeFile } from 'node:fs/promises';
 import { setTimeout as delay } from 'node:timers/promises';
 import { connectDatabase } from './database.js';
 import { loadMediaInspector } from './modules/media/media-inspector.js';
@@ -20,6 +21,7 @@ async function main() {
       try {
         busy = await jobs.verifyNext(shutdown.signal);
         busy = await jobs.collectNext(shutdown.signal) || busy;
+        if (process.env.SMARTGYM_WORKER_HEARTBEAT === 'true') await writeFile('/tmp/smartgym-worker-ready', '');
       } catch { console.error('Catalog media worker will retry'); }
       if (!busy && !shutdown.signal.aborted) await delay(2000, undefined, { signal: shutdown.signal }).catch(() => {});
     }

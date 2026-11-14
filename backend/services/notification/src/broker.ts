@@ -1,3 +1,4 @@
+import { ROOT_CONTEXT, context, propagation, trace, SpanKind } from '@opentelemetry/api';
 import { connect,ChannelModel,Channel } from 'amqplib';
 import { readFile } from 'node:fs/promises';
 import { InvalidEvent } from './contracts.js';
@@ -24,7 +25,14 @@ export class EmailConsumer {
             if(message.content.length>16384)throw new InvalidEvent('Oversized broker message');
             const event=JSON.parse(message.content.toString('utf8'));
             if(!event||message.properties.appId!==this.producer||message.properties.messageId!==event.id||message.fields.routingKey!==this.routingKey||message.properties.contentType!=='application/json')throw new InvalidEvent('Broker envelope mismatch');
-            await this.inbox.accept(message.content);channel.ack(message);
+            const parent = propagation.extract(ROOT_CONTEXT, message.properties.headers ?? {});
+            await trace.getTracer('smartgym.notification').startActiveSpan(
+              'notification consume', { kind: SpanKind.CONSUMER }, parent,
+              async span => {
+                try { await this.inbox.accept(message.content); channel.ack(message); }
+                finally { span.end(); }
+              },
+            );
           }catch(error){
             if(error instanceof InvalidEvent||error instanceof SyntaxError){try{channel.nack(message,false,false);}catch{}}else if(this.connection===connection){this.ready=false;await this.close();}
           }

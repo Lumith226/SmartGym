@@ -33,15 +33,24 @@ type RailItem = {
   svgPath: React.ReactNode;
 };
 
-/* ─── 5 Main Navigation Items chuẩn Option A (Linear Visual Poster Grid) ─── */
 const optionARailItems: RailItem[] = [
   {
     href: '/',
-    label: 'Phòng tập AI',
+    label: 'Phòng tập',
     svgPath: (
       <>
         <path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z" />
         <polyline points="9 22 9 12 15 12 15 22" />
+      </>
+    ),
+  },
+  {
+    href: '/ket-qua-tap',
+    label: 'Kết quả tập',
+    svgPath: (
+      <>
+        <path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8Z" />
+        <path d="M14 2v6h6M8 17v-3m4 3v-5m4 5v-2" />
       </>
     ),
   },
@@ -203,7 +212,7 @@ export function Sidebar() {
           <div className="h-px w-7 bg-[#e2e8f0] dark:bg-[#232736]" />
         </div>
 
-        {/* 2. Giữa Sidebar: Cụm 5 Navigation Icons được CĂN GIỮA THEO CHIỀU DỌC (Vertical Center) */}
+        {/* 2. Các mục điều hướng */}
         <nav className="my-auto flex w-full flex-col items-center justify-center gap-2">
           {optionARailItems.map(item => {
             const active = isItemActive(item.href);

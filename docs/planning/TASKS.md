@@ -67,8 +67,20 @@ M0 là gói thiết kế của lượt hiện tại, kiểm tra theo [review](..
 | T42 | Bảo trì | P1 | SYS-001 | T41 | Tổ chức Identity, Workout, Progress, Notification và Pose theo module nghiệp vụ | Build năm service, đối chiếu route và guard, cập nhật tham chiếu mã và kiểm tra các luồng tích hợp liên quan | Identity, Workout, Progress, Notification, Pose, check:boundaries, check:contracts | DONE |
 | T43 | M5 | P1 | POS-001 POS-002 | T21 T22 T23 | Tích hợp DirectML trên máy Windows chạy đồ án | Web, Pose API và worker dùng cùng engine mTLS, thử live và phân tích cả video, so sánh độ trễ CPU và DirectML trên cùng mẫu | Kiểm health, WebSocket và upload toàn video từ Docker | DONE |
 | T44 | M4 | P1 | ADM-003 ADM-005 | T12 T33 | Đồng bộ cấu trúc bài tập trong CMS | Thêm và sửa dùng chung form, 23 bản nháp có dữ liệu gốc đầy đủ theo nguồn, kiểm vai trò ảnh và tương thích bài cũ | catalog-media, Chromium CMS, kiểm tra hợp đồng, đối chiếu 23 bản nháp | DONE |
+| T45 | Bảo trì | P1 | POS-001 WEB-001 | T24 | Khôi phục video Phòng tập trong trình duyệt | Quay lại, tải lại hoặc đổi nguồn khôi phục video ở trạng thái tạm dừng; chỉ nút X của video xóa video đã lưu | Chromium Phòng tập, build Web | DONE |
+| T46 | Bảo trì | P1 | POS-001 POS-002 WEB-001 | T24 | Thêm Kết quả tập vào điều hướng | Mở từ sidebar desktop và mobile, lưu kết quả từ Phòng tập, hiển thị và tải bản JSON trên trình duyệt đã lưu | Build Web, Chromium sidebar | DONE |
+| T47 | Bảo trì | P1 | ADM-001 ADM-002 | T12 | Chọn bài tập trên mọi trang của CMS | Chọn hết theo bộ lọc, giữ lựa chọn khi phân trang, kiểm đúng số bài đủ điều kiện trong hộp xác nhận | Build Web, Chromium CMS | DONE |
+| T48 | Bảo trì | P1 | RAG-001 WEB-001 | T24 T27 | Chỉ mở Hỏi SmartGym khi bấm nút trong Phòng tập | Khung chat mặc định đóng và tạm dừng phân tích không mở chat | Build Web, Chromium Phòng tập | DONE |
 
 Đọc [roadmap](IMPLEMENTATION_PLAN.md), [ma trận](TRACEABILITY.md), [test plan](TEST_PLAN.md) và [hướng dẫn phát triển](../guides/DEVELOPMENT.md). Ghi bằng chứng và file thực tế trong lúc triển khai. Khi một giả định đổi, cập nhật requirement, task, hợp đồng và test cùng nhau.
+
+T45 PASS TypeScript Web, build và healthcheck Docker Web. Chromium trên cổng 3100 kiểm giữ vị trí video ở trạng thái tạm dừng khi qua Thư viện, tải lại, đổi Camera rồi quay về Video và mở tab mới. Nút X xóa video và tải lại mở Phòng tập trống. Video được lưu cục bộ trong trình duyệt.
+
+T46 PASS TypeScript, build và healthcheck Docker Web. Chromium trên cổng 3100 kiểm sidebar desktop, menu mobile, chuyển đến đăng nhập khi chưa có phiên, trạng thái trống, lưu kết quả, tải lại và tải JSON. Ca kiểm dùng tài khoản cục bộ xác minh qua Mailpit và phản hồi phân tích video mô phỏng.
+
+T47 PASS TypeScript, build Web Windows và Docker, healthcheck Web cổng 3100. Chromium 2/2 kiểm chọn 21 mục trên hai trang với dữ liệu mẫu, bỏ chọn riêng và danh sách xác nhận, cùng hồi quy thao tác hàng loạt trên Catalog kiểm thử.
+
+T48 PASS build và healthcheck Docker Web. Chromium cổng 3100 kiểm khung chat đóng khi vào trang và khi dừng phân tích video, mở bằng nút Hỏi SmartGym trên desktop và mobile. Kết nối Pose được mô phỏng trong ca kiểm giao diện.
 
 T44 PASS build Docker Web và Catalog, kiểm tra OpenAPI/schema Catalog và kiểm tra biên import. Ca Chromium tạo, lưu, xem trước và công bố bài đạt. Catalog media đạt 8/8 trên PostgreSQL 18.6. Đọc lại PostgreSQL qua Catalog trên Docker đã đối chiếu 23/23 bản nháp và checksum của 37 ảnh WebP gốc, gồm ảnh một tư thế hoặc cặp bắt đầu và điểm cao nhất. Dữ liệu tiếng Việt do SmartGym biên soạn được giữ. Độ khó nguồn sơ cấp, trung cấp và nâng cao tương ứng cấp II, III và V trong SmartGym.
 

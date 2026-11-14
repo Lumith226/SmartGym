@@ -13,7 +13,9 @@ const publicErrorCodes = new Set(['INVALID_CREDENTIALS', 'EMAIL_UNVERIFIED', 'AC
 
 export function problem(res, status, code, detail) {
   res.writeHead(status, { 'content-type': 'application/problem+json; charset=utf-8', 'cache-control': 'no-store', 'referrer-policy': 'no-referrer', 'x-content-type-options': 'nosniff', 'connection': 'close' });
-  res.end(JSON.stringify({ type: 'about:blank', title: 'Không thể thực hiện yêu cầu', status, code, requestId: randomUUID(), ...(detail ? { detail } : {}) }));
+  res.end(JSON.stringify({ type: 'about:blank', title: 'Không thể thực hiện yêu cầu', status, code,
+    requestId: typeof res.getHeader?.('x-request-id') === 'string' ? res.getHeader('x-request-id') : randomUUID(),
+    ...(detail ? { detail } : {}) }));
 }
 
 export function readBody(req, limit = 16384) {

@@ -1,3 +1,5 @@
+import { X509Certificate } from 'node:crypto';
+import { readFileSync } from 'node:fs';
 import 'reflect-metadata';
 import { Module, Catch, HttpException, ArgumentsHost, ExceptionFilter, CanActivate, ExecutionContext } from '@nestjs/common';
 import { NestFactory } from '@nestjs/core';
@@ -11,8 +13,11 @@ import { requestContext, correlationId } from './request-context.js';
 import { createAccountsModule } from './modules/accounts/accounts.module.js';
 import { createIdentityHealthModule } from './modules/identity-health.module.js';
 
+const selfProbeFingerprint = process.env.SMARTGYM_SELF_PROBE === 'true'
+  ? new X509Certificate(readFileSync('/run/secrets/client.crt')).fingerprint256 : undefined;
+
 interface Request { method: string; path: string; headers: Record<string, string | string[] | undefined>; socket: TLSSocket }
-interface Response { setHeader(name: string, value: string): void }
+interface Response { setHeader(name: string, value: string): void; getHeader?(name: string): number | string | string[] | undefined }
 
 @Catch()
 class ProblemFilter implements ExceptionFilter {
@@ -37,6 +42,7 @@ class ServiceGuard implements CanActivate {
   canActivate(context: ExecutionContext): boolean {
     const request = context.switchToHttp().getRequest<Request>();
     if (!request.socket.encrypted || !request.socket.authorized) denied('UNAUTHENTICATED_SERVICE', 401);
+    if (/^\/health\/(live|ready)$/.test(request.path)) { if (process.env.SMARTGYM_SELF_PROBE === 'true' && request.socket.authorized && request.socket.remoteAddress === '127.0.0.1' && request.socket.getPeerCertificate().fingerprint256 === selfProbeFingerprint) return true; }
     const fingerprint = request.socket.getPeerCertificate().fingerprint256;
     const caller = Object.entries(this.config.callers).find(([, fingerprints]) => fingerprints.includes(fingerprint))?.[0];
     if (!caller) denied('SERVICE_FORBIDDEN', 403);
@@ -72,7 +78,7 @@ export async function createApp(database: Database, supplied: Config, now?: () =
   const httpsOptions = { ...config.tls, requestCert: true, rejectUnauthorized: true, minVersion: 'TLSv1.2' as const };
   const app = await NestFactory.create<NestExpressApplication>(IdentityModule, { logger: false, bodyParser: false, httpsOptions });
   app.use((_req: unknown, res: Response, next: () => void) => {
-    const id = randomUUID(); res.setHeader('X-Request-ID', id); res.setHeader('Cache-Control', 'no-store'); res.setHeader('X-Content-Type-Options', 'nosniff');
+    const id = String(res.getHeader?.('X-Request-ID') ?? randomUUID()); res.setHeader('X-Request-ID', id); res.setHeader('Cache-Control', 'no-store'); res.setHeader('X-Content-Type-Options', 'nosniff');
     requestContext.run(id, next);
   });
   app.useBodyParser('json', { limit: '16kb', strict: true });

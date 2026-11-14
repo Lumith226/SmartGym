@@ -4,7 +4,7 @@ const root = new URL('../', import.meta.url);
 const api = JSON.parse(await readFile(new URL('docs/api/openapi.yaml', root), 'utf8'));
 const names = ['ExerciseDraftCreate', 'ExerciseDraftUpdate', 'CmsArchiveReason', 'Jwks', 'CmsContentCreate', 'CmsContentUpdate',
   'CmsRestoreRevision', 'CmsMediaUploadRequest', 'CmsImportRequest', 'CmsImportCommit', 'ExerciseRefBatch',
-  'ExerciseProfile', 'ExerciseImageRoles'];
+  'ExerciseProfile', 'ExerciseImageRoles', 'PoseExerciseLinkUpdate'];
 const content = JSON.stringify(Object.fromEntries(names.map(name => [name, api.components.schemas[name]])), null, 2)
   .replaceAll('#/components/schemas/ExerciseProfile', 'ExerciseProfile')
   .replaceAll('#/components/schemas/ExerciseImageRoles', 'ExerciseImageRoles') + '\n';

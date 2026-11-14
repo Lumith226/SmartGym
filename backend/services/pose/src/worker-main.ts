@@ -1,3 +1,4 @@
+import { writeFile } from 'node:fs/promises';
 import { isAbsolute } from 'node:path';
 import { setTimeout as delay } from 'node:timers/promises';
 import { connectDatabase } from './database.js';
@@ -17,6 +18,7 @@ async function main() {
       try {
         const worked = await worker.runNext(stop.signal);
         await worker.collectNext(AbortSignal.any([stop.signal, AbortSignal.timeout(10000)]));
+        if (process.env.SMARTGYM_WORKER_HEARTBEAT === 'true') await writeFile('/tmp/smartgym-worker-ready', '');
         if (!worked) await delay(500, undefined, { signal: stop.signal });
       } catch { if (!stop.signal.aborted) await delay(1000); }
     }

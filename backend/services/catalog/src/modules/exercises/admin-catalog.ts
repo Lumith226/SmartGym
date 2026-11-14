@@ -1,3 +1,4 @@
+import { context, propagation } from '@opentelemetry/api';
 import { randomUUID } from 'node:crypto';
 import type { Database, SqlClient } from '../../database.js';
 import { identifier, reject, uuid } from '../admin/admin-contract.js';
@@ -98,8 +99,10 @@ async function appendEvent(db: SqlClient, actor: string, id: string, type: strin
   if (!Number.isSafeInteger(aggregateVersion)) throw new Error('Catalog sequence exceeds event range');
   const payload = { id: eventId, type, producer: 'catalog', schemaVersion: 1, aggregateId: 'catalog', aggregateVersion, occurredAt,
     correlationId, data: { exerciseId: id, revision, contentRevision: version, ...(reason ? { reason } : {}) } };
-  await db.query('INSERT INTO outbox_events(event_id,type,aggregate_version,occurred_at,correlation_id,payload) VALUES($1,$2,$3,$4,$5,$6)',
-    [eventId, type, aggregateVersion, occurredAt, correlationId, JSON.stringify(payload)]);
+  const traceHeaders: Record<string, string> = {};
+  propagation.inject(context.active(), traceHeaders);
+  await db.query('INSERT INTO outbox_events(event_id,type,aggregate_version,occurred_at,correlation_id,payload,traceparent) VALUES($1,$2,$3,$4,$5,$6,$7)',
+    [eventId, type, aggregateVersion, occurredAt, correlationId, JSON.stringify(payload), traceHeaders.traceparent ?? null]);
   return revision;
 }
 

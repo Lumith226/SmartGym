@@ -95,7 +95,7 @@ export default async function ExercisePage({ params }: Props) {
         </div>
         <div className="flex flex-wrap gap-2">
           {poseId && <Button asChild size="sm">
-            <Link href={'/?exercise=' + encodeURIComponent(poseId)}><Camera className="size-4" aria-hidden="true" /> Tập với Pose AI</Link>
+            <Link href={'/?exercise=' + encodeURIComponent(poseId)}><Camera className="size-4" aria-hidden="true" /> Tập tại phòng tập</Link>
           </Button>}
           <Button asChild variant="outline" size="sm">
             <Link href="/hoi-dap">

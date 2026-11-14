@@ -1,7 +1,68 @@
 name: smartgym
 
 services:
+  redis:
+    image: redis:8.2-alpine
+    command: ["redis-server", "--appendonly", "yes", "--maxmemory", "128mb", "--maxmemory-policy", "noeviction"]
+    mem_limit: 256m
+    cpus: 1.0
+    pids_limit: 128
+    networks: [redis-private]
+    volumes: [redis-data:/data]
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
+    healthcheck:
+      test: ["CMD", "redis-cli", "ping"]
+      interval: 10s
+      timeout: 3s
+      retries: 3
+
+  observability:
+    image: grafana/otel-lgtm:0.34.0
+    profiles: [observability]
+    mem_limit: ${SMARTGYM_OBSERVABILITY_MEMORY:-2g}
+    cpus: 2.0
+    pids_limit: 512
+    ports: ["127.0.0.1:3030:3000"]
+    volumes:
+      - observability-data:/data
+      - ./ops/collector.yaml:/otel-lgtm/otelcol-config.yaml:ro
+      - ./ops/prometheus.yaml:/otel-lgtm/prometheus.yaml:ro
+      - ./ops/alerts.yaml:/otel-lgtm/smartgym-alerts.yaml:ro
+      - ./ops/dashboards.yaml:/otel-lgtm/grafana/conf/provisioning/dashboards/smartgym.yaml:ro
+      - ./ops/dashboard.json:/otel-lgtm/grafana/conf/provisioning/dashboards/smartgym/overview.json:ro
+    environment:
+      PROMETHEUS_EXTRA_ARGS: "--storage.tsdb.retention.time=3d --web.enable-lifecycle"
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
+    healthcheck:
+      test: ["CMD", "test", "-f", "/tmp/ready"]
+      interval: 15s
+      timeout: 3s
+      start_period: 60s
+      retries: 5
+
+  alertmanager:
+    image: prom/alertmanager:v0.28.1
+    profiles: [observability]
+    mem_limit: 128m
+    cpus: 0.5
+    pids_limit: 64
+    ports: ["127.0.0.1:9093:9093"]
+    command: ["--config.file=/etc/alertmanager/alertmanager.yml", "--storage.path=/alertmanager", "--cluster.listen-address="]
+    volumes:
+      - ./ops/alertmanager.yaml:/etc/alertmanager/alertmanager.yml:ro
+      - alertmanager-data:/alertmanager
+    healthcheck:
+      test: ["CMD", "wget", "-q", "-O", "/dev/null", "http://localhost:9093/-/ready"]
+      interval: 15s
+      timeout: 3s
+      retries: 3
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
+
   catalog-objects:
+    mem_limit: ${SMARTGYM_CATALOG_OBJECTS_MEMORY:-768m}
+    cpus: ${SMARTGYM_CATALOG_OBJECTS_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: rustfs/rustfs:latest
     env_file: ${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog-objects.env
     environment:
@@ -10,8 +71,17 @@ services:
     volumes:
       - catalog-objects-data:/data
       - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog-objects:/run/secrets:ro"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "--cacert", "/run/secrets/ca.crt", "https://catalog-objects:9000/health/ready"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
 
   catalog-bucket-init:
+    mem_limit: ${SMARTGYM_CATALOG_BUCKET_INIT_MEMORY:-512m}
+    cpus: ${SMARTGYM_CATALOG_BUCKET_INIT_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: smartgym/catalog:local
     pull_policy: never
     env_file: ${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog.storage.env
@@ -24,6 +94,10 @@ services:
         condition: service_started
 
   pose-objects:
+    mem_limit: ${SMARTGYM_POSE_OBJECTS_MEMORY:-768m}
+    cpus: ${SMARTGYM_POSE_OBJECTS_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: rustfs/rustfs:latest
     env_file: ${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose-objects.env
     environment:
@@ -32,8 +106,17 @@ services:
     volumes:
       - pose-objects-data:/data
       - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose-objects:/run/secrets:ro"
+    healthcheck:
+      test: ["CMD", "curl", "-fsS", "--cacert", "/run/secrets/ca.crt", "https://pose-objects:9000/health/ready"]
+      interval: 20s
+      timeout: 5s
+      retries: 5
 
   pose-bucket-init:
+    mem_limit: ${SMARTGYM_POSE_BUCKET_INIT_MEMORY:-512m}
+    cpus: ${SMARTGYM_POSE_BUCKET_INIT_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: smartgym/catalog:local
     pull_policy: never
     env_file: ${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose.storage.env
@@ -46,11 +129,25 @@ services:
         condition: service_started
 
   clamav:
+    mem_limit: ${SMARTGYM_CLAMAV_MEMORY:-2g}
+    cpus: ${SMARTGYM_CLAMAV_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: clamav/clamav:stable
     volumes:
       - clamav-data:/var/lib/clamav
+    healthcheck:
+      test: ["CMD","clamdscan","--ping","1"]
+      interval: 20s
+      timeout: 7s
+      start_period: 90s
+      retries: 5
 
   broker:
+    mem_limit: ${SMARTGYM_BROKER_MEMORY:-768m}
+    cpus: ${SMARTGYM_BROKER_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: rabbitmq:4.4
     hostname: broker
     volumes:
@@ -64,6 +161,10 @@ services:
       retries: 24
 
   mail:
+    mem_limit: ${SMARTGYM_MAIL_MEMORY:-256m}
+    cpus: ${SMARTGYM_MAIL_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: axllent/mailpit:v1
     environment:
       MP_DATABASE: /data/mailpit.db
@@ -73,8 +174,18 @@ services:
     volumes:
       - mail-data:/data
       - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/mail:/run/secrets:ro"
+    healthcheck:
+      test: ["CMD","wget","-q","-O","/dev/null","http://127.0.0.1:8025/readyz"]
+      interval: 20s
+      timeout: 7s
+      start_period: 90s
+      retries: 5
 
   pose-engine:
+    mem_limit: ${SMARTGYM_POSE_ENGINE_MEMORY:-4g}
+    cpus: ${SMARTGYM_POSE_ENGINE_CPUS:-4.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: smartgym/pose-engine:local
     build:
       context: ..
@@ -82,11 +193,32 @@ services:
     command: ["--source", "/source", "--host", "0.0.0.0", "--port", "8001",
       "--key", "/run/secrets/server.key", "--cert", "/run/secrets/server.crt", "--ca", "/run/secrets/ca.crt"]
     volumes:
+      - ./ops:/app/infra/ops:ro
       - "${SMARTGYM_POSE_SOURCE:-../../SmartGym}/smart_gym_web_v4:/source/smart_gym_web_v4:ro"
       - "${SMARTGYM_POSE_SOURCE:-../../SmartGym}/smart_gym_test_rtmpose_v4:/source/smart_gym_test_rtmpose_v4:ro"
       - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose-engine:/run/secrets:ro"
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose/engine-client.crt:/run/probe/client.crt:ro"
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose/engine-client.key:/run/probe/client.key:ro"
+
+    environment:
+      OTEL_SERVICE_NAME: pose-engine
+      OTEL_SDK_DISABLED: "${SMARTGYM_OTEL_DISABLED:-true}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://observability:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_PYTHON_LOG_AUTO_INSTRUMENTATION: "true"
+      OTEL_LOGS_EXPORTER: otlp
+    healthcheck:
+      test: ["CMD","python","/app/infra/ops/python-probe.py","https://pose-engine:8001/internal/v1/engine/manifest","ready","/run/probe/client"]
+      interval: 20s
+      timeout: 7s
+      start_period: 90s
+      retries: 5
 
   ollama:
+    mem_limit: ${SMARTGYM_OLLAMA_MEMORY:-8g}
+    cpus: ${SMARTGYM_OLLAMA_CPUS:-4.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: ollama/ollama:latest
     environment:
       OLLAMA_MODELS: /models
@@ -94,8 +226,18 @@ services:
       OLLAMA_NO_CLOUD: "1"
     volumes:
       - "${SMARTGYM_OLLAMA_MODELS:-${USERPROFILE}/.ollama/models}:/models:ro"
+    healthcheck:
+      test: ["CMD","ollama","list"]
+      interval: 20s
+      timeout: 7s
+      start_period: 90s
+      retries: 5
 
   rag:
+    mem_limit: ${SMARTGYM_RAG_MEMORY:-2g}
+    cpus: ${SMARTGYM_RAG_CPUS:-4.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: smartgym/rag:local
     build:
       context: ..
@@ -106,19 +248,36 @@ services:
       "--ssl-certfile", "/run/secrets/server.crt", "--ssl-ca-certs", "/run/secrets/ca.crt", "--ssl-cert-reqs", "2"]
     env_file: ${SMARTGYM_CONFIG_DIR:-../.local/compose}/rag.provider.env
     environment:
+      OTEL_SERVICE_NAME: rag
+      OTEL_SDK_DISABLED: "${SMARTGYM_OTEL_DISABLED:-true}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://observability:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_PYTHON_LOG_AUTO_INSTRUMENTATION: "true"
+      OTEL_LOGS_EXPORTER: otlp
       KB_INDEX_DIR: /index
       KB_GRAPH_BACKEND: local
       OLLAMA_BASE_URL: http://ollama:11434
       OLLAMA_CHAT_MODEL: ${SMARTGYM_CHAT_MODEL:-qwen2.5:3b}
       OLLAMA_EMBED_MODEL: ${SMARTGYM_EMBED_MODEL:-nomic-embed-text:latest}
     volumes:
+      - ./ops:/app/infra/ops:ro
       - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/rag-index:/index:ro"
       - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/rag:/run/secrets:ro"
     depends_on:
       ollama:
         condition: service_started
+    healthcheck:
+      test: ["CMD","python","/app/infra/ops/python-probe.py","https://rag:8010/health","kb_ready"]
+      interval: 20s
+      timeout: 7s
+      start_period: 90s
+      retries: 5
 
   catalog-db:
+    mem_limit: ${SMARTGYM_CATALOG_DB_MEMORY:-768m}
+    cpus: ${SMARTGYM_CATALOG_DB_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: postgres:18
     environment:
       POSTGRES_USER: smartgym_catalog
@@ -133,6 +292,10 @@ services:
       retries: 20
 
   identity-db:
+    mem_limit: ${SMARTGYM_IDENTITY_DB_MEMORY:-768m}
+    cpus: ${SMARTGYM_IDENTITY_DB_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: postgres:18
     environment:
       POSTGRES_USER: smartgym_identity
@@ -147,6 +310,10 @@ services:
       retries: 20
 
   notification-db:
+    mem_limit: ${SMARTGYM_NOTIFICATION_DB_MEMORY:-768m}
+    cpus: ${SMARTGYM_NOTIFICATION_DB_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: postgres:18
     environment:
       POSTGRES_USER: smartgym_notification
@@ -161,6 +328,10 @@ services:
       retries: 20
 
   workout-db:
+    mem_limit: ${SMARTGYM_WORKOUT_DB_MEMORY:-768m}
+    cpus: ${SMARTGYM_WORKOUT_DB_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: postgres:18
     environment:
       POSTGRES_USER: smartgym_workout
@@ -175,6 +346,10 @@ services:
       retries: 20
 
   progress-db:
+    mem_limit: ${SMARTGYM_PROGRESS_DB_MEMORY:-768m}
+    cpus: ${SMARTGYM_PROGRESS_DB_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: postgres:18
     environment:
       POSTGRES_USER: smartgym_progress
@@ -189,6 +364,10 @@ services:
       retries: 20
 
   pose-db:
+    mem_limit: ${SMARTGYM_POSE_DB_MEMORY:-768m}
+    cpus: ${SMARTGYM_POSE_DB_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: postgres:18
     environment:
       POSTGRES_USER: smartgym_pose
@@ -203,6 +382,11 @@ services:
       retries: 20
 
   catalog:
+    networks: [default, redis-private]
+    mem_limit: ${SMARTGYM_CATALOG_MEMORY:-768m}
+    cpus: ${SMARTGYM_CATALOG_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: smartgym/catalog:local
     build:
       context: ..
@@ -211,8 +395,18 @@ services:
       - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog.storage.env
       - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog.env
     volumes:
+      - ./ops:/app/infra/ops:ro
       - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog:/run/secrets:ro"
     environment:
+      NODE_OPTIONS: "--require=/app/infra/ops/runtime.cjs"
+      OTEL_SERVICE_NAME: catalog
+      OTEL_SDK_DISABLED: "${SMARTGYM_OTEL_DISABLED:-true}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://observability:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_LOGS_EXPORTER: none
+      OTEL_METRIC_EXPORT_INTERVAL: "10000"
+      OTEL_NODE_ENABLED_INSTRUMENTATIONS: http,express,nestjs-core,undici,pg,amqplib
+      SMARTGYM_REDIS_URL: redis://redis:6379
       DATABASE_URL: ${CATALOG_DATABASE_URL:?Set CATALOG_DATABASE_URL}
       HOST: 0.0.0.0
       PORT: "3001"
@@ -223,6 +417,8 @@ services:
       CATALOG_ADMIN_HOST: 0.0.0.0
       CATALOG_ADMIN_PORT: "3101"
     depends_on:
+      redis:
+        condition: service_started
       catalog-db:
         condition: service_healthy
       catalog-bucket-init:
@@ -231,24 +427,60 @@ services:
         condition: service_started
     command: ["sh", "-c", "node dist/migrate.js && exec node dist/main.js"]
 
+    healthcheck:
+      test: ["CMD","node","/app/infra/ops/healthcheck.cjs","http","http://catalog:3001/health/ready","self"]
+      interval: 15s
+      timeout: 5s
+      start_period: 45s
+      retries: 3
+
   identity:
+    networks: [default, redis-private]
+    mem_limit: ${SMARTGYM_IDENTITY_MEMORY:-512m}
+    cpus: ${SMARTGYM_IDENTITY_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: smartgym/identity:local
     build:
       context: ..
       dockerfile: infra/docker/Dockerfile.identity
     env_file: ${SMARTGYM_CONFIG_DIR:-../.local/compose}/identity.env
     volumes:
+      - ./ops:/app/infra/ops:ro
       - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/identity:/run/secrets:ro"
     environment:
+      NODE_OPTIONS: "--require=/app/infra/ops/runtime.cjs"
+      OTEL_SERVICE_NAME: identity
+      SMARTGYM_SELF_PROBE: "true"
+      OTEL_SDK_DISABLED: "${SMARTGYM_OTEL_DISABLED:-true}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://observability:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_LOGS_EXPORTER: none
+      OTEL_METRIC_EXPORT_INTERVAL: "10000"
+      OTEL_NODE_ENABLED_INSTRUMENTATIONS: http,express,nestjs-core,undici,pg,amqplib
+      SMARTGYM_REDIS_URL: redis://redis:6379
       IDENTITY_DATABASE_URL: ${IDENTITY_DATABASE_URL:?Set IDENTITY_DATABASE_URL}
       HOST: 0.0.0.0
       PORT: "3002"
     depends_on:
+      redis:
+        condition: service_started
       identity-db:
         condition: service_healthy
     command: ["sh", "-c", "node dist/migrate.js && exec node dist/main.js"]
 
+    healthcheck:
+      test: ["CMD","node","/app/infra/ops/healthcheck.cjs","http","https://127.0.0.1:3002/health/ready","self"]
+      interval: 15s
+      timeout: 5s
+      start_period: 45s
+      retries: 3
+
   notification:
+    mem_limit: ${SMARTGYM_NOTIFICATION_MEMORY:-512m}
+    cpus: ${SMARTGYM_NOTIFICATION_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: smartgym/notification:local
     build:
       context: ..
@@ -257,8 +489,18 @@ services:
       - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/notification.infrastructure.env
       - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/notification.env
     volumes:
+      - ./ops:/app/infra/ops:ro
       - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/notification:/run/secrets:ro"
     environment:
+      NODE_OPTIONS: "--require=/app/infra/ops/runtime.cjs"
+      OTEL_SERVICE_NAME: notification
+      SMARTGYM_SELF_PROBE: "true"
+      OTEL_SDK_DISABLED: "${SMARTGYM_OTEL_DISABLED:-true}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://observability:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_LOGS_EXPORTER: none
+      OTEL_METRIC_EXPORT_INTERVAL: "10000"
+      OTEL_NODE_ENABLED_INSTRUMENTATIONS: http,express,nestjs-core,undici,pg,amqplib
       NOTIFICATION_DATABASE_URL: ${NOTIFICATION_DATABASE_URL:?Set NOTIFICATION_DATABASE_URL}
       HOST: 0.0.0.0
       PORT: "3003"
@@ -271,18 +513,39 @@ services:
       mail:
         condition: service_started
       identity:
-        condition: service_started
+        condition: service_healthy
     command: ["sh", "-c", "node dist/migrate.js && exec node dist/main.js"]
 
+    healthcheck:
+      test: ["CMD","node","/app/infra/ops/healthcheck.cjs","http","https://127.0.0.1:3003/health/ready","self"]
+      interval: 15s
+      timeout: 5s
+      start_period: 45s
+      retries: 3
+
   workout:
+    mem_limit: ${SMARTGYM_WORKOUT_MEMORY:-512m}
+    cpus: ${SMARTGYM_WORKOUT_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: smartgym/workout:local
     build:
       context: ..
       dockerfile: infra/docker/Dockerfile.workout
     env_file: ${SMARTGYM_CONFIG_DIR:-../.local/compose}/workout.env
     volumes:
+      - ./ops:/app/infra/ops:ro
       - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/workout:/run/secrets:ro"
     environment:
+      NODE_OPTIONS: "--require=/app/infra/ops/runtime.cjs"
+      OTEL_SERVICE_NAME: workout
+      SMARTGYM_SELF_PROBE: "true"
+      OTEL_SDK_DISABLED: "${SMARTGYM_OTEL_DISABLED:-true}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://observability:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_LOGS_EXPORTER: none
+      OTEL_METRIC_EXPORT_INTERVAL: "10000"
+      OTEL_NODE_ENABLED_INSTRUMENTATIONS: http,express,nestjs-core,undici,pg,amqplib
       DATABASE_URL: ${WORKOUT_DATABASE_URL:?Set WORKOUT_DATABASE_URL}
       WORKOUT_HOST: 0.0.0.0
       WORKOUT_PORT: "3444"
@@ -295,15 +558,36 @@ services:
         condition: service_started
     command: ["sh", "-c", "node dist/migrate.js && exec node dist/main.js"]
 
+    healthcheck:
+      test: ["CMD","node","/app/infra/ops/healthcheck.cjs","http","https://127.0.0.1:3444/health/ready","self"]
+      interval: 15s
+      timeout: 5s
+      start_period: 45s
+      retries: 3
+
   progress:
+    mem_limit: ${SMARTGYM_PROGRESS_MEMORY:-512m}
+    cpus: ${SMARTGYM_PROGRESS_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: smartgym/progress:local
     build:
       context: ..
       dockerfile: infra/docker/Dockerfile.progress
     env_file: ${SMARTGYM_CONFIG_DIR:-../.local/compose}/progress.env
     volumes:
+      - ./ops:/app/infra/ops:ro
       - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/progress:/run/secrets:ro"
     environment:
+      NODE_OPTIONS: "--require=/app/infra/ops/runtime.cjs"
+      OTEL_SERVICE_NAME: progress
+      SMARTGYM_SELF_PROBE: "true"
+      OTEL_SDK_DISABLED: "${SMARTGYM_OTEL_DISABLED:-true}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://observability:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_LOGS_EXPORTER: none
+      OTEL_METRIC_EXPORT_INTERVAL: "10000"
+      OTEL_NODE_ENABLED_INSTRUMENTATIONS: http,express,nestjs-core,undici,pg,amqplib
       DATABASE_URL: ${PROGRESS_DATABASE_URL:?Set PROGRESS_DATABASE_URL}
       PROGRESS_HOST: 0.0.0.0
       PROGRESS_PORT: "3445"
@@ -311,16 +595,27 @@ services:
       progress-db:
         condition: service_healthy
       identity:
-        condition: service_started
+        condition: service_healthy
       catalog:
-        condition: service_started
+        condition: service_healthy
       workout:
-        condition: service_started
+        condition: service_healthy
       pose:
-        condition: service_started
+        condition: service_healthy
     command: ["sh", "-c", "node dist/migrate.js && exec node dist/main.js"]
 
+    healthcheck:
+      test: ["CMD","node","/app/infra/ops/healthcheck.cjs","http","https://127.0.0.1:3445/health/ready","self"]
+      interval: 15s
+      timeout: 5s
+      start_period: 45s
+      retries: 3
+
   pose:
+    mem_limit: ${SMARTGYM_POSE_MEMORY:-768m}
+    cpus: ${SMARTGYM_POSE_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: smartgym/pose:local
     build:
       context: ..
@@ -330,8 +625,18 @@ services:
       - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose.storage.env
       - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose.env
     volumes:
+      - ./ops:/app/infra/ops:ro
       - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose:/run/secrets:ro"
     environment:
+      NODE_OPTIONS: "--require=/app/infra/ops/runtime.cjs"
+      OTEL_SERVICE_NAME: pose
+      SMARTGYM_SELF_PROBE: "true"
+      OTEL_SDK_DISABLED: "${SMARTGYM_OTEL_DISABLED:-true}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://observability:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_LOGS_EXPORTER: none
+      OTEL_METRIC_EXPORT_INTERVAL: "10000"
+      OTEL_NODE_ENABLED_INSTRUMENTATIONS: http,express,nestjs-core,undici,pg,amqplib
       DATABASE_URL: ${POSE_DATABASE_URL:?Set POSE_DATABASE_URL}
       POSE_HOST: 0.0.0.0
       POSE_PORT: "3443"
@@ -350,95 +655,211 @@ services:
         condition: service_started
     command: ["sh", "-c", "node dist/migrate.js && exec node dist/main.js"]
 
+    healthcheck:
+      test: ["CMD","node","/app/infra/ops/healthcheck.cjs","http","https://127.0.0.1:3443/health/ready","self"]
+      interval: 15s
+      timeout: 5s
+      start_period: 45s
+      retries: 3
+
   identity-relay:
+    mem_limit: ${SMARTGYM_IDENTITY_RELAY_MEMORY:-768m}
+    cpus: ${SMARTGYM_IDENTITY_RELAY_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: smartgym/identity:local
     pull_policy: never
     env_file:
       - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/identity.infrastructure.env
       - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/identity.env
     volumes:
+      - ./ops:/app/infra/ops:ro
       - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/identity:/run/secrets:ro"
     environment:
+      NODE_OPTIONS: "--require=/app/infra/ops/runtime.cjs"
+      OTEL_SERVICE_NAME: identity-relay
+      OTEL_SDK_DISABLED: "${SMARTGYM_OTEL_DISABLED:-true}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://observability:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_LOGS_EXPORTER: none
+      OTEL_METRIC_EXPORT_INTERVAL: "10000"
+      OTEL_NODE_ENABLED_INSTRUMENTATIONS: http,express,nestjs-core,undici,pg,amqplib
+      SMARTGYM_WORKER_HEARTBEAT: "true"
       IDENTITY_DATABASE_URL: ${IDENTITY_DATABASE_URL:?Set IDENTITY_DATABASE_URL}
     depends_on:
       identity:
-        condition: service_started
+        condition: service_healthy
       broker:
         condition: service_healthy
     restart: on-failure
     command: ["node", "dist/relay-main.js"]
 
+    healthcheck:
+      test: ["CMD","node","/app/infra/ops/healthcheck.cjs","worker","30"]
+      interval: 15s
+      timeout: 5s
+      start_period: 45s
+      retries: 3
+
   workout-relay:
+    mem_limit: ${SMARTGYM_WORKOUT_RELAY_MEMORY:-768m}
+    cpus: ${SMARTGYM_WORKOUT_RELAY_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: smartgym/workout:local
     pull_policy: never
     env_file:
       - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/workout.infrastructure.env
       - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/workout.env
     volumes:
+      - ./ops:/app/infra/ops:ro
       - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/workout:/run/secrets:ro"
     environment:
+      NODE_OPTIONS: "--require=/app/infra/ops/runtime.cjs"
+      OTEL_SERVICE_NAME: workout-relay
+      OTEL_SDK_DISABLED: "${SMARTGYM_OTEL_DISABLED:-true}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://observability:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_LOGS_EXPORTER: none
+      OTEL_METRIC_EXPORT_INTERVAL: "10000"
+      OTEL_NODE_ENABLED_INSTRUMENTATIONS: http,express,nestjs-core,undici,pg,amqplib
+      SMARTGYM_WORKER_HEARTBEAT: "true"
       DATABASE_URL: ${WORKOUT_DATABASE_URL:?Set WORKOUT_DATABASE_URL}
     depends_on:
       workout:
-        condition: service_started
+        condition: service_healthy
       broker:
         condition: service_healthy
     restart: on-failure
     command: ["node", "dist/relay-main.js"]
 
+    healthcheck:
+      test: ["CMD","node","/app/infra/ops/healthcheck.cjs","worker","30"]
+      interval: 15s
+      timeout: 5s
+      start_period: 45s
+      retries: 3
+
   workout-materializer:
+    mem_limit: ${SMARTGYM_WORKOUT_MATERIALIZER_MEMORY:-768m}
+    cpus: ${SMARTGYM_WORKOUT_MATERIALIZER_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: smartgym/workout:local
     pull_policy: never
     env_file: ${SMARTGYM_CONFIG_DIR:-../.local/compose}/workout.env
     volumes:
+      - ./ops:/app/infra/ops:ro
       - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/workout:/run/secrets:ro"
     environment:
+      NODE_OPTIONS: "--require=/app/infra/ops/runtime.cjs"
+      OTEL_SERVICE_NAME: workout-materializer
+      OTEL_SDK_DISABLED: "${SMARTGYM_OTEL_DISABLED:-true}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://observability:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_LOGS_EXPORTER: none
+      OTEL_METRIC_EXPORT_INTERVAL: "10000"
+      OTEL_NODE_ENABLED_INSTRUMENTATIONS: http,express,nestjs-core,undici,pg,amqplib
+      SMARTGYM_WORKER_HEARTBEAT: "true"
       DATABASE_URL: ${WORKOUT_DATABASE_URL:?Set WORKOUT_DATABASE_URL}
     depends_on:
       workout:
-        condition: service_started
+        condition: service_healthy
     restart: on-failure
     command: ["node", "dist/materializer-main.js"]
 
+    healthcheck:
+      test: ["CMD","node","/app/infra/ops/healthcheck.cjs","worker","45"]
+      interval: 15s
+      timeout: 5s
+      start_period: 45s
+      retries: 3
+
   catalog-relay:
+    mem_limit: ${SMARTGYM_CATALOG_RELAY_MEMORY:-768m}
+    cpus: ${SMARTGYM_CATALOG_RELAY_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: smartgym/catalog:local
     pull_policy: never
     env_file:
       - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog.infrastructure.env
       - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog.env
     volumes:
+      - ./ops:/app/infra/ops:ro
       - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog:/run/secrets:ro"
     environment:
+      NODE_OPTIONS: "--require=/app/infra/ops/runtime.cjs"
+      OTEL_SERVICE_NAME: catalog-relay
+      OTEL_SDK_DISABLED: "${SMARTGYM_OTEL_DISABLED:-true}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://observability:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_LOGS_EXPORTER: none
+      OTEL_METRIC_EXPORT_INTERVAL: "10000"
+      OTEL_NODE_ENABLED_INSTRUMENTATIONS: http,express,nestjs-core,undici,pg,amqplib
+      SMARTGYM_WORKER_HEARTBEAT: "true"
       DATABASE_URL: ${CATALOG_DATABASE_URL:?Set CATALOG_DATABASE_URL}
     depends_on:
       catalog:
-        condition: service_started
+        condition: service_healthy
       broker:
         condition: service_healthy
     restart: on-failure
     command: ["node", "dist/relay-main.js"]
 
+    healthcheck:
+      test: ["CMD","node","/app/infra/ops/healthcheck.cjs","worker","30"]
+      interval: 15s
+      timeout: 5s
+      start_period: 45s
+      retries: 3
+
   catalog-media-worker:
+    mem_limit: ${SMARTGYM_CATALOG_MEDIA_WORKER_MEMORY:-768m}
+    cpus: ${SMARTGYM_CATALOG_MEDIA_WORKER_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: smartgym/catalog:local
     pull_policy: never
     env_file:
       - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog.storage.env
       - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog.env
     volumes:
+      - ./ops:/app/infra/ops:ro
       - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog:/run/secrets:ro"
     environment:
+      NODE_OPTIONS: "--require=/app/infra/ops/runtime.cjs"
+      OTEL_SERVICE_NAME: catalog-media-worker
+      OTEL_SDK_DISABLED: "${SMARTGYM_OTEL_DISABLED:-true}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://observability:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_LOGS_EXPORTER: none
+      OTEL_METRIC_EXPORT_INTERVAL: "10000"
+      OTEL_NODE_ENABLED_INSTRUMENTATIONS: http,express,nestjs-core,undici,pg,amqplib
+      SMARTGYM_WORKER_HEARTBEAT: "true"
       DATABASE_URL: ${CATALOG_DATABASE_URL:?Set CATALOG_DATABASE_URL}
       CATALOG_MEDIA_ENABLED: "true"
       CATALOG_MEDIA_PUBLIC_ORIGIN: ${SMARTGYM_WEB_ORIGIN:-https://127.0.0.1:3100}
     depends_on:
       catalog:
-        condition: service_started
+        condition: service_healthy
       clamav:
         condition: service_started
     restart: on-failure
     command: ["node", "dist/media-worker.js"]
 
+    healthcheck:
+      test: ["CMD","node","/app/infra/ops/healthcheck.cjs","worker","300"]
+      interval: 15s
+      timeout: 5s
+      start_period: 45s
+      retries: 3
+
   pose-worker:
+    mem_limit: ${SMARTGYM_POSE_WORKER_MEMORY:-768m}
+    cpus: ${SMARTGYM_POSE_WORKER_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: smartgym/pose:local
     pull_policy: never
     env_file:
@@ -446,17 +867,39 @@ services:
       - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose.storage.env
       - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose.env
     volumes:
+      - ./ops:/app/infra/ops:ro
       - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose:/run/secrets:ro"
     environment:
+      NODE_OPTIONS: "--require=/app/infra/ops/runtime.cjs"
+      OTEL_SERVICE_NAME: pose-worker
+      OTEL_SDK_DISABLED: "${SMARTGYM_OTEL_DISABLED:-true}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://observability:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_LOGS_EXPORTER: none
+      OTEL_METRIC_EXPORT_INTERVAL: "10000"
+      OTEL_NODE_ENABLED_INSTRUMENTATIONS: http,express,nestjs-core,undici,pg,amqplib
+      SMARTGYM_WORKER_HEARTBEAT: "true"
       DATABASE_URL: ${POSE_DATABASE_URL:?Set POSE_DATABASE_URL}
       POSE_ENGINE_ORIGIN: ${SMARTGYM_POSE_ENGINE_ORIGIN:-https://pose-engine:8001}
     depends_on:
       pose:
-        condition: service_started
+        condition: service_healthy
     restart: on-failure
     command: ["node", "dist/worker-main.js"]
 
+    healthcheck:
+      test: ["CMD","node","/app/infra/ops/healthcheck.cjs","worker","300"]
+      interval: 15s
+      timeout: 5s
+      start_period: 45s
+      retries: 3
+
   web:
+    networks: [default, redis-private]
+    mem_limit: ${SMARTGYM_WEB_MEMORY:-1g}
+    cpus: ${SMARTGYM_WEB_CPUS:-2.0}
+    pids_limit: 384
+    logging: {driver: local, options: {max-size: "10m", max-file: "3"}}
     image: smartgym/web:local
     build:
       context: ..
@@ -465,8 +908,18 @@ services:
       - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/web.rag.env
       - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/web.env
     volumes:
+      - ./ops:/app/infra/ops:ro
       - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/web:/run/secrets:ro"
     environment:
+      NODE_OPTIONS: "--require=/app/infra/ops/runtime.cjs"
+      OTEL_SERVICE_NAME: web
+      OTEL_SDK_DISABLED: "${SMARTGYM_OTEL_DISABLED:-true}"
+      OTEL_EXPORTER_OTLP_ENDPOINT: http://observability:4318
+      OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
+      OTEL_LOGS_EXPORTER: none
+      OTEL_METRIC_EXPORT_INTERVAL: "10000"
+      OTEL_NODE_ENABLED_INSTRUMENTATIONS: http,express,nestjs-core,undici,pg,amqplib
+      SMARTGYM_REDIS_URL: redis://redis:6379
       HOST: 0.0.0.0
       PORT: "3100"
       CATALOG_URL: http://catalog:3001
@@ -489,8 +942,10 @@ services:
     ports:
       - "127.0.0.1:3100:3100"
     depends_on:
-      catalog:
+      redis:
         condition: service_started
+      catalog:
+        condition: service_healthy
       identity:
         condition: service_started
       notification:
@@ -504,7 +959,21 @@ services:
       rag:
         condition: service_started
 
+    healthcheck:
+      test: ["CMD","node","/app/infra/ops/healthcheck.cjs","http","https://localhost:3100/health/ready","webserver"]
+      interval: 15s
+      timeout: 5s
+      start_period: 45s
+      retries: 3
+
+networks:
+  redis-private:
+    internal: true
+
 volumes:
+  alertmanager-data:
+  redis-data:
+  observability-data:
   catalog-objects-data:
   pose-objects-data:
   clamav-data:

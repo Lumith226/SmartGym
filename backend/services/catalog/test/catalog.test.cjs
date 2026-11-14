@@ -101,6 +101,22 @@ test('Catalog migration, atomic import and HTTP contract over PostgreSQL', async
     assert.equal(alias.status, 308);
     assert.equal(alias.headers.get('location'), '/api/v1/exercises/squat-khong-ta');
   });
+
+  await t.test('public library searches without accents and paginates matching rows on the server', async () => {
+    const list = async query => {
+      const response = await get('/api/v1/exercises?' + query);
+      assert.equal(response.status, 200);
+      return response.json();
+    };
+    const first = await list('q=khong+ta&limit=1&equipmentIds=bodyweight,barbell&sort=name');
+    assert.equal(first.items[0].id, 'bodyweight_squat');
+    assert.equal(first.totalCount, 1);
+    assert.equal(first.nextCursor, null);
+    const second = await list('q=khong+ta&limit=1&page=2&sort=name');
+    assert.equal(second.page, 2);
+    assert.equal(second.totalCount, 1);
+    assert.deepEqual(second.items, []);
+  });
   await t.test('cursor binds filter and revision, and archived content stays private', async () => {
     const doc = { ...snapshot.exercises[0], id: 'zz_test_squat', slug: 'test-squat' };
     await database.transaction(async client => {

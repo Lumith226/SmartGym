@@ -33,6 +33,14 @@ import {
   type V4LabelKind,
 } from './pose-studio-contracts';
 import { cn } from '../lib/utils';
+import { saveTrainingResult, type TrainingResult } from '../lib/training-results';
+import { toast } from '../lib/toast';
+import {
+  clearPoseVideoDraft,
+  loadPoseVideoDraft,
+  savePoseVideoDraft,
+  savePoseVideoPosition,
+} from '../lib/pose-video-draft';
 
 type LabelResultRow = {
   key: string;
@@ -63,7 +71,26 @@ function formatSeconds(sec: number) {
   return `${String(m).padStart(2, '0')}:${String(s).padStart(2, '0')}`;
 }
 
-export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4ExerciseConfig['id'] }) {
+interface ExercisePickerItem {
+  id: string;
+  name: string;
+  isPoseSupported: boolean;
+  enabled: boolean;
+  shortcutIndex?: number;
+  slug?: string;
+}
+
+export function PoseStudio({
+  initialExercise = 'squat',
+  initialExercises = DEFAULT_V4_EXERCISES,
+  exerciseFromLink = false,
+  libraryExercises = [],
+}: {
+  initialExercise?: V4ExerciseConfig['id'];
+  initialExercises?: V4ExerciseConfig[];
+  exerciseFromLink?: boolean;
+  libraryExercises?: { id: string; name: string; slug: string }[];
+}) {
   const [serverUrl, setServerUrl] = React.useState('');
   const [serverInput, setServerInput] = React.useState('');
   const [settingsOpen, setSettingsOpen] = React.useState(false);
@@ -72,7 +99,7 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
     if (window.matchMedia('(min-width: 1024px)').matches) setPanelOpen(true);
   }, []);
 
-  const [exercises, setExercises] = React.useState<V4ExerciseConfig[]>(DEFAULT_V4_EXERCISES);
+  const [exercises, setExercises] = React.useState<V4ExerciseConfig[]>(initialExercises);
   const [selectedId, setSelectedId] = React.useState<V4ExerciseConfig['id']>(initialExercise);
   const [exercisePickerOpen, setExercisePickerOpen] = React.useState(false);
   const [exerciseQuery, setExerciseQuery] = React.useState('');
@@ -107,6 +134,8 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
   const [noticeKind, setNoticeKind] = React.useState<'normal' | 'busy' | 'error'>('normal');
 
   const [repCount, setRepCount] = React.useState(0);
+  const [measuredRepCount, setMeasuredRepCount] = React.useState<number | null>(null);
+  const [savingResult, setSavingResult] = React.useState(false);
   const [displayFps, setDisplayFps] = React.useState('—');
   const [analysisFps, setAnalysisFps] = React.useState('—');
   const [roundtripMs, setRoundtripMs] = React.useState('—');
@@ -122,6 +151,10 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
   const socketRef = React.useRef<WebSocket | null>(null);
   const streamRef = React.useRef<MediaStream | null>(null);
   const objectUrlRef = React.useRef<string | null>(null);
+  const videoChoiceRef = React.useRef(0);
+  const videoDraftRef = React.useRef<{ id: string; time: number } | null>(null);
+  const resumeTimeRef = React.useRef<number | null>(null);
+  const poseConfigurationRef = React.useRef({ exerciseId: initialExercise, source: 'camera' as 'camera' | 'video' });
   const generationRef = React.useRef(0);
   const frameIdRef = React.useRef(0);
   const inFlightRef = React.useRef(false);
@@ -149,16 +182,52 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
     [exercises, selectedId],
   );
 
-  const filteredExercises = React.useMemo(() => {
-    if (!exerciseQuery.trim()) return exercises;
+  const filteredExercises = React.useMemo<ExercisePickerItem[]>(() => {
     const q = exerciseQuery.trim().toLowerCase();
-    return exercises.filter(
-      e =>
-        e.name.toLowerCase().includes(q) ||
-        e.id.toLowerCase().includes(q) ||
-        e.labels.some(l => l.name_vi.toLowerCase().includes(q)),
-    );
-  }, [exerciseQuery, exercises]);
+    if (!q) {
+      return exercises.map((item, idx) => ({
+        id: item.id,
+        name: item.name,
+        isPoseSupported: true,
+        enabled: item.enabled !== false,
+        shortcutIndex: idx + 1,
+      }));
+    }
+
+    // 1. Lọc các bài tập trong danh sách Pose
+    const poseMatches: ExercisePickerItem[] = exercises
+      .filter(
+        e =>
+          e.name.toLowerCase().includes(q) ||
+          e.id.toLowerCase().includes(q) ||
+          e.labels.some(l => l.name_vi.toLowerCase().includes(q)),
+      )
+      .map((item, idx) => ({
+        id: item.id,
+        name: item.name,
+        isPoseSupported: true,
+        enabled: item.enabled !== false,
+        shortcutIndex: idx + 1,
+      }));
+
+    // 2. Lọc các bài tập trong Thư viện chung mà chưa hỗ trợ Pose
+    const existingIds = new Set(exercises.map(e => e.id));
+    const libraryMatches: ExercisePickerItem[] = libraryExercises
+      .filter(
+        lib =>
+          !existingIds.has(lib.id) &&
+          lib.name.toLowerCase().includes(q),
+      )
+      .map(lib => ({
+        id: lib.id,
+        name: lib.name,
+        isPoseSupported: false,
+        enabled: false,
+        slug: lib.slug,
+      }));
+
+    return [...poseMatches, ...libraryMatches];
+  }, [exerciseQuery, exercises, libraryExercises]);
 
   React.useEffect(() => {
     function handleClickOutside(e: MouseEvent) {
@@ -188,6 +257,7 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
     poseReceivedAtRef.current = 0;
     analysisTimesRef.current = [];
     setRepCount(0);
+    setMeasuredRepCount(null);
     setAnalysisFps('—');
     setRoundtripMs('—');
     if (clearWhole) {
@@ -198,6 +268,9 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
 
   const sendConfigure = React.useCallback(
     (nextExerciseId: string, nextSource: 'camera' | 'video', clearWhole = false) => {
+      poseConfigurationRef.current = { exerciseId: nextExerciseId, source: nextSource };
+      const draft = videoDraftRef.current;
+      if (draft && nextSource === 'video') savePoseVideoPosition({ ...draft, exerciseId: nextExerciseId });
       generationRef.current += 1;
       configuredRef.current = false;
       setConfigured(false);
@@ -257,6 +330,36 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
     setDisplayFps('—');
     setPoseStatusText('CHƯA CÓ NGUỒN HÌNH');
   }, [pauseAnalysis]);
+
+  const showVideo = React.useCallback((file: File, id: string, time: number, exerciseId: string) => {
+    videoDraftRef.current = null;
+    stopMedia();
+    const video = videoRef.current;
+    if (!video) return;
+
+    videoDraftRef.current = { id, time };
+    resumeTimeRef.current = time;
+    setSource('video');
+    setMirrored(false);
+    setVideoFile(file);
+    setSelectedId(exerciseId);
+    setVideoPaused(true);
+    setVideoCurrentTime(time);
+    objectUrlRef.current = URL.createObjectURL(file);
+    video.src = objectUrlRef.current;
+    video.controls = false;
+    sendConfigure(exerciseId, 'video', true);
+    setNotice(
+      `Đã nạp tệp "${file.name}". Bấm "Bắt đầu phân tích" để theo dõi theo thời gian thực hoặc "Phân tích toàn video".`,
+    );
+  }, [sendConfigure, setNotice, stopMedia]);
+
+  const checkpointVideo = React.useCallback((video?: HTMLVideoElement | null) => {
+    const draft = videoDraftRef.current;
+    if (!draft || resumeTimeRef.current !== null) return;
+    if (video && video.readyState > 0) draft.time = video.currentTime;
+    savePoseVideoPosition({ ...draft, exerciseId: poseConfigurationRef.current.exerciseId });
+  }, []);
 
   const listCameraDevices = React.useCallback(async () => {
     if (!navigator.mediaDevices?.enumerateDevices) return;
@@ -345,7 +448,8 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
           setConnected(true);
           setConnectionText('Server AI đã sẵn sàng');
           setRuntimeText(`${gpuLabel} · RTMPose + ST-GCN++ · ${base.host}`);
-          sendConfigure(selectedId, source, true);
+          const configuration = poseConfigurationRef.current;
+          sendConfigure(configuration.exerciseId, configuration.source, true);
           setNotice('Đã kết nối Server AI. Mở camera hoặc chọn tệp video rồi bấm Bắt đầu phân tích.');
         };
 
@@ -375,6 +479,7 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
             analysisTimesRef.current = analysisTimesRef.current.filter(t => now - t < 2000);
             setRoundtripMs(`${Math.round(now - pending.captureAt)} ms`);
             setRepCount(Number(message.rep_count) || 0);
+            setMeasuredRepCount(Number.isInteger(message.rep_count) && message.rep_count >= 0 ? message.rep_count : null);
             setPoseStatusText(
               message.found
                 ? ({ READY: 'SẴN SÀNG', IN_REP: 'ĐANG TRONG LƯỢT' } as Record<string, string>)[
@@ -412,7 +517,7 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
         }, 3000);
       }
     },
-    [pauseAnalysis, selectedId, sendConfigure, setNotice, source],
+    [pauseAnalysis, sendConfigure, setNotice],
   );
 
   React.useEffect(() => {
@@ -433,6 +538,28 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
+
+  React.useEffect(() => {
+    const choice = videoChoiceRef.current;
+    let mounted = true;
+    void loadPoseVideoDraft().then(draft => {
+      if (!draft || !mounted || videoDraftRef.current || choice !== videoChoiceRef.current) return;
+      const retainedExercise = initialExercises.find(exercise => exercise.id === draft.exerciseId);
+      const exerciseId = exerciseFromLink ? initialExercise : retainedExercise?.id ?? initialExercise;
+      showVideo(draft.file, draft.id, draft.time, exerciseId);
+    }).catch(() => {
+      if (mounted && choice === videoChoiceRef.current) {
+        setNotice('Chưa khôi phục được video. Bạn có thể chọn lại tệp.', 'error');
+      }
+    });
+    const checkpoint = () => checkpointVideo(videoRef.current);
+    window.addEventListener('pagehide', checkpoint);
+    return () => {
+      mounted = false;
+      checkpoint();
+      window.removeEventListener('pagehide', checkpoint);
+    };
+  }, [checkpointVideo, exerciseFromLink, initialExercise, initialExercises, setNotice, showVideo]);
 
   const handleToggleFullscreen = () => {
     if (!document.fullscreenElement) {
@@ -464,15 +591,19 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
         return;
       }
       const idx = Number(e.key) - 1;
-      if (idx >= 0 && idx < DEFAULT_V4_EXERCISES.length) {
-        const nextId = DEFAULT_V4_EXERCISES[idx].id;
-        setSelectedId(nextId);
-        sendConfigure(nextId, source, true);
+      if (idx >= 0 && idx < exercises.length) {
+        const next = exercises[idx];
+        if (next.enabled !== false) {
+          setSelectedId(next.id);
+          sendConfigure(next.id, source, true);
+        } else {
+          setNotice(`Bài tập ${next.name} hiện đang tắt trong phòng tập.`, 'error');
+        }
       }
     }
     window.addEventListener('keydown', onKeyDown);
     return () => window.removeEventListener('keydown', onKeyDown);
-  }, [busyWhole, sendConfigure, source]);
+  }, [busyWhole, exercises, sendConfigure, source]);
 
   // Animation loop for skeleton overlay + FPS counters + sending frames
   React.useEffect(() => {
@@ -588,9 +719,9 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
               offY + pts[i][1] * drawH,
             ];
             const hasErr = hasErrorRef.current;
-            ctx.lineWidth = (hasErr ? 3.2 : 2.2) * dpr;
-            ctx.strokeStyle = hasErr ? '#ff453a' : '#34c759';
-            ctx.fillStyle = hasErr ? '#ff453a' : '#ffffff';
+            ctx.lineWidth = (hasErr ? 3.2 : 2.4) * dpr;
+            ctx.strokeStyle = hasErr ? '#ef4444' : '#6366f1';
+            ctx.fillStyle = hasErr ? '#ef4444' : '#818cf8';
             for (const [a, b] of POSE_SKELETON_PAIRS) {
               if (!pts[a] || !pts[b] || Math.min(pts[a][2], pts[b][2]) < 0.25) continue;
               const [x1, y1] = pt(a);
@@ -632,12 +763,17 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
 
   async function handleOpenCamera(customDeviceId?: string) {
     if (busyWhole || mediaBusy) return;
-    setSource('camera');
-    setMirrored(true);
+    const choice = ++videoChoiceRef.current;
     if (!navigator.mediaDevices?.getUserMedia) {
       setNotice('Trình duyệt chưa cấp quyền truy cập Camera.', 'error');
       return;
     }
+    setSource('camera');
+    setMirrored(true);
+    checkpointVideo(videoRef.current);
+    videoDraftRef.current = null;
+    resumeTimeRef.current = null;
+    setVideoFile(null);
     stopMedia();
     sendConfigure(selectedId, 'camera', true);
     setMediaBusy(true);
@@ -653,20 +789,24 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
         },
         audio: false,
       });
-      streamRef.current = stream;
       const v = videoRef.current;
-      if (v) {
-        v.srcObject = stream;
-        v.controls = false;
-        await v.play();
-        hasMediaRef.current = true;
-        setHasMedia(true);
-        setResolutionText(`${v.videoWidth || 640} × ${v.videoHeight || 480}`);
-        setPoseStatusText('CAMERA TRỰC TIẾP SẴN SÀNG');
+      if (!v || choice !== videoChoiceRef.current) {
+        stream.getTracks().forEach(track => track.stop());
+        return;
       }
+      streamRef.current = stream;
+      v.srcObject = stream;
+      v.controls = false;
+      await v.play();
+      if (choice !== videoChoiceRef.current) return;
+      hasMediaRef.current = true;
+      setHasMedia(true);
+      setResolutionText(`${v.videoWidth || 640} × ${v.videoHeight || 480}`);
+      setPoseStatusText('CAMERA TRỰC TIẾP SẴN SÀNG');
       await listCameraDevices();
       setNotice('Camera đã sẵn sàng. Bấm "Bắt đầu phân tích" để đếm nhịp và kiểm tra kỹ thuật.');
     } catch {
+      if (choice !== videoChoiceRef.current) return;
       stopMedia();
       setNotice(
         'Không mở được camera. Hãy kiểm tra quyền truy cập camera trên trình duyệt hoặc chuyển sang Tải tệp video.',
@@ -679,21 +819,38 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
 
   function handleSelectVideoFile(file: File | undefined) {
     if (!file || busyWhole) return;
-    setSource('video');
-    setMirrored(false);
+    const choice = ++videoChoiceRef.current;
+    const id = window.crypto.randomUUID();
+    void savePoseVideoDraft(file, { id, time: 0, exerciseId: selectedId }).catch(() => {
+      if (videoRef.current && choice === videoChoiceRef.current) {
+        setNotice('Video dùng được trên trang này. Trình duyệt chưa lưu được tệp để mở lại.', 'error');
+      }
+    });
+    showVideo(file, id, 0, selectedId);
+  }
+
+  function handleCloseSource() {
+    videoChoiceRef.current += 1;
+    videoDraftRef.current = null;
+    resumeTimeRef.current = null;
+    setVideoFile(null);
+    if (source === 'video') void clearPoseVideoDraft();
     stopMedia();
-    setVideoFile(file);
-    setVideoPaused(true);
-    const url = URL.createObjectURL(file);
-    objectUrlRef.current = url;
-    const v = videoRef.current;
-    if (v) {
-      v.src = url;
-      v.controls = false;
-      sendConfigure(selectedId, 'video', true);
-      setNotice(
-        `Đã nạp tệp "${file.name}". Bấm "Bắt đầu phân tích" để theo dõi theo thời gian thực hoặc "Phân tích toàn video".`,
-      );
+  }
+
+  async function handleVideoMode() {
+    if (busyWhole || mediaBusy) return;
+    if (source === 'video') {
+      fileInputRef.current?.click();
+      return;
+    }
+    const choice = ++videoChoiceRef.current;
+    const draft = await loadPoseVideoDraft().catch(() => null);
+    if (!videoRef.current || choice !== videoChoiceRef.current) return;
+    if (draft) {
+      showVideo(draft.file, draft.id, draft.time, selectedId);
+    } else {
+      fileInputRef.current?.click();
     }
   }
 
@@ -753,7 +910,6 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
 
     if (runningRef.current) {
       pauseAnalysis();
-      setDockMinimized(false);
       setNotice('Đã tạm dừng phân tích. Kết quả hiển thị là lần quan sát gần nhất.');
       return;
     }
@@ -865,6 +1021,38 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
     a.click();
   }
 
+  async function handleSaveResult() {
+    if (!activeResult || savingResult) return;
+    const entry: TrainingResult = {
+      id: crypto.randomUUID(),
+      exerciseId: selectedId,
+      exerciseName: activeExercise.name,
+      source,
+      scope: viewScope,
+      savedAt: new Date().toISOString(),
+      repCount: viewScope === 'live' ? measuredRepCount : null,
+      feedback: activeResult.feedback_vi ?? null,
+      result: activeResult,
+    };
+    setSavingResult(true);
+    try {
+      const response = await fetch('/api/v1/me', { cache: 'no-store' });
+      if (response.status === 401) {
+        toast.info('Đăng nhập để lưu kết quả tập');
+        return;
+      }
+      if (!response.ok) throw new Error('Profile unavailable');
+      const profile = await response.json();
+      if (typeof profile.id !== 'string' || !profile.id) throw new Error('Invalid profile');
+      saveTrainingResult(profile.id, entry);
+      toast.success('Đã lưu vào Kết quả tập');
+    } catch {
+      toast.error('Chưa lưu được kết quả tập. Hãy thử lại.');
+    } finally {
+      setSavingResult(false);
+    }
+  }
+
 
   // Tóm tắt kết quả quan sát
   const lookup = React.useMemo(() => {
@@ -891,15 +1079,15 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
     if (!running) {
       return {
         label: roundtripMs === '—' ? 'Sẵn sàng' : 'Đã tạm dừng',
-        dot: 'bg-foreground/50',
-        badge: 'bg-foreground/15 text-foreground/85',
+        dot: 'bg-muted-foreground',
+        badge: 'border border-border/80 bg-muted/80 text-foreground',
       };
     }
     if (detectedErrors.length > 0) {
       return {
         label: `Cần chỉnh form (${detectedErrors.length})`,
         dot: 'bg-white',
-        badge: 'bg-[#ff453a] text-white animate-pulse shadow-[0_0_12px_rgba(255,69,58,0.5)]',
+        badge: 'bg-rose-500 text-white animate-pulse shadow-[0_0_12px_rgba(244,63,94,0.5)]',
       };
     }
     if (poseStatusText === 'CHƯA THẤY KHỚP ĐỦ RÕ') {
@@ -912,19 +1100,19 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
     if (poseStatusText === 'ĐANG TRONG LƯỢT') {
       return {
         label: 'Đang đếm nhịp',
-        dot: 'bg-black',
-        badge: 'bg-[#30d158] text-black font-black shadow-[0_0_12px_rgba(48,209,88,0.4)]',
+        dot: 'bg-white',
+        badge: 'bg-[#6366f1] text-white font-bold shadow-[0_0_12px_rgba(99,102,241,0.4)]',
       };
     }
     return {
       label: 'Đang tập',
-      dot: 'bg-black',
-      badge: 'bg-[#30d158] text-black font-extrabold',
+      dot: 'bg-white',
+      badge: 'bg-emerald-500 text-white font-bold shadow-[0_0_12px_rgba(16,185,129,0.4)]',
     };
   }, [detectedErrors.length, poseStatusText, roundtripMs, running]);
 
   const glass =
-    'border border-foreground/12 bg-background/60 text-foreground backdrop-blur-xl shadow-[0_8px_30px_rgba(0,0,0,0.35)]';
+    'border border-border/80 bg-card/90 text-foreground backdrop-blur-xl shadow-lg shadow-black/5 dark:shadow-black/25';
 
   return (
     <div
@@ -937,6 +1125,13 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
         muted={videoMuted}
         playsInline
         preload="auto"
+        onLoadedMetadata={({ currentTarget: video }) => {
+          const time = resumeTimeRef.current;
+          if (time === null) return;
+          resumeTimeRef.current = null;
+          const duration = Number.isFinite(video.duration) ? video.duration : time;
+          if (time > 0) video.currentTime = Math.min(time, duration);
+        }}
         onLoadedData={e => {
           const v = e.currentTarget;
           if (v.videoWidth) {
@@ -947,7 +1142,13 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
             setVideoDuration(v.duration || 0);
           }
         }}
-        onTimeUpdate={e => setVideoCurrentTime(e.currentTarget.currentTime)}
+        onTimeUpdate={({ currentTarget: video }) => {
+          setVideoCurrentTime(video.currentTime);
+          if (videoDraftRef.current && resumeTimeRef.current === null && video.readyState > 0) {
+            videoDraftRef.current.time = video.currentTime;
+          }
+        }}
+        onSeeked={({ currentTarget: video }) => checkpointVideo(video)}
         onDurationChange={e => setVideoDuration(e.currentTarget.duration)}
         onVolumeChange={e => setVideoMuted(e.currentTarget.muted)}
         onPlay={event => {
@@ -958,6 +1159,7 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
         onSeeking={() => { pointsRef.current = []; }}
         onPause={event => {
           if (!event.currentTarget.paused) return;
+          checkpointVideo(event.currentTarget);
           setVideoPaused(true);
           if (!event.currentTarget.srcObject && runningRef.current) pauseAnalysis();
         }}
@@ -981,10 +1183,13 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
         type="file"
         accept="video/mp4,video/webm,video/quicktime,video/*"
         className="hidden"
-        onChange={e => handleSelectVideoFile(e.target.files?.[0])}
+        onChange={e => {
+          handleSelectVideoFile(e.currentTarget.files?.[0]);
+          e.currentTarget.value = '';
+        }}
       />
 
-      {/* ===== MÀN HÌNH CHỜ: chỉ một biểu tượng mờ, bấm để mở nguồn đang chọn ===== */}
+      {/* ===== MÀN HÌNH CHỜ: Nút tối giản ở giữa, bấm để mở nguồn đang chọn ===== */}
       {!hasMedia && (
         <button
           type="button"
@@ -993,9 +1198,9 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
             source === 'camera' ? void handleOpenCamera() : fileInputRef.current?.click()
           }
           aria-label={source === 'camera' ? 'Mở camera' : 'Chọn video'}
-          className="absolute left-1/2 top-[45%] flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-full border border-foreground/10 bg-foreground/[0.06] text-foreground/50 transition-colors hover:bg-foreground/10 hover:text-foreground"
+          className="absolute left-1/2 top-[45%] flex h-20 w-20 -translate-x-1/2 -translate-y-1/2 cursor-pointer items-center justify-center rounded-2xl border border-primary/20 bg-primary/10 text-primary shadow-xl shadow-primary/10 backdrop-blur-xl transition-all duration-300 hover:scale-105 hover:border-primary/40 hover:bg-primary/20 active:scale-95"
         >
-          {source === 'camera' ? <Camera size={30} strokeWidth={1.5} /> : <Upload size={30} strokeWidth={1.5} />}
+          {source === 'camera' ? <Camera size={32} strokeWidth={1.75} /> : <Upload size={32} strokeWidth={1.75} />}
         </button>
       )}
 
@@ -1054,51 +1259,90 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
                 </div>
 
                 {/* Danh sách bài tập */}
-                <div className="max-h-60 space-y-1 overflow-y-auto pr-1 text-xs [scrollbar-width:thin]">
+                <div className="max-h-64 space-y-1 overflow-y-auto pr-1 text-xs [scrollbar-width:thin]">
                   {filteredExercises.length === 0 ? (
                     <div className="p-4 text-center text-xs text-foreground/50">
                       Không tìm thấy bài tập phù hợp
                     </div>
                   ) : (
-                    filteredExercises.map((item, idx) => {
+                    filteredExercises.map(item => {
                       const active = item.id === selectedId;
+                      const canSelect = item.isPoseSupported && item.enabled;
+
                       return (
-                        <button
+                        <div
                           key={item.id}
-                          type="button"
+                          role={canSelect ? 'button' : undefined}
+                          tabIndex={canSelect ? 0 : -1}
                           onClick={() => {
+                            if (!canSelect) return;
                             setSelectedId(item.id);
                             sendConfigure(item.id, source, true);
                             setExercisePickerOpen(false);
                             setExerciseQuery('');
                           }}
                           className={cn(
-                            'group flex w-full cursor-pointer items-center justify-between rounded-xl px-3 py-2 text-left transition-colors',
-                            active
-                              ? 'bg-primary text-primary-foreground font-semibold'
-                              : 'hover:bg-foreground/10 text-foreground',
+                            'group flex w-full items-center justify-between rounded-xl px-3 py-2 text-left transition-all',
+                            canSelect
+                              ? 'cursor-pointer'
+                              : 'cursor-not-allowed opacity-45 select-none bg-foreground/[0.03]',
+                            active && canSelect
+                              ? 'bg-primary text-primary-foreground font-semibold shadow-xs'
+                              : canSelect
+                                ? 'hover:bg-foreground/10 text-foreground'
+                                : 'text-muted-foreground',
                           )}
                         >
                           <div className="flex flex-col min-w-0 pr-2">
-                            <span className="truncate">{item.name}</span>
-                            <span className={cn('text-[10px]', active ? 'text-primary-foreground/80' : 'text-foreground/50')}>
-                              Phím tắt {idx + 1}
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="truncate font-medium">{item.name}</span>
+                              {!item.isPoseSupported && (
+                                <span className="shrink-0 rounded-full bg-foreground/10 px-1.5 py-0.2 text-[9px] font-semibold text-muted-foreground">
+                                  Chưa hỗ trợ Pose AI
+                                </span>
+                              )}
+                              {item.isPoseSupported && !item.enabled && (
+                                <span className="shrink-0 rounded-full bg-rose-500/15 border border-rose-500/25 px-1.5 py-0.2 text-[9px] font-bold text-rose-500">
+                                  Tạm tắt
+                                </span>
+                              )}
+                            </div>
+                            <span
+                              className={cn(
+                                'text-[10px] mt-0.5',
+                                active && canSelect
+                                  ? 'text-primary-foreground/80'
+                                  : 'text-foreground/50',
+                              )}
+                            >
+                              {canSelect && item.shortcutIndex
+                                ? `Phím tắt ${item.shortcutIndex}`
+                                : item.isPoseSupported && !item.enabled
+                                  ? 'Tạm dừng phân tích ở phòng tập'
+                                  : 'Bài tập trong Thư viện (Chưa có phân tích tư thế)'}
                             </span>
                           </div>
-                          {active && <Check size={14} className="shrink-0 text-primary-foreground" />}
-                        </button>
+                          {active && canSelect && (
+                            <Check size={14} className="shrink-0 text-primary-foreground" />
+                          )}
+                          {!canSelect && (
+                            <span className="shrink-0 text-[10px] font-mono text-muted-foreground/60">
+                              ✕ Khóa
+                            </span>
+                          )}
+                        </div>
                       );
                     })
                   )}
                 </div>
 
-                {/* Footer liên kết Thư viện 80+ bài tập */}
+                {/* Footer liên kết Thư viện thêm bài tập */}
                 <div className="mt-2 border-t border-foreground/10 pt-2">
                   <Link
                     href="/bai-tap"
                     className="flex items-center justify-between rounded-xl px-2.5 py-1.5 text-[11px] font-medium text-foreground/70 transition-colors hover:bg-foreground/10 hover:text-foreground"
                   >
-                    <span>Khám phá 80+ bài tập trong Thư viện</span>
+                    <span>Khám phá thêm bài tập trong Thư viện</span>
                     <span className="text-primary font-bold">→</span>
                   </Link>
                 </div>
@@ -1113,8 +1357,10 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
                 onClick={() => void handleOpenCamera()}
                 aria-pressed={source === 'camera'}
                 className={cn(
-                  'inline-flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
-                  source === 'camera' ? 'bg-foreground text-background' : 'text-foreground/75 hover:text-foreground',
+                  'inline-flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
+                  source === 'camera'
+                    ? 'bg-[#6366f1] text-white shadow-xs'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                 )}
               >
                 <Camera size={13} />
@@ -1122,11 +1368,13 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
               </button>
               <button
                 type="button"
-                onClick={() => fileInputRef.current?.click()}
+                onClick={() => void handleVideoMode()}
                 aria-pressed={source === 'video'}
                 className={cn(
-                  'inline-flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-medium transition-colors',
-                  source === 'video' ? 'bg-foreground text-background' : 'text-foreground/75 hover:text-foreground',
+                  'inline-flex cursor-pointer items-center gap-1.5 rounded-full px-3 py-1.5 text-xs font-semibold transition-all',
+                  source === 'video'
+                    ? 'bg-[#6366f1] text-white shadow-xs'
+                    : 'text-muted-foreground hover:bg-muted hover:text-foreground',
                 )}
               >
                 <FileVideo size={13} />
@@ -1140,9 +1388,9 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
               aria-label="Bật tắt bảng kết quả"
               aria-pressed={panelOpen}
               className={cn(
-                'inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full',
+                'inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full transition-all',
                 glass,
-                panelOpen && 'bg-foreground/25',
+                panelOpen && 'bg-[#6366f1]/15 text-[#6366f1] border-[#6366f1]/30',
               )}
             >
               <PanelRight size={15} />
@@ -1153,13 +1401,13 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
               onClick={() => setSettingsOpen(v => !v)}
               aria-label="Cài đặt kết nối AI"
               title={connectionText}
-              className={cn('relative inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full', glass)}
+              className={cn('relative inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full transition-all', glass)}
             >
               <Settings2 size={15} />
               <span
                 className={cn(
                   'absolute right-1 top-1 h-2 w-2 rounded-full',
-                  connected ? 'bg-[#30d158]' : 'bg-[#ff9f0a]',
+                  connected ? 'bg-emerald-500 shadow-xs shadow-emerald-500/50' : 'bg-amber-500 shadow-xs shadow-amber-500/50',
                 )}
               />
             </button>
@@ -1250,9 +1498,17 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
               )}
               <button
                 type="button"
+                disabled={!activeResult || savingResult}
+                onClick={() => void handleSaveResult()}
+                className="cursor-pointer whitespace-nowrap rounded-full px-2 py-1 font-semibold hover:bg-foreground/15 disabled:opacity-30"
+              >
+                {savingResult ? 'Đang lưu…' : 'Lưu kết quả'}
+              </button>
+              <button
+                type="button"
                 disabled={!activeResult}
                 onClick={handleExportJson}
-                aria-label="Lưu JSON"
+                aria-label="Tải JSON"
                 className="cursor-pointer rounded-full p-1.5 hover:bg-foreground/15 disabled:opacity-30"
               >
                 <Download size={13} />
@@ -1274,10 +1530,10 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
                 <li
                   key={label.key}
                   className={cn(
-                    'm-0 flex items-center justify-between gap-2 border-b border-foreground/[0.06] px-3.5 py-1.5',
+                    'm-0 flex items-center justify-between gap-2 border-b border-border/60 px-3.5 py-1.5 transition-colors',
                     !supported && 'opacity-35',
-                    active && kind === 'error' && 'bg-[#ff453a]/20 font-semibold',
-                    active && kind !== 'error' && 'bg-[#30d158]/15 font-semibold',
+                    active && kind === 'error' && 'bg-rose-500/15 text-rose-600 dark:text-rose-400 font-semibold',
+                    active && kind !== 'error' && 'bg-emerald-500/15 text-emerald-600 dark:text-emerald-400 font-semibold',
                   )}
                 >
                   <span className="inline-flex min-w-0 items-center gap-2">
@@ -1285,15 +1541,15 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
                       className={cn(
                         'h-1.5 w-1.5 shrink-0 rounded-full',
                         kind === 'error'
-                          ? 'bg-[#ff453a]'
+                          ? 'bg-rose-500 shadow-xs shadow-rose-500/50'
                           : kind === 'positive' || kind === 'attribute'
-                            ? 'bg-[#30d158]'
-                            : 'bg-foreground/40',
+                            ? 'bg-emerald-500 shadow-xs shadow-emerald-500/50'
+                            : 'bg-muted-foreground/40',
                       )}
                     />
                     <span className="truncate">{label.name_vi}</span>
                   </span>
-                  <span className="shrink-0 font-mono text-[10.5px] text-foreground/60">
+                  <span className="shrink-0 font-mono text-[10.5px] text-muted-foreground">
                     {!supported ? 'N/A' : prob == null ? '—' : `${(prob * 100).toFixed(0)}%`}
                   </span>
                 </li>
@@ -1328,7 +1584,7 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
       {running && detectedErrors.length > 0 && (
         <div
           role="alert"
-          className="pointer-events-none absolute left-1/2 top-4 z-30 flex max-w-[92%] -translate-x-1/2 items-center gap-2.5 rounded-full border border-red-500/50 bg-[#ff453a] px-5 py-2 text-white shadow-2xl backdrop-blur-md animate-bounce"
+          className="pointer-events-none absolute left-1/2 top-4 z-30 flex max-w-[92%] -translate-x-1/2 items-center gap-2.5 rounded-full border border-rose-600 bg-rose-500 px-5 py-2 text-white shadow-2xl shadow-rose-500/30 backdrop-blur-md animate-bounce"
         >
           <span className="text-base sm:text-lg">⚠️</span>
           <span className="text-xs font-black uppercase tracking-wider sm:text-sm">
@@ -1379,184 +1635,200 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
         </div>
       )}
 
-      {/* ===== ĐIỀU KHIỂN PHIÊN (CHÍNH GIỮA ĐÁY MÀN HÌNH - TÍCH HỢP TRÌNH PHÁT VIDEO + NÚT HỎI AI) ===== */}
+      {/* ===== ĐIỀU KHIỂN PHIÊN (CHÍNH GIỮA ĐÁY MÀN HÌNH - ALL-IN-ONE STUDIO ISLAND) ===== */}
       {hasMedia && (
-        <div className="pointer-events-none absolute inset-x-0 bottom-5 z-20 flex flex-col items-center gap-2 px-3 transition-all duration-300">
-          {/* Thanh tua tiến trình video (Scrubber timeline) mảnh, tinh tế - thay thế hoàn toàn thanh browser native */}
-          {source === 'video' && videoDuration > 0 && (
-            <div className={cn('pointer-events-auto flex items-center gap-3 rounded-full px-4 py-1.5 shadow-xl', glass)}>
-              <span className="font-mono text-[10.5px] font-semibold text-foreground/75">
-                {formatSeconds(videoCurrentTime)}
-              </span>
-              <input
-                type="range"
-                min={0}
-                max={videoDuration}
-                step={0.1}
-                value={videoCurrentTime}
-                onChange={e => {
-                  const val = Number(e.target.value);
-                  setVideoCurrentTime(val);
-                  if (videoRef.current) {
-                    videoRef.current.currentTime = val;
-                  }
-                }}
-                className="h-1.5 w-44 cursor-pointer appearance-none rounded-full bg-foreground/20 accent-[#0a84ff] sm:w-64"
-                aria-label="Tua thời gian video"
-              />
-              <span className="font-mono text-[10.5px] text-foreground/50">
-                {formatSeconds(videoDuration)}
-              </span>
+        <div className="pointer-events-none absolute inset-x-0 bottom-4 z-20 flex justify-center px-3 transition-all duration-300">
+          <div
+            className={cn(
+              'pointer-events-auto flex flex-col gap-2 rounded-2xl p-2 sm:px-3 sm:py-2.5 shadow-2xl backdrop-blur-xl border border-white/10 transition-all max-w-full',
+              glass,
+            )}
+          >
+            {/* Tầng 1: Timeline Scrubber (chỉ hiện khi là nguồn video) */}
+            {source === 'video' && videoDuration > 0 && (
+              <div className="flex items-center gap-2.5 px-1 pb-1 border-b border-foreground/10">
+                <span className="font-mono text-[10.5px] font-semibold text-primary shrink-0">
+                  {formatSeconds(videoCurrentTime)}
+                </span>
+                <div className="relative flex-1 flex items-center group py-0.5 min-w-[140px] sm:min-w-[240px]">
+                  <input
+                    type="range"
+                    min={0}
+                    max={videoDuration}
+                    step={0.1}
+                    value={videoCurrentTime}
+                    onChange={e => {
+                      const val = Number(e.target.value);
+                      setVideoCurrentTime(val);
+                      if (videoRef.current) {
+                        videoRef.current.currentTime = val;
+                      }
+                    }}
+                    className="h-1.5 w-full cursor-pointer appearance-none rounded-full bg-foreground/20 accent-[#6366f1] group-hover:h-2 transition-all"
+                    aria-label="Tua thời gian video"
+                  />
+                </div>
+                <span className="font-mono text-[10.5px] text-foreground/50 shrink-0">
+                  {formatSeconds(videoDuration)}
+                </span>
+              </div>
+            )}
+
+            {/* Tầng 2: Thanh phím chức năng phân cụm trực quan */}
+            <div className="flex flex-wrap items-center justify-between gap-1.5 sm:gap-2">
+              {/* Cụm 1: AI Analysis */}
+              <div className="flex items-center gap-1.5">
+                <button
+                  type="button"
+                  disabled={busyWhole}
+                  onClick={() => void handleToggleAnalysis()}
+                  title="Phím tắt: Phím Cách (Space)"
+                  className={cn(
+                    'inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-xl px-3.5 text-xs font-semibold text-white shadow-md transition-all active:scale-95 disabled:opacity-50',
+                    running
+                      ? 'bg-rose-500 hover:bg-rose-600 shadow-rose-500/25'
+                      : 'bg-[#6366f1] hover:bg-[#4f46e5] shadow-[#6366f1]/25',
+                  )}
+                >
+                  {running ? <Square size={13} /> : <Play size={13} />}
+                  <span>{running ? 'Dừng' : 'Phân tích (Space)'}</span>
+                </button>
+
+                {source === 'video' && videoFile && (
+                  <button
+                    type="button"
+                    disabled={busyWhole}
+                    onClick={() => void handleAnalyzeWholeVideo()}
+                    title="Phân tích toàn bộ video tự động"
+                    className="h-9 cursor-pointer rounded-xl bg-foreground/10 hover:bg-foreground/15 px-3 text-xs font-medium text-foreground transition-colors disabled:opacity-50"
+                  >
+                    ⚡ Cả video
+                  </button>
+                )}
+              </div>
+
+              {/* Cụm 2: Video Player Controls (Play/Pause, Mute) */}
+              {source === 'video' && (
+                <div className="flex items-center gap-0.5 rounded-xl bg-foreground/5 p-0.5 border border-foreground/10">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const v = videoRef.current;
+                      if (!v) return;
+                      if (runningRef.current || !v.paused) pauseAnalysis();
+                      else void v.play().catch(() => setNotice('Không phát được video.', 'error'));
+                    }}
+                    aria-label={videoPaused ? 'Tiếp tục phát video' : 'Tạm dừng video'}
+                    title={videoPaused ? 'Phát video' : 'Tạm dừng video'}
+                    className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg hover:bg-foreground/15 text-foreground transition-colors"
+                  >
+                    {videoPaused ? <Play size={14} /> : <Pause size={14} />}
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => {
+                      const v = videoRef.current;
+                      if (!v) return;
+                      v.muted = !v.muted;
+                      setVideoMuted(v.muted);
+                    }}
+                    aria-label={videoMuted ? 'Bật âm thanh video' : 'Tắt tiếng video'}
+                    title={videoMuted ? 'Bật âm thanh video' : 'Tắt tiếng video'}
+                    className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-lg hover:bg-foreground/15 text-foreground transition-colors"
+                  >
+                    {videoMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
+                  </button>
+                </div>
+              )}
+
+              {/* Cụm 3: Tiện ích & Trợ lý SmartGym */}
+              <div className="flex items-center gap-1">
+                {/* Đặt lại số lượt */}
+                <button
+                  type="button"
+                  disabled={busyWhole}
+                  onClick={() => {
+                    sendConfigure(selectedId, source, false);
+                    setNotice('Đã đặt lại bộ đếm lượt tập.');
+                  }}
+                  aria-label="Đặt lại bộ đếm lượt"
+                  title="Đặt lại bộ đếm lượt"
+                  className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl hover:bg-foreground/15 text-foreground/80 transition-colors"
+                >
+                  <RotateCcw size={14} />
+                </button>
+
+                {/* Chụp ảnh khung hình */}
+                <button
+                  type="button"
+                  onClick={handleSaveSnapshot}
+                  aria-label="Lưu ảnh khung hình"
+                  title="Lưu ảnh phân tích"
+                  className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl hover:bg-foreground/15 text-foreground/80 transition-colors"
+                >
+                  <Download size={14} />
+                </button>
+
+                {/* Lật gương */}
+                <button
+                  type="button"
+                  onClick={() => setMirrored(v => !v)}
+                  aria-label="Lật gương"
+                  title="Lật gương"
+                  aria-pressed={mirrored}
+                  className={cn(
+                    'inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl hover:bg-foreground/15 text-foreground/80 transition-colors',
+                    mirrored && 'bg-foreground/20 text-foreground',
+                  )}
+                >
+                  <FlipHorizontal2 size={14} />
+                </button>
+
+                {/* Toàn màn hình */}
+                <button
+                  type="button"
+                  onClick={handleToggleFullscreen}
+                  aria-label={isFullscreen ? 'Thu nhỏ màn hình' : 'Toàn màn hình'}
+                  title={isFullscreen ? 'Thoát toàn màn hình' : 'Toàn màn hình'}
+                  className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl hover:bg-foreground/15 text-foreground/80 transition-colors"
+                >
+                  {isFullscreen ? <Minimize size={14} /> : <Maximize size={14} />}
+                </button>
+
+                {/* Vách ngăn mỏng */}
+                <div className="mx-0.5 h-4 w-px bg-foreground/15" />
+
+                {/* Nút Hỏi SmartGym */}
+                <button
+                  type="button"
+                  onClick={() => setDockMinimized(v => !v)}
+                  aria-label="Hỏi SmartGym"
+                  title="Hỏi trợ lý SmartGym (Phân tích lỗi & Kỹ thuật)"
+                  aria-pressed={!dockMinimized}
+                  className={cn(
+                    'inline-flex h-8 cursor-pointer items-center gap-1.5 rounded-xl px-2.5 text-xs font-semibold transition-all',
+                    !dockMinimized
+                      ? 'bg-primary text-primary-foreground shadow-md'
+                      : 'hover:bg-foreground/15 text-foreground/85 border border-foreground/10',
+                  )}
+                >
+                  <Sparkles size={13} className={!dockMinimized ? 'text-primary-foreground' : 'text-primary'} />
+                  <span className="hidden sm:inline">Hỏi AI</span>
+                </button>
+
+                {/* Đóng nguồn */}
+                <button
+                  type="button"
+                  onClick={handleCloseSource}
+                  aria-label="Đóng nguồn hình"
+                  title="Đóng video"
+                  className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl hover:bg-rose-500/20 hover:text-rose-500 text-foreground/60 transition-colors"
+                >
+                  <X size={14} />
+                </button>
+              </div>
             </div>
-          )}
-
-          {/* Thanh phím chức năng chính */}
-          <div className={cn('pointer-events-auto flex items-center gap-1.5 rounded-full p-1.5', glass)}>
-            {/* 1. Nút Phân tích / Dừng */}
-            <button
-              type="button"
-              disabled={busyWhole}
-              onClick={() => void handleToggleAnalysis()}
-              title="Phím tắt: Phím Cách (Space)"
-              className={cn(
-                'inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full px-4 text-xs font-semibold text-white transition-all disabled:opacity-50',
-                running ? 'bg-[#ff453a]' : 'bg-[#0a84ff]',
-              )}
-            >
-              {running ? <Square size={12} /> : <Play size={12} />}
-              <span>{running ? 'Dừng' : 'Phân tích (Space)'}</span>
-            </button>
-
-            {/* 2. Nút Phát / Tạm dừng video */}
-            {source === 'video' && (
-              <button
-                type="button"
-                onClick={() => {
-                  const v = videoRef.current;
-                  if (!v) return;
-                  if (runningRef.current || !v.paused) pauseAnalysis();
-                  else void v.play().catch(() => setNotice('Không phát được video.', 'error'));
-                }}
-                aria-label={videoPaused ? 'Tiếp tục phát video' : 'Tạm dừng video'}
-                title={videoPaused ? 'Phát video' : 'Tạm dừng video'}
-                className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full hover:bg-foreground/15"
-              >
-                {videoPaused ? <Play size={14} /> : <Pause size={14} />}
-              </button>
-            )}
-
-            {/* 3. Phân tích toàn bộ video */}
-            {source === 'video' && videoFile && (
-              <button
-                type="button"
-                disabled={busyWhole}
-                onClick={() => void handleAnalyzeWholeVideo()}
-                className="h-9 cursor-pointer rounded-full px-3 text-xs font-medium hover:bg-foreground/15 disabled:opacity-50"
-              >
-                Cả video
-              </button>
-            )}
-
-            {/* 4. Đặt lại số lượt */}
-            <button
-              type="button"
-              disabled={busyWhole}
-              onClick={() => {
-                sendConfigure(selectedId, source, false);
-                setNotice('Đã đặt lại bộ đếm lượt tập.');
-              }}
-              aria-label="Đặt lại"
-              title="Đặt lại bộ đếm lượt"
-              className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full hover:bg-foreground/15"
-            >
-              <RotateCcw size={14} />
-            </button>
-
-            {/* 5. Chụp ảnh khung hình */}
-            <button
-              type="button"
-              onClick={handleSaveSnapshot}
-              aria-label="Lưu ảnh khung hình"
-              title="Lưu ảnh phân tích"
-              className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full hover:bg-foreground/15"
-            >
-              <Download size={14} />
-            </button>
-
-            {/* 6. Lật gương */}
-            <button
-              type="button"
-              onClick={() => setMirrored(v => !v)}
-              aria-label="Lật gương"
-              title="Lật gương"
-              aria-pressed={mirrored}
-              className={cn(
-                'inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full hover:bg-foreground/15',
-                mirrored && 'bg-foreground/20',
-              )}
-            >
-              <FlipHorizontal2 size={14} />
-            </button>
-
-            {/* 7. Nút Bật/Tắt âm thanh video */}
-            {source === 'video' && (
-              <button
-                type="button"
-                onClick={() => {
-                  const v = videoRef.current;
-                  if (!v) return;
-                  v.muted = !v.muted;
-                  setVideoMuted(v.muted);
-                }}
-                aria-label={videoMuted ? 'Bật âm thanh video' : 'Tắt tiếng video'}
-                title={videoMuted ? 'Bật âm thanh video' : 'Tắt tiếng video'}
-                className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full hover:bg-foreground/15"
-              >
-                {videoMuted ? <VolumeX size={14} /> : <Volume2 size={14} />}
-              </button>
-            )}
-
-            {/* 8. Nút Toàn màn hình */}
-            <button
-              type="button"
-              onClick={handleToggleFullscreen}
-              aria-label={isFullscreen ? 'Thu nhỏ màn hình' : 'Toàn màn hình'}
-              title={isFullscreen ? 'Thoát toàn màn hình' : 'Toàn màn hình'}
-              className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full hover:bg-foreground/15"
-            >
-              {isFullscreen ? <Minimize size={14} /> : <Maximize size={14} />}
-            </button>
-
-            {/* Vách ngăn mờ */}
-            <div className="mx-0.5 h-4 w-px bg-foreground/15" />
-
-            {/* 9. Nút Hỏi SmartGym tích hợp */}
-            <button
-              type="button"
-              onClick={() => setDockMinimized(v => !v)}
-              title="Hỏi trợ lý SmartGym (Phân tích lỗi & Kỹ thuật)"
-              aria-pressed={!dockMinimized}
-              className={cn(
-                'inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full px-3 text-xs font-semibold transition-all',
-                !dockMinimized
-                  ? 'bg-primary text-primary-foreground shadow-md'
-                  : 'hover:bg-foreground/15 text-foreground/85',
-              )}
-            >
-              <Sparkles size={14} className={!dockMinimized ? 'text-primary-foreground' : 'text-primary'} />
-              <span className="hidden sm:inline">Hỏi SmartGym</span>
-            </button>
-
-            {/* 10. Đóng nguồn */}
-            <button
-              type="button"
-              onClick={stopMedia}
-              aria-label="Đóng nguồn hình"
-              title="Đóng nguồn video"
-              className="inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full hover:bg-foreground/15"
-            >
-              <X size={15} />
-            </button>
           </div>
         </div>
       )}
@@ -1569,7 +1841,7 @@ export function PoseStudio({ initialExercise = 'squat' }: { initialExercise?: V4
           className={cn(
             'pointer-events-none absolute left-1/2 top-16 z-10 max-w-[90%] -translate-x-1/2 rounded-full px-4 py-1.5 text-xs font-medium sm:top-[72px]',
             glass,
-            noticeKind === 'error' && '!bg-[#ff453a]/85 text-white',
+            noticeKind === 'error' && '!bg-rose-500/90 text-white shadow-lg shadow-rose-500/25',
           )}
         >
           {noticeText}

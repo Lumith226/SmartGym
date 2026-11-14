@@ -116,7 +116,10 @@ export function createGoogleHandler({
             method: 'POST', body, ip, cookie: sessionCookie(request.headers.get('cookie') ?? ''),
           });
           if (result.status === 409) return loginPage + '?google=link-conflict';
-          if (result.status === 429) return loginPage + '?google=rate-limited';
+          if (result.status === 429) {
+            console.warn('Google sign-in rate limited', { code: 'RATE_LIMITED' });
+            return loginPage + '?google=rate-limited';
+          }
           if (result.status === 403 && result.body?.code === 'EMAIL_UNVERIFIED') return loginPage + '?google=verify-email';
           if (result.status !== 200 || !valid('Profile', result.body) || !result.body.emailVerified ||
               result.cookies.length !== 1 || !identitySessionCookie.test(result.cookies[0])) return loginFailed;

@@ -77,7 +77,7 @@ export default async function Login({
           Đăng nhập SmartGym
         </h2>
         <p className="m-0 text-xs text-muted-foreground">
-          Nhập thông tin tài khoản của bạn để vào phòng tập AI.
+          Nhập thông tin tài khoản của bạn để vào phòng tập.
         </p>
       </div>
 

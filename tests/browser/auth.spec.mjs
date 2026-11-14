@@ -343,7 +343,7 @@ test('CMS exercise list handles bulk publication, partial failures and row statu
     expect(response.status()).toBe(201);
   }
   await page.goto(stack.url + '/admin/bai-tap?q=' + encodeURIComponent('Thao tác nhóm'));
-  const all = page.getByRole('checkbox', { name: 'Chọn tất cả bài trên trang' });
+  const all = page.getByRole('checkbox', { name: 'Chọn tất cả bài tập' });
   await all.check();
   await page.getByRole('button', { name: 'Công bố (3)', exact: true }).click();
   await page.getByRole('dialog').getByRole('button', { name: 'Xác nhận công bố', exact: true }).click();
@@ -384,6 +384,46 @@ test('CMS exercise list handles bulk publication, partial failures and row statu
   await expect(page.getByText('Thành công 1 bài', { exact: true })).toBeVisible();
   expect((await context.request.get(api + '/bulk_b')).status()).toBe(404);
   expect((await context.request.get(api + '/bulk_a')).status()).toBe(200);
+});
+
+test('CMS selects all matching exercises across pages and keeps individual exclusions', async ({ page, context }) => {
+  const email = 'cms-selection@example.test';
+  await setupUser(context, email);
+  const actor = (await stack.identityDb.query('SELECT id FROM users WHERE email_normalized=$1', [email])).rows[0].id;
+  await stack.identity.setRole(actor, 'ADMIN', null);
+  await login(page, email, '?next=/admin');
+  await expect(page).toHaveURL(stack.url + '/admin');
+
+  const items = Array.from({ length: 21 }, (_, index) => ({
+    id: 'selection_' + index, slug: 'selection-' + index, nameVi: 'Bài phân trang ' + (index + 1),
+    status: 'DRAFT', updatedAt: '2026-11-14T04:00:00Z', primaryMuscleIds: [], draftVersion: 1,
+  }));
+  const filters = new Set();
+  await page.route('**/api/v1/admin/exercises?*', route => {
+    const query = new URL(route.request().url()).searchParams;
+    if (query.get('limit') === '5') return route.continue();
+    filters.add(query.get('q') + ':' + query.get('status'));
+    const number = Number(query.get('page') ?? (query.has('cursor') ? 2 : 1));
+    return route.fulfill({ json: {
+      items: items.slice((number - 1) * 20, number * 20),
+      nextCursor: query.has('page') || number === 2 ? null : 'next-fixture',
+      ...(query.has('page') ? { pagination: { page: number, pageSize: 20, total: 21 } } : {}),
+    } });
+  });
+  await page.goto(stack.url + '/admin/bai-tap?q=fixture&status=DRAFT');
+  await page.getByRole('checkbox', { name: 'Chọn tất cả bài tập' }).click();
+  await expect(page.getByText('Đã chọn 21 bài')).toBeVisible();
+  await page.getByRole('link', { name: 'Trang 2', exact: true }).click();
+  const finalRow = page.getByRole('checkbox', { name: 'Chọn Bài phân trang 21', exact: true });
+  await expect(finalRow).toBeChecked();
+  await finalRow.uncheck();
+  await page.getByRole('link', { name: 'Trang 1', exact: true }).click();
+  await expect(page.getByText('Đã chọn 20 bài')).toBeVisible();
+  await page.getByRole('button', { name: 'Công bố (20)', exact: true }).click();
+  const dialog = page.getByRole('dialog');
+  await expect(dialog.getByText('Bài phân trang 1', { exact: true })).toBeVisible();
+  await expect(dialog.getByText('Bài phân trang 21', { exact: true })).toHaveCount(0);
+  expect([...filters]).toEqual(['fixture:DRAFT']);
 });
 
 test('revoking ADMIN blocks save from an open CMS tab and preserves the draft', async ({ page, context }) => {
@@ -626,7 +666,7 @@ test('CMS uploads and verifies media in private storage', async ({ page, context
   await expect(page).toHaveURL(detail);
   await expect(page.getByRole('heading', { name: 'Cách thực hiện', exact: true })).toBeVisible();
   await expect(page.getByRole('heading', { name: 'Nhóm cơ và dụng cụ' })).toBeVisible();
-  await expect(page.getByRole('link', { name: 'Tập với Pose AI' })).toHaveCount(0);
+  await expect(page.getByRole('link', { name: 'Tập tại phòng tập' })).toHaveCount(0);
   await expect(page.getByText('MediaPipe Pose Ready')).toHaveCount(0);
   await expect(page.getByText('Biến thể kiểm thử', { exact: true })).toHaveCount(0);
   const image = page.getByRole('img', { name: 'Ảnh kiểm thử nội bộ' });

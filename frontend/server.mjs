@@ -41,6 +41,10 @@ async function main(){
     try{
       if(!req.url?.startsWith('/')||req.url.startsWith('//')){problem(res,400,'BAD_REQUEST');return;}
       const url=new URL(req.url,config?.webOrigin??'http://localhost'),path=url.pathname;
+      if(req.method==='GET' && ['/health/live','/health/ready'].includes(path)){
+        res.writeHead(200,{'content-type':'application/json','cache-control':'no-store'});
+        res.end(JSON.stringify({status:path.endsWith('/live')?'live':'ready'}));return;
+      }
       if(path.startsWith('/internal/')){problem(res,404,'NOT_FOUND');return;}
       if(await handleMediaGateway(req,res,url,config?.webOrigin))return;
       if(path.startsWith('/api/auth/')){

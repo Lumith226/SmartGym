@@ -11,7 +11,7 @@ export function createCatalogHealthModule(database: Database) {
 
     @Get('health/ready')
     async ready() {
-      const result = await this.database.query('SELECT version FROM catalog_migrations WHERE version=8');
+      const result = await this.database.query('SELECT version FROM catalog_migrations WHERE version=11');
       if (!result.rows.length) throw new Error('Migration not applied');
       return { status: 'ready' };
     }

@@ -1234,5 +1234,32 @@
         "pattern": "^[a-z][a-z0-9_]{0,79}$"
       }
     }
+  },
+  "PoseExerciseLinkUpdate": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "poseId"
+    ],
+    "properties": {
+      "poseId": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]{0,63}$"
+      },
+      "exerciseId": {
+        "anyOf": [
+          {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$"
+          },
+          {
+            "type": "null"
+          }
+        ]
+      },
+      "enabled": {
+        "type": "boolean"
+      }
+    }
   }
 }

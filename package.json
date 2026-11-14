@@ -58,5 +58,10 @@
   },
   "optionalDependencies": {
     "@embedded-postgres/windows-x64": "18.6.0-beta.19"
+  },
+  "dependencies": {
+    "@opentelemetry/api": "1.10.0",
+    "@opentelemetry/auto-instrumentations-node": "0.83.1",
+    "redis": "6.3.1"
   }
 }
