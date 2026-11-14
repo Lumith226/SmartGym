@@ -18,5 +18,3 @@ SmartGym là nền tảng tập luyện tiếng Việt gồm thư viện bài t�
 | [docs/](docs/README.md) | Hướng dẫn chạy, thiết kế hệ thống và trạng thái nghiệm thu |
 
 Khi sửa mã, đọc [hướng dẫn phát triển, kiểm thử](docs/guides/DEVELOPMENT.md). Xem tình trạng từng tính năng ở [bảng công việc](docs/planning/TASKS.md).
-
-[Exercise data by RepDB (repdb.co)](https://repdb.co/) được dùng trong Catalog cục bộ. Tải nguồn riêng theo [giấy phép RepDB](https://github.com/RepDB/exercise-dataset/blob/main/LICENSE-DATA.md).
