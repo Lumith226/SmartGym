@@ -7,7 +7,8 @@ import { correlationId } from '../../request-context.js';
 const DAY = 86400000;
 export function denied(code: string, status: number): never { throw new HttpException({ code }, status); }
 type User = Record<string, unknown> & { id: string; email: string; display_name: string; time_zone: string;
-  role: string; status: string; email_verified_at: Date | null; created_at: Date; version: number };
+  role: string; status: string; email_normalized: string; google_subject: string | null;
+  email_verified_at: Date | null; created_at: Date; version: number };
 type Action = Record<string, unknown> & { id: string; user_id: string; purpose: string; encrypted_delivery_secret: string | null;
   expires_at: Date; used_at: Date | null; superseded_at: Date | null };
 export interface IdentityOptions { keys: IdentityKeys; webOrigin: string; now?: () => Date }
@@ -124,11 +125,26 @@ export class Identity {
         await this.audit(client, created, 'REGISTER_GOOGLE', now);
         return this.openSession(client, created, 1, 'LOGIN_GOOGLE', previous);
       }
-      const user = (await client.query<User>('SELECT * FROM users WHERE google_subject=$1 FOR UPDATE', [body.subject])).rows[0];
-      if (!user) denied('GOOGLE_EMAIL_EXISTS', 409);
-      if (user.status !== 'ACTIVE' || user.email !== email) denied('INVALID_CREDENTIALS', 401);
+      let user = (await client.query<User>('SELECT * FROM users WHERE google_subject=$1 FOR UPDATE', [body.subject])).rows[0];
+      if (!user) {
+        // The mTLS-only endpoint receives an authoritative Google email verified by the BFF.
+        user = (await client.query<User>('SELECT * FROM users WHERE email_normalized=$1 FOR UPDATE', [email])).rows[0];
+      }
+      if (!user || user.email_normalized !== email || user.status === 'DISABLED') denied('INVALID_CREDENTIALS', 401);
+      if (user.google_subject && user.google_subject !== body.subject) denied('GOOGLE_EMAIL_EXISTS', 409);
+      if (user.status !== 'ACTIVE' || !user.email_verified_at) denied('EMAIL_UNVERIFIED', 403);
+      if (!user.google_subject) {
+        user = (await client.query<User>(`UPDATE users SET google_subject=$2, updated_at=$3, version=version+1
+          WHERE id=$1 RETURNING *`, [user.id, body.subject, now])).rows[0];
+        await this.audit(client, user, 'LINK_GOOGLE', now);
+      }
       const current = (await client.query<{ credential_version: number }>('SELECT credential_version FROM credentials WHERE user_id=$1', [user.id])).rows[0];
       return this.openSession(client, user, current.credential_version, 'LOGIN_GOOGLE', previous);
+    }).catch((error: unknown) => {
+      // Two callbacks can race for the same subject while locking different emails.
+      if (typeof error === 'object' && error !== null && 'code' in error && error.code === '23505' &&
+          'constraint' in error && error.constraint === 'users_google_subject_key') denied('GOOGLE_EMAIL_EXISTS', 409);
+      throw error;
     });
   }
   private async openSession(client: SqlClient, user: User, version: number, action: string, previous?: string) {

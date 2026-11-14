@@ -28,7 +28,8 @@ export function createAccountsModule(identity: Identity) {
     private async input(request: Request, schema: string, body: unknown, category: string) {
       await this.limitIp(request, category);
       const value = validate(schema, body);
-      if (value.email) await this.identity.limit('email:' + category, value.email.toLowerCase(), category === 'login' ? 10 : 3);
+      const emailLimit = ['login', 'google-login'].includes(category) ? 10 : 3;
+      if (value.email) await this.identity.limit('email:' + category, value.email.toLowerCase(), emailLimit);
       return value;
     }
     @Post('api/v1/auth/register') @HttpCode(202)

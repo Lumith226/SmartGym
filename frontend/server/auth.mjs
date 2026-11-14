@@ -1,10 +1,11 @@
 import { randomUUID } from 'node:crypto';
 import { isIP } from 'node:net';
 import { operations, valid } from './contracts.mjs';
-import { AuthError, sessionCookie, identityRequest, hasLegacySessionCookie, clearLegacySessionCookie } from './identity-client.mjs';
+import { AuthError, sessionCookie, identitySessionCookie, identityRequest, hasLegacySessionCookie, clearLegacySessionCookie } from './identity-client.mjs';
+import { authenticatePassword } from './auth-js.mjs';
 
 export const allowedCookies = {
-  session: /^__Host-sg_session=[A-Za-z0-9_-]{43}; Path=\/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800$/,
+  session: identitySessionCookie,
   clear: /^__Host-sg_session=; Path=\/; HttpOnly; Secure; SameSite=Lax; Max-Age=0$/,
 };
 
@@ -15,7 +16,7 @@ export function problem(res, status, code, detail) {
   res.end(JSON.stringify({ type: 'about:blank', title: 'Không thể thực hiện yêu cầu', status, code, requestId: randomUUID(), ...(detail ? { detail } : {}) }));
 }
 
-export function readJson(req, limit = 16384) {
+export function readBody(req, limit = 16384) {
   return new Promise((resolve, reject) => {
     let text = '', size = 0, settled = false;
     const timer = setTimeout(() => fail(new AuthError(400, 'BAD_REQUEST')), 5000);
@@ -31,16 +32,17 @@ export function readJson(req, limit = 16384) {
     req.on('aborted', () => fail(new AuthError(400, 'BAD_REQUEST')));
     req.on('end', () => {
       if (settled) return;
-      try {
-        const body = text ? JSON.parse(text) : {};
-        settled = true;
-        clearTimeout(timer);
-        resolve(body);
-      } catch {
-        fail(new AuthError(400, 'BAD_REQUEST'));
-      }
+      settled = true;
+      clearTimeout(timer);
+      resolve(text);
     });
   });
+}
+
+export async function readJson(req, limit) {
+  const text = await readBody(req, limit);
+  try { return text ? JSON.parse(text) : {}; }
+  catch { throw new AuthError(400, 'BAD_REQUEST'); }
 }
 
 export function requireSameOrigin(req, webOrigin) {
@@ -67,7 +69,10 @@ export async function handleAuth(req, res, config) {
     if (url.pathname === '/api/v1/me' || ['/api/v1/auth/login', '/api/v1/auth/logout'].includes(url.pathname)) {
       try { cookie = sessionCookie(req.headers.cookie ?? ''); } catch (error) { throw operation.errors.includes(401) ? error : new AuthError(400, 'BAD_REQUEST'); }
     }
-    const upstream = await identityRequest(config, url.pathname, { method: req.method, body, cookie, ip, origin: req.headers.origin, csrf: req.headers['x-smartgym-csrf'] });
+    const options = { method: req.method, body, cookie, ip, origin: req.headers.origin, csrf: req.headers['x-smartgym-csrf'] };
+    const upstream = url.pathname === '/api/v1/auth/login'
+      ? await authenticatePassword(config, options)
+      : await identityRequest(config, url.pathname, options);
     if (upstream.status !== operation.success) {
       if (!operation.errors.includes(upstream.status) || !valid('Problem', upstream.body)) throw new AuthError();
       if (upstream.status === 429) res.setHeader('Retry-After', /^\d{1,5}$/.test(upstream.retryAfter ?? '') ? upstream.retryAfter : '900');

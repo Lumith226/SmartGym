@@ -2,6 +2,7 @@ import {readFile} from 'node:fs/promises';
 import {request} from 'node:https';
 import {valid} from './contracts.mjs';
 export const SESSION='__Host-sg_session';
+export const identitySessionCookie=/^__Host-sg_session=[A-Za-z0-9_-]{43}; Path=\/; HttpOnly; Secure; SameSite=Lax; Max-Age=604800$/;
 export class AuthError extends Error{
   constructor(status=503,code='AUTH_UNAVAILABLE'){super(code);this.status=status;this.code=code;}
 }

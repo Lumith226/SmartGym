@@ -1,7 +1,7 @@
 import Link from 'next/link';
 import { AccountForm } from '../../auth/forms';
 import { safeReturnPath } from '../../auth/navigation';
-import { Button } from '../../../components/ui/button';
+import { GoogleButton } from '../../auth/google-button';
 
 export const metadata = { title: 'Đăng nhập — SmartGym' };
 
@@ -18,9 +18,13 @@ export default async function Login({
   const googleEnabled = process.env.BFF_AUTH_ENABLED === 'true' && googleConfigured;
 
   const googleMessage =
-    query.google === 'email-exists'
-      ? 'Email này đã có tài khoản SmartGym. Hãy đăng nhập bằng mật khẩu.'
-      : query.google === 'failed'
+    query.google === 'link-conflict'
+      ? 'Tài khoản SmartGym này đã liên kết với một tài khoản Google khác.'
+      : query.google === 'verify-email'
+      ? 'Hãy xác minh email SmartGym trước khi đăng nhập bằng Google.'
+      : query.google === 'rate-limited'
+      ? 'Bạn đã thử đăng nhập Google quá nhiều lần. Hãy đợi tối đa 15 phút rồi thử lại.'
+      : query.google === 'failed' || typeof query.error === 'string'
       ? 'Chưa đăng nhập được bằng Google. Hãy thử lại hoặc dùng mật khẩu.'
       : query.google === 'unavailable'
       ? 'Dịch vụ Google Login đang bảo trì hoặc chưa bật BFF_AUTH_ENABLED.'
@@ -79,27 +83,7 @@ export default async function Login({
 
       {/* Nút đăng nhập Google */}
       <div>
-        <Button
-          asChild={googleEnabled}
-          type={googleEnabled ? undefined : 'button'}
-          disabled={!googleEnabled}
-          aria-describedby={googleEnabled ? undefined : 'google-sign-in-status'}
-          variant="outline"
-          className="h-11 w-full rounded-xl border border-border bg-card text-xs font-semibold text-foreground transition-all hover:bg-accent hover:border-primary/40 cursor-pointer"
-        >
-          {googleEnabled ? (
-            <a
-              href="/api/v1/auth/google"
-              className="inline-flex items-center justify-center gap-2.5 no-underline"
-            >
-              {googleLabel}
-            </a>
-          ) : (
-            <span className="inline-flex items-center justify-center gap-2.5 opacity-60 cursor-not-allowed">
-              {googleLabel}
-            </span>
-          )}
-        </Button>
+        <GoogleButton enabled={googleEnabled}>{googleLabel}</GoogleButton>
 
         {googleMessage && (
           <p

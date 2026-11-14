@@ -204,7 +204,7 @@ test('Pose upload and live lifecycle over real PostgreSQL, S3 and mTLS', { timeo
       const livePort = await freePort(), bffPort = await freePort(), webOrigin = 'https://127.0.0.1:' + bffPort;
       const liveApi = startProcess(['dist/main.js'], 'backend/services/pose', { ...config, ...engineConfig, POSE_PORT: String(livePort), POSE_LIVE_ENABLED: 'true' });
       cleanup.push(() => liveApi.stop());
-      const identityEnv = { BFF_AUTH_ENABLED: 'true', BFF_WEB_ORIGIN: webOrigin, BFF_IDENTITY_ORIGIN: config.POSE_IDENTITY_ORIGIN,
+      const identityEnv = { BFF_AUTH_ENABLED: 'true', AUTH_SECRET: randomBytes(32).toString('base64url'), BFF_WEB_ORIGIN: webOrigin, BFF_IDENTITY_ORIGIN: config.POSE_IDENTITY_ORIGIN,
         BFF_IDENTITY_KEY_FILE: join(tls.directory,'bff.key'), BFF_IDENTITY_CERT_FILE: join(tls.directory,'bff.crt'), BFF_IDENTITY_CA_FILE: join(tls.directory,'ca.crt') };
       async function issueSession(owner) {
         const handle = randomBytes(32).toString('base64url'), session = randomUUID();

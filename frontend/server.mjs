@@ -3,8 +3,8 @@ import {createServer as httpServer} from 'node:http';
 import {createServer as httpsServer} from 'node:https';
 import {readFile} from 'node:fs/promises';
 import {loadAuthConfig,profileForSession,AuthError} from './server/identity-client.mjs';
-import {handleAuth,problem} from './server/auth.mjs';
-import {handleGoogleAuth} from './server/google-auth.mjs';
+import {handleAuth,problem,readBody} from './server/auth.mjs';
+import {handleGoogleAuth,loadAuthJsConfig} from './server/auth-js.mjs';
 import {handleCatalogAdmin} from './server/catalog-admin.mjs';
 import {handleWorkout} from './server/workout.mjs';
 import {handleProgress} from './server/progress.mjs';
@@ -29,6 +29,7 @@ async function main(){
   const port=Number(process.env.PORT??'3000'),hostname=process.env.HOST??'0.0.0.0';
   if(!Number.isInteger(port)||port<1||port>65535)throw new Error('Invalid web port');
   const enabled=process.env.BFF_AUTH_ENABLED==='true',config=enabled?await loadAuthConfig():null;
+  if(config)await loadAuthJsConfig();
   const pose=config?await loadPoseLiveConfig():null;
   const studio=config?await loadPoseStudio(config.webOrigin):null;
   const webTls=enabled?{key:await readFile(process.env.BFF_WEB_KEY_FILE,'utf8'),cert:await readFile(process.env.BFF_WEB_CERT_FILE,'utf8'),minVersion:'TLSv1.2'}:null;
@@ -42,9 +43,26 @@ async function main(){
       const url=new URL(req.url,config?.webOrigin??'http://localhost'),path=url.pathname;
       if(path.startsWith('/internal/')){problem(res,404,'NOT_FOUND');return;}
       if(await handleMediaGateway(req,res,url,config?.webOrigin))return;
-      if(path==='/api/v1/auth/google'||path==='/api/v1/auth/google/callback'){
+      if(path.startsWith('/api/auth/')){
         if(!config){problem(res,503,'AUTH_UNAVAILABLE');return;}
-        await handleGoogleAuth(req,res,config);return;
+        if(!req.socket.encrypted||req.headers.host!==url.host){problem(res,403,'ORIGIN_REJECTED');return;}
+        if(!['GET','POST'].includes(req.method)){problem(res,405,'METHOD_NOT_ALLOWED');return;}
+        const headers=new Headers();
+        for(const name of ['cookie','origin','content-type','x-auth-return-redirect']){
+          if(typeof req.headers[name]==='string')headers.set(name,req.headers[name]);
+        }
+        let body;
+        if(req.method==='POST'){
+          if(headers.get('origin')!==url.origin||['cross-site','same-site'].includes(req.headers['sec-fetch-site'])){problem(res,403,'CSRF_REJECTED');return;}
+          if(headers.get('content-type')?.split(';')[0].trim()!=='application/x-www-form-urlencoded'){problem(res,400,'BAD_REQUEST');return;}
+          try{body=await readBody(req,4096);}catch{problem(res,400,'BAD_REQUEST');return;}
+        }
+        const response=await handleGoogleAuth(new Request(url,{method:req.method,headers,body}),config,req.socket.remoteAddress?.replace(/^::ffff:/,''));
+        const outgoing=Object.fromEntries(response.headers);
+        const cookies=response.headers.getSetCookie();
+        if(cookies.length)outgoing['set-cookie']=cookies;
+        res.writeHead(response.status,outgoing);
+        res.end(Buffer.from(await response.arrayBuffer()));return;
       }
       if(path==='/api/v1/chat'||path.startsWith('/api/v1/chat/')){
         if(!config){problem(res,503,'RAG_DISABLED');return;}

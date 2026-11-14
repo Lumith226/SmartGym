@@ -1,8 +1,9 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';
-import {createServer,request} from 'node:https';import {randomUUID} from 'node:crypto';
+import {createServer,request} from 'node:https';import {randomBytes,randomUUID} from 'node:crypto';
 import {createTestTls} from '../../backend/services/identity/test/tls.cjs';
 import {handleAuth} from '../../frontend/server/auth.mjs';
 test('BFF trust boundary, response filtering and secure cookie policy',{timeout:30000},async t=>{
+  process.env.AUTH_SECRET=randomBytes(32).toString('base64url');
   const tls=await createTestTls(),cleanup=[];cleanup.push(tls.stop);
   t.after(async()=>{for(const close of cleanup.reverse())await close();});
   let count=0,last,mode='valid';

@@ -273,7 +273,7 @@ test('Identity lifecycle, mTLS and HTTP contracts', { timeout: 120000 }, async t
       const jwks=await call('/internal/v1/identity/jwks',{caller:'catalog',targetPort}); assert.equal(jwks.status,200); assert.equal(jwks.body.keys[0].kid,'entrypoint-test');
     } finally { if(child.exitCode===null && child.signalCode===null)child.kill(); await exited; }
   });
-  await t.test('Google identity is restricted to BFF and keeps a stable account without claiming existing emails', async () => {
+  await t.test('Google links an existing verified account while preserving its identity and privileges', async () => {
     const path = '/internal/v1/identity/google-login';
     const body = { subject: 'fixture-google-subject', email: 'google-fixture@gmail.com', displayName: 'Google Demo' };
     await error(path, { method: 'POST', body, caller: 'catalog' }, 403, 'SERVICE_FORBIDDEN');
@@ -287,8 +287,24 @@ test('Identity lifecycle, mTLS and HTTP contracts', { timeout: 120000 }, async t
     await error('/api/v1/me', { headers: { cookie } }, 401, 'UNAUTHENTICATED');
     await error(path, { method: 'POST', body: { ...body, subject: 'other-subject' } }, 409, 'GOOGLE_EMAIL_EXISTS');
     await error(path, { method: 'POST', body: { ...body, email: 'changed@gmail.com' } }, 401, 'INVALID_CREDENTIALS');
-    await register('existing-password@example.test');
-    await error(path, { method: 'POST', body: { ...body, subject: 'new-subject', email: 'existing-password@example.test' } }, 409, 'GOOGLE_EMAIL_EXISTS');
+    const email = 'existing-password@gmail.com';
+    const linkedBody = { ...body, subject: 'new-subject', email };
+    await register(email);
+    await error(path, { method: 'POST', body: linkedBody }, 403, 'EMAIL_UNVERIFIED');
+    await verifyEmail(email);
+    await database.query("UPDATE users SET role='ADMIN' WHERE email_normalized=$1", [email]);
+    const existing = await login(email);
+    const linked = await success(path, { method: 'POST', body: linkedBody }, 200, 'Profile');
+    assert.deepEqual(linked.body, existing.profile);
+    assert.deepEqual(linked.body.roles, ['ADMIN']);
+    const linkedCookie = linked.headers['set-cookie'][0].split(';')[0];
+    const me = await success('/api/v1/me', { headers: { cookie: linkedCookie } }, 200, 'Profile');
+    assert.deepEqual(me.body, existing.profile);
+    await error(path, { method: 'POST', body: { ...linkedBody, subject: 'replacement-subject' } }, 409, 'GOOGLE_EMAIL_EXISTS');
+    assert.equal((await login(email)).profile.id, linked.body.id);
+    assert.equal((await database.query("SELECT action FROM identity_audit WHERE target_user_id=$1 AND action='LINK_GOOGLE'", [linked.body.id])).rows.length, 1);
+    await database.query("UPDATE users SET status='DISABLED' WHERE id=$1", [linked.body.id]);
+    await error(path, { method: 'POST', body: linkedBody }, 401, 'INVALID_CREDENTIALS');
   });
   await t.test('Argon2id local benchmark (not a deployment load gate)',async () => {
     const start=performance.now(); for(let i=0;i<5;i++)await hashPassword(password);

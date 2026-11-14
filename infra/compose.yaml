@@ -471,6 +471,7 @@ services:
       PORT: "3100"
       CATALOG_URL: http://catalog:3001
       BFF_AUTH_ENABLED: "true"
+      BFF_AUTHJS_SECRET_FILE: /run/secrets/authjs-secret
       BFF_WEB_ORIGIN: ${SMARTGYM_WEB_ORIGIN:-https://127.0.0.1:3100}
       BFF_CATALOG_MEDIA_ORIGIN: ${SMARTGYM_WEB_ORIGIN:-https://127.0.0.1:3100}
       BFF_POSE_UPLOAD_ORIGIN: ${SMARTGYM_WEB_ORIGIN:-https://127.0.0.1:3100}

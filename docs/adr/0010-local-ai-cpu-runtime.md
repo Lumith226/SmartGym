@@ -4,6 +4,8 @@ T21 là cổng nhận bàn giao engine: hash/schema, inference và raw fixtures 
 
 ACCEPTED cho môi trường development T21 ngày 2026-11-07. Người dùng đã chọn chạy AI trên máy hiện tại; được quyền chọn công cụ/runtime có thể đảo ngược trong WRITE_ROOT. Không thay framework nghiệp vụ hoặc mã/weights bàn giao.
 
+Phạm vi của quyết định này là profile smoke CPU T21. Môi trường hiện còn có tùy chọn tăng tốc Pose DirectML trên Windows x64. Xem [Runbook](../guides/OPERATIONS.md#directml-trên-windows) và [launcher](../../scripts/run-pose-directml.mjs) để biết cách chạy và phần pipeline dùng GPU.
+
 uv 0.13.7 portable có SHA-256 từ GitHub release chính thức; CPython 3.12.16 build 20261026 được kiểm từ distribution catalog của bản uv này. Binary/env/cache/temp đặt trong .local/ai, tắt cài executable, Windows registry và sửa PATH. Hai venv riêng cho Pose và RAG. RAG giữ nguyên tất cả 23 pin requirements.lock.txt của provider, thêm hash để sync.
 
 Resolve nguyên manifest Pose cho thấy rtmlib 0.0.16 yêu cầu onnxruntime không pin và cả opencv-python/opencv-contrib-python. Điều này kéo CPU ORT 1.31.1 song song GPU ORT 1.19.2, OpenCV contrib 5.0 song song core 4.12. Wheel dùng cùng namespace nên pip check không chứng minh implementation đúng. Kiểm import thực tế nạp ORT 1.31.1 CPU và cv2 4.12.0. CUDA không khả dụng trong runtime đã kiểm.

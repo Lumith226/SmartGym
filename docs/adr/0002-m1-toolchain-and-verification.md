@@ -4,7 +4,7 @@
 
 ## Bối cảnh và phương án
 
-Máy có Node.js 24 nhưng chưa có Docker CLI hoặc PostgreSQL server. M1 cần migration thật, import snapshot, public API và Web hoạt động qua hợp đồng. Dùng SQL migration và driver pg đáp ứng các ràng buộc PostgreSQL dự kiến. Next.js và NestJS đã được chọn làm baseline và build/kiểm thử với dependency có lockfile.
+Khi bắt đầu M1, máy có Node.js 24 và chưa có Docker CLI hoặc PostgreSQL server. M1 cần migration thật, import snapshot, public API và Web hoạt động qua hợp đồng. Dùng SQL migration và driver pg đáp ứng các ràng buộc PostgreSQL dự kiến. Next.js và NestJS đã được chọn làm baseline và build/kiểm thử với dependency có lockfile. Cách chạy hệ thống hiện tại nằm trong [hướng dẫn Docker](../guides/GETTING_STARTED.md).
 
 Các phương án kiểm chứng gồm chỉ dùng database nhúng, chờ môi trường Compose, hoặc bổ sung PostgreSQL server portable trong workspace. Chọn test nhanh bằng PGlite cùng test TCP trên server portable Windows x64. Chọn Playwright để thao tác Web thật và Swagger Parser/Ajv để xác minh hợp đồng. Tài sản này thuộc công cụ kiểm thử, không thêm backend service.
 

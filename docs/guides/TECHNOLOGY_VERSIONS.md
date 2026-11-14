@@ -40,6 +40,7 @@ Trạng thái phiên bản là NOT_PINNED hoặc PINNED. Bằng chứng cài đ�
 | OpenSSL cho test Identity | 3.5.9, 29 Sep 2026 tại Git for Windows | INSTALLED, RUNTIME_VERIFIED sinh CA/client/server certificate tạm. Không phải dependency/runtime của Identity. Máy khác dùng OPENSSL_TEST_BINARY và ghi bản chạy thực tế | openssl version và backend/services/identity/test/tls.cjs |
 | pnpm | 11.25.0 | PINNED qua packageManager, INSTALLED, install frozen lockfile đã chạy | [pnpm](https://pnpm.io/installation), root manifest và lockfile |
 | Next.js | 16.4.5 | PINNED, BUILD_VERIFIED. T10 dùng custom Node server với App Router và mTLS adapter. Tài liệu kiểm ngày 2026-11-07 hiển thị 16.4.5 | [Next custom server](https://nextjs.org/docs/app/guides/custom-server), [ADR 0005](../adr/0005-web-auth-bff.md), frontend/package.json |
+| Auth.js / NextAuth.js | `@auth/core` 0.41.3, `next-auth` 5.0.0-beta.32, `jose` 6.2.17 | PINNED. Kiểm ngày 2026-11-14 qua manifest, mã đã cài, TypeScript và `pnpm test:bff`. Google callback kiểm bằng OIDC fixture. | [NextAuth API](https://authjs.dev/reference/nextjs), [Google provider](https://authjs.dev/reference/core/providers/google), [ADR 0025](../adr/0025-authjs-google-account-linking.md) |
 | React / React DOM | 19.3.1 | PINNED, build/typecheck cùng Next.js đã đạt | [React](https://react.dev/versions), manifest/lockfile |
 | NestJS common/core/platform-express | 12.4.0 | PINNED, BUILD_VERIFIED và RUNTIME_VERIFIED cho public Catalog. ESM được kiểm với tsc và startup | [NestJS first steps](https://docs.nestjs.com/first-steps), manifest và installed type definitions |
 | TypeScript | 5.9.3 | PINNED, typecheck trong build Web/Catalog đã đạt | [TypeScript 5.9](https://www.typescriptlang.org/docs/handbook/release-notes/typescript-5-9.html) |
@@ -58,7 +59,7 @@ Trạng thái phiên bản là NOT_PINNED hoặc PINNED. Bằng chứng cài đ�
 | ClamAV portable test | 1.5.4 Windows x64 | SHA-256 pin, clamd INSTREAM đã chạy với database chữ ký fixture. Signature production cần kiểm tại staging | [ClamAV release](https://github.com/Cisco-Talos/clamav/releases/tag/clamav-1.5.4), [protocol](https://docs.clamav.net/manual/Usage/ClamdProtocol.html) |
 | S3 fixture | SeaweedFS 4.52 Windows amd64 | SHA-256 pin, loopback versioning/private PUT/presign/range. Provider production chưa được chọn | [SeaweedFS release](https://github.com/seaweedfs/seaweedfs/releases/tag/4.52) |
 
-Prisma và Tailwind CSS chưa được chọn hoặc cài. Nếu đề xuất, ghi ADR và kiểm tính tương thích. PostgreSQL exclusion constraint cho lịch được quản lý bằng SQL migration và test race tại Workout, theo requirement WKT-003.
+Tailwind CSS 4.3.5 được pin trong manifest Web theo [ADR 0024](../adr/0024-frontend-ui-stack.md). Prisma chưa được chọn. PostgreSQL exclusion constraint cho lịch được quản lý bằng SQL migration và test race tại Workout, theo requirement WKT-003.
 
 M2/T38 khai báo Ajv 8.20.0 làm runtime dependency riêng trong Catalog để validate snapshot trước giao dịch. Cùng version đã pin ở toolchain, không dựa vào dependency dev của workspace khi chạy service. Schema snapshot có trong service/data, tính toàn vẹn tham chiếu được kiểm trước import và ràng buộc DB. Tham chiếu [PostgreSQL 18 LIMIT](https://www.postgresql.org/docs/18/queries-limit.html) và [chuẩn hóa chuỗi](https://www.postgresql.org/docs/18/functions-string.html) đã mở để thiết kế query bounded.
 

@@ -63,6 +63,7 @@ const signing = join(identityDir, 'signing.key');
 if (!await exists(signing)) await run(['genpkey', '-algorithm', 'RSA', '-pkeyopt', 'rsa_keygen_bits:2048', '-out', signing]);
 await saveIfMissing(join(identityDir, 'delivery.key'), secret());
 await saveIfMissing(join(identityDir, 'limiter.key'), secret());
+await saveIfMissing(join(directory, 'web', 'authjs-secret'), secret());
 
 const issuer = 'https://identity:3002';
 const webOrigin = 'https://127.0.0.1:3100';

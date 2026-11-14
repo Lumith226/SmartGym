@@ -1,3 +1,4 @@
+// @ts-check
 import { readFile } from 'node:fs/promises';
 import { request } from 'node:https';
 import { isIP } from 'node:net';
@@ -11,20 +12,45 @@ import {
 } from './identity-client.mjs';
 import { problem, readJson, requireSameOrigin } from './auth.mjs';
 import { loadPoseLiveConfig } from './pose-live.mjs';
+
+/** @typedef {'knowledge' | 'score' | 'summary' | 'practice'} ChatTask */
+/** @typedef {{message: string, task: ChatTask, poseResultIds?: string[], videoState?: 'none' | 'selected' | 'analyzing', conversation?: {role: 'user' | 'assistant', content: string}[]}} ChatRequest */
+/** @typedef {{origin: string, tls: import('node:https').RequestOptions, token?: string}} UpstreamConfig */
+/** @typedef {UpstreamConfig & {token: string, revision: string, sources: Map<string, {origins: Set<string>}>}} ChatConfig */
+/** @typedef {{method?: string, body?: object, authorization?: string, signal?: AbortSignal, limit?: number, timeout?: number, privateResponse?: boolean}} UpstreamOptions */
+/** @typedef {{status: number, body: unknown}} UpstreamResponse */
+/** @typedef {{userId: string, accessToken: string}} Principal */
+/** @typedef {{result: {id: string, exerciseId: string, expiresAt: string, source: 'VIDEO' | 'LIVE'}, sourceId: string, modelSha256: string, rawModelResult: {exercise: string, schema_version: string, model_provenance: {model_sha256: string}, source: {video_sha256?: string, live_session_sha256?: string}}}} PoseRawResultEnvelope */
+
 const ajv = new Ajv2020({ strict: false });
 addFormats(ajv);
 ajv.addSchema({ $id: 'web-chat', $defs: contracts.schemas });
-const valid = (name, value) => ajv.getSchema('web-chat#/$defs/' + name)(value);
+/** @param {keyof typeof contracts.schemas} name @param {unknown} value */
+const valid = (name, value) =>
+  ajv.getSchema('web-chat#/$defs/' + name)?.(value);
+/** @param {unknown} value @returns {value is ChatRequest} */
+const isChatRequest = (value) => valid('ChatRequest', value) === true;
+/** @param {unknown} value @returns {value is PoseRawResultEnvelope} */
+const isPoseResult = (value) => valid('PoseRawResultEnvelope', value) === true;
+/** @param {unknown} value @returns {value is Record<string, unknown>} */
+const isRecord = (value) => value !== null && typeof value === 'object';
+/** @param {unknown} value @returns {value is unknown[]} */
+const isList = (value) => Array.isArray(value);
+/** @param {unknown} value @param {string} key */
+const field = (value, key) => (isRecord(value) ? value[key] : undefined);
 const fail = (status = 503, code = 'RAG_UNAVAILABLE') =>
   new AuthError(status, code);
 const unsafeText =
   /(?<![A-Za-z0-9+.-])[A-Za-z]:[\\/]|(?:\/run\/secrets|\/home\/|\/tmp\/)|Bearer\s+\S+|(?:api[_-]?key|password|token)\s*[:=]\s*\S+/i;
+/** @param {unknown} v */
 const text = (v, max = 3000) => {
   if (typeof v !== 'string' || v.length > max || unsafeText.test(v))
     throw fail();
   return v;
 };
+/** @param {Record<string, unknown>} row @param {string[]} keys */
 const pick = (row, keys) => Object.fromEntries(keys.map((k) => [k, row[k]]));
+/** @template T @param {() => T | PromiseLike<T>} work @param {AbortSignal} signal @returns {Promise<T>} */
 function within(work, signal) {
   signal.throwIfAborted();
   return new Promise((resolve, reject) => {
@@ -36,45 +62,59 @@ function within(work, signal) {
       .finally(() => signal.removeEventListener('abort', abort));
   });
 }
+/** @param {string | undefined} filename */
+function readConfigFile(filename) {
+  if (!filename) throw fail();
+  return readFile(filename, 'utf8');
+}
+
+/** @returns {Promise<ChatConfig>} */
 export async function loadChatConfig() {
   if (process.env.BFF_RAG_ENABLED !== 'true') throw fail(503, 'RAG_DISABLED');
   const origin = process.env.BFF_RAG_ORIGIN,
     url = origin && URL.parse(origin),
     revision = process.env.BFF_RAG_RUNTIME_REVISION;
   if (
+    !origin ||
     !url ||
     url.origin !== origin ||
     url.protocol !== 'https:' ||
-    !/^[a-f0-9]{16}$/.test(revision ?? '')
+    !revision ||
+    !/^[a-f0-9]{16}$/.test(revision)
   )
     throw fail();
   const [key, cert, ca, secret, registryText] = await Promise.all([
     ...['KEY', 'CERT', 'CA'].map((k) =>
-      readFile(process.env['BFF_RAG_TLS_' + k + '_FILE'], 'utf8'),
+      readConfigFile(process.env['BFF_RAG_TLS_' + k + '_FILE']),
     ),
-    readFile(process.env.BFF_RAG_TOKEN_FILE, 'utf8'),
-    readFile(process.env.BFF_RAG_SOURCES_FILE, 'utf8'),
+    readConfigFile(process.env.BFF_RAG_TOKEN_FILE),
+    readConfigFile(process.env.BFF_RAG_SOURCES_FILE),
   ]);
   const token = secret.trim();
   if (token.length < 32 || token.length > 4096 || /\s/.test(token))
     throw fail();
+  /** @type {unknown} */
   const registry = JSON.parse(registryText);
-  if (!Array.isArray(registry) || registry.length > 10000) throw fail();
+  if (!isList(registry) || registry.length > 10000) throw fail();
+  /** @type {ChatConfig['sources']} */
   const sources = new Map();
   for (const row of registry) {
     if (
-      !row ||
+      !isRecord(row) ||
       typeof row.id !== 'string' ||
       !row.id.length ||
       row.id.length > 300 ||
       /^(?:ex_|catalog:)/i.test(row.id) ||
       sources.has(row.id) ||
       row.rightsStatus !== 'APPROVED' ||
+      typeof row.kind !== 'string' ||
       !['BOOK', 'HTML', 'NOTE'].includes(row.kind) ||
-      !Array.isArray(row.allowedOrigins)
+      !isList(row.allowedOrigins)
     )
       throw fail();
+    const origins = new Set();
     for (const origin of row.allowedOrigins) {
+      if (typeof origin !== 'string') throw fail();
       const u = URL.parse(origin);
       if (
         !u ||
@@ -87,11 +127,13 @@ export async function loadChatConfig() {
         isIP(u.hostname.replace(/^\[|\]$/g, ''))
       )
         throw fail();
+      origins.add(origin);
     }
-    sources.set(row.id, { origins: new Set(row.allowedOrigins) });
+    sources.set(row.id, { origins });
   }
   return { origin, tls: { key, cert, ca }, token, revision, sources };
 }
+/** @param {UpstreamConfig} config @param {string} path @param {UpstreamOptions} [options] @returns {Promise<UpstreamResponse>} */
 function call(
   config,
   path,
@@ -116,7 +158,9 @@ function call(
         method,
         agent: false,
         signal: AbortSignal.any(
-          [signal, AbortSignal.timeout(timeout)].filter(Boolean),
+          signal
+            ? [signal, AbortSignal.timeout(timeout)]
+            : [AbortSignal.timeout(timeout)],
         ),
         headers: {
           accept: 'application/json',
@@ -131,6 +175,7 @@ function call(
       },
       (res) => {
         let size = 0;
+        /** @type {Buffer[]} */
         const chunks = [];
         res.on('data', (chunk) => {
           size += chunk.length;
@@ -148,7 +193,7 @@ function call(
             )
               throw fail();
             resolve({
-              status: res.statusCode,
+              status: res.statusCode ?? 0,
               body: JSON.parse(Buffer.concat(chunks).toString('utf8')),
             });
           } catch {
@@ -161,16 +206,16 @@ function call(
     req.end(payload);
   });
 }
+/** @param {unknown} output @param {ChatTask} task @param {ChatConfig} config */
 function project(output, task, config) {
   if (
-    !output ||
+    !isRecord(output) ||
     output.task !== task ||
-    !Array.isArray(output.references) ||
-    !Array.isArray(output.evidence) ||
-    !Array.isArray(output.citations) ||
-    !Array.isArray(output.user_notices) ||
-    !output.session ||
-    typeof output.session !== 'object'
+    !isList(output.references) ||
+    !isList(output.evidence) ||
+    !isList(output.citations) ||
+    !isList(output.user_notices) ||
+    !isRecord(output.session)
   )
     throw fail();
   if (
@@ -180,9 +225,14 @@ function project(output, task, config) {
     output.user_notices.length > 50
   )
     throw fail();
+  /** @type {Map<string, Record<string, unknown>>} */
   const evidence = new Map();
   for (const e of output.evidence) {
-    if (!e || typeof e.chunk_id !== 'string' || evidence.has(e.chunk_id))
+    if (
+      !isRecord(e) ||
+      typeof e.chunk_id !== 'string' ||
+      evidence.has(e.chunk_id)
+    )
       throw fail();
     evidence.set(e.chunk_id, e);
   }
@@ -193,10 +243,17 @@ function project(output, task, config) {
   )
     throw fail();
   const references = output.references.map((r, i) => {
-    if (r.number !== i + 1 || r.chunk_id !== cited[i]) throw fail();
+    if (
+      !isRecord(r) ||
+      r.number !== i + 1 ||
+      typeof r.chunk_id !== 'string' ||
+      r.chunk_id !== cited[i]
+    )
+      throw fail();
     const e = evidence.get(r.chunk_id),
-      source = e && config.sources.get(e.source_id);
-    if (!source) throw fail(503, 'RAG_SOURCE_NOT_APPROVED');
+      source =
+        e && typeof e.source_id === 'string' && config.sources.get(e.source_id);
+    if (!e || !source) throw fail(503, 'RAG_SOURCE_NOT_APPROVED');
     let safeUrl = null;
     if (typeof e.url === 'string') {
       const u = URL.parse(e.url);
@@ -225,14 +282,19 @@ function project(output, task, config) {
   if (
     s.penalty_total != null ||
     s.scoring_policy != null ||
-    (s.penalty_ledger?.length ?? 0) > 0
+    Number(
+      typeof s.penalty_ledger === 'string'
+        ? s.penalty_ledger.length
+        : (field(s.penalty_ledger, 'length') ?? 0),
+    ) > 0
   )
     throw fail();
+  /** @param {string} key @param {string[]} keys @param {number} max */
   const list = (key, keys, max) => {
     const rows = s[key] ?? [];
-    if (!Array.isArray(rows) || rows.length > max) throw fail();
+    if (!isList(rows) || rows.length > max) throw fail();
     return rows.map((row) => {
-      if (!row || typeof row !== 'object') throw fail();
+      if (!isRecord(row)) throw fail();
       return pick(row, keys);
     });
   };
@@ -303,6 +365,7 @@ function project(output, task, config) {
     throw fail();
   return result;
 }
+/** @param {{configuration?: () => Promise<ChatConfig>, assertion?: (cookie: string) => Promise<Principal>, poseConfiguration?: () => Promise<UpstreamConfig | null>, deadlineMs?: number, clock?: () => number}} [options] */
 export function createChatHandler({
   configuration = loadChatConfig,
   assertion = assertionForSession,
@@ -310,8 +373,10 @@ export function createChatHandler({
   deadlineMs = 90000,
   clock = () => Date.now(),
 } = {}) {
+  /** @type {Map<string, {until: number, count: number, active: boolean}>} */
   const limits = new Map();
   let active = 0;
+  /** @param {string} key */
   function claim(key) {
     const now = clock();
     for (const [k, v] of limits)
@@ -333,6 +398,7 @@ export function createChatHandler({
       v.active = false;
     };
   }
+  /** @param {import('node:http').IncomingMessage} req @param {import('node:http').ServerResponse} res @param {string} webOrigin */
   return async function handleChat(req, res, webOrigin) {
     let release,
       slot = false;
@@ -342,7 +408,7 @@ export function createChatHandler({
     res.once('close', disconnected);
     try {
       requireSameOrigin(req, webOrigin);
-      if (req.url.length > 8192) throw fail(400, 'BAD_REQUEST');
+      if (!req.url || req.url.length > 8192) throw fail(400, 'BAD_REQUEST');
       const url = new URL(req.url, webOrigin);
       if (req.method !== 'POST' || url.pathname !== '/api/v1/chat')
         throw fail(404, 'NOT_FOUND');
@@ -352,7 +418,7 @@ export function createChatHandler({
       )
         throw fail(400, 'BAD_REQUEST');
       const input = await readJson(req, 131072);
-      if (!valid('ChatRequest', input) || !input.message.trim())
+      if (!isChatRequest(input) || !input.message.trim())
         throw fail(422, 'VALIDATION_ERROR');
       if (active >= 2) throw fail(429, 'RATE_LIMITED');
       active++;
@@ -377,13 +443,14 @@ export function createChatHandler({
         timeout: 5000,
         limit: 16384,
       });
-      if (health.status !== 200 || health.body?.kb_ready !== true)
+      if (health.status !== 200 || field(health.body, 'kb_ready') !== true)
         throw fail(503, 'RAG_NOT_READY');
-      if (health.body.runtime_revision !== config.revision)
+      if (field(health.body, 'runtime_revision') !== config.revision)
         throw fail(503, 'RAG_RUNTIME_MISMATCH');
       const records = [];
       let resultExpiry = Infinity;
       if (ids.length) {
+        if (!principal) throw fail(401, 'UNAUTHENTICATED');
         const pose = await within(poseConfiguration, signal);
         if (!pose) throw fail(503, 'POSE_UNAVAILABLE');
         for (const id of ids) {
@@ -407,11 +474,14 @@ export function createChatHandler({
                   ? 'NOT_FOUND'
                   : 'UNAUTHENTICATED',
             );
-          if (raw.status === 422 && raw.body?.code === 'NO_RAW_OBSERVATION')
+          if (
+            raw.status === 422 &&
+            field(raw.body, 'code') === 'NO_RAW_OBSERVATION'
+          )
             throw fail(422, 'NO_RAW_OBSERVATION');
           if (
             raw.status !== 200 ||
-            !valid('PoseRawResultEnvelope', raw.body) ||
+            !isPoseResult(raw.body) ||
             raw.body.result.id !== id
           )
             throw fail(503, 'POSE_UNAVAILABLE');
@@ -501,7 +571,7 @@ export function createChatHandler({
             ? error
             : fail();
         if (safe.status === 429) res.setHeader('Retry-After', '60');
-        problem(res, safe.status, safe.code);
+        problem(res, safe.status, safe.code, undefined);
       }
     } finally {
       clearTimeout(timer);

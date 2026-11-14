@@ -146,7 +146,7 @@ export async function startAuthStack({workout:workoutRequested=false,progress:pr
     const web=startProcess(['server.mjs'],'frontend',{NODE_ENV:'production',PORT:String(webPort),HOST:'127.0.0.1',NEXT_TELEMETRY_DISABLED:'1',CATALOG_URL:'http://127.0.0.1:'+catalogPort,
       ...(chatProvider?.env??{}),
       WEB_PUBLIC_ORIGIN:url,
-      BFF_AUTH_ENABLED:'true',BFF_WEB_ORIGIN:url,BFF_IDENTITY_ORIGIN:'https://127.0.0.1:'+identityPort,
+      BFF_AUTH_ENABLED:'true',AUTH_SECRET:randomBytes(32).toString('base64url'),BFF_WEB_ORIGIN:url,BFF_IDENTITY_ORIGIN:'https://127.0.0.1:'+identityPort,
       BFF_CATALOG_ADMIN_ORIGIN:'https://127.0.0.1:'+catalogAdminPort,BFF_CATALOG_ADMIN_KEY_FILE:join(tls.directory,'bff.key'),
       BFF_CATALOG_ADMIN_CERT_FILE:join(tls.directory,'bff.crt'),BFF_CATALOG_ADMIN_CA_FILE:join(tls.directory,'ca.crt'),
       ...(withWorkout?{BFF_WORKOUT_ORIGIN:databaseUrls.workoutOrigin,BFF_WORKOUT_KEY_FILE:join(tls.directory,'bff.key'),

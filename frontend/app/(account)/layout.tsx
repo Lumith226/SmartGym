@@ -29,7 +29,7 @@ export default function AccountLayout({ children }: { children: React.ReactNode 
 
       {/* Grid Split 50/50: Cột trái Showcase AI Thể thao, Cột phải Form Auth */}
       <div className="grid min-h-dvh w-full grid-cols-1 lg:grid-cols-[1.05fr_1fr]">
-        
+
         {/* CỘT TRÁI: Hero Showcase (Linear Athletic Dark Precision) */}
         <section
           aria-label="Giới thiệu SmartGym AI"

@@ -4,9 +4,10 @@
   "scripts": {
     "build": "next build",
     "start": "node server.mjs",
-    "test": "node --test ../tests/integration/bff.test.mjs"
+    "test": "node --test ../tests/integration/bff.test.mjs ../tests/integration/google-auth.test.mjs"
   },
   "dependencies": {
+    "@auth/core": "0.41.3",
     "@hookform/resolvers": "7.0.3",
     "@js-temporal/polyfill": "0.5.1",
     "@radix-ui/react-dialog": "1.3.1",
@@ -17,9 +18,11 @@
     "ajv-formats": "3.0.1",
     "class-variance-authority": "0.7.1",
     "clsx": "2.1.1",
+    "jose": "6.2.17",
     "lucide-react": "1.70.0",
     "motion": "14.10.1",
     "next": "16.4.5",
+    "next-auth": "5.0.0-beta.32",
     "postcss": "8.5.32",
     "react": "19.3.1",
     "react-dom": "19.3.1",

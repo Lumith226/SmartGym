@@ -42,6 +42,7 @@
     "check:catalog-handoff": "node scripts/validate-catalog-handoff.mjs",
     "test:chat-bff": "node --test tests/integration/chat-bff.test.mjs",
     "lint:chat-bff": "eslint frontend/server/chat.mjs",
+    "typecheck:chat-bff": "pnpm --filter @smartgym/web exec tsc -p tsconfig.chat-bff.json",
     "format:chat-bff": "prettier --single-quote --write frontend/server/chat.mjs",
     "format:check:chat-bff": "prettier --single-quote --check frontend/server/chat.mjs"
   },

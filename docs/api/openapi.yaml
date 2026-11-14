@@ -8851,21 +8851,48 @@
         ]
       }
     },
-    "/api/v1/auth/google": {
-      "get": {
+    "/api/auth/signin/google": {
+      "post": {
         "tags": [
           "Identity"
         ],
         "operationId": "startGoogleLogin",
-        "summary": "Start Google OAuth sign-in",
+        "summary": "Start Google OAuth sign-in with Auth.js",
         "security": [],
         "x-visibility": "bff-public",
         "x-requirements": [
           "IDN-002"
         ],
+        "requestBody": {
+          "required": true,
+          "content": {
+            "application/x-www-form-urlencoded": {
+              "schema": {
+                "type": "object",
+                "required": ["csrfToken"],
+                "properties": {
+                  "csrfToken": {"type": "string"},
+                  "callbackUrl": {"type": "string"}
+                }
+              }
+            }
+          }
+        },
         "responses": {
-          "303": {
-            "description": "Redirect. Browser context cookie expires after 10 minutes.",
+          "200": {
+            "description": "When X-Auth-Return-Redirect is set, returns the authorization URL as JSON.",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": ["url"],
+                  "properties": {"url": {"type": "string"}}
+                }
+              }
+            }
+          },
+          "302": {
+            "description": "Redirect to Google with Auth.js state, PKCE and nonce cookies.",
             "headers": {
               "Location": {
                 "schema": {
@@ -8890,7 +8917,7 @@
         }
       }
     },
-    "/api/v1/auth/google/callback": {
+    "/api/auth/callback/google": {
       "get": {
         "tags": [
           "Identity"
@@ -8926,7 +8953,7 @@
           }
         ],
         "responses": {
-          "303": {
+          "302": {
             "description": "Redirect to account or login with a safe status. Successful responses issue the session cookie.",
             "headers": {
               "Location": {
@@ -8959,6 +8986,7 @@
         ],
         "operationId": "createGoogleIdentitySession",
         "summary": "Create a session for a Google identity verified by the Web BFF",
+        "description": "Matches the Google subject or links the first verified Google sign-in to an active, verified account with the same email. The existing user ID and role are preserved. Returns 409 when the Google subject conflicts with an existing link.",
         "security": [
           {
             "serviceAuth": []
