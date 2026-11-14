@@ -1,5 +1,7 @@
 # Chạy SmartGym bằng Docker
 
+Nếu lấy mã AI từ GitHub, xem [hướng dẫn checkout và kết nối ba nhánh](AI_HANDOFF.md).
+
 ## Chuẩn bị
 
 - Docker có Docker Compose, Node.js 24 và OpenSSL. Chạy lệnh từ thư mục gốc repository.

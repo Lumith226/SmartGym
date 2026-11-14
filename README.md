@@ -6,6 +6,8 @@ SmartGym là nền tảng tập luyện tiếng Việt gồm thư viện bài t�
 
 Đọc [hướng dẫn cài đặt bằng Docker](docs/guides/GETTING_STARTED.md) để chuẩn bị cấu hình, dữ liệu và tài sản AI rồi mở [SmartGym cục bộ](https://127.0.0.1:3100). Bản clone có mã nguồn và migration. Tài khoản, bài tập đã nhập, tệp media và model AI cần được chuẩn bị riêng.
 
+Thành viên phụ trách Pose hoặc RAG xem [hướng dẫn bàn giao AI](docs/guides/AI_HANDOFF.md) để lấy đúng nhánh và kết nối với Web.
+
 ## Cấu trúc repository
 
 | Thư mục | Nội dung |

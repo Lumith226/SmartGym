@@ -7,7 +7,7 @@
 | Hiểu tính năng và thao tác người dùng | [Yêu cầu sản phẩm](design/PRD.md), [luồng nghiệp vụ](design/USER_FLOWS.md), [UI/UX](design/UI_UX.md) |
 | Hiểu thiết kế và quyền sở hữu dữ liệu | [Kiến trúc](design/ARCHITECTURE.md), [ranh giới service](design/SERVICE_BOUNDARIES.md), [database](design/DATABASE.md), [kiến trúc frontend](design/FRONTEND_ARCHITECTURE.md), [ADR](adr/) |
 | Tích hợp HTTP, WebSocket hoặc event | [Quy tắc hợp đồng](api/API_CONTRACTS.md), [OpenAPI](api/openapi.yaml), [JSON Schema sự kiện](api/events.yaml) |
-| Tích hợp Pose hoặc RAG | [Tích hợp AI](design/AI_INTEGRATION.md), [hợp đồng bàn giao Catalog–RAG](api/catalog-rag-handoff.yaml) |
+| Tích hợp Pose hoặc RAG | [Kết nối ba nhánh GitHub](guides/AI_HANDOFF.md), [thiết kế tích hợp AI](design/AI_INTEGRATION.md), [hợp đồng Catalog–RAG](api/catalog-rag-handoff.yaml) |
 | Cấu hình service, bảo mật và phục hồi | [Runbook](guides/OPERATIONS.md), [bảo mật](design/SECURITY.md), [phiên bản công nghệ](guides/TECHNOLOGY_VERSIONS.md) |
 | Chọn việc hoặc xác minh nghiệm thu | [Roadmap](planning/IMPLEMENTATION_PLAN.md), [trạng thái từng task](planning/TASKS.md), [kế hoạch kiểm thử](planning/TEST_PLAN.md), [ma trận truy vết](planning/TRACEABILITY.md), [checkpoint](planning/AUTO_CHECKPOINT.md) |
 
