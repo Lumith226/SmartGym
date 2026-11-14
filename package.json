@@ -6,6 +6,8 @@
     "node": ">=24 <25"
   },
   "scripts": {
+    "start:local": "node --env-file=.env scripts/start-compose-local.mjs",
+    "setup:pose-autostart": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/install-pose-autostart.ps1",
     "build": "pnpm --filter @smartgym/backend --filter @smartgym/web build",
     "test": "pnpm --filter @smartgym/catalog test && pnpm --filter @smartgym/identity test && pnpm --filter @smartgym/notification test",
     "test:identity": "pnpm --filter @smartgym/identity test",

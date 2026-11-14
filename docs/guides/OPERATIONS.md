@@ -57,9 +57,11 @@ Mỗi service có danh sách cấu hình và nguồn bí mật, runtime/worker c
 
 ### Kiểm chứng cục bộ trước M6
 
-Các Dockerfile hiện có bao phủ Web và sáu package Node. [Workout](../../infra/docker/Dockerfile.workout) và [Pose adapter](../../infra/docker/Dockerfile.pose) có image build riêng, dùng workspace lockfile và chạy dưới user `node`. Pose engine Python và RAG vẫn cần artifact từ nguồn bàn giao, trong mạng private. Compose hiện chạy lát cắt thư viện. Môi trường đích cần kiểm quyền TLS, quyền từng kho, digest, nâng cấp và rollback cùng cấu hình thật.
+Docker Compose cục bộ chạy Web, sáu ứng dụng NestJS, Pose Engine Python, RAG và các tiến trình phụ trợ. Các image Node dùng chung lockfile pnpm. Backend build từng ứng dụng bằng Nest CLI và chạy dưới user `node`. Pose Engine và RAG cần tài sản từ nguồn bàn giao và hoạt động trong mạng private. Môi trường đích cần kiểm quyền TLS, quyền từng kho, digest, nâng cấp và rollback cùng cấu hình thật.
 
-Từ root, build thử từng image bằng `docker build -f infra/docker/Dockerfile.workout -t smartgym-workout:local .` và `docker build -f infra/docker/Dockerfile.pose -t smartgym-pose:local .`. Dùng secret mounts và cấu hình service tương ứng. Chạy migration bằng credential DDL của từng kho. Khởi động API theo `CMD`, sau đó chạy worker cần thiết bằng cùng image với entrypoint `dist/materializer-main.js`, `dist/relay-main.js` cho Workout hoặc `dist/worker-main.js` cho Pose. Giữ port 3444 và 3443 trên mạng nội bộ. Chờ readiness bằng probe phù hợp mTLS rồi kiểm API qua BFF. Container build và khởi chạy đang chờ Docker ở môi trường kiểm thử.
+Từ root, chạy `docker compose --env-file .env -f infra/compose.yaml build workout pose` để dựng riêng hai image. Compose dùng secret mounts, chạy migration rồi khởi động API. Worker và relay dùng lại image của ứng dụng với entrypoint riêng như `dist/materializer-main.js`, `dist/relay-main.js` hoặc `dist/worker-main.js`. Workout và Pose giữ cổng 3444 và 3443 trên mạng nội bộ.
+
+T50 đã xác minh build image Web, sáu API NestJS và Pose Engine. Sáu API, Pose Engine, worker, relay và materializer đã qua healthcheck cục bộ. Phòng tập và Thư viện trả HTTP 200 ở cổng 3100. Xem [trạng thái kiểm thử T50](../planning/TASKS.md) và [cách khởi động toàn bộ hệ thống](GETTING_STARTED.md).
 
 Để tái lập diễn tập restore Catalog, build package rồi chạy `node --test tests/integration/catalog-restore.test.mjs` với portable PostgreSQL Windows. Runner tạo cluster và role tạm, nạp snapshot local, dừng cluster, sao chép toàn bộ data directory sang backup rồi khởi động bản phục hồi từ bản sao riêng. Phép thử so sánh 35 bài, publication revisions, checksum của 8 migration, kiểm từ chối đăng nhập database khác và gọi API thực sau readiness. Log `.local/finish-catalog-restore.log` ghi 34,539 giây từ lúc bắt đầu dừng cluster đến khi API phục vụ. T29 vẫn cần diễn tập kho đích, chính sách lưu backup, RPO/RTO, kiểm phục hồi object store và đối soát broker. Phạm vi cold copy toàn cluster theo [tài liệu PostgreSQL 18](https://www.postgresql.org/docs/18/backup-file.html).
 
@@ -314,9 +316,25 @@ Ca Chromium dùng nguồn video benchmark làm camera ảo và chạy engine CPU
 
 #### DirectML trên Windows
 
-Chuẩn bị runtime Pose CPU cục bộ và cấu hình Compose theo T21. Trên Windows x64, chạy `node --env-file=.env scripts/run-pose-directml.mjs` từ thư mục repository trong một terminal riêng. Launcher đặt wheel DirectML đã khóa vào thư mục riêng dưới `.local/ai/`, dùng lại các dependency Pose đã cài và cấp chứng chỉ máy chủ từ CA riêng của Pose Engine. Engine nghe trên loopback `127.0.0.1:8002` qua mTLS. Detector và RTMPose từng khung dùng DirectML. Bộ phân loại ST-GCN++ và RTMPose theo batch của chế độ cả video dùng CPU.
+**Tự khởi động với Windows.** Sau khi chuẩn bị Compose và runtime Pose theo T21, chạy `pnpm setup:pose-autostart` một lần trên mỗi máy Windows x64. Lệnh đăng ký tác vụ `SmartGym Pose Engine` khi người dùng hiện tại đăng nhập và đặt origin trong `.env`. Lần cấu hình đầu cần tạo lại container để nhận origin bằng `docker compose --env-file .env -f infra/compose.yaml up -d --no-build --no-deps pose pose-worker web`. Sau đó có thể bật stack qua Docker Desktop. Phòng tập tự kết nối qua Web và thử lại khi mất kết nối. Tác vụ ưu tiên DirectML và có thể chạy CPU trên cùng endpoint nếu khởi tạo GPU lỗi. Để bỏ đăng ký, dùng Windows Task Scheduler và bỏ biến origin trong `.env` để về CPU trong Compose.
 
-Đặt `SMARTGYM_POSE_ENGINE_ORIGIN=https://host.docker.internal:8002` trong `.env`, sau đó chạy `docker compose --env-file .env -f infra/compose.yaml up -d --no-build --no-deps pose pose-worker web` khi các image đã có. Trình duyệt tiếp tục dùng `https://127.0.0.1:3100`. Kiểm tra mục kết nối của Pose Studio có báo DirectML. Sau khi khởi động lại Windows, chạy launcher trước khi dùng Pose. Muốn quay về engine CPU trong Compose, bỏ biến trên, khởi động `pose-engine` và tạo lại ba container client.
+**Chạy qua terminal.** Cách dưới đây dành cho máy chưa bật tác vụ tự khởi động.
+
+Nếu Phòng tập hiện **Mất kết nối**, mở **Trạng thái kết nối AI** để xem bước kiểm tra, lần thử và lỗi gần nhất. Web tự thử lại sau 3 giây. Tác vụ Windows chạy ẩn và kiểm tra chạy lại mỗi phút khi tiến trình Pose đã thoát. Log nằm ở `.local/ai/pose-directml-start.log`. Hộp thoại nhận các giai đoạn gần nhất của launcher từ mount cấu hình chỉ đọc của Web. GPU hoặc CPU chỉ được xác nhận sau khi engine trả health qua mTLS và WebSocket kết nối. Có thể bấm Run cho tác vụ `SmartGym Pose Engine` trong Task Scheduler nếu cần khởi động ngay.
+
+Chạy `pnpm start:local` từ gốc repo sau khi có `.env`, chứng chỉ Compose và nguồn Pose. Trên Windows có thể mở [Chay-SmartGym.cmd](../../Chay-SmartGym.cmd). Chế độ mặc định `auto` kiểm tra GPU NVIDIA từ container Linux x86-64. Nếu Docker cấp được GPU, launcher dùng [Compose CUDA](../../infra/compose.pose-cuda.yaml) và chờ Pose nạp mô hình. Nếu Docker không phát hiện GPU NVIDIA tương thích, launcher thử DirectML trên Windows x64. Khi thiếu runtime host, launcher chuẩn bị dưới `.local/ai/` bằng các script và lock của dự án. Launcher kiểm readiness và provider qua mTLS từ container Web. Nếu không thể khởi chạy hoặc kết nối GPU, launcher chạy cấu hình CPU.
+
+Đặt `SMARTGYM_POSE_ACCELERATION=cpu` trong môi trường hoặc `.env` để buộc chạy CPU. Dùng `pnpm start:local --build` khi cần build lại image. Nút Start trong Docker Desktop dùng lại cấu hình CUDA của container do launcher tạo. Nếu đổi máy hoặc GPU, chạy launcher để dò lại. Khi chẩn đoán DirectML, đọc `.local/ai/pose-directml-start.log`. Khi chẩn đoán CUDA, xem log container `pose-engine`. CPU fallback áp dụng khi chạy launcher.
+
+Nếu máy NVIDIA đã thiết lập GPU cho Docker và cần tạo stack trực tiếp bằng Compose, dùng hai file sau. Bỏ cấu hình `SMARTGYM_POSE_ENGINE_ORIGIN` trỏ về Windows trước khi chạy để Web và worker cùng dùng engine trong Docker.
+
+```powershell
+docker compose --env-file .env -f infra/compose.yaml -f infra/compose.pose-cuda.yaml up -d --build --wait
+```
+
+Để kiểm thủ công, chuẩn bị runtime Pose cục bộ và chạy `node --env-file=.env scripts/run-pose-directml.mjs`. Engine nghe trên loopback `127.0.0.1:8002` qua mTLS. Detector và RTMPose từng khung dùng DirectML. Bộ phân loại ST-GCN++ và RTMPose theo batch của chế độ cả video dùng CPU.
+
+Đặt `SMARTGYM_POSE_ENGINE_ORIGIN=https://host.docker.internal:8002` trong `.env`, sau đó chạy `docker compose --env-file .env -f infra/compose.yaml up -d --no-build --no-deps pose pose-worker web` khi các image đã có. Trình duyệt tiếp tục dùng `https://127.0.0.1:3100`. Kiểm tra mục kết nối của Pose Studio có báo DirectML. Tác vụ Windows đã đăng ký sẽ tự bật lúc đăng nhập, hoặc launcher có thể bật engine khi cần. Muốn quay về engine CPU trong Compose, bỏ biến trên, khởi động `pose-engine` và tạo lại ba container client.
 
 Chạy migration 002 và khởi động engine mTLS như T22. Đặt `POSE_LIVE_ENABLED=true` cùng `POSE_ENGINE_*` ở process Pose API. Bật `BFF_AUTH_ENABLED` và `BFF_POSE_LIVE_ENABLED`, cấu hình Pose HTTPS origin và `BFF_POSE_TLS_*` cho BFF. Giữ worker cleanup hoạt động để dọn kết quả hết hạn. Tại ingress, hỗ trợ WebSocket Upgrade và giữ đúng host/origin. Các biến mẫu có trong `.env.example` của frontend và Pose. `BFF_POSE_RECHECK_MS` mặc định 30000, cho phép 1000–30000 ms. Chọn theo tải Identity và độ trễ thu hồi phiên chấp nhận được.
 

@@ -202,6 +202,7 @@ services:
 
     environment:
       OTEL_SERVICE_NAME: pose-engine
+      SMARTGYM_POSE_ENGINE_DEVICE: cpu
       OTEL_SDK_DISABLED: "${SMARTGYM_OTEL_DISABLED:-true}"
       OTEL_EXPORTER_OTLP_ENDPOINT: http://observability:4318
       OTEL_EXPORTER_OTLP_PROTOCOL: http/protobuf
@@ -937,6 +938,7 @@ services:
       BFF_POSE_STUDIO_TLS_KEY_FILE: /run/secrets/pose-studio-client.key
       BFF_POSE_STUDIO_TLS_CERT_FILE: /run/secrets/pose-studio-client.crt
       BFF_POSE_STUDIO_TLS_CA_FILE: /run/secrets/pose-studio-ca.crt
+      BFF_POSE_STUDIO_STARTUP_FILE: /run/secrets/pose-startup.json
       BFF_RAG_ENABLED: ${SMARTGYM_WEB_RAG_ENABLED:-true}
       BFF_RAG_DEADLINE_MS: ${SMARTGYM_RAG_DEADLINE_MS:-180000}
     ports:

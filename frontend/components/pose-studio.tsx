@@ -17,7 +17,7 @@ import {
   Play,
   RotateCcw,
   Search,
-  Settings2,
+  Activity,
   Sparkles,
   Square,
   Upload,
@@ -35,6 +35,8 @@ import {
 import { cn } from '../lib/utils';
 import { saveTrainingResult, type TrainingResult } from '../lib/training-results';
 import { toast } from '../lib/toast';
+import { Button } from './ui/button';
+import { Dialog, DialogContent, DialogDescription, DialogTitle, DialogTrigger } from './ui/dialog';
 import {
   clearPoseVideoDraft,
   loadPoseVideoDraft,
@@ -50,6 +52,15 @@ type LabelResultRow = {
   supported?: boolean;
   kind?: V4LabelKind;
   status?: string;
+};
+
+const poseStartupMessages: Record<string, string> = {
+  checking_runtime: 'Windows đang kiểm tra môi trường chạy Pose.',
+  checking_gpu: 'Đang chuẩn bị DirectML và kiểm tra GPU.',
+  warming_gpu: 'Đang nạp mô hình và chạy thử bằng DirectML.',
+  starting_cpu: 'DirectML gặp lỗi. Đang khởi động Pose bằng CPU.',
+  failed: 'Pose Engine khởi động thất bại. Windows sẽ thử chạy lại.',
+  stopped: 'Pose Engine đã dừng. Đang chờ Windows khởi động lại.',
 };
 
 type InferencePayload = {
@@ -91,8 +102,6 @@ export function PoseStudio({
   exerciseFromLink?: boolean;
   libraryExercises?: { id: string; name: string; slug: string }[];
 }) {
-  const [serverUrl, setServerUrl] = React.useState('');
-  const [serverInput, setServerInput] = React.useState('');
   const [settingsOpen, setSettingsOpen] = React.useState(false);
   const [panelOpen, setPanelOpen] = React.useState(false);
   React.useEffect(() => {
@@ -109,8 +118,12 @@ export function PoseStudio({
 
   const [connected, setConnected] = React.useState(false);
   const [configured, setConfigured] = React.useState(false);
-  const [connectionText, setConnectionText] = React.useState('Chế độ sẵn sàng · Camera & Video');
-  const [runtimeText, setRuntimeText] = React.useState('RTMPose + ST-GCN++');
+  const [connection, setConnection] = React.useState<'checking' | 'ready' | 'retrying' | 'login'>('checking');
+  const [connectionProgress, setConnectionProgress] = React.useState('Đang kiểm tra dịch vụ Pose…');
+  const [connectionFailure, setConnectionFailure] = React.useState<string | null>(null);
+  const [connectionAttempt, setConnectionAttempt] = React.useState(0);
+  const [runtime, setRuntime] = React.useState<string | null>(null);
+  const [webOrigin, setWebOrigin] = React.useState('');
 
   const [cameras, setCameras] = React.useState<{ id: string; label: string }[]>([]);
   const [selectedCameraId, setSelectedCameraId] = React.useState('');
@@ -169,7 +182,8 @@ export function PoseStudio({
   const analysisAttemptRef = React.useRef(0);
   const configuredRef = React.useRef(false);
   const hasMediaRef = React.useRef(false);
-  const reconnectTimerRef = React.useRef<any>(null);
+  const reconnectTimerRef = React.useRef<ReturnType<typeof setTimeout> | null>(null);
+  const connectionAttemptRef = React.useRef<AbortController | null>(null);
   const countdownTimerRef = React.useRef<any>(null);
   const hasErrorRef = React.useRef(false);
   const handleToggleAnalysisRef = React.useRef<() => void>(() => {});
@@ -267,7 +281,7 @@ export function PoseStudio({
   }, []);
 
   const sendConfigure = React.useCallback(
-    (nextExerciseId: string, nextSource: 'camera' | 'video', clearWhole = false) => {
+    (nextExerciseId: string, nextSource: 'camera' | 'video', clearWhole = false, keepObservations = false) => {
       poseConfigurationRef.current = { exerciseId: nextExerciseId, source: nextSource };
       const draft = videoDraftRef.current;
       if (draft && nextSource === 'video') savePoseVideoPosition({ ...draft, exerciseId: nextExerciseId });
@@ -278,7 +292,7 @@ export function PoseStudio({
       pendingRef.current = null;
       lastSentMediaRef.current = -1;
       lastSentAtRef.current = -Infinity;
-      clearObservations(clearWhole);
+      if (!keepObservations) clearObservations(clearWhole);
       const ws = socketRef.current;
       if (ws && ws.readyState === WebSocket.OPEN) {
         ws.send(
@@ -373,43 +387,76 @@ export function PoseStudio({
   }, []);
 
   const connectServer = React.useCallback(
-    async (targetUrl: string) => {
+    async (retry = false) => {
+      connectionAttemptRef.current?.abort();
+      const attempt = new AbortController();
+      connectionAttemptRef.current = attempt;
       if (reconnectTimerRef.current) {
         clearTimeout(reconnectTimerRef.current);
         reconnectTimerRef.current = null;
       }
       if (socketRef.current) {
-        socketRef.current.close();
+        const oldSocket = socketRef.current;
         socketRef.current = null;
+        oldSocket.close();
       }
       configuredRef.current = false;
       setConfigured(false);
       inFlightRef.current = false;
       pendingRef.current = null;
-      setConnectionText('Đang kiểm tra kết nối AI...');
+      setConnected(false);
+      setRuntime(null);
+      setConnection('checking');
+      setConnectionAttempt(count => count + 1);
+      setConnectionProgress('Đang kiểm tra dịch vụ Pose…');
 
+      function reconnect(reason: string) {
+        if (attempt.signal.aborted) return;
+        setConnected(false);
+        setRuntime(null);
+        setConnection('retrying');
+        setConnectionFailure(reason);
+        configuredRef.current = false;
+        setConfigured(false);
+        if (runningRef.current) pauseAnalysis();
+        if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
+        reconnectTimerRef.current = setTimeout(() => void connectServer(true), 3000);
+      }
+
+      let failure = 'Web không nhận được phản hồi từ dịch vụ Pose.';
       try {
-        const base = new URL(targetUrl, window.location.origin);
-        const sameOrigin = base.origin === window.location.origin;
-        const api = sameOrigin ? '/api/pose-studio' : base.origin + '/api';
+        const api = '/api/pose-studio';
         const healthRes = await fetch(`${api}/health`, {
-          signal: AbortSignal.timeout(3500),
+          signal: AbortSignal.any([attempt.signal, AbortSignal.timeout(3500)]),
         });
-        if (healthRes.status === 401 && sameOrigin) {
-          setConnected(false);
-          setConnectionText('Đăng nhập để kết nối AI');
+        if (attempt.signal.aborted) return;
+        if (healthRes.status === 401) {
+          setConnection('login');
           setNotice('Hãy đăng nhập để phân tích bằng Camera hoặc Video.', 'error');
           return;
         }
-        if (!healthRes.ok) throw new Error(`Mã phản hồi ${healthRes.status}`);
+        if (!healthRes.ok) {
+          const problem = healthRes.status === 503 ? await healthRes.json().catch(() => null) : null;
+          const stage = typeof problem?.detail === 'string' && Object.hasOwn(poseStartupMessages, problem.detail)
+            ? poseStartupMessages[problem.detail] : null;
+          reconnect(healthRes.status === 503
+            ? stage ?? 'Web trả HTTP 503. Dịch vụ Pose có thể đang khởi động hoặc chưa phản hồi.'
+            : `Kiểm tra dịch vụ Pose thất bại (HTTP ${healthRes.status}).`);
+          return;
+        }
         const health = await healthRes.json();
-        if (!health.ready) throw new Error(health.error || 'Server đang khởi tạo mô hình.');
+        if (!health.ready) {
+          reconnect('Dịch vụ Pose đang nạp mô hình.');
+          return;
+        }
 
+        setConnectionProgress('Dịch vụ Pose đã phản hồi. Đang mở kết nối phân tích…');
+        failure = 'Dịch vụ Pose đã phản hồi nhưng chưa mở được kết nối phân tích.';
         const exRes = await fetch(`${api}/exercises`, {
-          signal: AbortSignal.timeout(3500),
-        });
-        if (exRes.ok) {
-          const exData = await exRes.json();
+          signal: AbortSignal.any([attempt.signal, AbortSignal.timeout(3500)]),
+        }).catch(() => null);
+        if (exRes?.ok) {
+          const exData = await exRes.json().catch(() => null);
           if (Array.isArray(exData?.exercises) && exData.exercises.length) {
             setExercises(prev =>
               prev.map(def => {
@@ -428,29 +475,38 @@ export function PoseStudio({
           }
         }
 
-        const wsUrl = new URL(sameOrigin ? '/api/pose-studio/live' : '/ws/live', base.origin);
-        wsUrl.protocol = base.protocol === 'https:' ? 'wss:' : 'ws:';
+        if (attempt.signal.aborted) return;
+        const wsUrl = new URL('/api/pose-studio/live', window.location.origin);
+        wsUrl.protocol = wsUrl.protocol === 'https:' ? 'wss:' : 'ws:';
         const ws = new WebSocket(wsUrl);
         socketRef.current = ws;
+        const handshake = setTimeout(() => {
+          failure = 'Mở kết nối phân tích quá thời gian chờ.';
+          ws.close();
+        }, 7000);
+        attempt.signal.addEventListener('abort', () => clearTimeout(handshake), { once: true });
 
         ws.onopen = () => {
+          clearTimeout(handshake);
+          if (socketRef.current !== ws || attempt.signal.aborted) return;
           if (reconnectTimerRef.current) {
             clearTimeout(reconnectTimerRef.current);
             reconnectTimerRef.current = null;
           }
-          if (socketRef.current !== ws) return;
           const gpuLabel =
             health.runtime?.device === 'dml'
-              ? 'GPU · DirectML (AMD)'
+              ? 'GPU · DirectML'
               : health.runtime?.device === 'cuda'
                 ? 'GPU · CUDA'
-                : 'CPU';
+                : health.runtime?.device === 'cpu' ? 'CPU' : null;
           setConnected(true);
-          setConnectionText('Server AI đã sẵn sàng');
-          setRuntimeText(`${gpuLabel} · RTMPose + ST-GCN++ · ${base.host}`);
+          setConnection('ready');
+          setConnectionFailure(null);
+          setRuntime(gpuLabel);
+          failure = 'Kết nối phân tích vừa bị ngắt.';
           const configuration = poseConfigurationRef.current;
-          sendConfigure(configuration.exerciseId, configuration.source, true);
-          setNotice('Đã kết nối Server AI. Mở camera hoặc chọn tệp video rồi bấm Bắt đầu phân tích.');
+          sendConfigure(configuration.exerciseId, configuration.source, false, retry);
+          setNotice(retry ? 'Đã kết nối lại. Bấm Phân tích để tiếp tục.' : 'Đã kết nối Server AI.');
         };
 
         ws.onmessage = ({ data }) => {
@@ -496,44 +552,30 @@ export function PoseStudio({
         };
 
         ws.onclose = () => {
+          clearTimeout(handshake);
           if (socketRef.current !== ws) return;
-          setConnected(false);
-          configuredRef.current = false;
-          setConfigured(false);
-          if (runningRef.current) pauseAnalysis();
-          setConnectionText('Đang chờ kết nối AI');
-          if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
-          reconnectTimerRef.current = setTimeout(() => {
-            void connectServer(targetUrl);
-          }, 3000);
+          socketRef.current = null;
+          reconnect(failure);
         };
-      } catch {
-        setConnected(false);
-        setConnectionText('Đang chờ kết nối AI');
-        setRuntimeText(`RTMPose + ST-GCN++ · ${targetUrl.replace(/^https?:\/\//, '')}`);
-        if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
-        reconnectTimerRef.current = setTimeout(() => {
-          void connectServer(targetUrl);
-        }, 3000);
+      } catch (error) {
+        reconnect(error instanceof DOMException && error.name === 'TimeoutError'
+          ? 'Kiểm tra dịch vụ Pose quá thời gian chờ.'
+          : failure);
       }
     },
     [pauseAnalysis, sendConfigure, setNotice],
   );
 
   React.useEffect(() => {
-    const webOrigin = window.location.origin;
-    let origin = webOrigin;
-    try {
-      const saved = window.localStorage.getItem('smartgym.server');
-      if (saved && !/^https?:\/\/(?:127\.0\.0\.1|localhost):8001\/?$/.test(saved)) origin = saved;
-    } catch {}
-    setServerUrl(origin);
-    setServerInput(origin);
-    void connectServer(origin);
+    setWebOrigin(window.location.origin);
+    void connectServer();
     void listCameraDevices();
     return () => {
+      connectionAttemptRef.current?.abort();
       if (reconnectTimerRef.current) clearTimeout(reconnectTimerRef.current);
-      socketRef.current?.close();
+      const socket = socketRef.current;
+      socketRef.current = null;
+      socket?.close();
       stopMedia();
     };
     // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -863,6 +905,10 @@ export function PoseStudio({
 
     const v = videoRef.current;
     if (!v || !hasMedia || runningRef.current) return;
+    if (!connected) {
+      setNotice('AI chưa kết nối. Hãy chờ kết nối lại rồi bấm Phân tích.', 'error');
+      return;
+    }
     const attempt = ++analysisAttemptRef.current;
     runningRef.current = true;
     setRunning(true);
@@ -885,19 +931,13 @@ export function PoseStudio({
     if (attempt !== analysisAttemptRef.current) return;
 
     setViewScope('live');
-    if (!connected) {
-      void connectServer(serverUrl);
-    } else if (!resumeVideo) {
+    if (!resumeVideo) {
       sendConfigure(selectedId, source, false);
     }
     setDockMinimized(true);
     setPoseStatusText('ĐANG QUAN SÁT CHUYỂN ĐỘNG');
-    setNotice(
-      connected
-        ? 'Đang gửi khung hình thời gian thực tới engine Pose...'
-        : 'Đang kết nối lại Server AI... Bấm lại Bắt đầu sau giây lát.',
-    );
-  }, [connected, connectServer, hasMedia, pauseAnalysis, selectedId, sendConfigure, serverUrl, setNotice, source]);
+    setNotice('Đang gửi khung hình thời gian thực tới engine Pose...');
+  }, [connected, hasMedia, pauseAnalysis, selectedId, sendConfigure, setNotice, source]);
 
   const handleToggleAnalysis = React.useCallback(() => {
     if (countdownTimerRef.current) {
@@ -952,10 +992,9 @@ export function PoseStudio({
       const formData = new FormData();
       formData.append('exercise', selectedId);
       formData.append('file', videoFile);
-      const sameOrigin = !serverUrl || serverUrl === window.location.origin;
-      const res = await fetch(sameOrigin ? '/api/pose-studio/analyze-video' : `${serverUrl}/api/analyze-video`, {
+      const res = await fetch('/api/pose-studio/analyze-video', {
         method: 'POST',
-        headers: sameOrigin ? { 'X-SmartGym-CSRF': '1' } : undefined,
+        headers: { 'X-SmartGym-CSRF': '1' },
         body: formData,
         signal: AbortSignal.timeout(180000),
       });
@@ -1206,7 +1245,7 @@ export function PoseStudio({
 
       {/* ===== THANH TRÊN: CHỌN BÀI TẬP + NGUỒN + KẾT NỐI ===== */}
       <div className="pointer-events-none absolute inset-x-0 top-0 flex flex-col gap-2 p-3 sm:p-4">
-        <div className="flex flex-wrap items-start justify-between gap-2">
+        <div className="relative z-20 flex flex-wrap items-start justify-between gap-2">
           {/* ===== BỘ CHỌN BÀI TẬP DẠNG DROPDOWN TỰ ĐỘNG MỞ RỘNG (SCALABLE PICKER) ===== */}
           <div ref={pickerRef} className="pointer-events-auto relative">
             <button
@@ -1396,68 +1435,59 @@ export function PoseStudio({
               <PanelRight size={15} />
             </button>
 
-            <button
-              type="button"
-              onClick={() => setSettingsOpen(v => !v)}
-              aria-label="Cài đặt kết nối AI"
-              title={connectionText}
-              className={cn('relative inline-flex h-9 w-9 cursor-pointer items-center justify-center rounded-full transition-all', glass)}
-            >
-              <Settings2 size={15} />
-              <span
-                className={cn(
-                  'absolute right-1 top-1 h-2 w-2 rounded-full',
-                  connected ? 'bg-emerald-500 shadow-xs shadow-emerald-500/50' : 'bg-amber-500 shadow-xs shadow-amber-500/50',
+            <Dialog open={settingsOpen} onOpenChange={setSettingsOpen}>
+              <DialogTrigger asChild>
+                <button type="button" aria-label="Trạng thái kết nối AI"
+                  className={cn('inline-flex h-9 cursor-pointer items-center gap-1.5 rounded-full px-2.5 text-xs font-medium', glass)}>
+                  <Activity size={14} aria-hidden="true" className={connected ? 'text-emerald-500' : 'text-amber-500'} />
+                  <span role="status">
+                    {connection === 'ready' ? runtime ?? 'Đã kết nối'
+                      : connection === 'login' ? 'Cần đăng nhập'
+                        : connection === 'retrying' ? 'Mất kết nối' : 'Đang kết nối'}
+                  </span>
+                </button>
+              </DialogTrigger>
+              <DialogContent portalContainer={isFullscreen ? studioContainerRef.current : undefined}>
+                <DialogTitle>Kết nối Phòng tập</DialogTitle>
+                <DialogDescription>
+                  {connection === 'ready'
+                    ? runtime === 'CPU'
+                      ? 'Đã kết nối. Phân tích đang chạy trên CPU của máy chủ.'
+                      : runtime ? `Đã kết nối. Máy chủ đang dùng ${runtime}.`
+                        : 'Đã kết nối. Máy chủ chưa báo thiết bị xử lý.'
+                    : connection === 'login'
+                      ? 'Hãy đăng nhập để sử dụng phân tích động tác.'
+                      : connection === 'retrying'
+                        ? 'Chưa kết nối được máy chủ AI. Sẽ tự thử lại sau 3 giây.'
+                        : 'Đang kết nối tới máy chủ AI.'}
+                </DialogDescription>
+                {(connection === 'checking' || connection === 'retrying') && (
+                  <div role="status" className="space-y-1 text-sm">
+                    <p>{connection === 'checking' ? connectionProgress : connectionFailure}</p>
+                    <p className="text-muted-foreground">Lần kiểm tra {connectionAttempt}</p>
+                    {connection === 'checking' && connectionFailure && (
+                      <p className="text-muted-foreground">Lần trước: {connectionFailure}</p>
+                    )}
+                  </div>
                 )}
-              />
-            </button>
+                <dl className="space-y-1 text-sm">
+                  <dt className="font-medium">Thiết bị xử lý</dt>
+                  <dd className="text-muted-foreground">{runtime ?? 'Chờ Pose Engine xác nhận'}</dd>
+                  <dt className="font-medium">Địa chỉ kết nối</dt>
+                  <dd className="break-all text-muted-foreground">{webOrigin}/api/pose-studio</dd>
+                </dl>
+                {connection === 'login'
+                  ? <Button asChild><Link href="/dang-nhap">Đăng nhập</Link></Button>
+                  : (connection === 'retrying' || connection === 'checking') && (
+                    <Button type="button" disabled={connection === 'checking'} onClick={() => void connectServer(true)}>
+                      {connection === 'checking' ? 'Đang kiểm tra…' : 'Thử lại'}
+                    </Button>
+                  )}
+              </DialogContent>
+            </Dialog>
           </div>
         </div>
 
-        {settingsOpen && (
-          <form
-            onSubmit={e => {
-              e.preventDefault();
-              try {
-                const parsed = new URL(serverInput.trim());
-                setServerUrl(parsed.origin);
-                window.localStorage.setItem('smartgym.server', parsed.origin);
-                void connectServer(parsed.origin);
-                setSettingsOpen(false);
-              } catch {
-                setNotice('Địa chỉ Server AI phải bắt đầu bằng http:// hoặc https://', 'error');
-              }
-            }}
-            className={cn(
-              'pointer-events-auto !m-0 ml-auto flex w-full max-w-md flex-col gap-2 !rounded-2xl !p-3',
-              glass,
-            )}
-          >
-            <div className="flex items-center justify-between text-xs">
-              <strong>{connectionText}</strong>
-              <span className="text-foreground/55">{runtimeText}</span>
-            </div>
-            <div className="flex gap-2">
-              <input
-                type="url"
-                aria-label="Địa chỉ Server AI"
-                spellCheck={false}
-                autoComplete="off"
-                data-gramm="false"
-                {...({ writingsuggestions: 'false' } as any)}
-                value={serverInput}
-                onChange={e => setServerInput(e.target.value)}
-                className="!m-0 h-9 min-w-0 flex-1 !rounded-lg !border-foreground/15 !bg-foreground/10 !px-3 text-xs !text-foreground outline-none"
-              />
-              <button
-                type="submit"
-                className="!m-0 h-9 cursor-pointer !rounded-lg !border-0 !bg-foreground !px-3.5 text-xs font-semibold !text-background"
-              >
-                Kết nối
-              </button>
-            </div>
-          </form>
-        )}
       </div>
 
       {/* ===== BẢNG KẾT QUẢ NỔI (BÊN PHẢI) ===== */}

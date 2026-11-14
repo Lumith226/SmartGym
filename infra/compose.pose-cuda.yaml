@@ -1,0 +1,8 @@
+services:
+  pose-engine:
+    gpus: all
+    image: smartgym/pose-engine:cuda
+    build:
+      target: cuda
+    environment:
+      SMARTGYM_POSE_ENGINE_DEVICE: cuda

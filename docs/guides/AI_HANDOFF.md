@@ -16,7 +16,7 @@ $env:SMARTGYM_RAG_SOURCE = (Resolve-Path '../SmartGym_RAG/smart-gym-ai/services/
 
 | Thành phần | Đường dẫn hoặc hợp đồng Web cần |
 |---|---|
-| Pose | `SMARTGYM_POSE_SOURCE` trỏ tới thư mục có `smart_gym_web_v4/server/` và `smart_gym_test_rtmpose_v4/weights/`. Compose khởi chạy engine tại `https://pose-engine:8001` trong mạng Docker. Web lấy danh sách động tác qua `/api/pose-studio/exercises` sau đăng nhập. |
+| Pose | `SMARTGYM_POSE_SOURCE` trỏ tới thư mục có `smart_gym_web_v4/server/` và `smart_gym_test_rtmpose_v4/weights/`. Launcher chọn CUDA trong Docker, DirectML trên Windows hoặc CPU. Web lấy danh sách động tác qua `/api/pose-studio/exercises` sau đăng nhập. |
 | RAG | `SMARTGYM_RAG_SOURCE` trỏ tới thư mục dịch vụ chứa `kb_service/`, `requirements.lock.txt` và `capabilities.json`. Web gọi `/v1/chatbot` qua BFF, với mTLS và token nội bộ do script chuẩn bị cấu hình. |
 
 ## 2. Chuẩn bị dữ liệu và chạy
@@ -31,7 +31,7 @@ $env:SMARTGYM_OLLAMA_MODELS = 'D:/du-lieu/ollama/models'
 
 node scripts/check-ai-handoff.mjs --pose-root "$env:SMARTGYM_POSE_SOURCE" --rag-root "$env:SMARTGYM_RAG_SOURCE"
 node scripts/prepare-compose-local.mjs
-docker compose --env-file .env -f infra/compose.yaml up -d --build
+pnpm start:local --build
 docker compose --env-file .env -f infra/compose.yaml ps -a
 ```
 

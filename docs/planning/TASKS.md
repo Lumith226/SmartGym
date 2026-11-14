@@ -73,6 +73,12 @@ M0 là gói thiết kế của lượt hiện tại, kiểm tra theo [review](..
 | T48 | Bảo trì | P1 | RAG-001 WEB-001 | T24 T27 | Chỉ mở Hỏi SmartGym khi bấm nút trong Phòng tập | Khung chat mặc định đóng và tạm dừng phân tích không mở chat | Build Web, Chromium Phòng tập | DONE |
 | T49 | Bảo trì | P1 | SYS-001 | T42 | Chuẩn hóa cấu trúc NestJS của sáu service | Module gốc, controller và provider có vị trí rõ; giữ route, guard và entrypoint; build và kiểm thử hồi quy | Build backend, kiểm tra hợp đồng và biên import, hồi quy tích hợp | DONE |
 | T50 | Bảo trì | P1 | SYS-001 | T49 | Chuyển backend sang Nest CLI Monorepo Mode | Sáu ứng dụng trong backend/apps, build riêng và đồng loạt bằng Nest CLI, Compose và kiểm thử dùng đường dẫn mới | Nest CLI, Docker, hợp đồng và biên import | DONE |
+| T51 | Bảo trì | P1 | POS-001 POS-002 OPS-001 | T43 T50 | Ưu tiên GPU khi khởi động SmartGym cục bộ | Một lệnh chọn DirectML đã kiểm bằng mTLS trên Windows x64 hoặc CPU và khởi động Compose | Smoke GPU, CPU, kiểm tra cấu hình | DONE |
+| T52 | Bảo trì | P1 | POS-001 POS-002 OPS-001 | T51 | Tự khởi động Pose với Windows và tự kết nối Phòng tập | Tiến trình host tự khởi động khi đăng nhập, Compose dùng cùng địa chỉ và Phòng tập tự kết nối | Tác vụ Windows, health mTLS và build Web | DONE |
+| T53 | Bảo trì | P1 | POS-002 WEB-001 | T52 | Hiển thị và khôi phục kết nối Phòng tập | Trạng thái luôn thấy, chi tiết mở riêng, mất kết nối tạm dừng và tự thử lại, CPU/GPU theo health máy chủ | TypeScript, Docker Web và Chromium | DONE |
+| T54 | Bảo trì | P1 | POS-002 OPS-001 | T53 | Hiển thị tiến trình thử lại và phục hồi tiến trình Pose host | Báo bước kiểm tra và lần thử, giữ lỗi gần nhất, cấu hình Windows tự bật lại khi tiến trình thoát | Health mTLS, build Web và Chromium | DONE |
+| T55 | Bảo trì | P1 | POS-002 OPS-001 | T54 | Chạy Pose Windows ẩn và báo tiến trình khởi tạo | Tác vụ không mở console, Web hiện giai đoạn DirectML hoặc CPU thực do hệ thống báo qua kết nối | Windows Task Scheduler, health mTLS DirectML, Chromium | DONE |
+| T56 | Bảo trì | P1 | POS-002 OPS-001 | T55 | Chọn CUDA trong Docker khi có NVIDIA | Launcher thử CUDA trước và xác minh Web kết nối được; Windows có thể dùng DirectML và có cấu hình CPU dự phòng; Docker Desktop giữ cấu hình GPU trên container đã tạo | Compose CPU/CUDA và mô phỏng chọn CUDA/chuyển CPU PASS. Engine CPU healthy với model thật. AMD DirectML từ Web mTLS PASS. Build CUDA dừng khi tải wheel NVIDIA; nghiệm thu CUDA cần GPU thật | IN_PROGRESS |
 
 Đọc [roadmap](IMPLEMENTATION_PLAN.md), [ma trận](TRACEABILITY.md), [test plan](TEST_PLAN.md) và [hướng dẫn phát triển](../guides/DEVELOPMENT.md). Ghi bằng chứng và file thực tế trong lúc triển khai. Khi một giả định đổi, cập nhật requirement, task, hợp đồng và test cùng nhau.
 
@@ -87,6 +93,14 @@ T48 PASS build và healthcheck Docker Web. Chromium cổng 3100 kiểm khung cha
 T49 PASS build TypeScript sáu service, kiểm tra hợp đồng và biên import, đối chiếu decorator route/guard/tham số trên 106 phương thức controller. Hồi quy đạt với Identity, Notification, Workout, Progress, nhập kết quả Pose và Pose API. Suite Catalog còn các ca schema/migration legacy và danh sách liên kết Pose tái hiện trên commit trước refactor `de68bc1`. NOT RUN entrypoint inference Pose thật và dựng lại Compose cho lần refactor này.
 
 T50 PASS Nest CLI 12.0.13 build sáu ứng dụng, build riêng và start Catalog, kiểm đầy đủ file API/migration/worker/relay và cài đặt pnpm frozen. Hợp đồng, biên import, smoke test Web/Catalog qua restart, Notification 11/11, Identity 17 đạt và 2 bỏ qua theo môi trường, Progress 16/16. Docker dựng tám image, sau đó sáu API, Pose Engine, worker, relay và materializer đều healthy. Phòng tập và Thư viện trả HTTP 200 trên cổng 3100. Turbopack Windows gặp lỗi worker, build Webpack trên Windows và build Next.js chuẩn trong Docker đã qua.
+
+T51 PASS kiểm cú pháp Node, khởi động Compose ở chế độ CPU và AUTO, xác minh RX 5600 XT qua health mTLS từ Web và giữ stack ở DirectML. Ca AUTO dùng engine Windows đã chạy. NOT RUN bootstrap runtime trên máy mới, NVIDIA và Linux GPU.
+
+T52 PASS đăng ký trigger Windows khi đăng nhập, thay tiến trình thủ công bằng tác vụ đã đăng ký và đọc health DirectML thật qua mTLS từ Docker. TypeScript và build Docker Web đạt. Chromium kiểm tự kết nối và bảng trạng thái qua phản hồi kiểm thử. NOT RUN khởi động lại Windows và lỗi DirectML trên máy thiếu GPU.
+
+T53 PASS TypeScript, build và healthcheck Docker Web. Chromium dùng phản hồi Pose mô phỏng để kiểm chỉ báo GPU/CPU trên desktop và mobile, địa chỉ Web trong hộp thoại riêng, tạm dừng video khi WebSocket đóng, tự thử lại khi health trả 503 rồi chuyển chỉ báo sang CPU khi máy chủ báo CPU.
+
+T54 PASS TypeScript và build Docker Web. Chromium kiểm bấm Thử lại, khóa nút trong lúc kiểm tra, lỗi HTTP 503 gần nhất và các bước mở kết nối. Trên Windows đã xác minh trigger lặp mỗi phút, chủ động dừng tiến trình Python để xác minh launcher phục hồi bằng CPU qua mTLS. Sau ca kiểm, khởi động lại tác vụ và xác nhận sẵn sàng ở DirectML.
 
 T44 PASS build Docker Web và Catalog, kiểm tra OpenAPI/schema Catalog và kiểm tra biên import. Ca Chromium tạo, lưu, xem trước và công bố bài đạt. Catalog media đạt 8/8 trên PostgreSQL 18.6. Đọc lại PostgreSQL qua Catalog trên Docker đã đối chiếu 23/23 bản nháp và checksum của 37 ảnh WebP gốc, gồm ảnh một tư thế hoặc cặp bắt đầu và điểm cao nhất. Dữ liệu tiếng Việt do SmartGym biên soạn được giữ. Độ khó nguồn sơ cấp, trung cấp và nâng cao tương ứng cấp II, III và V trong SmartGym.
 

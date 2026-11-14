@@ -29,7 +29,7 @@ $env:OPENSSL_CONF = 'C:/Program Files/Git/usr/ssl/openssl.cnf'
 
 ```powershell
 node scripts/prepare-compose-local.mjs
-docker compose --env-file .env -f infra/compose.yaml up -d --build
+pnpm start:local --build
 docker compose --env-file .env -f infra/compose.yaml ps -a
 ```
 
@@ -39,13 +39,21 @@ Script tạo cấu hình, mật khẩu cục bộ và chứng chỉ. Dùng [.env
 
 Nếu đã chọn đường dẫn AI khác mặc định, lưu các biến đường dẫn vào `.env` để Compose dùng lại khi bạn mở terminal mới.
 
+### Khởi động hằng ngày
+
+Trên Windows, mở Docker Desktop rồi nhấp đúp [Chay-SmartGym.cmd](../../Chay-SmartGym.cmd). Launcher chọn GPU, đợi Compose sẵn sàng và mở Web. Có thể dùng `pnpm start:local` trên các máy đã cài Node.js và Docker.
+
+- NVIDIA x86-64 có GPU truy cập được từ Docker sẽ chạy Pose bằng CUDA trong container. Cần driver NVIDIA phù hợp CUDA 12.8 và Docker Desktop với WSL 2 trên Windows hoặc NVIDIA Container Toolkit trên Linux. Lần đầu Docker tải thư viện CUDA và cuDNN để tạo image Pose. Xem [Docker Desktop GPU](https://docs.docker.com/desktop/features/gpu/) và [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html).
+- Windows x64 thử DirectML khi Docker không phát hiện GPU NVIDIA tương thích. Nếu mô hình GPU không thể khởi tạo hoặc Web không kết nối được, launcher chạy Pose CPU trong Docker.
+- Sau khi launcher đã tạo container CUDA, có thể bấm **Start** trong Docker Desktop ở các lần sau. Docker giữ cấu hình GPU lúc tạo container. Khi đổi máy, đổi GPU hoặc cần chọn lại thiết bị, chạy launcher.
+
 ## Mở Web và chuẩn bị dữ liệu
 
 1. Mở [https://127.0.0.1:3100](https://127.0.0.1:3100). Đây là địa chỉ loopback. Chứng chỉ được ký bởi CA của bản cài cục bộ.
 2. Đăng ký tài khoản của bản cài. Compose dùng Mailpit nội bộ cho email xác minh. Để cấp quyền quản trị, làm theo [runbook Identity](OPERATIONS.md#identity-t08). Đăng nhập lại sau khi đổi vai trò.
 3. Dùng [CMS](https://127.0.0.1:3100/admin) để thêm và công bố nội dung, hoặc [nhập gói nội dung được duyệt](OPERATIONS.md#importexport-t34). Migration tạo schema. Tài khoản, các bài RepDB đã nhập ở một máy và media trong object storage cần được chuẩn bị hoặc chuyển riêng khi bàn giao.
 4. Google OAuth dùng client riêng và callback đúng Web origin. Xem [cấu hình đăng nhập](OPERATIONS.md#web-auth-t10).
-5. Trên Windows, cấu hình DirectML tùy chọn dùng engine mTLS chạy trên máy host. Làm theo [runbook DirectML](OPERATIONS.md#directml-trên-windows) nếu cần GPU. Compose mặc định gọi Pose Engine nội bộ.
+5. Trên Windows x64, có thể đăng ký tự khởi động Pose một lần để những lần sau mở SmartGym từ Docker Desktop. Phòng tập tự kết nối và hiển thị thiết bị GPU hoặc CPU. Xem [runbook DirectML](OPERATIONS.md#directml-trên-windows).
 
 ## Chuyển dữ liệu từ bản cài cũ
 

@@ -14,6 +14,17 @@ const routes = new Map([
 ]);
 const maxFrameBytes = 2 * 1024 * 1024;
 const maxUploadBytes = 201 * 1024 * 1024;
+const startupStages = new Set(['checking_runtime', 'checking_gpu', 'warming_gpu', 'starting_cpu', 'failed', 'stopped']);
+
+async function recentStartupStage() {
+  const file = process.env.BFF_POSE_STUDIO_STARTUP_FILE;
+  if (!file) return undefined;
+  try {
+    const { stage, updatedAt } = JSON.parse(await readFile(file, 'utf8'));
+    const age = Date.now() - updatedAt;
+    if (Number.isFinite(updatedAt) && age >= 0 && age < 300000 && startupStages.has(stage)) return stage;
+  } catch {}
+}
 
 export async function loadPoseStudio(webOrigin) {
   const engineOrigin = process.env.BFF_POSE_STUDIO_ENGINE_ORIGIN;
@@ -75,7 +86,7 @@ export async function loadPoseStudio(webOrigin) {
     } catch (error) {
       if (res.headersSent) res.destroy();
       else if (error instanceof AuthError) problem(res, error.status, error.status === 401 ? 'UNAUTHENTICATED' : 'POSE_UNAVAILABLE');
-      else problem(res, 503, 'POSE_UNAVAILABLE');
+      else problem(res, 503, 'POSE_UNAVAILABLE', path === '/api/health' ? await recentStartupStage() : undefined);
     }
   }
 

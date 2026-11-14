@@ -1,5 +1,7 @@
 # Công nghệ và bằng chứng phiên bản
 
+T56 dùng Compose `gpus: all` (từ Compose 2.30, kiểm cấu hình trên 5.6.1) và ONNX Runtime GPU 1.26.0 cho CUDA 12.8, cuDNN 9. Ghim các wheel NVIDIA Linux x86-64 trong [danh sách dependency CUDA](../../infra/ai/pose-cuda.linux-x64.txt). Ngày 2026-11-14 đối chiếu [Compose gpus](https://docs.docker.com/reference/compose-file/services/#gpus), [ma trận CUDA của ONNX Runtime](https://onnxruntime.ai/docs/execution-providers/CUDA-ExecutionProvider.html) và metadata PyPI đúng phiên bản. GPU NVIDIA thực tế chưa nghiệm thu trên máy AMD hiện tại.
+
 T50 pin Nest CLI 12.0.13 trong manifest backend và lockfile pnpm, tiếp tục dùng TypeScript 5.9.3. Ngày 2026-11-14 đối chiếu [Nest CLI Workspaces](https://docs.nestjs.com/cli/monorepo), phiên bản công bố trên npm và mã CLI đã cài. Đã kiểm Nest CLI build sáu ứng dụng, `nest start catalog` trả HTTP 200 tại health endpoint và cài lại bằng lockfile frozen. [ADR 0027](../adr/0027-nest-cli-monorepo.md)
 
 Phần chuẩn bị M6 dùng Dockerfile Workout/Pose adapter với tag Node `24.22.1-bookworm-slim` theo convention của Identity và Progress. Ngày 2026-11-08, build workspace và kiểm đường dẫn `COPY` cùng entrypoint API/migration/worker đã đạt. Image digest, Docker build và container run chưa xác minh vì máy thiếu Docker CLI. Restore local chạy bằng portable PostgreSQL 18.6 đã có. Cách sao lưu cluster đã dừng được đối chiếu với [PostgreSQL 18](https://www.postgresql.org/docs/18/backup-file.html).
