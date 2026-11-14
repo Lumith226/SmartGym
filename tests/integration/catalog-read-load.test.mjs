@@ -6,9 +6,9 @@ import { performance } from 'node:perf_hooks';
 import { setTimeout as delay } from 'node:timers/promises';
 import { startPostgres, freePort } from '../helpers/postgres.mjs';
 import { startProcess } from '../helpers/processes.mjs';
-import { connectDatabase } from '../../backend/services/catalog/dist/database.js';
-import { migrate } from '../../backend/services/catalog/dist/migrate.js';
-import { importSnapshot } from '../../backend/services/catalog/dist/import.js';
+import { connectDatabase } from '../../backend/apps/catalog/dist/database.js';
+import { migrate } from '../../backend/apps/catalog/dist/migrate.js';
+import { importSnapshot } from '../../backend/apps/catalog/dist/import.js';
 
 const seconds = Number(process.env.LIBRARY_LOAD_SECONDS ?? 60);
 assert.ok(Number.isInteger(seconds) && seconds >= 60 && seconds <= 600, 'LIBRARY_LOAD_SECONDS must be 60–600');
@@ -25,11 +25,11 @@ test('Catalog public read load on an isolated PostgreSQL database', { timeout: (
   const db = connectDatabase(pg.connectionString);
   cleanup.push(() => db.close());
   await migrate(db);
-  const snapshot = JSON.parse(await readFile('backend/services/catalog/data/smartgym-m2.json', 'utf8'));
+  const snapshot = JSON.parse(await readFile('backend/apps/catalog/data/smartgym-m2.json', 'utf8'));
   await importSnapshot(db, snapshot, true);
   const port = await freePort();
   const origin = 'http://127.0.0.1:' + port;
-  const service = startProcess(['dist/main.js'], 'backend/services/catalog', {
+  const service = startProcess(['dist/main.js'], 'backend/apps/catalog', {
     HOST: '127.0.0.1', PORT: String(port), DATABASE_URL: pg.connectionString,
     CATALOG_ADMIN_ENABLED: 'false', CATALOG_MEDIA_ENABLED: 'false',
   });

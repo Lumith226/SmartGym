@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { resolveLocal, project, validateSchedule } from '../../backend/services/workout/dist/modules/scheduling/schedule-time.js';
+import { resolveLocal, project, validateSchedule } from '../../backend/apps/workout/dist/modules/scheduling/schedule-time.js';
 
 const weekly = { planId: 'unused-in-time-calculation', timeZone: 'America/New_York', startDate: '2027-03-01',
   startLocalTime: '02:30', durationMinutes: 30, recurrence: 'WEEKLY', weekdays: [7] };

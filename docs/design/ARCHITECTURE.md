@@ -68,15 +68,15 @@ Identity sở hữu phiên. Chỉ tài khoản đã xác minh email được c�
 
 Triển khai cục bộ có thể dùng Compose. Mỗi unit có artifact phiên bản hóa, manifest phụ thuộc, env schema, quy trình migration/build/test/start, liveness kiểm process, readiness kiểm năng lực và rollback theo service. Kết nối PostgreSQL chỉ nằm trên mạng riêng, thông tin xác thực tách theo service. Dùng đồng thời hai phiên bản tương thích trong lúc rollout. Test M6 cần chạy từng artifact độc lập với các phụ thuộc đã công bố, nâng cấp hoặc khởi động lại riêng, và chứng minh role DB không thể đọc dữ liệu của service khác.
 
-Workout T13/T14 chạy API plan/schedule mTLS độc lập trong `backend/services/workout`, đọc JWKS từ Identity và đối chiếu bài qua Catalog refs trên listener private. Plan/items/schedule/occurrence/receipt/outbox thuộc database Workout. Snapshot và sự kiện ghi cùng transaction, GiST bảo đảm không chồng lịch theo owner. Relay RabbitMQ chạy process riêng, broker lỗi giữ PENDING và API tiếp tục ghi lịch. T15 đã bổ sung sửa/hủy theo version, bảo toàn override và materializer độc lập đọc database Workout để mở rộng 35 ngày, lưu conflict và retry sau gián đoạn. [ADR 0015](../adr/0015-workout-schedule-reconciliation.md) [ADR 0013](../adr/0013-workout-plan-implementation.md) · [ADR 0014](../adr/0014-workout-schedule-time.md)
+Workout T13/T14 chạy API plan/schedule mTLS độc lập trong `backend/apps/workout`, đọc JWKS từ Identity và đối chiếu bài qua Catalog refs trên listener private. Plan/items/schedule/occurrence/receipt/outbox thuộc database Workout. Snapshot và sự kiện ghi cùng transaction, GiST bảo đảm không chồng lịch theo owner. Relay RabbitMQ chạy process riêng, broker lỗi giữ PENDING và API tiếp tục ghi lịch. T15 đã bổ sung sửa/hủy theo version, bảo toàn override và materializer độc lập đọc database Workout để mở rộng 35 ngày, lưu conflict và retry sau gián đoạn. [ADR 0015](../adr/0015-workout-schedule-reconciliation.md) [ADR 0013](../adr/0013-workout-plan-implementation.md) · [ADR 0014](../adr/0014-workout-schedule-time.md)
 
 Dependency Web/NestJS giữ theo manifest/lockfile hiện có. Pose V4 dùng FastAPI, RTMPose, ONNX Runtime và thư viện decode của nguồn đã kiểm kê. Coordination DB là phần bổ sung trong Pose boundary. RAG giữ FastAPI, JSON snapshot/vector, Neo4j tùy chọn và adapter Ollama của bàn giao. Phiên bản provider theo lockfile/manifest của provider, chưa xác minh cài đặt tại Web. [Kế hoạch](../planning/IMPLEMENTATION_PLAN.md) và [AI integration](AI_INTEGRATION.md) ghi cổng triển khai.
 
 ### Module HTTP của Catalog
 
-Catalog đặt module HTTP và logic liên quan cạnh nhau trong [`src/modules/`](../../backend/services/catalog/src/modules/). `exercises/` chứa thư viện, quản trị bài tập và tra cứu tham chiếu. `media/` chứa upload, phục vụ file công khai, xử lý xác minh và storage. `content/`, `revisions/`, `transfers/` và `feed/` chứa module cùng phần xử lý tương ứng. `admin/` chứa guard, hợp đồng và các tiện ích CMS dùng chung. Health check chỉ cần một file ở `modules/`.
+Catalog đặt module HTTP và logic liên quan cạnh nhau trong [`src/modules/`](../../backend/apps/catalog/src/modules/). `exercises/` chứa thư viện, quản trị bài tập và tra cứu tham chiếu. `media/` chứa upload, phục vụ file công khai, xử lý xác minh và storage. `content/`, `revisions/`, `transfers/` và `feed/` chứa module cùng phần xử lý tương ứng. `admin/` chứa guard, hợp đồng và các tiện ích CMS dùng chung. Health check chỉ cần một file ở `modules/`.
 
-[Entrypoint công khai](../../backend/services/catalog/src/app.ts) và [entrypoint mTLS](../../backend/services/catalog/src/admin-app.ts) ghép các module tương ứng. Module tra cứu tham chiếu và module snapshot cho RAG có guard riêng theo danh tính service gọi. Hai listener thuộc cùng đơn vị triển khai Catalog và dùng dữ liệu do Catalog sở hữu. Database, migration CLI, entrypoint media worker và entrypoint relay đặt ở cấp service.
+[Entrypoint công khai](../../backend/apps/catalog/src/app.ts) và [entrypoint mTLS](../../backend/apps/catalog/src/admin-app.ts) ghép các module tương ứng. Module tra cứu tham chiếu và module snapshot cho RAG có guard riêng theo danh tính service gọi. Hai listener thuộc cùng đơn vị triển khai Catalog và dùng dữ liệu do Catalog sở hữu. Database, migration CLI, entrypoint media worker và entrypoint relay đặt ở cấp service.
 
 ### Module HTTP của các service NestJS còn lại
 
@@ -84,36 +84,35 @@ Mỗi service ghép module HTTP tại `src/app.ts`. Các file nghiệp vụ liê
 
 | Service | Nhóm nghiệp vụ |
 |---|---|
-| [Identity](../../backend/services/identity/src/modules/) | `accounts/` chứa xác thực, phiên, hồ sơ, API nội bộ và phần xử lý tài khoản. |
-| [Workout](../../backend/services/workout/src/modules/) | `plans/` chứa chương trình và tra cứu Catalog. `scheduling/` chứa lịch, buổi tập, API nội bộ cho Progress và logic materializer. |
-| [Progress](../../backend/services/progress/src/modules/) | `logs/` chứa nhật ký, nhập kết quả Pose và các client đọc nguồn. `summary/` chứa thống kê. |
-| [Notification](../../backend/services/notification/src/modules/) | `inbox/` chứa inbox, tùy chọn và nhắc lịch. `delivery/` chứa job gửi và SMTP. |
-| [Pose](../../backend/services/pose/src/modules/) | `analysis/` chứa upload, job, kết quả và storage. `live/` chứa phiên tập và WebSocket. Status module công bố health và capabilities. |
+| [Identity](../../backend/apps/identity/src/modules/) | `accounts/` chứa xác thực, phiên, hồ sơ, API nội bộ và phần xử lý tài khoản. |
+| [Workout](../../backend/apps/workout/src/modules/) | `plans/` chứa chương trình và tra cứu Catalog. `scheduling/` chứa lịch, buổi tập, API nội bộ cho Progress và logic materializer. |
+| [Progress](../../backend/apps/progress/src/modules/) | `logs/` chứa nhật ký, nhập kết quả Pose và các client đọc nguồn. `summary/` chứa thống kê. |
+| [Notification](../../backend/apps/notification/src/modules/) | `inbox/` chứa inbox, tùy chọn và nhắc lịch. `delivery/` chứa job gửi và SMTP. |
+| [Pose](../../backend/apps/pose/src/modules/) | `analysis/` chứa upload, job, kết quả và storage. `live/` chứa phiên tập và WebSocket. Status module công bố health và capabilities. |
 
 Pose engine và RAG provider tiếp tục chạy bằng FastAPI theo [thiết kế tích hợp AI](AI_INTEGRATION.md).
 
-## Cây repository mục tiêu
-
-Cây này là thiết kế trước Development. Chỉ tạo một thư mục khi milestone cần mã hoặc cấu hình tương ứng.
+## Cây repository
 
 ```text
 SmartGym_Web/
   frontend/                       Next.js, UI và BFF
   backend/
-    services/
+    nest-cli.json                 Nest CLI Monorepo Mode
+    apps/
       identity/                   NestJS API và outbox
       catalog/                    NestJS API, import, publish
       workout/                    NestJS API, materializer và outbox
       progress/                   NestJS API
       notification/               NestJS API, scheduler và email worker
-  # Pose và RAG do đội ngoài phát hành, Web tích hợp qua contracts
-  packages/contracts/             Hợp đồng/client khi có nhiệm vụ cần dùng
+      pose/                       NestJS API, worker và engine FastAPI
+  # RAG lấy từ nguồn bàn giao qua Docker Compose
   tests/system/                   E2E, fault injection và kiểm tra vận hành
   infra/                          Compose/manifest khi được phép triển khai
   docs/                           Quyết định, hợp đồng và tài liệu vận hành
 ```
 
-Lock dependency theo hệ sinh thái. Service build từ workspace riêng với hợp đồng phiên bản hóa. Package dùng chung chỉ chứa schema, client được sinh hoặc tiện ích kỹ thuật có owner. Quy tắc dependency chặn import domain, ORM repository, migration và mã worker từ service khác. UI không import domain service. Xác thực dùng khóa và hợp đồng Identity, mỗi consumer áp dụng kiểm quyền riêng.
+pnpm quản lý phụ thuộc toàn repository. Nest CLI build lần lượt hoặc riêng từng ứng dụng backend với hợp đồng phiên bản hóa. Quy tắc dependency chặn import domain, ORM repository, migration và mã worker từ service khác. UI không import domain service. Xác thực dùng khóa và hợp đồng Identity, mỗi consumer áp dụng kiểm quyền riêng. [ADR 0027](../adr/0027-nest-cli-monorepo.md)
 
 ## Hợp đồng đồng bộ
 

@@ -6,14 +6,14 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const source = process.env.SMARTGYM_LEGACY_DATABASE_URL;
 if (!source) throw new Error('Set SMARTGYM_LEGACY_DATABASE_URL to the existing local PostgreSQL');
-const migrations = new URL('../backend/services/catalog/migrations/', import.meta.url);
+const migrations = new URL('../backend/apps/catalog/migrations/', import.meta.url);
 const files = (await readdir(migrations)).filter(file => /^\d{3}_.+\.sql$/.test(file));
 const migrationSql = await Promise.all(files.map(file => readFile(new URL(file, migrations), 'utf8')));
 const tables = [...new Set(migrationSql.flatMap(sql => [...sql.matchAll(/CREATE TABLE\s+([a-z_]+)\s*\(/gi)].map(match => match[1])))]
   .filter(table => table !== 'catalog_migrations');
 if (!tables.includes('exercises') || !tables.includes('support_revisions')) throw new Error('Could not identify Catalog tables');
 
-const { Client } = createRequire(new URL('../backend/services/catalog/package.json', import.meta.url))('pg');
+const { Client } = createRequire(new URL('../backend/apps/catalog/package.json', import.meta.url))('pg');
 const db = new Client({ connectionString: source, connectionTimeoutMillis: 3000 });
 let schema;
 try {

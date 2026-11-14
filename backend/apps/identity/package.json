@@ -1,0 +1,32 @@
+{
+  "name": "@smartgym/identity",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "engines": { "node": "24.22.1" },
+  "scripts": {
+    "build": "pnpm --filter @smartgym/backend exec nest build identity",
+    "start": "node dist/main.js",
+    "migrate": "node dist/migrate.js",
+    "admin": "node dist/admin.js",
+    "relay": "node dist/relay-main.js",
+    "test": "pnpm run build && node --test test/*.test.cjs"
+  },
+  "dependencies": {
+    "amqplib": "2.2.1",
+    "@nestjs/common": "12.4.0",
+    "@nestjs/core": "12.4.0",
+    "@nestjs/platform-express": "12.4.0",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "pg": "8.23.1",
+    "reflect-metadata": "0.2.2",
+    "rxjs": "7.8.2"
+  },
+  "devDependencies": {
+    "@electric-sql/pglite": "0.5.15",
+    "@types/node": "24.10.1",
+    "@types/pg": "8.23.1",
+    "typescript": "5.9.3"
+  }
+}

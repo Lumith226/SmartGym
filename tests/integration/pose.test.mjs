@@ -13,22 +13,22 @@ import addFormats from 'ajv-formats';
 import { startPostgres, freePort } from '../helpers/postgres.mjs';
 import { startMediaTools } from '../helpers/media-stack.mjs';
 import { startProcess } from '../helpers/processes.mjs';
-import { createTestTls } from '../../backend/services/identity/test/tls.cjs';
-import { createApp as createIdentity } from '../../backend/services/identity/dist/app.js';
-import { IdentityKeys, hashSecret } from '../../backend/services/identity/dist/modules/accounts/crypto.js';
-import { migrate as migrateIdentity } from '../../backend/services/identity/dist/migrate.js';
-import { connectDatabase } from '../../backend/services/pose/dist/database.js';
-import { migrate } from '../../backend/services/pose/dist/migrate.js';
-import { PoseStorage } from '../../backend/services/pose/dist/modules/analysis/storage.js';
-import { PoseWorker } from '../../backend/services/pose/dist/modules/analysis/worker.js';
-import { EngineHttp } from '../../backend/services/pose/dist/engine.js';
-import { models } from '../../backend/services/pose/dist/contract.js';
+import { createTestTls } from '../../backend/apps/identity/test/tls.cjs';
+import { createApp as createIdentity } from '../../backend/apps/identity/dist/app.js';
+import { IdentityKeys, hashSecret } from '../../backend/apps/identity/dist/modules/accounts/crypto.js';
+import { migrate as migrateIdentity } from '../../backend/apps/identity/dist/migrate.js';
+import { connectDatabase } from '../../backend/apps/pose/dist/database.js';
+import { migrate } from '../../backend/apps/pose/dist/migrate.js';
+import { PoseStorage } from '../../backend/apps/pose/dist/modules/analysis/storage.js';
+import { PoseWorker } from '../../backend/apps/pose/dist/modules/analysis/worker.js';
+import { EngineHttp } from '../../backend/apps/pose/dist/engine.js';
+import { models } from '../../backend/apps/pose/dist/contract.js';
 import { aiDirectory, localAIEnv } from '../../scripts/ai-local-env.mjs';
 // Resolve the workspace cache before Playwright evaluates its browser registry.
 process.env.PLAYWRIGHT_BROWSERS_PATH ??= resolve('.local/browsers');
 const {chromium,expect}=await import('@playwright/test');
 const WebSocket = createRequire(new URL('../../frontend/package.json', import.meta.url))('ws');
-const { PutBucketCorsCommand } = createRequire(new URL('../../backend/services/pose/package.json', import.meta.url))('@aws-sdk/client-s3');
+const { PutBucketCorsCommand } = createRequire(new URL('../../backend/apps/pose/package.json', import.meta.url))('@aws-sdk/client-s3');
 
 const sha = bytes => createHash('sha256').update(bytes).digest('hex');
 test('Pose upload and live lifecycle over real PostgreSQL, S3 and mTLS', { timeout: 240000 }, async t => {
@@ -64,7 +64,7 @@ test('Pose upload and live lifecycle over real PostgreSQL, S3 and mTLS', { timeo
     POSE_IDENTITY_TLS_KEY_FILE: join(tls.directory,'catalog.key'), POSE_IDENTITY_TLS_CERT_FILE: join(tls.directory,'catalog.crt'), POSE_IDENTITY_TLS_CA_FILE: join(tls.directory,'ca.crt'),
     POSE_S3_ENDPOINT: tools.endpoint, POSE_S3_BUCKET: tools.bucket, POSE_S3_REGION: 'us-east-1', POSE_S3_PREFIX: 'tests/pose',
     AWS_ACCESS_KEY_ID: tools.credentials.accessKeyId, AWS_SECRET_ACCESS_KEY: tools.credentials.secretAccessKey };
-  const api = startProcess(['dist/main.js'], 'backend/services/pose', config); cleanup.push(() => api.stop());
+  const api = startProcess(['dist/main.js'], 'backend/apps/pose', config); cleanup.push(() => api.stop());
   const apiSchema = JSON.parse(await readFile('docs/api/openapi.yaml', 'utf8'));
   const ajv = new Ajv2020({ strict: false }); addFormats(ajv); ajv.addSchema({ $id: 'api', components: apiSchema.components });
   const userA = randomUUID(), userB = randomUUID(), admin = randomUUID();
@@ -179,7 +179,7 @@ test('Pose upload and live lifecycle over real PostgreSQL, S3 and mTLS', { timeo
     const source=process.env.POSE_TEST_SOURCE_ROOT;
     if(!source){st.skip('Set POSE_TEST_SOURCE_ROOT and prepare T21 runtime for real inference');return;}
     const engineTls=await createTestTls();cleanup.push(engineTls.stop);const enginePort=await freePort();
-    const python=spawn(join(aiDirectory,'pose-env/Scripts/python.exe'),['-B','backend/services/pose/engine/main.py','--source',source,'--port',String(enginePort),
+    const python=spawn(join(aiDirectory,'pose-env/Scripts/python.exe'),['-B','backend/apps/pose/engine/main.py','--source',source,'--port',String(enginePort),
       '--key',join(engineTls.directory,'server.key'),'--cert',join(engineTls.directory,'server.crt'),'--ca',join(engineTls.directory,'ca.crt')],{cwd:resolve('.'),env:await localAIEnv(),windowsHide:true});
     let logs='';python.stdout.on('data',b=>{logs=(logs+b).slice(-5000);});python.stderr.on('data',b=>{logs=(logs+b).slice(-5000);});
     cleanup.push(async()=>{if(python.exitCode===null&&python.signalCode===null)await new Promise(r=>{python.once('exit',r);python.kill();});});
@@ -193,7 +193,7 @@ test('Pose upload and live lifecycle over real PostgreSQL, S3 and mTLS', { timeo
     const engineConfig = { POSE_ENGINE_ORIGIN:engine.origin,
       POSE_ENGINE_TLS_KEY_FILE:join(engineTls.directory,'bff.key'),POSE_ENGINE_TLS_CERT_FILE:join(engineTls.directory,'bff.crt'),POSE_ENGINE_TLS_CA_FILE:join(engineTls.directory,'ca.crt'),
       POSE_FFMPEG:tools.ffmpeg,POSE_FFPROBE:tools.ffprobe,POSE_TEMP_DIR:temp };
-    const workerProcess=startProcess(['dist/worker-main.js'],'backend/services/pose',{...config,...engineConfig});cleanup.push(()=>workerProcess.stop());
+    const workerProcess=startProcess(['dist/worker-main.js'],'backend/apps/pose',{...config,...engineConfig});cleanup.push(()=>workerProcess.stop());
     try {
       let result;for(let i=0;i<600;i++){result=(await checked('/api/v1/pose/jobs/'+q.job.id,{owner:q.owner})).body;if(!['QUEUED','RUNNING'].includes(result.status))break;await delay(100);}
       assert.equal(result.status,'SUCCEEDED',JSON.stringify(result));assert.equal(result.result.repCount,null);
@@ -202,7 +202,7 @@ test('Pose upload and live lifecycle over real PostgreSQL, S3 and mTLS', { timeo
 
     await st.test('live browser contract through BFF and real V4, including cookie revocation and connection fencing', async liveTest => {
       const livePort = await freePort(), bffPort = await freePort(), webOrigin = 'https://127.0.0.1:' + bffPort;
-      const liveApi = startProcess(['dist/main.js'], 'backend/services/pose', { ...config, ...engineConfig, POSE_PORT: String(livePort), POSE_LIVE_ENABLED: 'true' });
+      const liveApi = startProcess(['dist/main.js'], 'backend/apps/pose', { ...config, ...engineConfig, POSE_PORT: String(livePort), POSE_LIVE_ENABLED: 'true' });
       cleanup.push(() => liveApi.stop());
       const identityEnv = { BFF_AUTH_ENABLED: 'true', AUTH_SECRET: randomBytes(32).toString('base64url'), BFF_WEB_ORIGIN: webOrigin, BFF_IDENTITY_ORIGIN: config.POSE_IDENTITY_ORIGIN,
         BFF_IDENTITY_KEY_FILE: join(tls.directory,'bff.key'), BFF_IDENTITY_CERT_FILE: join(tls.directory,'bff.crt'), BFF_IDENTITY_CA_FILE: join(tls.directory,'ca.crt') };
@@ -378,7 +378,7 @@ test('Pose upload and live lifecycle over real PostgreSQL, S3 and mTLS', { timeo
             await expect(page.getByRole('button',{name:'Hủy phân tích'}),errors.join('\n')).toBeVisible({timeout:15000});
             await page.getByRole('button',{name:'Hủy phân tích'}).click();
             await expect(page.getByText('Đã hủy yêu cầu phân tích.')).toBeVisible();
-            uiWorker=startProcess(['dist/worker-main.js'],'backend/services/pose',{...config,...engineConfig});
+            uiWorker=startProcess(['dist/worker-main.js'],'backend/apps/pose',{...config,...engineConfig});
             await picker.setInputFiles({name:'squat.mp4',mimeType:'video/mp4',buffer:video});
             await page.getByRole('button',{name:'Phân tích video'}).click();
             await expect(page.getByRole('heading',{name:'Kết quả phân tích'})).toBeVisible({timeout:45000});

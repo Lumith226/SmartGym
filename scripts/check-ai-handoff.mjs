@@ -20,7 +20,7 @@ export async function checkHandoff({ poseRoot, ragRoot }) {
   assert(poseRoot && ragRoot, 'Explicit --pose-root and --rag-root are required');
   const manifest = await json(resolve(project, 'docs/api/ai-provider-compatibility.yaml'));
   const registry = await json(resolve(ragRoot, 'label_catalog_v4.json'));
-  const catalog = await json(resolve(project, 'backend/services/catalog/data/smartgym-m2.json'));
+  const catalog = await json(resolve(project, 'backend/apps/catalog/data/smartgym-m2.json'));
   const catalogIds = new Set(catalog.exercises.map(row => row.id));
   const results = [];
   const ids = new Set();

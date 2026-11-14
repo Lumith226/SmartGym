@@ -1,6 +1,6 @@
 import {test,expect} from '@playwright/test';import {randomUUID} from 'node:crypto';import {readFile,mkdir} from 'node:fs/promises';
 import {startAuthStack} from '../helpers/auth-stack.mjs';
-import {ReminderInbox,ReminderWorker} from '../../backend/services/notification/dist/modules/inbox/reminders.js';
+import {ReminderInbox,ReminderWorker} from '../../backend/apps/notification/dist/modules/inbox/reminders.js';
 test.use({ignoreHTTPSErrors:true,trace:'off'});let stack;const password='SmartGym notifications browser 123!';
 test.beforeAll(async()=>{test.setTimeout(180000);stack=await startAuthStack({notifications:true,workout:true});});test.afterAll(async()=>{test.setTimeout(90000);await stack?.stop();});
 const headers=()=>({Origin:stack.url,'X-SmartGym-CSRF':'1'});

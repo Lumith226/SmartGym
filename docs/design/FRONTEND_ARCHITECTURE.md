@@ -18,7 +18,7 @@ T16 hiện thực chương trình ở `/app/chuong-trinh`, `/moi`, `/[id]`, lị
 
 ## 1. Kiến trúc và trách nhiệm
 
-Mã Next.js nằm ở `frontend/`, có manifest và build riêng. Backend nằm ở `backend/services/`; frontend chỉ sử dụng API và hợp đồng, không import trực tiếp source của backend. Scripts/tests/Docker dùng đường dẫn này theo cấu trúc người dùng đã chọn.
+Mã Next.js nằm ở `frontend/`, có manifest và build riêng. Backend nằm ở `backend/apps/`; frontend chỉ sử dụng API và hợp đồng, không import trực tiếp source của backend. Scripts/tests/Docker dùng đường dẫn này theo cấu trúc người dùng đã chọn.
 
 **Quyết định thiết kế.** Một ứng dụng Next.js App Router và TypeScript có layout public, tài khoản, người dùng và admin. Backend-for-frontend cùng origin phục vụ API trình duyệt. Các service sở hữu nghiệp vụ, dữ liệu và kiểm tra quyền. Frontend sở hữu điều hướng, hiển thị, tương tác và chuyển tiếp tới hợp đồng đã công bố. Giữ lớp BFF mỏng, có timeout, không tạo bản sao dữ liệu nghiệp vụ.
 

@@ -1,6 +1,6 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';
 import {createServer,request} from 'node:https';import {randomUUID} from 'node:crypto';import {join} from 'node:path';
-import {createTestTls} from '../../backend/services/identity/test/tls.cjs';import {handleNotifications} from '../../frontend/server/notifications.mjs';
+import {createTestTls} from '../../backend/apps/identity/test/tls.cjs';import {handleNotifications} from '../../frontend/server/notifications.mjs';
 test('Notification BFF uses explicit mTLS upstream fixtures and validates four contracts',{timeout:30000},async t=>{
   const tls=await createTestTls(),cleanup=[tls.stop];t.after(async()=>{for(const close of cleanup.reverse())await close();});
   let mode='valid',calls=0,last,revoked=false;const token='server-only-fixture-assertion',handle='s'.repeat(43),id=randomUUID(),occurrenceId=randomUUID();

@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 const root = fileURLToPath(new URL('../', import.meta.url));
 const source = process.env.SMARTGYM_LEGACY_DATABASE_URL;
 if (!source) throw new Error('Set SMARTGYM_LEGACY_DATABASE_URL to the existing local PostgreSQL');
-const { Client } = createRequire(new URL('../backend/services/identity/package.json', import.meta.url))('pg');
+const { Client } = createRequire(new URL('../backend/apps/identity/package.json', import.meta.url))('pg');
 const db = new Client({ connectionString: source, connectionTimeoutMillis: 3000 });
 let rows;
 try {

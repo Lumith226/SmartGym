@@ -1,6 +1,6 @@
 // Explicit stored final-result fixtures. No ONNX inference or video access is claimed here.
 import {randomUUID} from 'node:crypto';
-import {createPoseApp} from '../../backend/services/pose/dist/app.js';
+import {createPoseApp} from '../../backend/apps/pose/dist/app.js';
 export async function startPoseSummary(db,tls,identityOrigin){
   let storageCalls=0;
   const unused=async()=>{storageCalls++;throw Error('Summary import must not access object/video storage');};

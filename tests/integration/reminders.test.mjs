@@ -8,24 +8,24 @@ import {request} from 'node:https';
 import {startPostgres,freePort} from '../helpers/postgres.mjs';
 import {startRabbit} from '../helpers/rabbitmq.mjs';
 import {startProcess} from '../helpers/processes.mjs';
-import {createTestTls} from '../../backend/services/identity/test/tls.cjs';
-import {connectDatabase} from '../../backend/services/notification/dist/database.js';
-import {migrate} from '../../backend/services/notification/dist/migrate.js';
-import {ReminderInbox,ReminderWorker,ReminderPreferences} from '../../backend/services/notification/dist/modules/inbox/reminders.js';
-import {Inbox,DeliveryWorker,DeliveryError} from '../../backend/services/notification/dist/modules/delivery/jobs.js';
-import {IdentityClient} from '../../backend/services/notification/dist/identity-client.js';
-import {SmtpProvider} from '../../backend/services/notification/dist/modules/delivery/mail.js';
-import {WorkoutConsumer} from '../../backend/services/notification/dist/broker.js';
-import {migrate as migrateIdentity} from '../../backend/services/identity/dist/migrate.js';
-import {createApp as createIdentity} from '../../backend/services/identity/dist/app.js';
-import {IdentityKeys} from '../../backend/services/identity/dist/modules/accounts/crypto.js';
-import {migrate as migrateWorkout} from '../../backend/services/workout/dist/migrate.js';
-import {Schedules} from '../../backend/services/workout/dist/modules/scheduling/schedules.js';
-import {ConfirmPublisher} from '../../backend/services/workout/dist/broker.js';
-import {OutboxRelay} from '../../backend/services/workout/dist/outbox.js';
+import {createTestTls} from '../../backend/apps/identity/test/tls.cjs';
+import {connectDatabase} from '../../backend/apps/notification/dist/database.js';
+import {migrate} from '../../backend/apps/notification/dist/migrate.js';
+import {ReminderInbox,ReminderWorker,ReminderPreferences} from '../../backend/apps/notification/dist/modules/inbox/reminders.js';
+import {Inbox,DeliveryWorker,DeliveryError} from '../../backend/apps/notification/dist/modules/delivery/jobs.js';
+import {IdentityClient} from '../../backend/apps/notification/dist/identity-client.js';
+import {SmtpProvider} from '../../backend/apps/notification/dist/modules/delivery/mail.js';
+import {WorkoutConsumer} from '../../backend/apps/notification/dist/broker.js';
+import {migrate as migrateIdentity} from '../../backend/apps/identity/dist/migrate.js';
+import {createApp as createIdentity} from '../../backend/apps/identity/dist/app.js';
+import {IdentityKeys} from '../../backend/apps/identity/dist/modules/accounts/crypto.js';
+import {migrate as migrateWorkout} from '../../backend/apps/workout/dist/migrate.js';
+import {Schedules} from '../../backend/apps/workout/dist/modules/scheduling/schedules.service.js';
+import {ConfirmPublisher} from '../../backend/apps/workout/dist/broker.js';
+import {OutboxRelay} from '../../backend/apps/workout/dist/outbox.js';
 import {provisionEmailTopology} from '../../scripts/provision-email-topology.mjs';
 import {provisionReminderTopology} from '../../scripts/provision-reminder-topology.mjs';
-const {SMTPServer,connect}=(()=>{const require=createRequire(new URL('../../backend/services/notification/package.json',import.meta.url));return{SMTPServer:require('smtp-server').SMTPServer,connect:require('amqplib').connect};})();
+const {SMTPServer,connect}=(()=>{const require=createRequire(new URL('../../backend/apps/notification/package.json',import.meta.url));return{SMTPServer:require('smtp-server').SMTPServer,connect:require('amqplib').connect};})();
 const delay=ms=>new Promise(resolve=>setTimeout(resolve,ms));
 async function until(check,label){for(let n=0;n<200;n++){if(await check())return;await delay(50);}throw new Error('Timed out: '+label);}
 
@@ -44,7 +44,7 @@ test('T19 Notification reminders on independent PostgreSQL/RabbitMQ/mTLS/SMTP', 
   let time=new Date('2026-11-08T12:00:00Z');const now=()=>new Date(time);
   // Explicit synthetic domain events are used for fault/reordering cases; the first chain uses real Workout logic/outbox.
   const event=(options={})=>{const id=options.occurrenceId??randomUUID();return{id:randomUUID(),type:'workout.occurrence.changed.v1',producer:'workout',schemaVersion:1,occurredAt:now().toISOString(),aggregateId:id,aggregateVersion:options.version??1,correlationId:randomUUID(),data:{occurrenceId:id,userId:options.owner??randomUUID(),status:options.status??'SCHEDULED',startAt:options.startAt??new Date(time.getTime()+30*60000).toISOString(),endAt:options.endAt??new Date(time.getTime()+90*60000).toISOString(),timeZone:options.timeZone??'Asia/Bangkok'}};};
-  const old=await readFile('backend/services/notification/migrations/001_email_delivery.sql','utf8');await db.query(old);
+  const old=await readFile('backend/apps/notification/migrations/001_email_delivery.sql','utf8');await db.query(old);
   await db.query('INSERT INTO notification_migrations(version,checksum) VALUES(1,$1)',[createHash('sha256').update(old).digest('hex')]);
   const securityId=randomUUID(),securityRef=randomUUID();
   await db.query(`INSERT INTO delivery_jobs(id,channel,purpose,source_ref,source_version,expires_at,due_at,status,provider_idempotency_key,created_at,updated_at)
@@ -202,7 +202,7 @@ test('T19 Notification reminders on independent PostgreSQL/RabbitMQ/mTLS/SMTP', 
     const persisted=event({startAt:new Date(Date.now()+20*60000).toISOString(),endAt:new Date(Date.now()+80*60000).toISOString()});
     await new ReminderInbox(db).accept(Buffer.from(JSON.stringify(persisted)));
     assert.equal((await getJob(persisted)).status,'PENDING','durable due job exists before worker process startup');
-    const port=await freePort();const process=startProcess(['dist/main.js'],'backend/services/notification',{
+    const port=await freePort();const process=startProcess(['dist/main.js'],'backend/apps/notification',{
       NOTIFICATION_DATABASE_URL:urls.reminder_notification,HOST:'127.0.0.1',PORT:String(port),NOTIFICATION_AMQP_URL:broker.consumerUrl,
       NOTIFICATION_ALLOW_LOOPBACK_PLAINTEXT:'true',NOTIFICATION_IDENTITY_ORIGIN:identityOrigin,NOTIFICATION_WEB_ORIGIN:'https://web.test',
       NOTIFICATION_IDENTITY_KEY_FILE:join(tls.directory,'notification.key'),NOTIFICATION_IDENTITY_CERT_FILE:join(tls.directory,'notification.crt'),NOTIFICATION_IDENTITY_CA_FILE:join(tls.directory,'ca.crt'),

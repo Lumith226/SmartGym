@@ -5,7 +5,7 @@ import { resolve,join,sep } from 'node:path';
 import { randomBytes,createHash } from 'node:crypto';
 import { createRequire } from 'node:module';
 import { freePort } from './postgres.mjs';
-const require=createRequire(new URL('../../backend/services/notification/package.json',import.meta.url));
+const require=createRequire(new URL('../../backend/apps/notification/package.json',import.meta.url));
 const {connect}=require('amqplib');
 export async function startRabbit({publisher='identity',reminders=false}={}){
   if(!['identity','workout','catalog'].includes(publisher))throw new Error('Unknown fixture publisher');

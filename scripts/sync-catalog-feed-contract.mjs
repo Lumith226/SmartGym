@@ -4,5 +4,5 @@ const names=new Set(['CatalogHead','CatalogSnapshot']);for(const n of names)for(
 const schemas=Object.fromEntries([...names].map(n=>[n,JSON.parse(JSON.stringify(api.components.schemas[n]).replaceAll('#/components/schemas/','#/$defs/'))]));
 const eventNames=['CatalogExercisePublished','CatalogExerciseUpdated','CatalogExerciseUnpublished'];
 const event={$schema:events.$schema,oneOf:eventNames.map(n=>({$ref:'#/$defs/'+n})),$defs:events.$defs};
-const output=JSON.stringify({schemas,event},null,2)+'\n',file=new URL('backend/services/catalog/data/feed-contracts.json',root);
+const output=JSON.stringify({schemas,event},null,2)+'\n',file=new URL('backend/apps/catalog/data/feed-contracts.json',root);
 if(process.argv.includes('--check')){if((await readFile(file,'utf8')).replaceAll('\r\n','\n')!==output)throw Error('Stale Catalog feed contracts');console.log('Catalog feed contracts match sources');}else await writeFile(file,output);

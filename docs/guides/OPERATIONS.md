@@ -73,7 +73,7 @@ T07 chờ phiên kiểm bằng trình đọc màn hình, thao tác trên thiết
 
 ### Identity T08
 
-Runtime Node.js 24.22.1, package @smartgym/identity 0.1.0. Cấu hình độc lập ở [mẫu](../../backend/services/identity/.env.example), quyết định ở [ADR 0003](../adr/0003-identity-implementation.md). Build bằng pnpm --filter @smartgym/identity build; migrate và start qua script cùng package. Chạy migrate bằng credential của riêng Identity có quyền DDL; sau đó start bằng credential runtime. Không trỏ IDENTITY_DATABASE_URL về database Catalog. Production phân quyền chi tiết/audit append-only phải kiểm ở T28/T29.
+Runtime Node.js 24.22.1, package @smartgym/identity 0.1.0. Cấu hình độc lập ở [mẫu](../../backend/apps/identity/.env.example), quyết định ở [ADR 0003](../adr/0003-identity-implementation.md). Build bằng pnpm --filter @smartgym/identity build; migrate và start qua script cùng package. Chạy migrate bằng credential của riêng Identity có quyền DDL; sau đó start bằng credential runtime. Không trỏ IDENTITY_DATABASE_URL về database Catalog. Production phân quyền chi tiết/audit append-only phải kiểm ở T28/T29.
 
 - Khóa ký là RSA PEM >=2048 bit. Hai file delivery/limiter là chuỗi base64url canonical của 32 byte ngẫu nhiên, khác nhau; cung cấp từ secret store, không commit hoặc in log. TLS key/cert/CA là đường dẫn tuyệt đối do deployment cấp. Web origin phải chính xác, issuer HTTPS. Thiếu hoặc sai cấu hình làm startup thất bại, không có HTTP/insecure fallback.
 - Client cert hợp lệ theo CA chưa đủ: pin SHA-256 fingerprint cho BFF, Notification và backend cần đọc JWKS. Danh sách nhiều fingerprint cho phép đổi cert. Không dùng test CA/cert ở deployment. Cấp certificate probes để gọi /health/live và /health/ready qua mTLS. Readiness hiện cần schema 002 và DB; liveness chỉ kiểm process. Email/broker lỗi không làm hỏng tài khoản đã có.
@@ -85,7 +85,7 @@ Runtime Node.js 24.22.1, package @smartgym/identity 0.1.0. Cấu hình độc l�
 
 ### Workout plan T13
 
-Tạo database riêng cho Workout và nạp [mẫu cấu hình](../../backend/services/workout/.env.example). Build `pnpm --filter @smartgym/workout build`, chạy `pnpm --filter @smartgym/workout migrate` bằng role migration, rồi khởi động `pnpm --filter @smartgym/workout start` bằng role runtime. Listener mặc định `127.0.0.1:3444` dùng mTLS. Đăng ký certificate BFF trong `WORKOUT_BFF_FINGERPRINTS`. Readiness/liveness cần certificate BFF được phép làm probe, `/health/ready` kiểm schema Workout và DB.
+Tạo database riêng cho Workout và nạp [mẫu cấu hình](../../backend/apps/workout/.env.example). Build `pnpm --filter @smartgym/workout build`, chạy `pnpm --filter @smartgym/workout migrate` bằng role migration, rồi khởi động `pnpm --filter @smartgym/workout start` bằng role runtime. Listener mặc định `127.0.0.1:3444` dùng mTLS. Đăng ký certificate BFF trong `WORKOUT_BFF_FINGERPRINTS`. Readiness/liveness cần certificate BFF được phép làm probe, `/health/ready` kiểm schema Workout và DB.
 
 Đăng ký certificate outbound Workout tại Identity trong `IDENTITY_CALLER_FINGERPRINTS.workout` để đọc JWKS, và trong `CATALOG_REF_FINGERPRINTS` để gọi Catalog refs trên listener mTLS riêng. Cấu hình `WORKOUT_CATALOG_ORIGIN` bằng origin listener đó. Quyền tra refs độc lập quyền CMS. Các operation plan kiểm assertion owner, email đã xác minh và TTL tối đa 5 phút. Cổng BFF và giao diện planner được nối ở T16. [ADR 0013](../adr/0013-workout-plan-implementation.md)
 
@@ -97,7 +97,7 @@ T14 bổ sung migration 002. Artifact hiện tại yêu cầu thêm migration 00
 
 T14 thêm API tạo/list/get lịch và list/get occurrence. Tạo lịch ONCE/WEEKLY bằng IANA zone, ngày địa phương, giờ HH:mm và thời lượng 5–240 phút. Khởi tạo tối đa 35 ngày địa phương, bỏ buổi bắt đầu trong quá khứ. Lịch ONCE ngoài cửa sổ có thể chưa có occurrence. T15 đã bổ sung worker tiếp tục mở rộng horizon, chỉnh/hủy và phục hồi theo mục dưới. Khi hai khoảng giờ chồng nhau, API trả 409 với chi tiết buổi đang chiếm giờ, toàn bộ rule/occurrence/outbox mới được rollback. Snapshot bài giữ theo thời điểm tạo lịch. [ADR 0014](../adr/0014-workout-schedule-time.md)
 
-Khởi động relay độc lập bằng `pnpm --filter @smartgym/workout relay`. Đặt `WORKOUT_AMQP_URL` và `AMQP_CA_FILE` theo [mẫu](../../backend/services/workout/.env.example). Operator tạo durable topic exchange `smartgym.events.v1` và queue/binding cho consumer theo hợp đồng. Cấp publisher Workout quyền write exchange đó và routing key `workout.occurrence.changed.v1`, không cấp quyền configure hoặc đọc queue. Consumer reminders thuộc T19. Nếu chưa có binding, mandatory publish bị trả lại, outbox giữ PENDING và retry với cùng event ID. Relay dùng lease 30 giây, token fencing, confirm timeout 5 giây và backoff 5 giây đến 5 phút. Cờ plaintext chỉ dùng cho loopback thử nghiệm ngoài production. Broker lỗi giữ API lịch hoạt động và không làm mất outbox.
+Khởi động relay độc lập bằng `pnpm --filter @smartgym/workout relay`. Đặt `WORKOUT_AMQP_URL` và `AMQP_CA_FILE` theo [mẫu](../../backend/apps/workout/.env.example). Operator tạo durable topic exchange `smartgym.events.v1` và queue/binding cho consumer theo hợp đồng. Cấp publisher Workout quyền write exchange đó và routing key `workout.occurrence.changed.v1`, không cấp quyền configure hoặc đọc queue. Consumer reminders thuộc T19. Nếu chưa có binding, mandatory publish bị trả lại, outbox giữ PENDING và retry với cùng event ID. Relay dùng lease 30 giây, token fencing, confirm timeout 5 giây và backoff 5 giây đến 5 phút. Cờ plaintext chỉ dùng cho loopback thử nghiệm ngoài production. Broker lỗi giữ API lịch hoạt động và không làm mất outbox.
 
 ### Chỉnh lịch và materializer T15
 
@@ -139,7 +139,7 @@ Chạy `pnpm test:pose-import` để build workspace và kiểm Web/BFF/Progress
 
 T25 bổ sung nhập kết quả AI, giữ schema 001 và các quy tắc log cũ; cấu hình và nghiệm thu ở [runbook T25](#nhập-pose-vào-progress-t25).
 
-`@smartgym/progress` 0.1.0 có cấu hình tại [mẫu riêng](../../backend/services/progress/.env.example). Cấp database/role chỉ cho Progress, từ chối kết nối database Catalog/Workout/Identity. Dùng credential migration riêng khi vận hành. Cấu hình DATABASE_URL trỏ đúng kho Progress và TLS key/cert/CA của API. Mặc định bind 127.0.0.1:3445, chỉ mở qua mạng service riêng trong môi trường đích.
+`@smartgym/progress` 0.1.0 có cấu hình tại [mẫu riêng](../../backend/apps/progress/.env.example). Cấp database/role chỉ cho Progress, từ chối kết nối database Catalog/Workout/Identity. Dùng credential migration riêng khi vận hành. Cấu hình DATABASE_URL trỏ đúng kho Progress và TLS key/cert/CA của API. Mặc định bind 127.0.0.1:3445, chỉ mở qua mạng service riêng trong môi trường đích.
 
 Cấp certificate client của Progress vào caller `progress` trong IDENTITY_CALLER_FINGERPRINTS để đọc JWKS. Thêm fingerprint phù hợp vào CATALOG_REF_FINGERPRINTS và WORKOUT_PROGRESS_FINGERPRINTS. Workout vẫn giữ WORKOUT_BFF_FINGERPRINTS tách riêng. Certificate Progress chỉ đọc `/internal/v1/workout/occurrences/{id}` kèm JWT principal, không sửa kế hoạch/lịch. BFF certificate không được gọi endpoint nội bộ đó. Cấu hình PROGRESS_BFF_FINGERPRINTS cho API Progress. Không cấp khóa ký Identity hoặc credential DB service khác cho Progress.
 
@@ -169,7 +169,7 @@ T18 không xác lập kiểm thử tải hoặc toàn bộ WCAG, không có cont
 
 ### Notification email T09
 
-Đọc [ADR 0004](../adr/0004-transactional-email.md) và [mẫu cấu hình](../../backend/services/notification/.env.example). Hai process thuộc hai service sở hữu dữ liệu độc lập: Identity relay chỉ dùng database Identity; Notification consumer/worker chỉ dùng database Notification và HTTP mTLS resolveEmailDelivery. Không cần private signing/delivery key của Identity ở Notification. Node 24.22.1, package @smartgym/notification 0.1.0; port mặc định 3003 HTTPS/mTLS, chỉ có health endpoints tại T09.
+Đọc [ADR 0004](../adr/0004-transactional-email.md) và [mẫu cấu hình](../../backend/apps/notification/.env.example). Hai process thuộc hai service sở hữu dữ liệu độc lập: Identity relay chỉ dùng database Identity; Notification consumer/worker chỉ dùng database Notification và HTTP mTLS resolveEmailDelivery. Không cần private signing/delivery key của Identity ở Notification. Node 24.22.1, package @smartgym/notification 0.1.0; port mặc định 3003 HTTPS/mTLS, chỉ có health endpoints tại T09.
 
 Trình tự hiện hành: cấp DB/credentials/TLS và SMTP sandbox → pnpm --filter @smartgym/identity run migrate (đến 003), pnpm --filter @smartgym/notification run migrate (đến 002 từ T19) → provision cả topology email/nhắc lịch → khởi chạy Identity API → Notification → Identity relay. Build từng package bằng script build riêng. Relay chạy pnpm --filter @smartgym/identity run relay; Notification chạy pnpm --filter @smartgym/notification start. Không tự migrate khi start. Runtime DB role tối thiểu/audit ACL cần cổng T28/T29; test đã dùng owner role không superuser và từ chối DB chéo. Xem thêm [nâng cấp T19](#nhắc-lịch-notification-t19).
 
@@ -225,7 +225,7 @@ Khởi chạy Web bằng pnpm --filter @smartgym/web start (node server.mjs), bu
 
 ### Catalog Admin T11
 
-Chạy `pnpm --filter @smartgym/catalog run migrate` để áp dụng các migration chưa chạy trước khi khởi động binary mới. Catalog public giữ port 3001 theo mặc định. Khi bật `CATALOG_ADMIN_ENABLED=true`, listener mTLS mặc định bind loopback port 3101. Cấu hình certificate server, CA và fingerprint BFF. Cấp certificate client riêng cho Catalog và đăng ký fingerprint `catalog` ở Identity để đọc JWKS. `CATALOG_IDENTITY_ISSUER` phải khớp issuer của assertion. Giữ listener admin trên mạng riêng. [Mẫu cấu hình](../../backend/services/catalog/.env.example)
+Chạy `pnpm --filter @smartgym/catalog run migrate` để áp dụng các migration chưa chạy trước khi khởi động binary mới. Catalog public giữ port 3001 theo mặc định. Khi bật `CATALOG_ADMIN_ENABLED=true`, listener mTLS mặc định bind loopback port 3101. Cấu hình certificate server, CA và fingerprint BFF. Cấp certificate client riêng cho Catalog và đăng ký fingerprint `catalog` ở Identity để đọc JWKS. `CATALOG_IDENTITY_ISSUER` phải khớp issuer của assertion. Giữ listener admin trên mạng riêng. [Mẫu cấu hình](../../backend/apps/catalog/.env.example)
 
 Kiểm tra `/health/ready` trên listener public và chạy `pnpm test:catalog-admin` trên Windows x64 để nghiệm thu với PostgreSQL tạm. Khi Identity gián đoạn, Catalog public vẫn đọc từ database. Theo dõi lỗi 503 trên admin và trạng thái outbox PENDING. Relay Catalog thuộc T36. Trước release, cấp role runtime không có quyền sửa trigger audit và lập lịch dọn `idempotency_keys` hết hạn. [ADR 0006](../adr/0006-catalog-exercise-publication.md)
 
@@ -256,15 +256,15 @@ Ca media và import/export cần các công cụ local trong [runbook media](#me
 
 ### Catalog CMS T31
 
-Dừng writer Catalog bản cũ và bootstrap CLI trước migration 004 để mọi lệnh công bố sau backfill đều pin revision. Chạy migrate bằng role DDL, kiểm `/health/ready`, rồi khởi động writer mới. Trước khi bật ghi, smoke nhóm cơ/dụng cụ cũ, bài legacy và đường quản trị qua listener mTLS. Nếu đã có lượt ghi T31, rollback cần bản writer hiểu revision pin hoặc quy trình phục hồi đã diễn tập. `pnpm test:catalog-admin` dùng PostgreSQL tạm. Upload READY trong test là metadata fixture, triển khai object store thuộc T33. [Migration 004](../../backend/services/catalog/migrations/004_support_cms.sql)
+Dừng writer Catalog bản cũ và bootstrap CLI trước migration 004 để mọi lệnh công bố sau backfill đều pin revision. Chạy migrate bằng role DDL, kiểm `/health/ready`, rồi khởi động writer mới. Trước khi bật ghi, smoke nhóm cơ/dụng cụ cũ, bài legacy và đường quản trị qua listener mTLS. Nếu đã có lượt ghi T31, rollback cần bản writer hiểu revision pin hoặc quy trình phục hồi đã diễn tập. `pnpm test:catalog-admin` dùng PostgreSQL tạm. Upload READY trong test là metadata fixture, triển khai object store thuộc T33. [Migration 004](../../backend/apps/catalog/migrations/004_support_cms.sql)
 
 ### Lịch sử Catalog T32
 
-Áp dụng migration 005 trước khi chạy bản Catalog có T32. Readiness yêu cầu schema mới nhất của binary. Kiểm qua listener mTLS bằng `pnpm test:catalog-admin`. Khi khôi phục, đọc ETag mới nhất từ owner. Retry giữ nguyên khóa và payload, còn 412 yêu cầu đọc lại trước khi quyết định. Đối chiếu `sourceVersion`, lý do và actor ở audit. Restore chỉ lưu nháp, muốn đổi thư viện cần công bố riêng. [Hợp đồng CMS](../api/API_CONTRACTS.md) · [Migration 005](../../backend/services/catalog/migrations/005_revision_history.sql)
+Áp dụng migration 005 trước khi chạy bản Catalog có T32. Readiness yêu cầu schema mới nhất của binary. Kiểm qua listener mTLS bằng `pnpm test:catalog-admin`. Khi khôi phục, đọc ETag mới nhất từ owner. Retry giữ nguyên khóa và payload, còn 412 yêu cầu đọc lại trước khi quyết định. Đối chiếu `sourceVersion`, lý do và actor ở audit. Restore chỉ lưu nháp, muốn đổi thư viện cần công bố riêng. [Hợp đồng CMS](../api/API_CONTRACTS.md) · [Migration 005](../../backend/apps/catalog/migrations/005_revision_history.sql)
 
 ### Media Catalog T33
 
-Áp dụng migration 006. Upload READY từ bản metadata cũ được chuyển VERIFYING để kiểm bytes trước khi dùng. Bật `CATALOG_MEDIA_ENABLED` tại API và worker, cấu hình bucket private có versioning, prefix riêng, region và origin HTTPS công khai cho gateway Catalog. Origin không chứa path. Biến S3_ENDPOINT chỉ cần với provider S3 tương thích. Cấp credentials Catalog qua AWS credential chain/IAM. Worker dùng cùng kho và database của Catalog. [Mẫu cấu hình](../../backend/services/catalog/.env.example)
+Áp dụng migration 006. Upload READY từ bản metadata cũ được chuyển VERIFYING để kiểm bytes trước khi dùng. Bật `CATALOG_MEDIA_ENABLED` tại API và worker, cấu hình bucket private có versioning, prefix riêng, region và origin HTTPS công khai cho gateway Catalog. Origin không chứa path. Biến S3_ENDPOINT chỉ cần với provider S3 tương thích. Cấp credentials Catalog qua AWS credential chain/IAM. Worker dùng cùng kho và database của Catalog. [Mẫu cấu hình](../../backend/apps/catalog/.env.example)
 
 Chạy `pnpm --filter @smartgym/catalog build`, migrate rồi start API. Worker chạy bằng `pnpm --filter @smartgym/catalog media-worker`. Khai báo đường dẫn tuyệt đối FFPROBE/FFMPEG và clamd trên Unix socket hoặc mạng riêng. Giới hạn worker theo process/container, bộ nhớ, CPU và dung lượng thư mục tạm. ClamAV cần signature hiện hành và StreamMaxLength ít nhất 100 MiB. Tắt phân tích mạng/remote của decoder và chặn egress worker tới nguồn chưa được phép. Sự cố scanner/store giữ job VERIFYING với retry, không làm mất thư viện văn bản.
 

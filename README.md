@@ -13,10 +13,12 @@ Thành viên phụ trách Pose hoặc RAG xem [hướng dẫn bàn giao AI](docs
 | Thư mục | Nội dung |
 |---|---|
 | [frontend/](frontend/) | Next.js App Router, giao diện người dùng, CMS và BFF |
-| [backend/services/](backend/services/) | 6 service NestJS gồm Identity, Catalog, Workout, Progress, Notification và Pose. RAG là service thứ bảy, chạy từ nguồn bàn giao. |
+| [backend/apps/](backend/apps/) | 6 service NestJS gồm Identity, Catalog, Workout, Progress, Notification và Pose. RAG là service thứ bảy, chạy từ nguồn bàn giao. |
 | [infra/](infra/) | Docker Compose, Dockerfiles và cấu hình hạ tầng |
 | [scripts/](scripts/) | Chuẩn bị cấu hình, xác minh hợp đồng và vận hành |
 | [tests/](tests/) | Kiểm thử hợp đồng, tích hợp, hệ thống và trình duyệt |
 | [docs/](docs/README.md) | Hướng dẫn chạy, thiết kế hệ thống và trạng thái nghiệm thu |
+
+Build toàn bộ backend bằng `pnpm --filter @smartgym/backend build`. Build riêng Catalog bằng `pnpm --filter @smartgym/backend exec nest build catalog`. Cấu hình các ứng dụng ở [backend/nest-cli.json](backend/nest-cli.json).
 
 Khi sửa mã, đọc [hướng dẫn phát triển, kiểm thử](docs/guides/DEVELOPMENT.md). Xem tình trạng từng tính năng ở [bảng công việc](docs/planning/TASKS.md).

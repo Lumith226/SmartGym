@@ -1,6 +1,6 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';
 import {createServer,request} from 'node:https';import {randomBytes,randomUUID} from 'node:crypto';
-import {createTestTls} from '../../backend/services/identity/test/tls.cjs';
+import {createTestTls} from '../../backend/apps/identity/test/tls.cjs';
 import {handleAuth} from '../../frontend/server/auth.mjs';
 test('BFF trust boundary, response filtering and secure cookie policy',{timeout:30000},async t=>{
   process.env.AUTH_SECRET=randomBytes(32).toString('base64url');

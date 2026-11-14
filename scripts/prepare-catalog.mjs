@@ -18,7 +18,7 @@ export async function prepareCatalog(sourceRoot, outputFile) {
   } catch (error) {
     if (error.code !== 'ENOENT') throw error;
   }
-  const mappingFile = new URL('../backend/services/catalog/data/taxonomy-mapping.json', import.meta.url);
+  const mappingFile = new URL('../backend/apps/catalog/data/taxonomy-mapping.json', import.meta.url);
   const mappingBytes = await readFile(mappingFile);
   const mapping = JSON.parse(mappingBytes.toString('utf8'));
   const catalogPath = resolve(source, 'exercise_catalog.json');
@@ -65,7 +65,7 @@ export async function prepareCatalog(sourceRoot, outputFile) {
     },
     muscleGroups: mapping.muscleGroups, equipment: mapping.equipment, exercises,
   };
-  const { validateSnapshot } = await import('../backend/services/catalog/dist/import.js');
+  const { validateSnapshot } = await import('../backend/apps/catalog/dist/import.js');
   validateSnapshot(snapshot);
   await writeFile(output, JSON.stringify(snapshot, null, 2) + '\n');
   return snapshot;

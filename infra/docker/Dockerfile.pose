@@ -3,20 +3,22 @@ RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -r
 RUN corepack enable
 WORKDIR /app
 COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
-COPY backend/services/catalog/package.json backend/services/catalog/
-COPY backend/services/identity/package.json backend/services/identity/
-COPY backend/services/notification/package.json backend/services/notification/
-COPY backend/services/pose/package.json backend/services/pose/
-COPY backend/services/workout/package.json backend/services/workout/
-COPY backend/services/progress/package.json backend/services/progress/
+COPY backend/apps/catalog/package.json backend/apps/catalog/
+COPY backend/apps/identity/package.json backend/apps/identity/
+COPY backend/apps/notification/package.json backend/apps/notification/
+COPY backend/apps/pose/package.json backend/apps/pose/
+COPY backend/apps/workout/package.json backend/apps/workout/
+COPY backend/apps/progress/package.json backend/apps/progress/
 COPY frontend/package.json frontend/
+COPY backend/package.json backend/
 RUN pnpm install --frozen-lockfile --ignore-scripts
-COPY backend/services/pose/tsconfig.json backend/services/pose/
-COPY backend/services/pose/src backend/services/pose/src
-COPY backend/services/pose/data backend/services/pose/data
-COPY backend/services/pose/migrations backend/services/pose/migrations
+COPY backend/apps/pose/tsconfig.json backend/apps/pose/
+COPY backend/apps/pose/src backend/apps/pose/src
+COPY backend/apps/pose/data backend/apps/pose/data
+COPY backend/apps/pose/migrations backend/apps/pose/migrations
+COPY backend/nest-cli.json backend/
 RUN pnpm --filter @smartgym/pose build
-WORKDIR /app/backend/services/pose
+WORKDIR /app/backend/apps/pose
 USER node
 ENV POSE_HOST=0.0.0.0
 EXPOSE 3443

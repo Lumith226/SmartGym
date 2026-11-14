@@ -2,9 +2,9 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { startPostgres, freePort } from '../helpers/postgres.mjs';
 import { startProcess } from '../helpers/processes.mjs';
-import { connectDatabase } from '../../backend/services/catalog/dist/database.js';
-import { migrate } from '../../backend/services/catalog/dist/migrate.js';
-import { importSnapshot } from '../../backend/services/catalog/dist/import.js';
+import { connectDatabase } from '../../backend/apps/catalog/dist/database.js';
+import { migrate } from '../../backend/apps/catalog/dist/migrate.js';
+import { importSnapshot } from '../../backend/apps/catalog/dist/import.js';
 import { createRequire } from 'node:module';
 
 const axeScript = createRequire(import.meta.url).resolve('axe-core/axe.min.js');
@@ -21,10 +21,10 @@ test.beforeAll(async () => {
   console.log(postgres.version);
   database = connectDatabase(postgres.connectionString);
   await migrate(database);
-  const snapshot = JSON.parse(await readFile('backend/services/catalog/data/smartgym-m2.json', 'utf8'));
+  const snapshot = JSON.parse(await readFile('backend/apps/catalog/data/smartgym-m2.json', 'utf8'));
   await importSnapshot(database, snapshot, true);
   const backendPort = await freePort();
-  backend = startProcess(['dist/main.js'], 'backend/services/catalog', {
+  backend = startProcess(['dist/main.js'], 'backend/apps/catalog', {
     PORT: String(backendPort), DATABASE_URL: postgres.connectionString,
   });
   await backend.waitFor('http://127.0.0.1:' + backendPort + '/health/ready');

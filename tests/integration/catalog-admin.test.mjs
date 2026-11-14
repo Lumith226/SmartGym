@@ -9,13 +9,13 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { startPostgres, freePort } from '../helpers/postgres.mjs';
 import { startProcess } from '../helpers/processes.mjs';
-import { createTestTls } from '../../backend/services/identity/test/tls.cjs';
-import { createApp as createIdentity } from '../../backend/services/identity/dist/app.js';
-import { IdentityKeys } from '../../backend/services/identity/dist/modules/accounts/crypto.js';
-import { connectDatabase } from '../../backend/services/catalog/dist/database.js';
-import { migrate } from '../../backend/services/catalog/dist/migrate.js';
-import { importSnapshot } from '../../backend/services/catalog/dist/import.js';
-import { fingerprint } from '../../backend/services/catalog/dist/modules/admin/admin-store.js';
+import { createTestTls } from '../../backend/apps/identity/test/tls.cjs';
+import { createApp as createIdentity } from '../../backend/apps/identity/dist/app.js';
+import { IdentityKeys } from '../../backend/apps/identity/dist/modules/accounts/crypto.js';
+import { connectDatabase } from '../../backend/apps/catalog/dist/database.js';
+import { migrate } from '../../backend/apps/catalog/dist/migrate.js';
+import { importSnapshot } from '../../backend/apps/catalog/dist/import.js';
+import { fingerprint } from '../../backend/apps/catalog/dist/modules/admin/admin-store.js';
 
 test('Catalog CMS over PostgreSQL and real mTLS/JWKS', { timeout: 120000 }, async t => {
   const cleanup = [];
@@ -30,7 +30,7 @@ test('Catalog CMS over PostgreSQL and real mTLS/JWKS', { timeout: 120000 }, asyn
   t.diagnostic(pg.version);
   const database = connectDatabase(pg.connectionString); cleanup.push(() => database.close());
   await migrate(database);
-  const snapshot = JSON.parse(await readFile('backend/services/catalog/data/smartgym-m2.json', 'utf8'));
+  const snapshot = JSON.parse(await readFile('backend/apps/catalog/data/smartgym-m2.json', 'utf8'));
   await importSnapshot(database, snapshot, true);
   const fixtureBase = resolve('.local'); await mkdir(fixtureBase, { recursive: true });
   const importDir = await mkdtemp(join(fixtureBase, 'cms-import-'));
@@ -71,7 +71,7 @@ test('Catalog CMS over PostgreSQL and real mTLS/JWKS', { timeout: 120000 }, asyn
     CATALOG_IDENTITY_ORIGIN: 'https://127.0.0.1:' + identity.getHttpServer().address().port, CATALOG_IDENTITY_ISSUER: issuer,
     CATALOG_IMPORT_REGISTRY_FILE: registryFile,
   };
-  const process = startProcess(['dist/main.js'], 'backend/services/catalog', config); cleanup.push(() => process.stop());
+  const process = startProcess(['dist/main.js'], 'backend/apps/catalog', config); cleanup.push(() => process.stop());
   const publicOrigin = 'http://127.0.0.1:' + publicPort;
   await process.waitFor(publicOrigin + '/health/ready');
   const actor = randomUUID(), secondActor = randomUUID(), user = randomUUID();

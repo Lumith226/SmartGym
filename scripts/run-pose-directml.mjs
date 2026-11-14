@@ -60,7 +60,7 @@ if (!await exists(key) || !await exists(cert)) {
   }
 }
 
-const child = spawn(python, ['-B', join(root, 'backend/services/pose/engine/main.py'),
+const child = spawn(python, ['-B', join(root, 'backend/apps/pose/engine/main.py'),
   '--device', 'dml', '--source', source, '--host', process.env.SMARTGYM_POSE_DIRECTML_BIND || '127.0.0.1',
   '--port', process.env.SMARTGYM_POSE_DIRECTML_PORT || '8002', '--key', key, '--cert', cert, '--ca', join(engineSecrets, 'ca.crt')],
 { cwd: root, env: { ...env, PYTHONPATH: provider, OMP_NUM_THREADS: '2', OPENBLAS_NUM_THREADS: '2' },

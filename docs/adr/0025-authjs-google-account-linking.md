@@ -15,4 +15,4 @@ Identity sở hữu user ID, mật khẩu, vai trò và phiên được CMS, Wor
 
 ## Hệ quả và kiểm chứng
 
-Mỗi môi trường phải đăng ký callback chính xác và cấp secret cho Web theo [runbook](../guides/OPERATIONS.md#web-auth-t10). Nghiệp vụ giữ ID và vai trò được kiểm bằng [Identity integration](../../backend/services/identity/test/identity.test.cjs). Luồng OIDC, cookie và xử lý rate limit được kiểm với [Google fixture](../../tests/integration/google-auth.test.mjs). Xem lại ADR khi đổi nhà cung cấp danh tính, nơi sở hữu phiên hoặc chính sách liên kết tài khoản.
+Mỗi môi trường phải đăng ký callback chính xác và cấp secret cho Web theo [runbook](../guides/OPERATIONS.md#web-auth-t10). Nghiệp vụ giữ ID và vai trò được kiểm bằng [Identity integration](../../backend/apps/identity/test/identity.test.cjs). Luồng OIDC, cookie và xử lý rate limit được kiểm với [Google fixture](../../tests/integration/google-auth.test.mjs). Xem lại ADR khi đổi nhà cung cấp danh tính, nơi sở hữu phiên hoặc chính sách liên kết tài khoản.

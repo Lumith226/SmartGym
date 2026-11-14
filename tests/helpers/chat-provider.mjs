@@ -23,7 +23,7 @@ export async function startChatProvider(tls){
 export async function seedChatPose(db,owner){
   const {seedPoseResult}=await import('./pose-summary.mjs');
   const m=JSON.parse(await readFile('docs/api/ai-provider-compatibility.yaml','utf8')).models[0];
-  const spec=JSON.parse(await readFile('backend/services/pose/data/models.json','utf8')).find(row=>row.catalogId===m.catalog_id);
+  const spec=JSON.parse(await readFile('backend/apps/pose/data/models.json','utf8')).find(row=>row.catalogId===m.catalog_id);
   const raw={exercise:m.pose_id,schema_version:m.schema_version,scope:'video',quality:{usable:true},source:{video_sha256:'a'.repeat(64)},model_provenance:{model_sha256:m.model_sha256},
     label_results:spec.labels.map(l=>({key:l.key,kind:l.kind,raw_label:l.raw_label,probability:l.calibrated?.1:null,threshold:l.threshold}))};
   return seedPoseResult(db,owner,{source:'VIDEO',repCount:null,repCountStatus:'UNAVAILABLE',formStatus:'ASSESSED'},{rawModelResult:raw,modelSha256:m.model_sha256,schemaVersion:m.schema_version});

@@ -1,12 +1,12 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';import {randomUUID,randomBytes,generateKeyPairSync,createHash} from 'node:crypto';
 import {readFile} from 'node:fs/promises';import {request} from 'node:https';import {createRequire} from 'node:module';
 import {startPostgres,freePort} from '../helpers/postgres.mjs';import {startRabbit} from '../helpers/rabbitmq.mjs';import {startProcess} from '../helpers/processes.mjs';
-import {createTestTls} from '../../backend/services/identity/test/tls.cjs';import {createApp as createIdentity} from '../../backend/services/identity/dist/app.js';import {IdentityKeys} from '../../backend/services/identity/dist/modules/accounts/crypto.js';
-import {connectDatabase} from '../../backend/services/catalog/dist/database.js';import {migrate} from '../../backend/services/catalog/dist/migrate.js';import {importSnapshot} from '../../backend/services/catalog/dist/import.js';
-import {createAdminApp} from '../../backend/services/catalog/dist/admin-app.js';import {AdminCatalog} from '../../backend/services/catalog/dist/modules/exercises/admin-catalog.js';import {fingerprint} from '../../backend/services/catalog/dist/modules/admin/admin-store.js';
-import {CatalogFeed} from '../../backend/services/catalog/dist/modules/feed/feed.js';import {validFeed,validCatalogEvent} from '../../backend/services/catalog/dist/modules/feed/feed-contract.js';
-import {ConfirmPublisher,validateBrokerUrl} from '../../backend/services/catalog/dist/broker.js';import {OutboxRelay} from '../../backend/services/catalog/dist/modules/feed/outbox.js';import {provisionCatalogTopology} from '../../scripts/provision-catalog-topology.mjs';
-const {connect}=createRequire(new URL('../../backend/services/catalog/package.json',import.meta.url))('amqplib');
+import {createTestTls} from '../../backend/apps/identity/test/tls.cjs';import {createApp as createIdentity} from '../../backend/apps/identity/dist/app.js';import {IdentityKeys} from '../../backend/apps/identity/dist/modules/accounts/crypto.js';
+import {connectDatabase} from '../../backend/apps/catalog/dist/database.js';import {migrate} from '../../backend/apps/catalog/dist/migrate.js';import {importSnapshot} from '../../backend/apps/catalog/dist/import.js';
+import {createAdminApp} from '../../backend/apps/catalog/dist/admin-app.js';import {AdminCatalog} from '../../backend/apps/catalog/dist/modules/exercises/admin-catalog.service.js';import {fingerprint} from '../../backend/apps/catalog/dist/modules/admin/admin-store.js';
+import {CatalogFeed} from '../../backend/apps/catalog/dist/modules/feed/catalog-feed.service.js';import {validFeed,validCatalogEvent} from '../../backend/apps/catalog/dist/modules/feed/feed-contract.js';
+import {ConfirmPublisher,validateBrokerUrl} from '../../backend/apps/catalog/dist/broker.js';import {OutboxRelay} from '../../backend/apps/catalog/dist/modules/feed/outbox.js';import {provisionCatalogTopology} from '../../scripts/provision-catalog-topology.mjs';
+const {connect}=createRequire(new URL('../../backend/apps/catalog/package.json',import.meta.url))('amqplib');
 const delay=ms=>new Promise(r=>setTimeout(r,ms));async function until(fn,label){for(let i=0;i<200;i++){if(await fn())return;await delay(50);}throw Error('Timed out: '+label);}
 test('T36 Catalog producer: mTLS head/snapshot and confirmed outbox; broker probe is NOT a RAG consumer',{timeout:180000},async t=>{
   const cleanup=[];t.after(async()=>{const failures=[];for(const close of cleanup.reverse())try{await close();}catch(e){failures.push(e);}if(failures.length)throw new AggregateError(failures,'Feed cleanup failed');});
@@ -31,7 +31,7 @@ test('T36 Catalog producer: mTLS head/snapshot and confirmed outbox; broker prob
   async function publish(id){const current=await api('/api/v1/admin/exercises/'+id,{cert:'bff'});const r=await api('/api/v1/admin/exercises/'+id+'/publish',{method:'POST',cert:'bff',headers:{'if-match':current.headers.etag,'idempotency-key':randomUUID()}});assert.equal(r.status,200,JSON.stringify(r.body));return r;}
   async function archive(id){const current=await api('/api/v1/admin/exercises/'+id,{cert:'bff'});const r=await api('/api/v1/admin/exercises/'+id+'/unpublish',{method:'POST',cert:'bff',body:{reason:'Thu hồi fixture'},headers:{'if-match':current.headers.etag,'idempotency-key':randomUUID()}});assert.equal(r.status,200,JSON.stringify(r.body));return r;}
   await t.test('migration to 008 is idempotent and no fake head before bootstrap',async()=>{assert.equal((await db.query('SELECT max(version) AS v FROM catalog_migrations')).rows[0].v,8);assert.equal((await api(root+'/head')).status,503);});
-  await importSnapshot(db,JSON.parse(await readFile('backend/services/catalog/data/smartgym-m2.json','utf8')),true);
+  await importSnapshot(db,JSON.parse(await readFile('backend/apps/catalog/data/smartgym-m2.json','utf8')),true);
   let initialHead,initialSnapshot;
   await t.test('RAG cert only; BFF ADMIN/refs/unknown cannot read feed, RAG cannot edit CMS or call refs',async()=>{
     for(const cert of ['bff','catalog','unknown'])assert.equal((await api(root+'/head',{cert})).status,403,cert);
@@ -106,7 +106,7 @@ test('T36 Catalog producer: mTLS head/snapshot and confirmed outbox; broker prob
     assert.throws(()=>validateBrokerUrl('amqp://outside.test',true));const denied=await ConfirmPublisher.open(broker.publisherUrl,undefined,true);try{await assert.rejects(denied.publish({...e,type:'workout.occurrence.changed.v1'}));}finally{await denied.close();}
   });
   await t.test('Catalog relay starts independently from env and publishes without Identity/provider',async()=>{
-    const e=await fixtureEvent(),process=startProcess(['dist/relay-main.js'],'backend/services/catalog',{DATABASE_URL:url.href,CATALOG_AMQP_URL:broker.publisherUrl,BROKER_ALLOW_LOOPBACK_PLAINTEXT:'true'});cleanup.push(()=>process.stop());
+    const e=await fixtureEvent(),process=startProcess(['dist/relay-main.js'],'backend/apps/catalog',{DATABASE_URL:url.href,CATALOG_AMQP_URL:broker.publisherUrl,BROKER_ALLOW_LOOPBACK_PLAINTEXT:'true'});cleanup.push(()=>process.stop());
     await until(async()=>(await db.query('SELECT status FROM outbox_events WHERE event_id=$1',[e.id])).rows[0].status==='PUBLISHED','standalone relay confirm');await process.stop();const messages=await probe();assert.ok(messages.some(m=>m.id===e.id));
   });
 });

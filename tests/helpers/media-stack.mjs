@@ -4,7 +4,7 @@ import { mkdir, mkdtemp, readFile, rm, writeFile } from 'node:fs/promises';
 import { resolve, join, sep } from 'node:path';
 import { randomBytes } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
-import { S3Client, PutBucketVersioningCommand, HeadBucketCommand } from '../../backend/services/catalog/node_modules/@aws-sdk/client-s3/dist-cjs/index.js';
+import { S3Client, PutBucketVersioningCommand, HeadBucketCommand } from '../../backend/apps/catalog/node_modules/@aws-sdk/client-s3/dist-cjs/index.js';
 import { freePort } from './postgres.mjs';
 
 const exec = promisify(execFile);

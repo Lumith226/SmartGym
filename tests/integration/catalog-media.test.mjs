@@ -9,19 +9,19 @@ import { createRequire } from 'node:module';
 import { startPostgres, freePort } from '../helpers/postgres.mjs';
 import { startMediaTools } from '../helpers/media-stack.mjs';
 import { startProcess } from '../helpers/processes.mjs';
-import { createTestTls } from '../../backend/services/identity/test/tls.cjs';
-import { createApp as createIdentity } from '../../backend/services/identity/dist/app.js';
-import { IdentityKeys } from '../../backend/services/identity/dist/modules/accounts/crypto.js';
-import { connectDatabase } from '../../backend/services/catalog/dist/database.js';
-import { migrate } from '../../backend/services/catalog/dist/migrate.js';
-import { importSnapshot } from '../../backend/services/catalog/dist/import.js';
-import { createApp } from '../../backend/services/catalog/dist/app.js';
-import { createAdminApp } from '../../backend/services/catalog/dist/admin-app.js';
-import { S3MediaStorage } from '../../backend/services/catalog/dist/modules/media/media-storage.js';
-import { createMediaInspector } from '../../backend/services/catalog/dist/modules/media/media-inspector.js';
-import { MediaJobs } from '../../backend/services/catalog/dist/modules/media/media-jobs.js';
+import { createTestTls } from '../../backend/apps/identity/test/tls.cjs';
+import { createApp as createIdentity } from '../../backend/apps/identity/dist/app.js';
+import { IdentityKeys } from '../../backend/apps/identity/dist/modules/accounts/crypto.js';
+import { connectDatabase } from '../../backend/apps/catalog/dist/database.js';
+import { migrate } from '../../backend/apps/catalog/dist/migrate.js';
+import { importSnapshot } from '../../backend/apps/catalog/dist/import.js';
+import { createApp } from '../../backend/apps/catalog/dist/app.js';
+import { createAdminApp } from '../../backend/apps/catalog/dist/admin-app.js';
+import { S3MediaStorage } from '../../backend/apps/catalog/dist/modules/media/media-storage.js';
+import { createMediaInspector } from '../../backend/apps/catalog/dist/modules/media/media-inspector.js';
+import { MediaJobs } from '../../backend/apps/catalog/dist/modules/media/media-jobs.js';
 
-const require = createRequire(new URL('../../backend/services/catalog/package.json', import.meta.url));
+const require = createRequire(new URL('../../backend/apps/catalog/package.json', import.meta.url));
 const { PutObjectCommand } = require('@aws-sdk/client-s3');
 const hash = body => createHash('sha256').update(body).digest('hex');
 const uploadPath = id => '/media-uploads/' + id;
@@ -37,7 +37,7 @@ test('Catalog private S3 media, real decoder and ClamAV', { timeout: 180000 }, a
   const pg = await startPostgres(); cleanup.push(pg.stop); t.diagnostic(pg.version);
   const db = connectDatabase(pg.connectionString); cleanup.push(() => db.close());
   await migrate(db);
-  await importSnapshot(db, JSON.parse(await readFile('backend/services/catalog/data/smartgym-m2.json', 'utf8')), true);
+  await importSnapshot(db, JSON.parse(await readFile('backend/apps/catalog/data/smartgym-m2.json', 'utf8')), true);
   const tls = await createTestTls(); cleanup.push(tls.stop);
   const actor = randomUUID(), other = randomUUID();
   const keys = new IdentityKeys(generateKeyPairSync('rsa', { modulusLength: 2048 }).privateKey.export({ type: 'pkcs8', format: 'pem' }),
@@ -256,7 +256,7 @@ test('Catalog private S3 media, real decoder and ClamAV', { timeout: 180000 }, a
   await t.test('configured media worker runs independently and can recover a queued upload', async () => {
     const grant = await reserve(); await put(grant, tools.png);
     await api(uploadPath(grant.uploadId) + '/complete', post(), 202);
-    const worker = startProcess(['dist/media-worker.js'], 'backend/services/catalog', {
+    const worker = startProcess(['dist/media-worker.js'], 'backend/apps/catalog', {
       DATABASE_URL: pg.connectionString, CATALOG_MEDIA_ENABLED: 'true', CATALOG_MEDIA_PUBLIC_ORIGIN: origin,
       CATALOG_MEDIA_S3_ENDPOINT: tools.endpoint, CATALOG_MEDIA_BUCKET: tools.bucket, CATALOG_MEDIA_REGION: 'us-east-1',
       AWS_ACCESS_KEY_ID: tools.credentials.accessKeyId, AWS_SECRET_ACCESS_KEY: tools.credentials.secretAccessKey,

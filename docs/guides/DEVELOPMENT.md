@@ -15,6 +15,22 @@ pnpm check:contracts
 pnpm check:boundaries
 ```
 
+## Cấu trúc các service NestJS
+
+Nest CLI quản lý sáu ứng dụng ở [backend/nest-cli.json](../../backend/nest-cli.json). Chạy từ gốc repo:
+
+```powershell
+pnpm --filter @smartgym/backend build
+pnpm --filter @smartgym/backend exec nest build catalog
+pnpm --filter @smartgym/backend exec nest start catalog --watch
+```
+
+Lệnh watch cần hạ tầng và biến môi trường của service. Mỗi ứng dụng xuất JavaScript vào `backend/apps/<service>/dist/`. Lệnh `pnpm --filter @smartgym/catalog build` cũng dùng Nest CLI qua workspace backend.
+
+Trong `backend/apps/<service>/src/`, `main.ts` là điểm vào tiến trình, `app.ts` khởi tạo HTTP/TLS và `app.module.ts` đăng ký các module tính năng. Catalog có thêm `admin-app.ts` và `admin-app.module.ts` cho listener quản trị riêng.
+
+Đặt route, decorator và chuyển đổi request/response trong `*.controller.ts`. Đặt thao tác nghiệp vụ trong `*.service.ts`, còn `*.module.ts` nối controller, guard và provider. Khi module nhận cấu hình riêng của từng ứng dụng, giữ việc đăng ký phụ thuộc theo từng lần khởi tạo. Worker, relay và migrations chạy qua các điểm vào riêng trong package của service. [NestJS Feature Modules](https://docs.nestjs.com/modules#feature-modules)
+
 ## Chạy Catalog và Web riêng
 
 Chạy Catalog với PostgreSQL nhúng trong terminal thứ nhất.
@@ -29,7 +45,7 @@ pnpm --filter @smartgym/catalog dev:embedded
 pnpm --filter @smartgym/web start
 ```
 
-Catalog ở port 3001, Web ở port 3000. Cả hai mặc định kết nối qua loopback. Runner nhúng dùng PGlite devDependency và lưu ở backend/services/catalog/.local/catalog. Catalog mới khởi tạo trống. Bộ 35 bài M2 đã ngừng sử dụng trên Web và chỉ còn làm dữ liệu kiểm thử.
+Catalog ở port 3001, Web ở port 3000. Cả hai mặc định kết nối qua loopback. Runner nhúng dùng PGlite devDependency và lưu ở backend/apps/catalog/.local/catalog. Catalog mới khởi tạo trống. Bộ 35 bài M2 đã ngừng sử dụng trên Web và chỉ còn làm dữ liệu kiểm thử.
 
 Để thử đăng nhập bằng email trên Windows, chạy `pnpm build`, chuẩn bị broker bằng `node scripts/prepare-broker-tools.mjs` nếu chưa có, rồi chạy `node scripts/dev-auth.mjs` từ root. Terminal hiện URL HTTPS và tài khoản demo đã xác minh. Runner dùng PostgreSQL, RabbitMQ và SMTP sandbox trên loopback. Dữ liệu demo được dọn khi dừng bằng Ctrl+C. Trình duyệt cần tin cậy CA thử nghiệm để mở URL HTTPS. [Cấu hình auth](OPERATIONS.md#web-auth-t10)
 
@@ -37,7 +53,7 @@ Fixture M2 ghi 36 file nguồn kèm SHA-256 và bốn biến thể cần đối 
 
 ```powershell
 pnpm --filter @smartgym/catalog build
-node scripts/prepare-catalog.mjs "D:/du-an/SmartGym/knowledge_base" backend/services/catalog/data/smartgym-m2.json
+node scripts/prepare-catalog.mjs "D:/du-an/SmartGym/knowledge_base" backend/apps/catalog/data/smartgym-m2.json
 ```
 
 Để kiểm thử PostgreSQL server thật qua TCP trên Windows x64, chạy lệnh sau. Binary portable là optional dependency, cụm tạm chỉ nghe loopback, tạo mật khẩu ngẫu nhiên và được đóng/dọn sau test. Sandbox Windows có thể cần cho phép tạo process PostgreSQL.
@@ -58,7 +74,7 @@ Catalog entrypoint dùng driver pg với DATABASE_URL. Để dùng server sẵn 
 
 ## Chạy Identity riêng
 
-Identity yêu cầu Node.js 24.22.1, PostgreSQL database riêng và cấu hình TLS/secret tại [mẫu cấu hình](../../backend/services/identity/.env.example). Nạp biến bằng shell/secret manager, service không tự đọc .env. [Runbook Identity](OPERATIONS.md#identity-t08) mô tả caller ACL, migration, rotation và quyền cấp ADMIN.
+Identity yêu cầu Node.js 24.22.1, PostgreSQL database riêng và cấu hình TLS/secret tại [mẫu cấu hình](../../backend/apps/identity/.env.example). Nạp biến bằng shell/secret manager, service không tự đọc .env. [Runbook Identity](OPERATIONS.md#identity-t08) mô tả caller ACL, migration, rotation và quyền cấp ADMIN.
 
 ```powershell
 pnpm --filter @smartgym/identity build
@@ -70,7 +86,7 @@ Test nhanh riêng bằng `pnpm test:identity`; cần OpenSSL để sinh certific
 
 ## Notification và email sandbox
 
-Notification có [cấu hình riêng](../../backend/services/notification/.env.example), migrations và các lệnh build/migrate/start theo package @smartgym/notification. Identity relay chạy process riêng bằng pnpm --filter @smartgym/identity run relay với IDENTITY_DATABASE_URL và IDENTITY_AMQP_URL. Cấu hình broker topology trước bằng script provisioning có quyền riêng; runtime chỉ có quyền publisher hoặc consumer tương ứng. [Runbook](OPERATIONS.md#notification-email-t09) mô tả thứ tự chạy, TLS, retry, DLQ và UNKNOWN.
+Notification có [cấu hình riêng](../../backend/apps/notification/.env.example), migrations và các lệnh build/migrate/start theo package @smartgym/notification. Identity relay chạy process riêng bằng pnpm --filter @smartgym/identity run relay với IDENTITY_DATABASE_URL và IDENTITY_AMQP_URL. Cấu hình broker topology trước bằng script provisioning có quyền riêng; runtime chỉ có quyền publisher hoặc consumer tương ứng. [Runbook](OPERATIONS.md#notification-email-t09) mô tả thứ tự chạy, TLS, retry, DLQ và UNKNOWN.
 
 Kiểm thử toàn luồng trên Windows x64 bằng runtime portable. Bước chuẩn bị tải khoảng 257 MB ZIP chính thức, kiểm SHA-256 và giải nén vào .local, không chạy installer hoặc tạo Windows service. Công cụ cần quyền mạng/process phù hợp. Không có email nào gửi ra ngoài: SMTP test chỉ nghe loopback và chỉ giữ thư trong bộ nhớ.
 
@@ -96,4 +112,4 @@ pnpm test:browser
 
 ## API quản trị Catalog
 
-Catalog dùng migration 003–007 cho revision, công bố, audit, xác minh media và nhập/xuất. Bật listener quản trị riêng bằng biến môi trường Catalog và certificate mTLS. `/admin` có editor cho năm loại, lịch sử, so sánh, khôi phục thành nháp, upload/preview và nhật ký. S3 private và worker ClamAV/FFmpeg phục vụ tệp đã kiểm qua gateway có byte range. Chạy `pnpm test:catalog-admin` để kiểm CMS, `pnpm test:catalog-media` để kiểm media hoặc theo runbook T35 để kiểm giao diện cùng công cụ local. [Mẫu cấu hình Catalog](../../backend/services/catalog/.env.example) · [Runbook CMS](OPERATIONS.md#admin-cms-t35)
+Catalog dùng migration 003–007 cho revision, công bố, audit, xác minh media và nhập/xuất. Bật listener quản trị riêng bằng biến môi trường Catalog và certificate mTLS. `/admin` có editor cho năm loại, lịch sử, so sánh, khôi phục thành nháp, upload/preview và nhật ký. S3 private và worker ClamAV/FFmpeg phục vụ tệp đã kiểm qua gateway có byte range. Chạy `pnpm test:catalog-admin` để kiểm CMS, `pnpm test:catalog-media` để kiểm media hoặc theo runbook T35 để kiểm giao diện cùng công cụ local. [Mẫu cấu hình Catalog](../../backend/apps/catalog/.env.example) · [Runbook CMS](OPERATIONS.md#admin-cms-t35)

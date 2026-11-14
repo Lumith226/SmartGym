@@ -9,22 +9,22 @@ import Ajv2020 from 'ajv/dist/2020.js';
 import addFormats from 'ajv-formats';
 import { startPostgres, freePort } from '../helpers/postgres.mjs';
 import { startProcess } from '../helpers/processes.mjs';
-import { createTestTls } from '../../backend/services/identity/test/tls.cjs';
-import { createApp as createIdentity } from '../../backend/services/identity/dist/app.js';
-import { IdentityKeys } from '../../backend/services/identity/dist/modules/accounts/crypto.js';
-import { connectDatabase } from '../../backend/services/catalog/dist/database.js';
-import { migrate as migrateCatalog } from '../../backend/services/catalog/dist/migrate.js';
-import { importSnapshot } from '../../backend/services/catalog/dist/import.js';
-import { migrate } from '../../backend/services/workout/dist/migrate.js';
-import { fingerprint } from '../../backend/services/workout/dist/modules/plans/plans.js';
-import { Schedules } from '../../backend/services/workout/dist/modules/scheduling/schedules.js';
-import { OutboxRelay } from '../../backend/services/workout/dist/outbox.js';
-import { ConfirmPublisher } from '../../backend/services/workout/dist/broker.js';
+import { createTestTls } from '../../backend/apps/identity/test/tls.cjs';
+import { createApp as createIdentity } from '../../backend/apps/identity/dist/app.js';
+import { IdentityKeys } from '../../backend/apps/identity/dist/modules/accounts/crypto.js';
+import { connectDatabase } from '../../backend/apps/catalog/dist/database.js';
+import { migrate as migrateCatalog } from '../../backend/apps/catalog/dist/migrate.js';
+import { importSnapshot } from '../../backend/apps/catalog/dist/import.js';
+import { migrate } from '../../backend/apps/workout/dist/migrate.js';
+import { fingerprint } from '../../backend/apps/workout/dist/modules/plans/plans.service.js';
+import { Schedules } from '../../backend/apps/workout/dist/modules/scheduling/schedules.service.js';
+import { OutboxRelay } from '../../backend/apps/workout/dist/outbox.js';
+import { ConfirmPublisher } from '../../backend/apps/workout/dist/broker.js';
 import { startRabbit } from '../helpers/rabbitmq.mjs';
 import { createRequire } from 'node:module';
 import { scheduleChangeCases } from './workout-schedule-cases.mjs';
 
-const { connect } = createRequire(new URL('../../backend/services/workout/package.json', import.meta.url))('amqplib');
+const { connect } = createRequire(new URL('../../backend/apps/workout/package.json', import.meta.url))('amqplib');
 
 test('Workout plans over independent PostgreSQL, mTLS and published Catalog refs', { timeout: 180000 }, async t => {
   const cleanup = [];
@@ -36,7 +36,7 @@ test('Workout plans over independent PostgreSQL, mTLS and published Catalog refs
   const pg = await startPostgres(); cleanup.push(pg.stop); t.diagnostic(pg.version);
   const catalogDb = connectDatabase(pg.connectionString); cleanup.push(() => catalogDb.close());
   await migrateCatalog(catalogDb);
-  await importSnapshot(catalogDb, JSON.parse(await readFile('backend/services/catalog/data/smartgym-m2.json', 'utf8')), true);
+  await importSnapshot(catalogDb, JSON.parse(await readFile('backend/apps/catalog/data/smartgym-m2.json', 'utf8')), true);
   const password = randomBytes(24).toString('hex');
   await catalogDb.query("CREATE ROLE workout_runtime LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD '" + password + "'");
   await catalogDb.query('CREATE DATABASE workout_private OWNER workout_runtime');
@@ -48,7 +48,7 @@ test('Workout plans over independent PostgreSQL, mTLS and published Catalog refs
   const legacyBody = { name: 'Kế hoạch trước migration lịch', exercises: [{ exerciseId: 'bodyweight_squat', sets: 1, targetReps: 10 }] };
   const legacyReceipt = { ...legacyBody, id: legacyId, status: 'ACTIVE', version: 1, createdAt: new Date().toISOString(), updatedAt: new Date().toISOString(),
     exercises: [{ ...legacyBody.exercises[0], exerciseNameVi: 'Squat không tạ' }] };
-  const oldMigration = await readFile('backend/services/workout/migrations/001_workout_plans.sql', 'utf8');
+  const oldMigration = await readFile('backend/apps/workout/migrations/001_workout_plans.sql', 'utf8');
   await db.query(oldMigration);
   await db.query('INSERT INTO workout_migrations VALUES(1,$1)', [createHash('sha256').update(oldMigration).digest('hex')]);
   await db.query('INSERT INTO workout_plans(id,owner_user_id,title) VALUES($1,$2,$3)', [legacyId, legacyOwner, legacyBody.name]);
@@ -66,7 +66,7 @@ test('Workout plans over independent PostgreSQL, mTLS and published Catalog refs
   await identity.listen(0, '127.0.0.1'); cleanup.push(() => identity.close());
   const identityOrigin = 'https://127.0.0.1:' + identity.getHttpServer().address().port;
   const catalogPort = await freePort(), refsPort = await freePort();
-  const catalog = startProcess(['dist/main.js'], 'backend/services/catalog', {
+  const catalog = startProcess(['dist/main.js'], 'backend/apps/catalog', {
     DATABASE_URL: pg.connectionString, PORT: String(catalogPort), HOST: '127.0.0.1', CATALOG_ADMIN_ENABLED: 'true',
     CATALOG_ADMIN_PORT: String(refsPort), CATALOG_ADMIN_HOST: '127.0.0.1', CATALOG_MEDIA_ENABLED: 'false',
     CATALOG_ADMIN_BFF_FINGERPRINTS: JSON.stringify(tls.callers.bff),
@@ -84,7 +84,7 @@ test('Workout plans over independent PostgreSQL, mTLS and published Catalog refs
     WORKOUT_IDENTITY_TLS_KEY_FILE: join(tls.directory, 'catalog.key'), WORKOUT_IDENTITY_TLS_CERT_FILE: join(tls.directory, 'catalog.crt'), WORKOUT_IDENTITY_TLS_CA_FILE: join(tls.directory, 'ca.crt'),
     WORKOUT_CATALOG_ORIGIN: 'https://127.0.0.1:' + refsPort,
     WORKOUT_CATALOG_TLS_KEY_FILE: join(tls.directory, 'notification.key'), WORKOUT_CATALOG_TLS_CERT_FILE: join(tls.directory, 'notification.crt'), WORKOUT_CATALOG_TLS_CA_FILE: join(tls.directory, 'ca.crt') };
-  let api = startProcess(['dist/main.js'], 'backend/services/workout', config); cleanup.push(() => api.stop());
+  let api = startProcess(['dist/main.js'], 'backend/apps/workout', config); cleanup.push(() => api.stop());
   const owner = randomUUID(), other = randomUUID();
   const token = (user = owner, role = 'USER', expired = false) => keys.assertion(user, role, new Date(Date.now() - 10000), new Date(Date.now() + (expired ? -1000 : 290000))).accessToken;
   const schema = JSON.parse(await readFile('docs/api/openapi.yaml', 'utf8'));
@@ -390,7 +390,7 @@ test('Workout plans over independent PostgreSQL, mTLS and published Catalog refs
     try { await assert.rejects(denied.publish({ ...event.payload, type: 'identity.email-action.requested.v1' })); }
     finally { await denied.close(); }
     await db.query("UPDATE outbox_events SET available_at=now() WHERE status='PENDING'");
-    const relayProcess = startProcess(['dist/relay-main.js'], 'backend/services/workout', { ...config, WORKOUT_AMQP_URL: broker.publisherUrl,
+    const relayProcess = startProcess(['dist/relay-main.js'], 'backend/apps/workout', { ...config, WORKOUT_AMQP_URL: broker.publisherUrl,
       BROKER_ALLOW_LOOPBACK_PLAINTEXT: 'true', NODE_ENV: 'development' });
     cleanup.push(() => relayProcess.stop());
     let pending;
@@ -423,7 +423,7 @@ test('Workout plans over independent PostgreSQL, mTLS and published Catalog refs
     const key = randomUUID(), body = { name: 'Lặp lại', exercises: [input.exercises[1]] };
     const created = await checked(root, post(body, key), 201);
     await catalog.stop(); await api.stop();
-    api = startProcess(['dist/main.js'], 'backend/services/workout', config); await ready();
+    api = startProcess(['dist/main.js'], 'backend/apps/workout', config); await ready();
     assert.deepEqual((await checked(root, post(body, key), 201)).body, created.body);
     await checked(root + '/' + created.body.id, {}, 200, 'WorkoutPlan');
     await checked(root, post(body), 503);

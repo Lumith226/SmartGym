@@ -3,7 +3,7 @@ import assert from 'node:assert/strict';
 import { createServer,request } from 'node:https';
 import { randomUUID } from 'node:crypto';
 import { join } from 'node:path';
-import { createTestTls } from '../../backend/services/identity/test/tls.cjs';
+import { createTestTls } from '../../backend/apps/identity/test/tls.cjs';
 import { handleProgress } from '../../frontend/server/progress.mjs';
 
 test('Progress BFF transport and schema boundary with explicit TLS upstream fixtures',{timeout:30000},async t=>{

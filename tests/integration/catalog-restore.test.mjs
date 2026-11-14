@@ -5,9 +5,9 @@ import { readFile } from 'node:fs/promises';
 import { performance } from 'node:perf_hooks';
 import { startPostgres, freePort } from '../helpers/postgres.mjs';
 import { startProcess } from '../helpers/processes.mjs';
-import { connectDatabase } from '../../backend/services/catalog/dist/database.js';
-import { migrate } from '../../backend/services/catalog/dist/migrate.js';
-import { importSnapshot } from '../../backend/services/catalog/dist/import.js';
+import { connectDatabase } from '../../backend/apps/catalog/dist/database.js';
+import { migrate } from '../../backend/apps/catalog/dist/migrate.js';
+import { importSnapshot } from '../../backend/apps/catalog/dist/import.js';
 
 test('isolated Catalog cold backup restores data, database roles and API readiness', { timeout: 120000 }, async t => {
   const pg = await startPostgres();
@@ -34,7 +34,7 @@ test('isolated Catalog cold backup restores data, database roles and API readine
     return { migrations: migrations.rows, revisions: revisions.rows, exercises: exercises.rows };
   }
 
-  const fixture = JSON.parse(await readFile('backend/services/catalog/data/smartgym-m2.json', 'utf8'));
+  const fixture = JSON.parse(await readFile('backend/apps/catalog/data/smartgym-m2.json', 'utf8'));
   const source = connectDatabase(catalogUrl.href);
   let expected;
   try {
@@ -67,7 +67,7 @@ test('isolated Catalog cold backup restores data, database roles and API readine
 
   const port = await freePort();
   const origin = 'http://127.0.0.1:' + port;
-  const catalog = startProcess(['dist/main.js'], 'backend/services/catalog', {
+  const catalog = startProcess(['dist/main.js'], 'backend/apps/catalog', {
     DATABASE_URL: catalogUrl.href, HOST: '127.0.0.1', PORT: String(port),
     CATALOG_ADMIN_ENABLED: 'false', CATALOG_MEDIA_ENABLED: 'false',
   });

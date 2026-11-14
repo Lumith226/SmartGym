@@ -43,7 +43,7 @@ test('Web → Catalog public flow degrades and recovers across a Catalog restart
       child.kill();
     })));
   });
-  const startCatalog = () => start(['test/dev.cjs', '--ephemeral'], 'backend/services/catalog', {
+  const startCatalog = () => start(['test/dev.cjs', '--ephemeral', '--seed-test-catalog'], 'backend/apps/catalog', {
     PORT: String(catalogPort), NODE_ENV: 'development',
   });
   const backend = startCatalog();
@@ -55,9 +55,9 @@ test('Web → Catalog public flow degrades and recovers across a Catalog restart
   });
   const webUrl = 'http://127.0.0.1:' + webPort;
   await waitFor(webUrl, web.child, web.output);
-  const home = await (await fetch(webUrl + '/?muscleGroupId=quadriceps&equipmentId=bodyweight')).text();
-  assert.match(home, /Squat không tạ/);
-  assert.match(home, /\/bai-tap\/squat-khong-ta/);
+  const library = await fetch(webUrl + '/?muscleGroupId=quadriceps&equipmentId=bodyweight');
+  assert.equal(new URL(library.url).pathname, '/bai-tap');
+  assert.match(await library.text(), /Squat không tạ/);
   const response = await fetch(webUrl + '/bai-tap/squat-khong-ta');
   assert.equal(response.status, 200);
   const detail = await response.text();
@@ -65,13 +65,13 @@ test('Web → Catalog public flow degrades and recovers across a Catalog restart
   assert.match(detail, /noindex/);
   assert.equal((await fetch(webUrl + '/sitemap.xml')).status, 404);
   const empty = await (await fetch(webUrl + '/?q=unknown-exercise')).text();
-  assert.match(empty, /Chưa có bài tập khớp/);
+  assert.match(empty, /Không tìm thấy bài tập nào khớp/);
   assert.equal((await fetch(webUrl + '/bai-tap/missing')).status, 404);
   const exit = new Promise(resolve => backend.child.once('exit', resolve));
   backend.child.kill();
   await exit;
-  const degraded = await (await fetch(webUrl)).text();
-  assert.match(degraded, /Thư viện đang kết nối lại/);
+  const degraded = await (await fetch(webUrl + '/bai-tap')).text();
+  assert.match(degraded, /Chưa tải được bài tập/);
 
   const restarted = startCatalog();
   await waitFor(backendUrl + '/health/ready', restarted.child, restarted.output);

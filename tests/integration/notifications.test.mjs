@@ -1,11 +1,11 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';
 import {request} from 'node:https';import {randomUUID,randomBytes,generateKeyPairSync,sign} from 'node:crypto';
 import {join} from 'node:path';
-import {startPostgres} from '../helpers/postgres.mjs';import {createTestTls} from '../../backend/services/identity/test/tls.cjs';
-import {connectDatabase} from '../../backend/services/notification/dist/database.js';import {migrate} from '../../backend/services/notification/dist/migrate.js';
-import {createApp} from '../../backend/services/notification/dist/app.js';import {ReminderInbox,ReminderWorker} from '../../backend/services/notification/dist/modules/inbox/reminders.js';
-import {Inbox,DeliveryWorker} from '../../backend/services/notification/dist/modules/delivery/jobs.js';
-import {createApp as createIdentity} from '../../backend/services/identity/dist/app.js';import {migrate as migrateIdentity} from '../../backend/services/identity/dist/migrate.js';import {IdentityKeys} from '../../backend/services/identity/dist/modules/accounts/crypto.js';
+import {startPostgres} from '../helpers/postgres.mjs';import {createTestTls} from '../../backend/apps/identity/test/tls.cjs';
+import {connectDatabase} from '../../backend/apps/notification/dist/database.js';import {migrate} from '../../backend/apps/notification/dist/migrate.js';
+import {createApp} from '../../backend/apps/notification/dist/app.js';import {ReminderInbox,ReminderWorker} from '../../backend/apps/notification/dist/modules/inbox/reminders.js';
+import {Inbox,DeliveryWorker} from '../../backend/apps/notification/dist/modules/delivery/jobs.js';
+import {createApp as createIdentity} from '../../backend/apps/identity/dist/app.js';import {migrate as migrateIdentity} from '../../backend/apps/identity/dist/migrate.js';import {IdentityKeys} from '../../backend/apps/identity/dist/modules/accounts/crypto.js';
 test('T20 owner Notification APIs over PostgreSQL and Identity mTLS/JWKS',{timeout:120000},async t=>{
   const cleanup=[];t.after(async()=>{for(const close of cleanup.reverse())await close();});const pg=await startPostgres();cleanup.push(pg.stop);
   const admin=connectDatabase(pg.connectionString),urls={};try{for(const name of ['inbox_identity','inbox_notification']){const password=randomBytes(24).toString('hex');await admin.query("CREATE ROLE "+name+" LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD '"+password+"'");await admin.query('CREATE DATABASE '+name+' OWNER '+name);await admin.query('REVOKE CONNECT ON DATABASE '+name+' FROM PUBLIC');const u=new URL(pg.connectionString);u.username=name;u.password=password;u.pathname='/'+name;urls[name]=u.href;}}finally{await admin.close();}
@@ -75,7 +75,7 @@ test('T20 owner Notification APIs over PostgreSQL and Identity mTLS/JWKS',{timeo
     const spoofed=await call(undefined,{headers:{'x-user-id':other,'x-user-role':'ADMIN'}});assert.equal(spoofed.status,200);assert.ok(spoofed.body.items.length);assert.ok(spoofed.body.items.every(n=>!foreignIds.has(n.id)));
   });
   await t.test('API enablement requires valid BFF fingerprints and Identity issuer; worker-only config stays compatible',async()=>{
-    const {loadConfig}=await import('../../backend/services/notification/dist/config.js');const previous={...process.env};
+    const {loadConfig}=await import('../../backend/apps/notification/dist/config.js');const previous={...process.env};
     try{
       for(const [key,value]of Object.entries({NOTIFICATION_DATABASE_URL:urls.inbox_notification,NOTIFICATION_IDENTITY_ORIGIN:config.auth.identity.origin,NOTIFICATION_WEB_ORIGIN:'https://web.test',NOTIFICATION_AMQP_URL:'amqp://127.0.0.1:5672/test',NOTIFICATION_ALLOW_LOOPBACK_PLAINTEXT:'true',NOTIFICATION_PROBE_FINGERPRINTS:JSON.stringify(tls.callers.bff),SMTP_HOST:'127.0.0.1',SMTP_PORT:'2525',SMTP_FROM:'noreply@smartgym.test'}))process.env[key]=value;
       delete process.env.SMTP_USER;

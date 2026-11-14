@@ -6,7 +6,7 @@
     "node": ">=24 <25"
   },
   "scripts": {
-    "build": "pnpm -r build",
+    "build": "pnpm --filter @smartgym/backend --filter @smartgym/web build",
     "test": "pnpm --filter @smartgym/catalog test && pnpm --filter @smartgym/identity test && pnpm --filter @smartgym/notification test",
     "test:identity": "pnpm --filter @smartgym/identity test",
     "test:bff": "pnpm --filter @smartgym/web test",

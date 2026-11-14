@@ -8,7 +8,7 @@ const names = ['ExerciseDraftCreate', 'ExerciseDraftUpdate', 'CmsArchiveReason',
 const content = JSON.stringify(Object.fromEntries(names.map(name => [name, api.components.schemas[name]])), null, 2)
   .replaceAll('#/components/schemas/ExerciseProfile', 'ExerciseProfile')
   .replaceAll('#/components/schemas/ExerciseImageRoles', 'ExerciseImageRoles') + '\n';
-const target = new URL('backend/services/catalog/data/admin.schemas.json', root);
+const target = new URL('backend/apps/catalog/data/admin.schemas.json', root);
 if (process.argv.includes('--check')) {
   if ((await readFile(target, 'utf8')).replaceAll('\r\n', '\n') !== content) throw new Error('Stale Catalog admin schemas');
   console.log('Catalog admin schemas match OpenAPI');

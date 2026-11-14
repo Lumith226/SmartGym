@@ -7,7 +7,7 @@ console.log('Testing over TCP with ' + server.version);
 try {
   const status = await new Promise((resolve, reject) => {
     const child = spawn(process.execPath, ['--test', 'test/catalog.test.cjs'], {
-      cwd: new URL('../backend/services/catalog/', import.meta.url),
+      cwd: new URL('../backend/apps/catalog/', import.meta.url),
       env: { ...process.env, CATALOG_TEST_DATABASE_URL: server.connectionString },
       stdio: 'inherit', windowsHide: true,
     });
@@ -16,7 +16,7 @@ try {
   });
   process.exitCode = status;
   if (status === 0) {
-    const { connectDatabase } = await import('../backend/services/identity/dist/database.js');
+    const { connectDatabase } = await import('../backend/apps/identity/dist/database.js');
     const administrator = connectDatabase(server.connectionString);
     const password = randomBytes(24).toString('hex');
     try {
@@ -30,7 +30,7 @@ try {
     const forbiddenUrl = new URL(identityUrl); forbiddenUrl.pathname = '/postgres';
     process.exitCode = await new Promise((resolve, reject) => {
       const child = spawn(process.execPath, ['--test', 'test/identity.test.cjs'], {
-        cwd: new URL('../backend/services/identity/', import.meta.url),
+        cwd: new URL('../backend/apps/identity/', import.meta.url),
         env: { ...process.env, IDENTITY_TEST_DATABASE_URL: identityUrl.href, IDENTITY_TEST_FORBIDDEN_DATABASE_URL: forbiddenUrl.href },
         stdio: 'inherit', windowsHide: true,
       });
@@ -39,7 +39,7 @@ try {
     });
   }
   if (process.exitCode === 0) {
-    const { connectDatabase } = await import('../backend/services/notification/dist/database.js');
+    const { connectDatabase } = await import('../backend/apps/notification/dist/database.js');
     const administrator = connectDatabase(server.connectionString);
     const password = randomBytes(24).toString('hex');
     try {
@@ -50,7 +50,7 @@ try {
     url.username = 'notification_test'; url.password = password; url.pathname = '/notification_test';
     process.exitCode = await new Promise((resolve, reject) => {
       const child = spawn(process.execPath, ['--test', 'test/delivery.test.cjs'], {
-        cwd: new URL('../backend/services/notification/', import.meta.url),
+        cwd: new URL('../backend/apps/notification/', import.meta.url),
         env: { ...process.env, NOTIFICATION_TEST_DATABASE_URL: url.href }, stdio: 'inherit', windowsHide: true,
       });
       child.once('error', reject);

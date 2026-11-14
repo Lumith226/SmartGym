@@ -1744,16 +1744,22 @@ export function PoseStudio({
 
               {/* Cụm 3: Tiện ích & Trợ lý SmartGym */}
               <div className="flex items-center gap-1">
-                {/* Đặt lại số lượt */}
+                {/* Tải lại từ đầu */}
                 <button
                   type="button"
                   disabled={busyWhole}
                   onClick={() => {
                     sendConfigure(selectedId, source, false);
-                    setNotice('Đã đặt lại bộ đếm lượt tập.');
+                    if (source === 'video') {
+                      if (videoRef.current) {
+                        videoRef.current.currentTime = 0;
+                      }
+                      setVideoCurrentTime(0);
+                    }
+                    setNotice('Đã tải lại từ đầu.');
                   }}
-                  aria-label="Đặt lại bộ đếm lượt"
-                  title="Đặt lại bộ đếm lượt"
+                  aria-label="Tải lại từ đầu"
+                  title="Tải lại từ đầu (đặt lại lượt và phát lại từ đầu)"
                   className="inline-flex h-8 w-8 cursor-pointer items-center justify-center rounded-xl hover:bg-foreground/15 text-foreground/80 transition-colors"
                 >
                   <RotateCcw size={14} />
@@ -1814,7 +1820,7 @@ export function PoseStudio({
                   )}
                 >
                   <Sparkles size={13} className={!dockMinimized ? 'text-primary-foreground' : 'text-primary'} />
-                  <span className="hidden sm:inline">Hỏi AI</span>
+                  <span className="hidden sm:inline">Hỏi SmartGym</span>
                 </button>
 
                 {/* Đóng nguồn */}
@@ -1848,9 +1854,9 @@ export function PoseStudio({
         </div>
       )}
 
-      {/* ===== KHUNG CHAT RAG (BUNG LÊN PHÍA TRÊN THANH ĐIỀU KHIỂN KHI BẤM 'HỎI AI') ===== */}
+      {/* ===== KHUNG CHAT TRỢ LÝ SMARTGYM (CÙNG ĐƯỜNG CƠ SỞ VỚI THANH ĐIỀU KHIỂN ĐÁY) ===== */}
       {!dockMinimized && (
-        <div className="pointer-events-auto absolute bottom-[4.5rem] inset-x-3 z-30 mx-auto max-w-2xl sm:inset-x-auto sm:left-1/2 sm:-translate-x-1/2 sm:w-full">
+        <div className="pointer-events-auto absolute right-3 bottom-4 z-30 w-[min(340px,calc(100%-1.5rem))] sm:right-4 transition-all duration-300">
           <RagDock
             context={ragContext}
             minimized={false}

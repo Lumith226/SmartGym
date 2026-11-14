@@ -1,7 +1,7 @@
 import {test} from 'node:test';import assert from 'node:assert/strict';
 import {createServer,request} from 'node:https';import {randomUUID} from 'node:crypto';
 import {readFile,writeFile} from 'node:fs/promises';import {join} from 'node:path';
-import {createTestTls} from '../../backend/services/identity/test/tls.cjs';
+import {createTestTls} from '../../backend/apps/identity/test/tls.cjs';
 import {createChatHandler,loadChatConfig} from '../../frontend/server/chat.mjs';
 const pause=ms=>new Promise(r=>setTimeout(r,ms));
 test('T27 BFF over mTLS provider/Pose fixtures; no real corpus or generation claimed',{timeout:60000},async t=>{

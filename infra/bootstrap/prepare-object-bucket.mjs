@@ -1,7 +1,7 @@
 import { createRequire } from 'node:module';
 import { setTimeout as delay } from 'node:timers/promises';
 
-const require = createRequire('/app/backend/services/catalog/package.json');
+const require = createRequire('/app/backend/apps/catalog/package.json');
 const { S3Client, HeadBucketCommand, CreateBucketCommand, GetBucketVersioningCommand, PutBucketVersioningCommand } = require('@aws-sdk/client-s3');
 const endpoint = process.env.S3_BOOTSTRAP_ENDPOINT;
 const Bucket = process.env.S3_BOOTSTRAP_BUCKET;

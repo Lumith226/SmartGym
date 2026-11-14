@@ -1,6 +1,7 @@
 packages:
   - frontend
-  - backend/services/*
+  - backend
+  - backend/apps/*
 storeDir: .pnpm-store
 minimumReleaseAgeExclude:
   - '@nestjs/common@12.4.0'

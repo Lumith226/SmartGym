@@ -22,7 +22,7 @@ Mỗi service NestJS sở hữu database PostgreSQL riêng. Catalog và Pose s�
 
 ## Hệ quả và điều kiện xem xét lại
 
-Theo yêu cầu người dùng về tổ chức thư mục, dùng `frontend/` và `backend/services/<service>/` trong cùng monorepo. Đây là quyết định đã xác nhận về bố cục mã. Package identity, service ownership, API và cách triển khai độc lập giữ theo quyết định kiến trúc hiện có. Cây dự kiến ở [Architecture](../design/ARCHITECTURE.md) và cây thực tế ở [README](../../README.md).
+Theo yêu cầu người dùng, giữ `frontend/` và `backend/` trong cùng repository. [ADR 0027](0027-nest-cli-monorepo.md) cập nhật bố cục backend và cách build. Package identity, service ownership, API và cách triển khai độc lập tiếp tục theo quyết định kiến trúc tại đây.
 
 - Dùng ID và revision thay cho cross-service FK, truy vấn DB và chia sẻ domain. Tiến trình đọc phải xử lý dữ liệu chậm cập nhật, API nội bộ lỗi hoặc tài liệu đã gỡ.
 - Event at-least-once cần dedup, xử lý sai thứ tự, DLQ và replay theo runbook. Khi thêm broker/event mới, ADR phải giải thích lợi ích giao dịch hoặc vận hành.

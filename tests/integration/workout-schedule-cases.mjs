@@ -1,9 +1,9 @@
 import assert from 'node:assert/strict';
 import { randomUUID } from 'node:crypto';
 import { setTimeout as delay } from 'node:timers/promises';
-import { Schedules } from '../../backend/services/workout/dist/modules/scheduling/schedules.js';
-import { ScheduleChanges } from '../../backend/services/workout/dist/modules/scheduling/schedule-changes.js';
-import { ScheduleMaterializer } from '../../backend/services/workout/dist/modules/scheduling/materializer.js';
+import { Schedules } from '../../backend/apps/workout/dist/modules/scheduling/schedules.service.js';
+import { ScheduleChanges } from '../../backend/apps/workout/dist/modules/scheduling/schedule-changes.service.js';
+import { ScheduleMaterializer } from '../../backend/apps/workout/dist/modules/scheduling/materializer.js';
 import { startProcess } from '../helpers/processes.mjs';
 
 export async function scheduleChangeCases({ t, db, checked, call, input, config, cleanup }) {
@@ -210,7 +210,7 @@ export async function scheduleChangeCases({ t, db, checked, call, input, config,
       await tx.query('DELETE FROM workout_occurrences WHERE schedule_id=$1', [f.schedule.id]);
     });
     await db.query("UPDATE workout_schedules SET next_projection_at=now()+interval '1 day' WHERE id<>$1", [f.schedule.id]);
-    const worker = startProcess(['dist/materializer-main.js'], 'backend/services/workout', { DATABASE_URL: config.DATABASE_URL });
+    const worker = startProcess(['dist/materializer-main.js'], 'backend/apps/workout', { DATABASE_URL: config.DATABASE_URL });
     cleanup.push(() => worker.stop());
     try {
       let rows;

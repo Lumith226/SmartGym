@@ -4,20 +4,20 @@ import {createRequire} from 'node:module';import {spawn} from 'node:child_proces
 import {startPostgres,freePort} from '../helpers/postgres.mjs';import {startRabbit} from '../helpers/rabbitmq.mjs';
 import {provisionEmailTopology} from '../../scripts/provision-email-topology.mjs';
 import {provisionReminderTopology} from '../../scripts/provision-reminder-topology.mjs';
-import {createTestTls} from '../../backend/services/identity/test/tls.cjs';
-import {connectDatabase as connectIdentity} from '../../backend/services/identity/dist/database.js';
-import {migrate as migrateIdentity} from '../../backend/services/identity/dist/migrate.js';
-import {IdentityKeys} from '../../backend/services/identity/dist/modules/accounts/crypto.js';
-import {createApp as createIdentity} from '../../backend/services/identity/dist/app.js';
-import {ConfirmPublisher} from '../../backend/services/identity/dist/broker.js';
-import {OutboxRelay} from '../../backend/services/identity/dist/outbox.js';
-import {connectDatabase as connectNotification} from '../../backend/services/notification/dist/database.js';
-import {migrate as migrateNotification} from '../../backend/services/notification/dist/migrate.js';
-import {Inbox,DeliveryWorker} from '../../backend/services/notification/dist/modules/delivery/jobs.js';
-import {IdentityClient} from '../../backend/services/notification/dist/identity-client.js';
-import {SmtpProvider} from '../../backend/services/notification/dist/modules/delivery/mail.js';
-import {EmailConsumer} from '../../backend/services/notification/dist/broker.js';
-const require=createRequire(new URL('../../backend/services/notification/package.json',import.meta.url));
+import {createTestTls} from '../../backend/apps/identity/test/tls.cjs';
+import {connectDatabase as connectIdentity} from '../../backend/apps/identity/dist/database.js';
+import {migrate as migrateIdentity} from '../../backend/apps/identity/dist/migrate.js';
+import {IdentityKeys} from '../../backend/apps/identity/dist/modules/accounts/crypto.js';
+import {createApp as createIdentity} from '../../backend/apps/identity/dist/app.js';
+import {ConfirmPublisher} from '../../backend/apps/identity/dist/broker.js';
+import {OutboxRelay} from '../../backend/apps/identity/dist/outbox.js';
+import {connectDatabase as connectNotification} from '../../backend/apps/notification/dist/database.js';
+import {migrate as migrateNotification} from '../../backend/apps/notification/dist/migrate.js';
+import {Inbox,DeliveryWorker} from '../../backend/apps/notification/dist/modules/delivery/jobs.js';
+import {IdentityClient} from '../../backend/apps/notification/dist/identity-client.js';
+import {SmtpProvider} from '../../backend/apps/notification/dist/modules/delivery/mail.js';
+import {EmailConsumer} from '../../backend/apps/notification/dist/broker.js';
+const require=createRequire(new URL('../../backend/apps/notification/package.json',import.meta.url));
 const {SMTPServer}=require('smtp-server'),{connect}=require('amqplib');
 async function until(predicate,label){const end=Date.now()+10000;while(Date.now()<end){if(await predicate())return;await new Promise(resolve=>setTimeout(resolve,50));}throw new Error('Timed out: '+label);}
 test('Identity → RabbitMQ → Notification → SMTP with separate databases and mTLS', {timeout:180000},async t=>{
@@ -122,8 +122,8 @@ test('Identity → RabbitMQ → Notification → SMTP with separate databases an
       NOTIFICATION_IDENTITY_KEY_FILE:join(tls.directory,'notification.key'),NOTIFICATION_IDENTITY_CERT_FILE:join(tls.directory,'notification.crt'),NOTIFICATION_IDENTITY_CA_FILE:join(tls.directory,'ca.crt'),
       NOTIFICATION_PROBE_FINGERPRINTS:JSON.stringify(tls.callers.bff),SMTP_HOST:'127.0.0.1',SMTP_PORT:String(smtp.server.address().port),SMTP_FROM:'noreply@smartgym.test',SMTP_SECURE:'false',HOST:'127.0.0.1',PORT:String(targetPort)};
     delete environment.SMTP_USER;delete environment.SMTP_PASSWORD_FILE;delete environment.AMQP_CA_FILE;delete environment.SMTP_CA_FILE;
-    const notification=spawn(process.execPath,['dist/main.js'],{cwd:new URL('../../backend/services/notification/',import.meta.url),env:environment,windowsHide:true,stdio:'ignore'});
-    const relayProcess=spawn(process.execPath,['dist/relay-main.js'],{cwd:new URL('../../backend/services/identity/',import.meta.url),env:{...process.env,IDENTITY_DATABASE_URL:urls.identity_email,IDENTITY_AMQP_URL:broker.publisherUrl,BROKER_ALLOW_LOOPBACK_PLAINTEXT:'true'},windowsHide:true,stdio:'ignore'});
+    const notification=spawn(process.execPath,['dist/main.js'],{cwd:new URL('../../backend/apps/notification/',import.meta.url),env:environment,windowsHide:true,stdio:'ignore'});
+    const relayProcess=spawn(process.execPath,['dist/relay-main.js'],{cwd:new URL('../../backend/apps/identity/',import.meta.url),env:{...process.env,IDENTITY_DATABASE_URL:urls.identity_email,IDENTITY_AMQP_URL:broker.publisherUrl,BROKER_ALLOW_LOOPBACK_PLAINTEXT:'true'},windowsHide:true,stdio:'ignore'});
     const stop=async child=>{if(child.exitCode!==null||child.signalCode!==null)return;const exited=new Promise(resolve=>child.once('exit',resolve));child.kill();await exited;};
     try{
       await until(async()=>{try{return(await api('/health/ready',undefined,{},targetPort)).status===200;}catch{return false;}},'Notification process readiness');

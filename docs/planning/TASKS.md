@@ -61,7 +61,7 @@ M0 là gói thiết kế của lượt hiện tại, kiểm tra theo [review](..
 | T36 | M5 | P0 | ADM-002 RAG-002 | T11 T32 T34 | Hợp đồng Catalog head/snapshot/outbox với đội RAG | Events published/updated/unpublished có version và tombstone, replay kiểm qua staging | TST-36 | BLOCKED |
 | T37 | M4 | P0 | ADM-007 SEC-001 | T08 T11 T31 | Catalog RBAC và audit liên loại | ADMIN theo claims tại Catalog, revocation, audit append-only và no-store | TST-37 | DONE |
 | T38 | M2 | P0 | CAT-001 CAT-002 CAT-003 | T03 T04 | Mở rộng dữ liệu KB và truy vấn Catalog phía backend | Snapshot 35 bài có provenance, import append nguyên tử/replay, nâng schema M1, tìm kiếm và keyset SQL giới hạn limit+1 | TST-38 | DONE |
-| T39 | M2 | P1 | SYS-001 WEB-001 | T38 | Chuyển mã sang frontend/ và backend/services/ | Cập nhật workspace/lockfile, scripts, test paths, Docker và tài liệu. Build riêng và mọi phép kiểm tra hiện có tiếp tục đạt | TST-39 | DONE |
+| T39 | M2 | P1 | SYS-001 WEB-001 | T38 | Chuyển mã sang frontend/ và backend/apps/ | Cập nhật workspace/lockfile, scripts, test paths, Docker và tài liệu. Build riêng và mọi phép kiểm tra hiện có tiếp tục đạt | TST-39 | DONE |
 | T40 | Bảo trì | P1 | SYS-001 | T39 | Tổ chức HTTP API Catalog theo module nghiệp vụ | Build Catalog, giữ route và chính sách truy cập của hai listener, kiểm tra hợp đồng và đối chiếu hồi quy tích hợp với bản trước refactor | Catalog CMS, media, feed, thư viện công khai, check:boundaries, check:contracts | DONE |
 | T41 | Bảo trì | P1 | SYS-001 | T40 | Gom module HTTP và phần xử lý Catalog theo thư mục nghiệp vụ | Đường dẫn runtime, test và tài liệu trỏ đến cấu trúc mới, build Catalog và kiểm tra hồi quy CMS/media/feed | catalog-admin, catalog-media, catalog-feed, check:boundaries, check:contracts | DONE |
 | T42 | Bảo trì | P1 | SYS-001 | T41 | Tổ chức Identity, Workout, Progress, Notification và Pose theo module nghiệp vụ | Build năm service, đối chiếu route và guard, cập nhật tham chiếu mã và kiểm tra các luồng tích hợp liên quan | Identity, Workout, Progress, Notification, Pose, check:boundaries, check:contracts | DONE |
@@ -71,6 +71,8 @@ M0 là gói thiết kế của lượt hiện tại, kiểm tra theo [review](..
 | T46 | Bảo trì | P1 | POS-001 POS-002 WEB-001 | T24 | Thêm Kết quả tập vào điều hướng | Mở từ sidebar desktop và mobile, lưu kết quả từ Phòng tập, hiển thị và tải bản JSON trên trình duyệt đã lưu | Build Web, Chromium sidebar | DONE |
 | T47 | Bảo trì | P1 | ADM-001 ADM-002 | T12 | Chọn bài tập trên mọi trang của CMS | Chọn hết theo bộ lọc, giữ lựa chọn khi phân trang, kiểm đúng số bài đủ điều kiện trong hộp xác nhận | Build Web, Chromium CMS | DONE |
 | T48 | Bảo trì | P1 | RAG-001 WEB-001 | T24 T27 | Chỉ mở Hỏi SmartGym khi bấm nút trong Phòng tập | Khung chat mặc định đóng và tạm dừng phân tích không mở chat | Build Web, Chromium Phòng tập | DONE |
+| T49 | Bảo trì | P1 | SYS-001 | T42 | Chuẩn hóa cấu trúc NestJS của sáu service | Module gốc, controller và provider có vị trí rõ; giữ route, guard và entrypoint; build và kiểm thử hồi quy | Build backend, kiểm tra hợp đồng và biên import, hồi quy tích hợp | DONE |
+| T50 | Bảo trì | P1 | SYS-001 | T49 | Chuyển backend sang Nest CLI Monorepo Mode | Sáu ứng dụng trong backend/apps, build riêng và đồng loạt bằng Nest CLI, Compose và kiểm thử dùng đường dẫn mới | Nest CLI, Docker, hợp đồng và biên import | DONE |
 
 Đọc [roadmap](IMPLEMENTATION_PLAN.md), [ma trận](TRACEABILITY.md), [test plan](TEST_PLAN.md) và [hướng dẫn phát triển](../guides/DEVELOPMENT.md). Ghi bằng chứng và file thực tế trong lúc triển khai. Khi một giả định đổi, cập nhật requirement, task, hợp đồng và test cùng nhau.
 
@@ -81,6 +83,10 @@ T46 PASS TypeScript, build và healthcheck Docker Web. Chromium trên cổng 310
 T47 PASS TypeScript, build Web Windows và Docker, healthcheck Web cổng 3100. Chromium 2/2 kiểm chọn 21 mục trên hai trang với dữ liệu mẫu, bỏ chọn riêng và danh sách xác nhận, cùng hồi quy thao tác hàng loạt trên Catalog kiểm thử.
 
 T48 PASS build và healthcheck Docker Web. Chromium cổng 3100 kiểm khung chat đóng khi vào trang và khi dừng phân tích video, mở bằng nút Hỏi SmartGym trên desktop và mobile. Kết nối Pose được mô phỏng trong ca kiểm giao diện.
+
+T49 PASS build TypeScript sáu service, kiểm tra hợp đồng và biên import, đối chiếu decorator route/guard/tham số trên 106 phương thức controller. Hồi quy đạt với Identity, Notification, Workout, Progress, nhập kết quả Pose và Pose API. Suite Catalog còn các ca schema/migration legacy và danh sách liên kết Pose tái hiện trên commit trước refactor `de68bc1`. NOT RUN entrypoint inference Pose thật và dựng lại Compose cho lần refactor này.
+
+T50 PASS Nest CLI 12.0.13 build sáu ứng dụng, build riêng và start Catalog, kiểm đầy đủ file API/migration/worker/relay và cài đặt pnpm frozen. Hợp đồng, biên import, smoke test Web/Catalog qua restart, Notification 11/11, Identity 17 đạt và 2 bỏ qua theo môi trường, Progress 16/16. Docker dựng tám image, sau đó sáu API, Pose Engine, worker, relay và materializer đều healthy. Phòng tập và Thư viện trả HTTP 200 trên cổng 3100. Turbopack Windows gặp lỗi worker, build Webpack trên Windows và build Next.js chuẩn trong Docker đã qua.
 
 T44 PASS build Docker Web và Catalog, kiểm tra OpenAPI/schema Catalog và kiểm tra biên import. Ca Chromium tạo, lưu, xem trước và công bố bài đạt. Catalog media đạt 8/8 trên PostgreSQL 18.6. Đọc lại PostgreSQL qua Catalog trên Docker đã đối chiếu 23/23 bản nháp và checksum của 37 ảnh WebP gốc, gồm ảnh một tư thế hoặc cặp bắt đầu và điểm cao nhất. Dữ liệu tiếng Việt do SmartGym biên soạn được giữ. Độ khó nguồn sơ cấp, trung cấp và nâng cao tương ứng cấp II, III và V trong SmartGym.
 

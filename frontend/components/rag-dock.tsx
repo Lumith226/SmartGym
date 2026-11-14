@@ -2,7 +2,7 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { ArrowUp, ChevronDown, MessageSquare, Sparkles, X } from 'lucide-react';
+import { ArrowUp, ChevronDown, Sparkles, Trash2, X } from 'lucide-react';
 import { cn } from '../lib/utils';
 
 type Reference = {
@@ -32,12 +32,6 @@ const ERROR_TEXT: Record<string, string> = {
   UNAUTHENTICATED: 'Cần đăng nhập để hỏi về buổi tập của bạn.',
   VALIDATION_ERROR: 'Kiểm tra lại nội dung câu hỏi.',
 };
-
-const SUGGESTIONS = [
-  'Tôi nên chú ý gì khi squat?',
-  'Chống đẩy sai ở đâu là phổ biến nhất?',
-  'Gợi ý bài tập thay thế khi đau gối',
-];
 
 export function RagDock({
   context,
@@ -69,7 +63,7 @@ export function RagDock({
     abortRef.current = controller;
     setPending(true);
     setError('');
-    setExpanded(true);
+    setExpanded(true); // Khi ấn gửi chat thì mới mở to hơn để trả lời
     try {
       const conversation = turns
         .slice(-8)
@@ -111,30 +105,18 @@ export function RagDock({
   }
 
   if (minimized) {
-    return (
-      <div className="pointer-events-auto">
-        <button
-          type="button"
-          onClick={onToggleMinimize}
-          className="group inline-flex items-center gap-2 rounded-full border border-foreground/15 bg-card/90 px-4 py-2 text-xs font-semibold text-foreground shadow-2xl backdrop-blur-xl transition-all hover:bg-card hover:scale-105 active:scale-95"
-        >
-          <Sparkles size={14} className="text-primary transition-transform group-hover:rotate-12" />
-          <span className="hidden sm:inline">Hỏi SmartGym AI</span>
-          <span className="rounded-full bg-foreground/10 px-2 py-0.5 text-[10px] text-foreground/70">Mở</span>
-        </button>
-      </div>
-    );
+    return null;
   }
 
   return (
-    <div className="pointer-events-auto mx-auto w-full max-w-3xl">
-      {/* Khung hội thoại mở rộng lên trên (chỉ hiện khi đã có tin nhắn) */}
+    <div className="pointer-events-auto flex w-full flex-col">
+      {/* Khung hội thoại mở rộng lên trên (chỉ mở to khi ấn gửi hoặc đã có tin nhắn) */}
       {expanded && (turns.length > 0 || pending || error) && (
-        <div className="mb-2 overflow-hidden rounded-2xl border border-border/80 bg-card/95 text-foreground shadow-2xl backdrop-blur-2xl">
-          <div className="flex items-center justify-between border-b border-border/80 px-4 py-2.5 text-xs text-muted-foreground">
+        <div className="mb-2 flex max-h-[340px] flex-col overflow-hidden rounded-2xl border border-foreground/15 bg-card/95 text-foreground shadow-2xl backdrop-blur-2xl">
+          <div className="flex items-center justify-between border-b border-foreground/10 px-3.5 py-2 text-xs">
             <span className="inline-flex items-center gap-1.5 font-semibold text-foreground">
-              <MessageSquare size={13} className="text-primary" />
-              <span>Trợ lý SmartGym · Trả lời có nguồn</span>
+              <Sparkles size={13} className="text-primary" />
+              <span>Trợ lý SmartGym</span>
             </span>
             <div className="flex items-center gap-1">
               <button
@@ -144,62 +126,62 @@ export function RagDock({
                   setTurns([]);
                   setError('');
                   setPending(false);
+                  setExpanded(false);
                 }}
-                className="cursor-pointer rounded-md px-2 py-0.5 text-[11px] hover:bg-muted hover:text-foreground"
+                title="Xóa đoạn chat"
+                className="inline-flex h-6 px-1.5 items-center justify-center rounded text-[11px] text-muted-foreground hover:bg-foreground/10 hover:text-foreground transition-colors"
               >
-                Xóa
+                <Trash2 size={12} className="mr-1" />
+                <span>Xóa</span>
               </button>
               <button
                 type="button"
-                aria-label="Thu gọn hội thoại"
                 onClick={() => setExpanded(false)}
-                className="cursor-pointer rounded-md p-1 hover:bg-muted hover:text-foreground"
+                title="Thu gọn"
+                className="inline-flex h-6 w-6 items-center justify-center rounded text-muted-foreground hover:bg-foreground/10 hover:text-foreground transition-colors"
               >
                 <ChevronDown size={14} />
               </button>
             </div>
           </div>
-          <div ref={scrollRef} className="max-h-[34dvh] space-y-3 overflow-y-auto px-4 py-3">
+
+          <div ref={scrollRef} className="flex-1 space-y-2.5 overflow-y-auto p-3 text-xs [scrollbar-width:thin]">
             {turns.map((turn, i) => (
               <div key={i} className={cn('flex', turn.role === 'user' && 'justify-end')}>
                 <div
                   className={cn(
-                    'max-w-[88%] rounded-2xl px-3.5 py-2 text-[13px] leading-relaxed',
-                    turn.role === 'user' ? 'bg-[#6366f1] text-white shadow-xs' : 'bg-muted/80 text-foreground',
+                    'max-w-[88%] rounded-2xl px-3 py-1.5 text-[12px] leading-relaxed',
+                    turn.role === 'user'
+                      ? 'bg-[#6366f1] text-white shadow-xs'
+                      : 'bg-muted/80 text-foreground border border-foreground/5',
                   )}
                 >
                   <p className="m-0 whitespace-pre-wrap">{turn.content}</p>
-                  {turn.answer && turn.answer.user_notices.length > 0 && (
-                    <ul className="m-0 mt-1.5 list-disc pl-4 text-[11px] text-muted-foreground">
+                  {turn.answer?.user_notices && turn.answer.user_notices.length > 0 && (
+                    <ul className="m-0 mt-1 list-disc pl-3.5 text-[10.5px] text-muted-foreground">
                       {turn.answer.user_notices.map((n, k) => (
                         <li key={k}>{n}</li>
                       ))}
                     </ul>
                   )}
-                  {turn.answer && turn.answer.references.length > 0 && (
-                    <details className="mt-2 text-[11px] text-muted-foreground">
+                  {turn.answer?.references && turn.answer.references.length > 0 && (
+                    <details className="mt-1 text-[10.5px] text-muted-foreground">
                       <summary className="cursor-pointer select-none font-semibold text-primary">
                         {turn.answer.references.length} nguồn tham khảo
                       </summary>
-                      <ol className="m-0 mt-1 space-y-1 pl-4">
+                      <ol className="m-0 mt-1 space-y-0.5 pl-3.5">
                         {turn.answer.references.map(ref => (
                           <li key={ref.number} value={ref.number}>
                             <strong className="text-foreground">{ref.title}</strong>
-                            {ref.publisher && <> — {ref.publisher}</>}
-                            {ref.pdf_page !== null && <> · tr. {ref.pdf_page}</>}
                             {ref.url && (
-                              <>
-                                {' '}
-                                ·{' '}
-                                <a
-                                  href={ref.url}
-                                  target="_blank"
-                                  rel="noopener noreferrer"
-                                  className="text-primary font-semibold hover:underline"
-                                >
-                                  Mở nguồn
-                                </a>
-                              </>
+                              <a
+                                href={ref.url}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="ml-1 text-primary font-semibold hover:underline"
+                              >
+                                [Xem]
+                              </a>
                             )}
                           </li>
                         ))}
@@ -211,13 +193,13 @@ export function RagDock({
             ))}
             {pending && (
               <div className="flex">
-                <div className="rounded-2xl bg-muted px-3.5 py-2 text-[13px] text-muted-foreground">
-                  Đang tìm bằng chứng và chuẩn bị trả lời…
+                <div className="rounded-2xl bg-muted px-3 py-1.5 text-xs text-muted-foreground animate-pulse">
+                  Đang phân tích và trả lời…
                 </div>
               </div>
             )}
             {error && (
-              <p role="alert" className="m-0 text-xs text-amber-500">
+              <p role="alert" className="m-0 text-xs text-rose-500">
                 {error}{' '}
                 <Link href="/dang-nhap?next=%2F" className="text-primary font-semibold hover:underline">
                   Đăng nhập
@@ -228,73 +210,57 @@ export function RagDock({
         </div>
       )}
 
-      {/* Gợi ý nhanh khi chưa có hội thoại */}
-      {!turns.length && !pending && !message && (
-        <div className="mb-2 hidden flex-wrap justify-center gap-1.5 sm:flex">
-          {SUGGESTIONS.map(s => (
-            <button
-              key={s}
-              type="button"
-              onClick={() => void send(s)}
-              className="cursor-pointer rounded-full border border-border/80 bg-card/85 px-3 py-1 text-[11.5px] text-foreground/80 backdrop-blur-md transition-all hover:border-primary/40 hover:bg-card hover:text-foreground shadow-xs"
-            >
-              {s}
-            </button>
-          ))}
-        </div>
-      )}
-
-      {/* Ô nhập chat kiểu Clean SmartGym */}
+      {/* Thanh nhập chat nhỏ gọn (chỉ cao ~40px), ôm sát mép phải */}
       <form
         onSubmit={e => {
           e.preventDefault();
           void send(message);
         }}
-        className="!m-0 flex items-end gap-2 !rounded-2xl !border !border-border/80 !bg-card/95 !p-2 !shadow-2xl backdrop-blur-2xl"
+        className="flex items-center gap-1.5 rounded-2xl border border-foreground/15 bg-card/95 p-1.5 shadow-2xl backdrop-blur-2xl"
       >
-        <span className="mb-1.5 ml-2 text-primary">
-          <Sparkles size={16} />
+        <span className="flex h-7 w-7 items-center justify-center rounded-xl bg-primary/10 text-primary shrink-0">
+          <Sparkles size={13} />
         </span>
-        <textarea
-          rows={1}
+        <input
+          type="text"
           value={message}
           maxLength={2500}
           spellCheck={false}
           autoComplete="off"
-          data-gramm="false"
-          {...({ writingsuggestions: 'false' } as any)}
-          onFocus={() => setExpanded(true)}
           onChange={e => setMessage(e.target.value)}
-          onKeyDown={e => {
-            if (e.key === 'Enter' && !e.shiftKey) {
-              e.preventDefault();
-              void send(message);
-            }
-          }}
-          placeholder="Hỏi SmartGym về kỹ thuật, bài tập thay thế hoặc nhận xét buổi tập…"
+          placeholder=""
           aria-label="Câu hỏi cho trợ lý SmartGym"
-          className="!m-0 max-h-32 min-h-9 flex-1 resize-none !border-0 !bg-transparent !px-1 !py-2 text-[13.5px] !text-foreground !shadow-none outline-none placeholder:text-muted-foreground focus:!ring-0"
+          className="flex-1 min-w-0 bg-transparent px-2 py-1 text-xs text-foreground outline-none"
         />
-        {onToggleMinimize && (
+        {turns.length > 0 && !expanded && (
           <button
             type="button"
-            onClick={onToggleMinimize}
-            title="Thu gọn thanh chat để nhìn rõ toàn thân"
-            className="mb-1 inline-flex h-8 w-8 shrink-0 cursor-pointer items-center justify-center rounded-full text-muted-foreground hover:bg-muted hover:text-foreground"
+            onClick={() => setExpanded(true)}
+            title="Mở lại câu trả lời"
+            className="inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-xl text-muted-foreground hover:bg-foreground/10 hover:text-foreground transition-colors"
           >
-            <ChevronDown size={16} />
+            <ChevronDown size={13} className="rotate-180" />
           </button>
         )}
         <button
           type="submit"
           disabled={pending || message.trim().length < 2}
-          aria-label="Gửi câu hỏi"
-          className="!m-0 inline-flex h-9 w-9 shrink-0 cursor-pointer items-center justify-center !rounded-full !border-0 !bg-[#6366f1] hover:!bg-[#4f46e5] !p-0 !text-white transition-all shadow-xs disabled:!bg-muted disabled:!text-muted-foreground"
+          title="Gửi câu hỏi"
+          className="inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-xl bg-primary text-primary-foreground shadow transition-all hover:bg-primary/90 disabled:opacity-30"
         >
-          {pending ? <X size={15} /> : <ArrowUp size={16} strokeWidth={2.4} />}
+          <ArrowUp size={13} />
         </button>
+        {onToggleMinimize && (
+          <button
+            type="button"
+            onClick={onToggleMinimize}
+            title="Đóng trợ lý"
+            className="inline-flex h-7 w-7 shrink-0 cursor-pointer items-center justify-center rounded-xl text-muted-foreground hover:bg-foreground/10 hover:text-foreground transition-colors"
+          >
+            <X size={13} />
+          </button>
+        )}
       </form>
     </div>
   );
 }
-

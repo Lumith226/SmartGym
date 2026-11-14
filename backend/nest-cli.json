@@ -1,0 +1,67 @@
+{
+  "$schema": "https://json.schemastore.org/nest-cli",
+  "collection": "@nestjs/schematics",
+  "monorepo": true,
+  "root": "apps/catalog",
+  "sourceRoot": "apps/catalog/src",
+  "compilerOptions": {
+    "builder": "tsc",
+    "tsConfigPath": "apps/catalog/tsconfig.json"
+  },
+  "projects": {
+    "catalog": {
+      "type": "application",
+      "root": "apps/catalog",
+      "entryFile": "main",
+      "sourceRoot": "apps/catalog/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/catalog/tsconfig.json"
+      }
+    },
+    "identity": {
+      "type": "application",
+      "root": "apps/identity",
+      "entryFile": "main",
+      "sourceRoot": "apps/identity/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/identity/tsconfig.json"
+      }
+    },
+    "notification": {
+      "type": "application",
+      "root": "apps/notification",
+      "entryFile": "main",
+      "sourceRoot": "apps/notification/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/notification/tsconfig.json"
+      }
+    },
+    "pose": {
+      "type": "application",
+      "root": "apps/pose",
+      "entryFile": "main",
+      "sourceRoot": "apps/pose/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/pose/tsconfig.json"
+      }
+    },
+    "progress": {
+      "type": "application",
+      "root": "apps/progress",
+      "entryFile": "main",
+      "sourceRoot": "apps/progress/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/progress/tsconfig.json"
+      }
+    },
+    "workout": {
+      "type": "application",
+      "root": "apps/workout",
+      "entryFile": "main",
+      "sourceRoot": "apps/workout/src",
+      "compilerOptions": {
+        "tsConfigPath": "apps/workout/tsconfig.json"
+      }
+    }
+  }
+}

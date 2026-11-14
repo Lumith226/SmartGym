@@ -2,21 +2,21 @@ import {createRequire} from 'node:module';import {readFile,writeFile} from 'node
 import {randomBytes,generateKeyPairSync} from 'node:crypto';import {join} from 'node:path';
 import {startPostgres,freePort} from './postgres.mjs';import {startRabbit} from './rabbitmq.mjs';import {startProcess} from './processes.mjs';
 import {provisionEmailTopology} from '../../scripts/provision-email-topology.mjs';
-import {createTestTls} from '../../backend/services/identity/test/tls.cjs';
-import {connectDatabase as identityDatabase} from '../../backend/services/identity/dist/database.js';
-import {migrate as identityMigrate} from '../../backend/services/identity/dist/migrate.js';
-import {createApp} from '../../backend/services/identity/dist/app.js';import {IdentityKeys} from '../../backend/services/identity/dist/modules/accounts/crypto.js';
-import {OutboxRelay} from '../../backend/services/identity/dist/outbox.js';import {ConfirmPublisher} from '../../backend/services/identity/dist/broker.js';
-import {connectDatabase as notificationDatabase} from '../../backend/services/notification/dist/database.js';
-import {migrate as notificationMigrate} from '../../backend/services/notification/dist/migrate.js';
-import {Inbox,DeliveryWorker} from '../../backend/services/notification/dist/modules/delivery/jobs.js';import {EmailConsumer} from '../../backend/services/notification/dist/broker.js';
-import {IdentityClient} from '../../backend/services/notification/dist/identity-client.js';import {SmtpProvider} from '../../backend/services/notification/dist/modules/delivery/mail.js';
-import {connectDatabase as catalogDatabase} from '../../backend/services/catalog/dist/database.js';
-import {migrate as catalogMigrate} from '../../backend/services/catalog/dist/migrate.js';import {importSnapshot} from '../../backend/services/catalog/dist/import.js';
-import {fingerprint} from '../../backend/services/catalog/dist/modules/admin/admin-store.js';
+import {createTestTls} from '../../backend/apps/identity/test/tls.cjs';
+import {connectDatabase as identityDatabase} from '../../backend/apps/identity/dist/database.js';
+import {migrate as identityMigrate} from '../../backend/apps/identity/dist/migrate.js';
+import {createApp} from '../../backend/apps/identity/dist/app.js';import {IdentityKeys} from '../../backend/apps/identity/dist/modules/accounts/crypto.js';
+import {OutboxRelay} from '../../backend/apps/identity/dist/outbox.js';import {ConfirmPublisher} from '../../backend/apps/identity/dist/broker.js';
+import {connectDatabase as notificationDatabase} from '../../backend/apps/notification/dist/database.js';
+import {migrate as notificationMigrate} from '../../backend/apps/notification/dist/migrate.js';
+import {Inbox,DeliveryWorker} from '../../backend/apps/notification/dist/modules/delivery/jobs.js';import {EmailConsumer} from '../../backend/apps/notification/dist/broker.js';
+import {IdentityClient} from '../../backend/apps/notification/dist/identity-client.js';import {SmtpProvider} from '../../backend/apps/notification/dist/modules/delivery/mail.js';
+import {connectDatabase as catalogDatabase} from '../../backend/apps/catalog/dist/database.js';
+import {migrate as catalogMigrate} from '../../backend/apps/catalog/dist/migrate.js';import {importSnapshot} from '../../backend/apps/catalog/dist/import.js';
+import {fingerprint} from '../../backend/apps/catalog/dist/modules/admin/admin-store.js';
 import {startMediaTools} from './media-stack.mjs';
 import {startChatProvider} from './chat-provider.mjs';
-const require=createRequire(new URL('../../backend/services/notification/package.json',import.meta.url)),{SMTPServer}=require('smtp-server');
+const require=createRequire(new URL('../../backend/apps/notification/package.json',import.meta.url)),{SMTPServer}=require('smtp-server');
 export async function startAuthStack({workout:workoutRequested=false,progress:progressRequested=false,notifications:withNotifications=false,pose:withPose=false,chat:withChat=false,webPort:requestedWebPort}={}){
   const withProgress=progressRequested||withPose;
   const withWorkout=workoutRequested||withProgress;
@@ -25,7 +25,7 @@ export async function startAuthStack({workout:workoutRequested=false,progress:pr
   async function stop(){if(closed)return;closed=true;const errors=[];for(const action of cleanup.reverse())try{await action();}catch(error){errors.push(error);}if(errors.length)throw new AggregateError(errors,'Auth fixture cleanup failed');}
   try{
     const pg=await startPostgres();defer(pg.stop);const broker=await startRabbit();defer(broker.stop);await provisionEmailTopology(broker.url);
-    const snapshot=JSON.parse(await readFile('backend/services/catalog/data/smartgym-m2.json','utf8'));
+    const snapshot=JSON.parse(await readFile('backend/apps/catalog/data/smartgym-m2.json','utf8'));
     const catalogDb=catalogDatabase(pg.connectionString);defer(()=>catalogDb.close());await catalogMigrate(catalogDb);await importSnapshot(catalogDb,snapshot,true);
     const databaseUrls={};
     for(const name of ['identity_browser','notification_browser',...(withWorkout?['workout_browser']:[]),...(withProgress?['progress_browser']:[]),...(withPose?['pose_browser']:[])]){
@@ -45,7 +45,7 @@ export async function startAuthStack({workout:workoutRequested=false,progress:pr
     let cmsEnv = {}, importFixture;
     if (cmsTools) {
       defer(cmsTools.stop);
-      const {PutBucketCorsCommand}=createRequire(new URL('../../backend/services/catalog/package.json',import.meta.url))('@aws-sdk/client-s3');
+      const {PutBucketCorsCommand}=createRequire(new URL('../../backend/apps/catalog/package.json',import.meta.url))('@aws-sdk/client-s3');
       await cmsTools.client.send(new PutBucketCorsCommand({Bucket:cmsTools.bucket,CORSConfiguration:{CORSRules:[{
         AllowedOrigins:[url],AllowedMethods:['PUT'],AllowedHeaders:['content-type','if-none-match','x-amz-checksum-sha256'],MaxAgeSeconds:60,
       }]}}),{abortSignal:AbortSignal.timeout(5000)});
@@ -62,7 +62,7 @@ export async function startAuthStack({workout:workoutRequested=false,progress:pr
         CATALOG_MEDIA_CLAMD_HOST:cmsTools.scanner.host,CATALOG_MEDIA_CLAMD_PORT:String(cmsTools.scanner.port),
         AWS_ACCESS_KEY_ID:cmsTools.credentials.accessKeyId,AWS_SECRET_ACCESS_KEY:cmsTools.credentials.secretAccessKey};
     }
-    const catalog=startProcess(['dist/main.js'],'backend/services/catalog',{
+    const catalog=startProcess(['dist/main.js'],'backend/apps/catalog',{
       ...cmsEnv,PORT:String(catalogPort),DATABASE_URL:pg.connectionString,HOST:'127.0.0.1',
       CATALOG_ADMIN_ENABLED:'true',CATALOG_ADMIN_PORT:String(catalogAdminPort),CATALOG_ADMIN_HOST:'127.0.0.1',
       CATALOG_ADMIN_BFF_FINGERPRINTS:JSON.stringify(tls.callers.bff),
@@ -73,16 +73,16 @@ export async function startAuthStack({workout:workoutRequested=false,progress:pr
       CATALOG_IDENTITY_ORIGIN:'https://127.0.0.1:'+identityPort,CATALOG_IDENTITY_ISSUER:'https://identity.test',
     });defer(()=>catalog.stop());await catalog.waitFor('http://127.0.0.1:'+catalogPort+'/health/ready');
     if (cmsTools) {
-      const worker=startProcess(['dist/media-worker.js'],'backend/services/catalog',{...cmsEnv,DATABASE_URL:pg.connectionString});
+      const worker=startProcess(['dist/media-worker.js'],'backend/apps/catalog',{...cmsEnv,DATABASE_URL:pg.connectionString});
       defer(()=>worker.stop());
     }
     let workoutDb,stopWorkout;
     if(withWorkout){
-      const {connectDatabase}=await import('../../backend/services/workout/dist/database.js');
-      const {migrate}=await import('../../backend/services/workout/dist/migrate.js');
+      const {connectDatabase}=await import('../../backend/apps/workout/dist/database.js');
+      const {migrate}=await import('../../backend/apps/workout/dist/migrate.js');
       workoutDb=connectDatabase(databaseUrls.workout_browser);defer(()=>workoutDb.close());await migrate(workoutDb);
       const workoutPort=await freePort();databaseUrls.workoutOrigin='https://127.0.0.1:'+workoutPort;
-      const workout=startProcess(['dist/main.js'],'backend/services/workout',{
+      const workout=startProcess(['dist/main.js'],'backend/apps/workout',{
         DATABASE_URL:databaseUrls.workout_browser,WORKOUT_PORT:String(workoutPort),WORKOUT_HOST:'127.0.0.1',
         WORKOUT_BFF_FINGERPRINTS:JSON.stringify(tls.callers.bff),
         ...(withProgress?{WORKOUT_PROGRESS_FINGERPRINTS:JSON.stringify(tls.callers.catalog)}:{}),
@@ -101,17 +101,17 @@ export async function startAuthStack({workout:workoutRequested=false,progress:pr
     }
     let poseDb,poseSummary;
     if(withPose){
-      const {connectDatabase}=await import('../../backend/services/pose/dist/database.js'),{migrate}=await import('../../backend/services/pose/dist/migrate.js');
+      const {connectDatabase}=await import('../../backend/apps/pose/dist/database.js'),{migrate}=await import('../../backend/apps/pose/dist/migrate.js');
       const {startPoseSummary}=await import('./pose-summary.mjs');poseDb=connectDatabase(databaseUrls.pose_browser);defer(()=>poseDb.close());await migrate(poseDb);
       poseSummary=await startPoseSummary(poseDb,tls,'https://127.0.0.1:'+identityPort);defer(poseSummary.stop);
     }
     let progressDb,stopProgress;
     if(withProgress){
-      const {connectDatabase}=await import('../../backend/services/progress/dist/database.js');const {migrate}=await import('../../backend/services/progress/dist/migrate.js');
+      const {connectDatabase}=await import('../../backend/apps/progress/dist/database.js');const {migrate}=await import('../../backend/apps/progress/dist/migrate.js');
       progressDb=connectDatabase(databaseUrls.progress_browser);defer(()=>progressDb.close());await migrate(progressDb);
       const progressPort=await freePort();databaseUrls.progressOrigin='https://127.0.0.1:'+progressPort;
       const certs=(prefix,client)=>Object.fromEntries([['KEY',client+'.key'],['CERT',client+'.crt'],['CA','ca.crt']].map(([key,file])=>[prefix+'_'+key+'_FILE',join(tls.directory,file)]));
-      const service=startProcess(['dist/main.js'],'backend/services/progress',{
+      const service=startProcess(['dist/main.js'],'backend/apps/progress',{
         DATABASE_URL:databaseUrls.progress_browser,PROGRESS_PORT:String(progressPort),PROGRESS_HOST:'127.0.0.1',PROGRESS_BFF_FINGERPRINTS:JSON.stringify(tls.callers.bff),
         ...certs('PROGRESS_TLS','server'),...certs('PROGRESS_IDENTITY_TLS','catalog'),PROGRESS_IDENTITY_ORIGIN:'https://127.0.0.1:'+identityPort,PROGRESS_IDENTITY_ISSUER:'https://identity.test',
         PROGRESS_WORKOUT_ORIGIN:databaseUrls.workoutOrigin,...certs('PROGRESS_WORKOUT_TLS','catalog'),PROGRESS_CATALOG_ORIGIN:'https://127.0.0.1:'+catalogAdminPort,...certs('PROGRESS_CATALOG_TLS','catalog'),
@@ -136,7 +136,7 @@ export async function startAuthStack({workout:workoutRequested=false,progress:pr
     defer(async()=>{pumping=false;await pump;});
     let notificationOrigin,stopNotification;
     if(withNotifications){
-      const {createApp}=await import('../../backend/services/notification/dist/app.js');
+      const {createApp}=await import('../../backend/apps/notification/dist/app.js');
       const api=await createApp(notificationDb,{tls:{...tls.clients.server,ca:tls.ca},probeFingerprints:tls.callers.bff,
         auth:{tls:{...tls.clients.server,ca:tls.ca},bffFingerprints:tls.callers.bff,identity:{...tls.clients.notification,ca:tls.ca,origin:'https://127.0.0.1:'+identityPort,issuer:'https://identity.test'}}},()=>consumer.ready);
       await api.listen(0,'127.0.0.1');notificationOrigin='https://127.0.0.1:'+api.getHttpServer().address().port;

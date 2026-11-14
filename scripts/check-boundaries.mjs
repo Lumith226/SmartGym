@@ -4,10 +4,10 @@ import { fileURLToPath } from 'node:url';
 
 export function forbiddenImport(file, specifier, root = process.cwd()) {
   const location = relative(root, file).replaceAll('\\', '/');
-  const service = location.match(/^backend\/services\/([^/]+)\//);
+  const service = location.match(/^backend\/apps\/([^/]+)\//);
   const owner = location.startsWith('frontend/')
     ? { directory: 'frontend', packageName: '@smartgym/web' }
-    : service && { directory: 'backend/services/' + service[1], packageName: '@smartgym/' + service[1] };
+    : service && { directory: 'backend/apps/' + service[1], packageName: '@smartgym/' + service[1] };
   if (!owner) return false;
   if (specifier.startsWith('@smartgym/')) {
     return specifier !== owner.packageName && !specifier.startsWith(owner.packageName + '/');
@@ -32,7 +32,7 @@ export async function checkBoundaries(root = process.cwd()) {
       }
     }
   }
-  for (const dir of ['frontend', 'backend/services']) await visit(resolve(root, dir));
+  for (const dir of ['frontend', 'backend/apps']) await visit(resolve(root, dir));
   return violations;
 }
 

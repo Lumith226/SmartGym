@@ -8,20 +8,20 @@ import { setTimeout as delay } from 'node:timers/promises';
 import Ajv2020 from 'ajv/dist/2020.js';import addFormats from 'ajv-formats';
 import { startPostgres,freePort } from '../helpers/postgres.mjs';
 import { startProcess } from '../helpers/processes.mjs';
-import { createTestTls } from '../../backend/services/identity/test/tls.cjs';
-import { createApp as createIdentity } from '../../backend/services/identity/dist/app.js';
-import { IdentityKeys } from '../../backend/services/identity/dist/modules/accounts/crypto.js';
-import { connectDatabase } from '../../backend/services/progress/dist/database.js';
-import { migrate } from '../../backend/services/progress/dist/migrate.js';
-import { migrate as workoutMigrate } from '../../backend/services/workout/dist/migrate.js';
-import { migrate as catalogMigrate } from '../../backend/services/catalog/dist/migrate.js';
-import { importSnapshot } from '../../backend/services/catalog/dist/import.js';
+import { createTestTls } from '../../backend/apps/identity/test/tls.cjs';
+import { createApp as createIdentity } from '../../backend/apps/identity/dist/app.js';
+import { IdentityKeys } from '../../backend/apps/identity/dist/modules/accounts/crypto.js';
+import { connectDatabase } from '../../backend/apps/progress/dist/database.js';
+import { migrate } from '../../backend/apps/progress/dist/migrate.js';
+import { migrate as workoutMigrate } from '../../backend/apps/workout/dist/migrate.js';
+import { migrate as catalogMigrate } from '../../backend/apps/catalog/dist/migrate.js';
+import { importSnapshot } from '../../backend/apps/catalog/dist/import.js';
 
 test('Progress logs across independent databases, owner APIs and mTLS contracts',{timeout:150000},async t=>{
   const cleanup=[];t.after(async()=>{const errors=[];for(const close of cleanup.reverse())try{await close();}catch(e){errors.push(e);}if(errors.length)throw new AggregateError(errors,'Progress cleanup failed');});
   const pg=await startPostgres();cleanup.push(pg.stop);t.diagnostic(pg.version);
   const catalogDb=connectDatabase(pg.connectionString);cleanup.push(()=>catalogDb.close());await catalogMigrate(catalogDb);
-  await importSnapshot(catalogDb,JSON.parse(await readFile('backend/services/catalog/data/smartgym-m2.json','utf8')),true);
+  await importSnapshot(catalogDb,JSON.parse(await readFile('backend/apps/catalog/data/smartgym-m2.json','utf8')),true);
   const urls={};for(const name of ['progress_test','workout_progress_test']){
     const password=randomBytes(24).toString('hex');await catalogDb.query("CREATE ROLE "+name+" LOGIN NOSUPERUSER NOCREATEDB NOCREATEROLE PASSWORD '"+password+"'");await catalogDb.query('CREATE DATABASE '+name+' OWNER '+name);await catalogDb.query('REVOKE CONNECT ON DATABASE '+name+' FROM PUBLIC');
     const url=new URL(pg.connectionString);url.username=name;url.password=password;url.pathname='/'+name;urls[name]=url.href;
@@ -36,12 +36,12 @@ test('Progress logs across independent databases, owner APIs and mTLS contracts'
   const identityOrigin='https://127.0.0.1:'+identity.getHttpServer().address().port;
   const port=await freePort(),workoutPort=await freePort(),catalogPort=await freePort(),refsPort=await freePort();
   const certs=(prefix,client)=>Object.fromEntries([['KEY',client+'.key'],['CERT',client+'.crt'],['CA','ca.crt']].map(([key,file])=>[prefix+'_'+key+'_FILE',join(tls.directory,file)]));
-  const catalog=startProcess(['dist/main.js'],'backend/services/catalog',{
+  const catalog=startProcess(['dist/main.js'],'backend/apps/catalog',{
     DATABASE_URL:pg.connectionString,PORT:String(catalogPort),HOST:'127.0.0.1',CATALOG_ADMIN_ENABLED:'true',CATALOG_ADMIN_PORT:String(refsPort),CATALOG_ADMIN_HOST:'127.0.0.1',CATALOG_MEDIA_ENABLED:'false',
     CATALOG_ADMIN_BFF_FINGERPRINTS:JSON.stringify(tls.callers.bff),CATALOG_REF_FINGERPRINTS:JSON.stringify([...tls.callers.notification,...tls.callers.catalog]),
     ...certs('CATALOG_ADMIN_TLS','server'),...certs('CATALOG_IDENTITY_TLS','catalog'),CATALOG_IDENTITY_ORIGIN:identityOrigin,CATALOG_IDENTITY_ISSUER:'https://identity.test',
   });cleanup.push(()=>catalog.stop());await catalog.waitFor('http://127.0.0.1:'+catalogPort+'/health/ready');
-  const workout=startProcess(['dist/main.js'],'backend/services/workout',{
+  const workout=startProcess(['dist/main.js'],'backend/apps/workout',{
     DATABASE_URL:urls.workout_progress_test,WORKOUT_HOST:'127.0.0.1',WORKOUT_PORT:String(workoutPort),WORKOUT_BFF_FINGERPRINTS:JSON.stringify(tls.callers.bff),WORKOUT_PROGRESS_FINGERPRINTS:JSON.stringify(tls.callers.catalog),
     ...certs('WORKOUT_TLS','server'),...certs('WORKOUT_IDENTITY_TLS','catalog'),WORKOUT_IDENTITY_ORIGIN:identityOrigin,WORKOUT_IDENTITY_ISSUER:'https://identity.test',
     WORKOUT_CATALOG_ORIGIN:'https://127.0.0.1:'+refsPort,...certs('WORKOUT_CATALOG_TLS','notification'),
@@ -49,7 +49,7 @@ test('Progress logs across independent databases, owner APIs and mTLS contracts'
   const config={DATABASE_URL:urls.progress_test,PROGRESS_HOST:'127.0.0.1',PROGRESS_PORT:String(port),PROGRESS_BFF_FINGERPRINTS:JSON.stringify(tls.callers.bff),
     ...certs('PROGRESS_TLS','server'),...certs('PROGRESS_IDENTITY_TLS','catalog'),PROGRESS_IDENTITY_ORIGIN:identityOrigin,PROGRESS_IDENTITY_ISSUER:'https://identity.test',
     PROGRESS_CATALOG_ORIGIN:'https://127.0.0.1:'+refsPort,...certs('PROGRESS_CATALOG_TLS','catalog'),PROGRESS_WORKOUT_ORIGIN:'https://127.0.0.1:'+workoutPort,...certs('PROGRESS_WORKOUT_TLS','catalog')};
-  let api=startProcess(['dist/main.js'],'backend/services/progress',config);cleanup.push(()=>api.stop());
+  let api=startProcess(['dist/main.js'],'backend/apps/progress',config);cleanup.push(()=>api.stop());
   const owner=randomUUID(),other=randomUUID(),root='/api/v1/progress/logs';
   const token=(user=owner,role='USER',expired=false)=>keys.assertion(user,role,new Date(Date.now()-10000),new Date(Date.now()+(expired?-1000:290000))).accessToken;
   function call(path,{method='GET',body,user=owner,role='USER',caller='bff',bearer=token(user,role),match,key,target=port,raw}={}){
@@ -69,7 +69,7 @@ test('Progress logs across independent databases, owner APIs and mTLS contracts'
   }
   let manual,manualKey,scheduled,occurrenceId;
   await t.test('migration replay/checksum and cross-service database access are enforced',async()=>{
-    const row=(await db.query('SELECT checksum FROM progress_migrations')).rows[0];const sql=await readFile('backend/services/progress/migrations/001_workout_logs.sql','utf8');assert.equal(row.checksum,createHash('sha256').update(sql).digest('hex'));
+    const row=(await db.query('SELECT checksum FROM progress_migrations')).rows[0];const sql=await readFile('backend/apps/progress/migrations/001_workout_logs.sql','utf8');assert.equal(row.checksum,createHash('sha256').update(sql).digest('hex'));
     await db.query("UPDATE progress_migrations SET checksum='changed'");await assert.rejects(migrate(db),/history mismatch/);await db.query('UPDATE progress_migrations SET checksum=$1',[row.checksum]);await migrate(db);
     await assert.rejects(db.query('SELECT * FROM workout_schedules'),e=>e.code==='42P01');
     for(const database of ['postgres','workout_progress_test']){const url=new URL(urls.progress_test);url.pathname='/'+database;const forbidden=connectDatabase(url.href);try{await assert.rejects(forbidden.query('SELECT 1'),e=>e.code==='42501');}finally{await forbidden.close();}}
@@ -186,7 +186,7 @@ test('Progress logs across independent databases, owner APIs and mTLS contracts'
     manual=(await checked(root+'/'+manual.id,{method:'PUT',match:'"v2"',body:{...input,notes:'Giữ snapshot gốc'}})).body;
     await catalog.stop();const body={...input,occurrenceId:occ,sets:[input.sets[0]]},key=randomUUID();
     const log=await checked(root,{...post(body,key),user:subject},201,'WorkoutLog');assert.equal(log.body.sets[0].exerciseNameVi,'Squat không tạ');
-    await workout.stop();await api.stop();api=startProcess(['dist/main.js'],'backend/services/progress',config);await ready(port);
+    await workout.stop();await api.stop();api=startProcess(['dist/main.js'],'backend/apps/progress',config);await ready(port);
     assert.deepEqual((await checked(root,{...post(body,key),user:subject},201)).body,log.body);await checked(root+'/'+log.body.id,{user:subject},200,'WorkoutLog');
     await checked(root,post(input),503);await checked(root,{...post({...input,occurrenceId:randomUUID()}),user:subject},503);
     await checked(root+'/'+log.body.id,{user:subject,method:'PUT',match:'"v1"',body:{...body,notes:'Sửa khi provider tắt'}});

@@ -2,7 +2,7 @@ import { createRequire } from 'node:module';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { readFile } from 'node:fs/promises';
-const require=createRequire(new URL('../backend/services/notification/package.json',import.meta.url));
+const require=createRequire(new URL('../backend/apps/notification/package.json',import.meta.url));
 const {connect}=require('amqplib');
 export async function provisionEmailTopology(url,caFile){
   const connection=await connect(url,{timeout:5000,...(caFile?{ca:await readFile(caFile)}:{})});connection.on('error',()=>{});
@@ -18,7 +18,7 @@ export async function provisionEmailTopology(url,caFile){
 }
 if(process.argv[1]&&resolve(process.argv[1])===fileURLToPath(import.meta.url)){
   const url=process.env.AMQP_ADMIN_URL;if(!url)throw new Error('AMQP_ADMIN_URL required for provisioning');
-  const {brokerUrl}=await import('../backend/services/notification/dist/broker.js');
+  const {brokerUrl}=await import('../backend/apps/notification/dist/broker.js');
   await provisionEmailTopology(brokerUrl(url,process.env.NOTIFICATION_ALLOW_LOOPBACK_PLAINTEXT==='true'),process.env.AMQP_CA_FILE);
   console.log('Durable email topology provisioned');
 }

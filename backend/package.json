@@ -1,0 +1,11 @@
+{
+  "name": "@smartgym/backend",
+  "private": true,
+  "scripts": {
+    "build": "nest build --all"
+  },
+  "devDependencies": {
+    "@nestjs/cli": "12.0.13",
+    "typescript": "5.9.3"
+  }
+}

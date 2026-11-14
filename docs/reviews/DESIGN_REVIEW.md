@@ -150,7 +150,7 @@ Các kết quả NOT RUN ở M0 là lịch sử của Planning. Tại Developmen
 
 T38 bổ sung backend M2, snapshot 35 bài và migration 002, cùng 8 ca Catalog và 3 ca Chromium đã đạt. Ma trận giữ 32 requirement, nay có 38 task/test case thiết kế. T38 phục vụ CAT-001–003. Dữ liệu/taxonomy đang ở development-only, bốn biến thể chờ clip và quyền media có cổng phát hành riêng. [Checkpoint hiện tại](../planning/AUTO_CHECKPOINT.md)
 
-T39 đổi bố cục monorepo theo yêu cầu người dùng thành frontend/ và backend/services/. Cập nhật workspace, lockfile, paths, Dockerfiles và tài liệu. Build và regression PostgreSQL, HTTP/system và Chromium đã đạt. Có 39 task/test case thiết kế sau bổ sung T39 cho SYS-001 và WEB-001. Package identity và các hợp đồng tiếp tục dùng như thiết kế. Docker build vẫn NOT RUN vì thiếu CLI.
+T39 đổi bố cục monorepo theo yêu cầu người dùng thành frontend/ và backend/apps/. Cập nhật workspace, lockfile, paths, Dockerfiles và tài liệu. Build và regression PostgreSQL, HTTP/system và Chromium đã đạt. Có 39 task/test case thiết kế sau bổ sung T39 cho SYS-001 và WEB-001. Package identity và các hợp đồng tiếp tục dùng như thiết kế. Docker build vẫn NOT RUN vì thiếu CLI.
 
 ## Review triển khai Identity T08
 
