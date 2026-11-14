@@ -40,14 +40,20 @@
     "test:pose-import-ui": "pnpm run build && pnpm run test:progress-bff && playwright test tests/browser/pose-import.spec.mjs",
     "test:catalog-feed": "pnpm --filter @smartgym/catalog build && pnpm --filter @smartgym/identity build && node --test tests/integration/catalog-feed.test.mjs",
     "check:catalog-handoff": "node scripts/validate-catalog-handoff.mjs",
-    "test:chat-bff": "node --test tests/integration/chat-bff.test.mjs"
+    "test:chat-bff": "node --test tests/integration/chat-bff.test.mjs",
+    "lint:chat-bff": "eslint frontend/server/chat.mjs",
+    "format:chat-bff": "prettier --single-quote --write frontend/server/chat.mjs",
+    "format:check:chat-bff": "prettier --single-quote --check frontend/server/chat.mjs"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "13.1.0",
+    "@eslint/js": "10.0.1",
     "@playwright/test": "1.65.0",
     "ajv": "8.20.0",
     "ajv-formats": "3.0.1",
-    "axe-core": "4.11.4"
+    "axe-core": "4.11.4",
+    "eslint": "10.10.0",
+    "prettier": "3.9.6"
   },
   "optionalDependencies": {
     "@embedded-postgres/windows-x64": "18.6.0-beta.19"
