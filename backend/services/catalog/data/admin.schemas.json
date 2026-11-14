@@ -1,0 +1,1238 @@
+{
+  "ExerciseDraftCreate": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "id",
+      "slug",
+      "nameVi",
+      "summary",
+      "primaryMuscleIds",
+      "equipmentIds",
+      "instructions"
+    ],
+    "properties": {
+      "id": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]{0,79}$",
+        "examples": [
+          "bodyweight_squat"
+        ]
+      },
+      "slug": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+        "maxLength": 100,
+        "examples": [
+          "squat-khong-ta"
+        ]
+      },
+      "nameVi": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120
+      },
+      "nameEn": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120
+      },
+      "summary": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "primaryMuscleIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$",
+          "examples": [
+            "bodyweight_squat"
+          ]
+        },
+        "minItems": 1,
+        "maxItems": 8,
+        "uniqueItems": true
+      },
+      "secondaryMuscleIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$",
+          "examples": [
+            "bodyweight_squat"
+          ]
+        },
+        "maxItems": 12,
+        "uniqueItems": true
+      },
+      "equipmentIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$",
+          "examples": [
+            "bodyweight_squat"
+          ]
+        },
+        "maxItems": 10,
+        "uniqueItems": true
+      },
+      "instructions": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "minItems": 1,
+        "maxItems": 30
+      },
+      "commonMistakes": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "maxItems": 20
+      },
+      "mediaIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$",
+          "examples": [
+            "bodyweight_squat"
+          ]
+        },
+        "maxItems": 20
+      },
+      "variantIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$",
+          "examples": [
+            "bodyweight_squat"
+          ]
+        },
+        "maxItems": 20
+      },
+      "sourceRef": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "workoutType": {
+        "type": "string",
+        "enum": [
+          "STRENGTH",
+          "CARDIO",
+          "HIIT",
+          "CORE",
+          "STRETCHING"
+        ]
+      },
+      "focusArea": {
+        "type": "string",
+        "enum": [
+          "FULL_BODY",
+          "UPPER_BODY",
+          "LOWER_BODY",
+          "ABS"
+        ]
+      },
+      "difficulty": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 5
+      },
+      "levelSets": {
+        "type": "array",
+        "minItems": 3,
+        "maxItems": 3,
+        "items": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        }
+      },
+      "restSeconds": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 600
+      },
+      "poseStyle": {
+        "type": "string",
+        "enum": [
+          "squat",
+          "pushup",
+          "plank",
+          "jump",
+          "pull",
+          "lunge",
+          "core",
+          "barbell"
+        ]
+      },
+      "profile": {
+        "$ref": "ExerciseProfile"
+      },
+      "imageRoles": {
+        "$ref": "ExerciseImageRoles"
+      }
+    }
+  },
+  "ExerciseDraftUpdate": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "slug": {
+        "type": "string",
+        "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+        "maxLength": 100,
+        "examples": [
+          "squat-khong-ta"
+        ]
+      },
+      "nameVi": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120
+      },
+      "nameEn": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120
+      },
+      "summary": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "primaryMuscleIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$",
+          "examples": [
+            "bodyweight_squat"
+          ]
+        },
+        "minItems": 1,
+        "maxItems": 8,
+        "uniqueItems": true
+      },
+      "secondaryMuscleIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$",
+          "examples": [
+            "bodyweight_squat"
+          ]
+        },
+        "maxItems": 12,
+        "uniqueItems": true
+      },
+      "equipmentIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$",
+          "examples": [
+            "bodyweight_squat"
+          ]
+        },
+        "maxItems": 10,
+        "uniqueItems": true
+      },
+      "instructions": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "minItems": 1,
+        "maxItems": 30
+      },
+      "commonMistakes": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "maxItems": 20
+      },
+      "mediaIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$",
+          "examples": [
+            "bodyweight_squat"
+          ]
+        },
+        "maxItems": 20
+      },
+      "variantIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$",
+          "examples": [
+            "bodyweight_squat"
+          ]
+        },
+        "maxItems": 20
+      },
+      "sourceRef": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      },
+      "workoutType": {
+        "type": "string",
+        "enum": [
+          "STRENGTH",
+          "CARDIO",
+          "HIIT",
+          "CORE",
+          "STRETCHING"
+        ]
+      },
+      "focusArea": {
+        "type": "string",
+        "enum": [
+          "FULL_BODY",
+          "UPPER_BODY",
+          "LOWER_BODY",
+          "ABS"
+        ]
+      },
+      "difficulty": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 5
+      },
+      "levelSets": {
+        "type": "array",
+        "minItems": 3,
+        "maxItems": 3,
+        "items": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 20
+        }
+      },
+      "restSeconds": {
+        "type": "integer",
+        "minimum": 0,
+        "maximum": 600
+      },
+      "poseStyle": {
+        "type": "string",
+        "enum": [
+          "squat",
+          "pushup",
+          "plank",
+          "jump",
+          "pull",
+          "lunge",
+          "core",
+          "barbell"
+        ]
+      },
+      "profile": {
+        "$ref": "ExerciseProfile"
+      },
+      "imageRoles": {
+        "$ref": "ExerciseImageRoles"
+      }
+    },
+    "minProperties": 1
+  },
+  "CmsArchiveReason": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "reason": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      }
+    },
+    "required": [
+      "reason"
+    ]
+  },
+  "Jwks": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "keys"
+    ],
+    "properties": {
+      "keys": {
+        "type": "array",
+        "items": {
+          "type": "object",
+          "additionalProperties": false,
+          "required": [
+            "kid",
+            "kty",
+            "alg",
+            "use",
+            "n",
+            "e"
+          ],
+          "properties": {
+            "kid": {
+              "type": "string"
+            },
+            "kty": {
+              "type": "string",
+              "enum": [
+                "RSA"
+              ]
+            },
+            "alg": {
+              "type": "string",
+              "enum": [
+                "RS256"
+              ]
+            },
+            "use": {
+              "type": "string",
+              "enum": [
+                "sig"
+              ]
+            },
+            "n": {
+              "type": "string"
+            },
+            "e": {
+              "type": "string"
+            }
+          }
+        },
+        "minItems": 1
+      }
+    }
+  },
+  "CmsContentCreate": {
+    "oneOf": [
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$",
+            "examples": [
+              "bodyweight_squat"
+            ]
+          },
+          "contentType": {
+            "const": "muscle-group"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "nameVi": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                "maxLength": 100,
+                "examples": [
+                  "squat-khong-ta"
+                ]
+              },
+              "regionKey": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80,
+                "pattern": "^[a-zA-Z][a-zA-Z0-9_-]{0,79}$"
+              },
+              "side": {
+                "type": "string",
+                "enum": [
+                  "FRONT",
+                  "BACK",
+                  "BOTH"
+                ]
+              },
+              "sortOrder": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2147483647
+              }
+            },
+            "required": [
+              "nameVi",
+              "slug",
+              "sortOrder"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "contentType",
+          "data"
+        ]
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$",
+            "examples": [
+              "bodyweight_squat"
+            ]
+          },
+          "contentType": {
+            "const": "equipment"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "nameVi": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                "maxLength": 100,
+                "examples": [
+                  "squat-khong-ta"
+                ]
+              }
+            },
+            "required": [
+              "nameVi",
+              "slug"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "contentType",
+          "data"
+        ]
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$",
+            "examples": [
+              "bodyweight_squat"
+            ]
+          },
+          "contentType": {
+            "const": "exercise-variant"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "exerciseId": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,79}$",
+                "examples": [
+                  "bodyweight_squat"
+                ]
+              },
+              "nameVi": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "notes": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              }
+            },
+            "required": [
+              "exerciseId",
+              "nameVi"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "contentType",
+          "data"
+        ]
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "id": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$",
+            "examples": [
+              "bodyweight_squat"
+            ]
+          },
+          "contentType": {
+            "const": "media"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "IMAGE",
+                  "VIDEO"
+                ]
+              },
+              "uploadId": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,79}$",
+                "examples": [
+                  "bodyweight_squat"
+                ]
+              },
+              "sourceUri": {
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2048
+              },
+              "credit": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "licenseRef": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "altText": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 240
+              },
+              "rightsStatus": {
+                "type": "string",
+                "enum": [
+                  "PENDING",
+                  "APPROVED",
+                  "REJECTED"
+                ]
+              }
+            },
+            "required": [
+              "kind",
+              "uploadId",
+              "altText",
+              "rightsStatus"
+            ]
+          }
+        },
+        "required": [
+          "id",
+          "contentType",
+          "data"
+        ]
+      }
+    ]
+  },
+  "CmsContentUpdate": {
+    "oneOf": [
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contentType": {
+            "const": "muscle-group"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "nameVi": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                "maxLength": 100,
+                "examples": [
+                  "squat-khong-ta"
+                ]
+              },
+              "regionKey": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 80,
+                "pattern": "^[a-zA-Z][a-zA-Z0-9_-]{0,79}$"
+              },
+              "side": {
+                "type": "string",
+                "enum": [
+                  "FRONT",
+                  "BACK",
+                  "BOTH"
+                ]
+              },
+              "sortOrder": {
+                "type": "integer",
+                "minimum": 0,
+                "maximum": 2147483647
+              }
+            },
+            "required": [],
+            "minProperties": 1
+          }
+        },
+        "required": [
+          "contentType",
+          "data"
+        ]
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contentType": {
+            "const": "equipment"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "nameVi": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "slug": {
+                "type": "string",
+                "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+                "maxLength": 100,
+                "examples": [
+                  "squat-khong-ta"
+                ]
+              }
+            },
+            "required": [],
+            "minProperties": 1
+          }
+        },
+        "required": [
+          "contentType",
+          "data"
+        ]
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contentType": {
+            "const": "exercise-variant"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "exerciseId": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,79}$",
+                "examples": [
+                  "bodyweight_squat"
+                ]
+              },
+              "nameVi": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120
+              },
+              "notes": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1500
+              }
+            },
+            "required": [],
+            "minProperties": 1
+          }
+        },
+        "required": [
+          "contentType",
+          "data"
+        ]
+      },
+      {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "contentType": {
+            "const": "media"
+          },
+          "data": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "kind": {
+                "type": "string",
+                "enum": [
+                  "IMAGE",
+                  "VIDEO"
+                ]
+              },
+              "uploadId": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,79}$",
+                "examples": [
+                  "bodyweight_squat"
+                ]
+              },
+              "sourceUri": {
+                "type": "string",
+                "format": "uri",
+                "maxLength": 2048
+              },
+              "credit": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 300
+              },
+              "licenseRef": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 200
+              },
+              "altText": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 240
+              },
+              "rightsStatus": {
+                "type": "string",
+                "enum": [
+                  "PENDING",
+                  "APPROVED",
+                  "REJECTED"
+                ]
+              }
+            },
+            "required": [],
+            "minProperties": 1
+          }
+        },
+        "required": [
+          "contentType",
+          "data"
+        ]
+      }
+    ],
+    "description": "PATCH typed payload; trường bỏ qua giữ nguyên. contentType phải khớp path, exerciseId của variant không được thay đổi."
+  },
+  "CmsRestoreRevision": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "version": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 2147483647
+      },
+      "reason": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 500
+      }
+    },
+    "required": [
+      "version",
+      "reason"
+    ]
+  },
+  "CmsMediaUploadRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "mime": {
+        "type": "string",
+        "enum": [
+          "image/jpeg",
+          "image/png",
+          "image/webp",
+          "video/mp4",
+          "video/webm"
+        ]
+      },
+      "sizeBytes": {
+        "type": "integer",
+        "minimum": 1,
+        "maximum": 104857600
+      },
+      "sha256": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      }
+    },
+    "required": [
+      "mime",
+      "sizeBytes",
+      "sha256"
+    ],
+    "allOf": [
+      {
+        "if": {
+          "properties": {
+            "mime": {
+              "enum": [
+                "image/jpeg",
+                "image/png",
+                "image/webp"
+              ]
+            }
+          },
+          "required": [
+            "mime"
+          ]
+        },
+        "then": {
+          "properties": {
+            "sizeBytes": {
+              "maximum": 10485760,
+              "type": "integer"
+            }
+          }
+        }
+      }
+    ]
+  },
+  "CmsImportRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "sourceKey": {
+        "type": "string",
+        "const": "SMARTGYM_KB"
+      },
+      "sourceRevision": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120
+      },
+      "manifestSha256": {
+        "type": "string",
+        "pattern": "^[a-f0-9]{64}$"
+      }
+    },
+    "required": [
+      "sourceKey",
+      "sourceRevision",
+      "manifestSha256"
+    ]
+  },
+  "CmsImportCommit": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "mode": {
+        "const": "DRAFT_ONLY"
+      }
+    },
+    "required": [
+      "mode"
+    ]
+  },
+  "ExerciseRefBatch": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "exerciseIds"
+    ],
+    "properties": {
+      "exerciseIds": {
+        "type": "array",
+        "items": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$",
+          "examples": [
+            "bodyweight_squat"
+          ]
+        },
+        "minItems": 1,
+        "maxItems": 100,
+        "uniqueItems": true
+      }
+    }
+  },
+  "ExerciseProfile": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "category": {
+        "type": "string",
+        "enum": [
+          "strength",
+          "cardio",
+          "stretching",
+          "plyometrics",
+          "olympic"
+        ]
+      },
+      "forceType": {
+        "type": "string",
+        "enum": [
+          "static",
+          "dynamic",
+          "pull",
+          "push"
+        ]
+      },
+      "mechanic": {
+        "type": "string",
+        "enum": [
+          "compound",
+          "isolation"
+        ]
+      },
+      "bodyPart": {
+        "type": "string",
+        "enum": [
+          "upper_legs",
+          "core",
+          "full_body",
+          "back",
+          "chest",
+          "shoulders",
+          "upper_arms",
+          "lower_legs",
+          "lower_arms"
+        ]
+      },
+      "goals": {
+        "type": "array",
+        "maxItems": 30,
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "\\S"
+        },
+        "uniqueItems": true
+      },
+      "tags": {
+        "type": "array",
+        "maxItems": 40,
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "\\S"
+        },
+        "uniqueItems": true
+      },
+      "isUnilateral": {
+        "type": "boolean"
+      },
+      "isBodyweight": {
+        "type": "boolean"
+      },
+      "met": {
+        "type": "number",
+        "minimum": 0,
+        "maximum": 30
+      },
+      "primaryMuscles": {
+        "type": "array",
+        "maxItems": 30,
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "\\S"
+        },
+        "uniqueItems": true
+      },
+      "secondaryMuscles": {
+        "type": "array",
+        "maxItems": 30,
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100,
+          "pattern": "\\S"
+        },
+        "uniqueItems": true
+      },
+      "variationGroup": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120,
+        "pattern": "\\S"
+      },
+      "tips": {
+        "type": "array",
+        "maxItems": 30,
+        "items": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000,
+          "pattern": "\\S"
+        }
+      },
+      "translations": {
+        "type": "object",
+        "additionalProperties": false,
+        "properties": {
+          "en": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000,
+                "pattern": "\\S"
+              },
+              "instructions": {
+                "type": "array",
+                "maxItems": 30,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000,
+                  "pattern": "\\S"
+                }
+              },
+              "tips": {
+                "type": "array",
+                "maxItems": 30,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000,
+                  "pattern": "\\S"
+                }
+              }
+            }
+          },
+          "de": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120,
+                "pattern": "\\S"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000,
+                "pattern": "\\S"
+              },
+              "instructions": {
+                "type": "array",
+                "maxItems": 30,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000,
+                  "pattern": "\\S"
+                }
+              },
+              "tips": {
+                "type": "array",
+                "maxItems": 30,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000,
+                  "pattern": "\\S"
+                }
+              }
+            }
+          },
+          "es": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "name": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 120,
+                "pattern": "\\S"
+              },
+              "description": {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 2000,
+                "pattern": "\\S"
+              },
+              "instructions": {
+                "type": "array",
+                "maxItems": 30,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000,
+                  "pattern": "\\S"
+                }
+              },
+              "tips": {
+                "type": "array",
+                "maxItems": 30,
+                "items": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000,
+                  "pattern": "\\S"
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "ExerciseImageRoles": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "main": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]{0,79}$"
+      },
+      "start": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]{0,79}$"
+      },
+      "peak": {
+        "type": "string",
+        "pattern": "^[a-z][a-z0-9_]{0,79}$"
+      }
+    }
+  }
+}

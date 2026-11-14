@@ -1,0 +1,259 @@
+{
+  "version": 1,
+  "checked_at": "2026-11-08",
+  "decision": "../adr/0008-ai-provider-handoff.md",
+  "runtime_verification": "LOCAL_CPU_SMOKE_VERIFIED",
+  "application": {
+    "backend": "NestJS domain services",
+    "web": "Next.js BFF",
+    "business_boundaries": 7
+  },
+  "sources": {
+    "pose": "E:/do an/SmartGym",
+    "rag": "E:/do an/smart-gym-ai/services/kb_rag",
+    "old_rag": "HISTORICAL_ONLY"
+  },
+  "pose": {
+    "entrypoint": "smart_gym_web_v4/server/app.py",
+    "health": "/api/health",
+    "capabilities": "/api/exercises",
+    "video": {
+      "path": "/api/analyze-video",
+      "method": "POST",
+      "body": "multipart/form-data exercise + file",
+      "mode": "synchronous",
+      "response": [
+        "result",
+        "elapsed_seconds"
+      ],
+      "limit_mib": 200,
+      "web_target_limit_mib": 100,
+      "web_target_limit_seconds": 120,
+      "rep_count": "UNAVAILABLE"
+    },
+    "live": {
+      "path": "/ws/live",
+      "configure": [
+        "type=configure",
+        "exercise",
+        "source",
+        "generation"
+      ],
+      "packet": "uint32 little-endian JSON length + metadata JSON + JPEG",
+      "metadata": [
+        "frame_id",
+        "timestamp seconds",
+        "generation"
+      ],
+      "provider_limit_mib": 2,
+      "web_target_limit_kib": 256,
+      "translation": "REQUIRED"
+    },
+    "lifecycle_auth_owner": "ADAPTER_REQUIRED",
+    "model_result_required": [
+      "exercise",
+      "schema_version",
+      "scope",
+      "quality.usable",
+      "label_results"
+    ]
+  },
+  "rag": {
+    "entrypoint": "kb_service/app.py",
+    "path": "/v1/chatbot",
+    "method": "POST",
+    "request": {
+      "message_min": 2,
+      "message_max": 3000,
+      "tasks": [
+        "knowledge",
+        "score",
+        "summary",
+        "practice"
+      ],
+      "records_max": 50,
+      "conversation_max": 8,
+      "record_fields": [
+        "observation_id",
+        "source_id",
+        "model_result",
+        "simulated"
+      ],
+      "application_browser_input": "OWNED_RESULT_IDS"
+    },
+    "response": [
+      "reply",
+      "status",
+      "task",
+      "generation_used",
+      "generation_mode",
+      "kb_version",
+      "model_version",
+      "session",
+      "references",
+      "evidence",
+      "user_notices"
+    ],
+    "statuses": [
+      "generated",
+      "grounded_guidance",
+      "evidence_only",
+      "insufficient_evidence",
+      "insufficient_observation",
+      "conversational",
+      "needs_clarification",
+      "out_of_scope",
+      "unavailable"
+    ],
+    "auth": {
+      "bearer": "KB_INTERNAL_TOKEN",
+      "token_required_when_integrated": true,
+      "user_jwt": "NOT_PROVIDER_TOKEN",
+      "mtls": "TERMINATION_REQUIRED"
+    },
+    "storage": {
+      "snapshot": "snapshot.json",
+      "vectors": "embeddings.json",
+      "graph": "local JSON or Neo4j",
+      "corpus_present": false,
+      "reload": "RESTART_AFTER_INGEST",
+      "catalog_feed": "NOT_IMPLEMENTED",
+      "kb_version_is_catalog_revision": false
+    },
+    "readiness": {
+      "path": "/health",
+      "required": "kb_ready=true",
+      "generation_smoke": "REQUIRED"
+    },
+    "llm_timeout_per_call_seconds": 120,
+    "web_deadline": "45_SECONDS_BETA_BUDGET_REAL_GENERATION_LOAD_UNVERIFIED",
+    "response_model": "NO_DECLARED_CHATBOT_RESPONSE_MODEL",
+    "application_adapter": {
+      "decision": "../adr/0023-rag-web-adapter.md",
+      "task": "T27",
+      "status": "LOCAL_ADAPTER_VERIFIED_GENERATION_BLOCKED",
+      "browser_schemas": [
+        "ChatRequest",
+        "ChatAnswer",
+        "ChatSession",
+        "ChatReference"
+      ],
+      "deadline_seconds": 45,
+      "source_registry": "OPERATOR_APPROVED_KB_ONLY",
+      "source_opening": "ALLOWLISTED_ORIGINAL_URL_AND_EVIDENCE_EXCERPT_FULLTEXT_NOT_PROVIDED",
+      "provider_runtime_pin": "REQUIRED_16_HEX_HEALTH_REVISION",
+      "real_corpus_generation": "NOT_RUN",
+      "catalog_feed": "BLOCKED_T26_T36"
+    }
+  },
+  "models": [
+    {
+      "catalog_id": "bodyweight_squat",
+      "pose_id": "squat",
+      "rag_code": "SQUAT",
+      "label_count": 14,
+      "schema_version": "qualcomm-squat-14-clipbatch-v1",
+      "model_file": "best_stgcnpp_squat_v4_multihead.onnx",
+      "model_sha256": "eb6f2cefefbdcba392c0f2eda3bbcf0f9df6f0c6d1877ee3fcd5ad801668eb04",
+      "contract_file": "squat_v4_contract.json",
+      "contract_bytes_sha256": "99bd9a1d67478f819f725c8bfd216c4467dc16bab558ee27f405a4d84c3e1b07",
+      "contract_lf_sha256": "d3a3de81466a190e7366aac833d936549d83b79c81143e82d1d5633c52c0c6b9",
+      "registered_contract_sha256": "d3a3de81466a190e7366aac833d936549d83b79c81143e82d1d5633c52c0c6b9",
+      "contract_byte_identical_between_sources": true,
+      "registered_contract_matches": "LF_NORMALIZED_UTF8",
+      "status": "SOURCE_VERIFIED",
+      "inference": "LOCAL_CPU_SMOKE_VERIFIED"
+    },
+    {
+      "catalog_id": "push_up",
+      "pose_id": "push_up",
+      "rag_code": "PUSHUP",
+      "label_count": 21,
+      "schema_version": "qualcomm-pushup-21-128frames-context32-v1",
+      "model_file": "best_stgcnpp_pushup_v4_multihead.onnx",
+      "model_sha256": "a61e117cd9563881cf0b1654f2f2c0c7c3733dfe802496bc59405556dd29226c",
+      "contract_file": "pushup_v4_contract.json",
+      "contract_bytes_sha256": "c02864edbaf3d12fd03e04f9313ee1f562cb0fe6db52bbe913167b0dfb2ab9c8",
+      "contract_lf_sha256": "b7cc142e0a4820835ed1489426683c1862ee13d54961b2a0c8c77d0fc90e68a0",
+      "registered_contract_sha256": "b7cc142e0a4820835ed1489426683c1862ee13d54961b2a0c8c77d0fc90e68a0",
+      "contract_byte_identical_between_sources": true,
+      "registered_contract_matches": "LF_NORMALIZED_UTF8",
+      "status": "SOURCE_VERIFIED",
+      "inference": "LOCAL_CPU_SMOKE_VERIFIED"
+    },
+    {
+      "catalog_id": "jumping_jacks",
+      "pose_id": "jump_jack",
+      "rag_code": "JUMPING_JACK",
+      "label_count": 29,
+      "schema_version": "qualcomm-jumpjack-29-128frames-context32-v1",
+      "model_file": "best_stgcnpp_jumpjack_v4_multihead.onnx",
+      "model_sha256": "2af00a3ae132e3e684d44a04d49ed471e8e54f0d7ef71536aad0861535d7633f",
+      "contract_file": "jumpjack_v4_contract.json",
+      "contract_bytes_sha256": "6a4486ac90dcaf1467a7aaf4155087651729a428400d1dcacd6bb4b34d7bb9f8",
+      "contract_lf_sha256": "51bdffbd1afbf4841440de095a2002e2c1b73ce5175364842ee257a3cfc81afb",
+      "registered_contract_sha256": "51bdffbd1afbf4841440de095a2002e2c1b73ce5175364842ee257a3cfc81afb",
+      "contract_byte_identical_between_sources": true,
+      "registered_contract_matches": "LF_NORMALIZED_UTF8",
+      "status": "SOURCE_VERIFIED",
+      "inference": "LOCAL_CPU_SMOKE_VERIFIED"
+    },
+    {
+      "catalog_id": "reverse_crunch",
+      "pose_id": "situp",
+      "rag_code": "REVERSE_CRUNCH",
+      "label_count": 19,
+      "schema_version": "qualcomm-reverse-crunch-19-128frames-context32-v1",
+      "model_file": "best_stgcnpp_crunch_v4_multihead.onnx",
+      "model_sha256": "b6150a5b98884df6e0e73e9dd0a85e78d160ff5c6f8eeb055fa98b39850520c7",
+      "contract_file": "crunch_v4_contract.json",
+      "contract_bytes_sha256": "e6fbe50bc6ee30d0dd2960efc525167741fb1ba0f58083b64597d1591e1be9fc",
+      "contract_lf_sha256": "7aadde0468a137d7a4aec8f85508db52acb34bd65783c451be867d7cacacabca",
+      "registered_contract_sha256": "7aadde0468a137d7a4aec8f85508db52acb34bd65783c451be867d7cacacabca",
+      "contract_byte_identical_between_sources": true,
+      "registered_contract_matches": "LF_NORMALIZED_UTF8",
+      "status": "SOURCE_VERIFIED",
+      "inference": "LOCAL_CPU_SMOKE_VERIFIED"
+    }
+  ],
+  "gates": {
+    "T21": [
+      "manifest and hash",
+      "scope fixtures",
+      "inference smoke",
+      "private transport"
+    ],
+    "T22": [
+      "durable owner jobs",
+      "raw result API",
+      "nullable repCount"
+    ],
+    "T23": [
+      "packet translation",
+      "session admission",
+      "backpressure"
+    ],
+    "T27": [
+      "application DTO",
+      "all task/status fixtures",
+      "citations",
+      "deadline/readiness"
+    ],
+    "T26": [
+      "external source namespace",
+      "Catalog feed provider agreement"
+    ],
+    "T36": [
+      "head/snapshot/events",
+      "visibility and tombstones"
+    ]
+  },
+  "limitations": [
+    "RAG corpus and index absent (including services.rar)",
+    "Referenced Chapter4 rules file absent",
+    "Ollama generation and Neo4j not executed",
+    "Web AI adapters/production transport not accepted; see runtime evidence gates",
+    "CPU development profile differs from provider GPU dependencies; see ADR 0010"
+  ],
+  "runtime_evidence": "ai-runtime-verification.yaml"
+}

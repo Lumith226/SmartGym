@@ -1,0 +1,1325 @@
+{
+  "schemas": {
+    "Problem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "title",
+        "status",
+        "code",
+        "requestId"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "format": "uri"
+        },
+        "title": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer",
+          "minimum": 400,
+          "maximum": 599
+        },
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "field",
+              "message"
+            ],
+            "properties": {
+              "field": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "ExerciseSummaryPage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "items",
+        "nextCursor"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExerciseSummary"
+          }
+        },
+        "nextCursor": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "WorkoutPlanPage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "items",
+        "nextCursor"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WorkoutPlan"
+          }
+        },
+        "nextCursor": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "WorkoutPlanCreate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "name",
+        "exercises"
+      ],
+      "properties": {
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "exercises": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WorkoutPlanItemInput"
+          },
+          "minItems": 1,
+          "maxItems": 40
+        }
+      }
+    },
+    "WorkoutPlan": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "name",
+        "exercises",
+        "status",
+        "version",
+        "createdAt",
+        "updatedAt"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "name": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "description": {
+          "type": "string",
+          "maxLength": 500
+        },
+        "exercises": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WorkoutPlanItem"
+          },
+          "minItems": 1,
+          "maxItems": 40
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "ACTIVE",
+            "ARCHIVED"
+          ]
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "updatedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "WorkoutSchedulePage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "items",
+        "nextCursor"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WorkoutSchedule"
+          }
+        },
+        "nextCursor": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "WorkoutScheduleCreate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "planId",
+        "timeZone",
+        "startDate",
+        "startLocalTime",
+        "durationMinutes",
+        "recurrence"
+      ],
+      "properties": {
+        "planId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "timeZone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "examples": [
+            "Asia/Bangkok"
+          ]
+        },
+        "startDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "endDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "startLocalTime": {
+          "type": "string",
+          "pattern": "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$"
+        },
+        "durationMinutes": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 240
+        },
+        "recurrence": {
+          "type": "string",
+          "enum": [
+            "ONCE",
+            "WEEKLY"
+          ]
+        },
+        "weekdays": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 7
+          },
+          "minItems": 1,
+          "maxItems": 7,
+          "uniqueItems": true
+        }
+      },
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "recurrence": {
+                "const": "WEEKLY"
+              }
+            }
+          },
+          "then": {
+            "required": [
+              "weekdays"
+            ]
+          },
+          "else": {
+            "not": {
+              "anyOf": [
+                {
+                  "required": [
+                    "weekdays"
+                  ]
+                },
+                {
+                  "required": [
+                    "endDate"
+                  ]
+                }
+              ]
+            }
+          }
+        }
+      ]
+    },
+    "WorkoutSchedule": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "planId",
+        "timeZone",
+        "startDate",
+        "startLocalTime",
+        "durationMinutes",
+        "recurrence",
+        "status",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "planId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "timeZone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "examples": [
+            "Asia/Bangkok"
+          ]
+        },
+        "startDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "endDate": {
+          "type": "string",
+          "format": "date"
+        },
+        "startLocalTime": {
+          "type": "string",
+          "pattern": "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$"
+        },
+        "durationMinutes": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 240
+        },
+        "recurrence": {
+          "type": "string",
+          "enum": [
+            "ONCE",
+            "WEEKLY"
+          ]
+        },
+        "weekdays": {
+          "type": "array",
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 7
+          },
+          "minItems": 1,
+          "maxItems": 7,
+          "uniqueItems": true
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "ACTIVE",
+            "CANCELED"
+          ]
+        },
+        "projectionConflicts": {
+          "type": "array",
+          "readOnly": true,
+          "maxItems": 35,
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "status",
+              "localDate",
+              "startAt",
+              "endAt",
+              "code"
+            ],
+            "properties": {
+              "status": {
+                "const": "CONFLICT"
+              },
+              "localDate": {
+                "type": "string",
+                "format": "date"
+              },
+              "startAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "endAt": {
+                "type": "string",
+                "format": "date-time"
+              },
+              "code": {
+                "const": "SCHEDULE_OVERLAP"
+              }
+            }
+          }
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        }
+      }
+    },
+    "WorkoutOccurrencePage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "items",
+        "nextCursor"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WorkoutOccurrence"
+          }
+        },
+        "nextCursor": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    },
+    "WorkoutOccurrence": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "scheduleId",
+        "planId",
+        "plannedExercises",
+        "startAt",
+        "endAt",
+        "timeZone",
+        "status",
+        "version"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "scheduleId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "planId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "plannedExercises": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/WorkoutPlanItem"
+          },
+          "maxItems": 40
+        },
+        "startAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "timeZone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "examples": [
+            "Asia/Bangkok"
+          ]
+        },
+        "status": {
+          "type": "string",
+          "enum": [
+            "SCHEDULED",
+            "CANCELED"
+          ]
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        }
+      }
+    },
+    "WorkoutOccurrenceChange": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "startAt",
+        "endAt",
+        "timeZone"
+      ],
+      "properties": {
+        "startAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "endAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "timeZone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "examples": [
+            "Asia/Bangkok"
+          ]
+        }
+      }
+    },
+    "ExerciseSummary": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "slug",
+        "nameVi",
+        "summary",
+        "primaryMuscleIds",
+        "equipmentIds",
+        "media"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$",
+          "examples": [
+            "bodyweight_squat"
+          ]
+        },
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "maxLength": 100,
+          "examples": [
+            "squat-khong-ta"
+          ]
+        },
+        "nameVi": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "nameEn": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "primaryMuscleIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$",
+            "examples": [
+              "bodyweight_squat"
+            ]
+          }
+        },
+        "equipmentIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$",
+            "examples": [
+              "bodyweight_squat"
+            ]
+          }
+        },
+        "media": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExercisePublicMedia"
+          },
+          "maxItems": 1
+        }
+      }
+    },
+    "WorkoutPlanItemInput": {
+      "type": "object",
+      "required": [
+        "exerciseId",
+        "sets"
+      ],
+      "oneOf": [
+        {
+          "required": [
+            "targetReps"
+          ]
+        },
+        {
+          "required": [
+            "targetDurationSeconds"
+          ]
+        }
+      ],
+      "unevaluatedProperties": false,
+      "properties": {
+        "exerciseId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$"
+        },
+        "sets": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30
+        },
+        "targetReps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "targetDurationSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600
+        },
+        "restSeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 600
+        }
+      }
+    },
+    "WorkoutPlanItem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exerciseId",
+        "sets",
+        "exerciseNameVi"
+      ],
+      "oneOf": [
+        {
+          "required": [
+            "targetReps"
+          ]
+        },
+        {
+          "required": [
+            "targetDurationSeconds"
+          ]
+        }
+      ],
+      "properties": {
+        "exerciseId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$"
+        },
+        "exerciseNameVi": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "sets": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 30
+        },
+        "targetReps": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 200
+        },
+        "targetDurationSeconds": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 3600
+        },
+        "restSeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 600
+        }
+      }
+    },
+    "ExercisePublicMedia": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "url",
+        "altText"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "IMAGE",
+            "VIDEO"
+          ]
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "altText": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "posterUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "credit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "main",
+            "start",
+            "peak"
+          ]
+        }
+      }
+    }
+  },
+  "operations": [
+    {
+      "path": "/api/v1/exercises",
+      "method": "GET",
+      "name": "listExercises",
+      "public": true,
+      "status": 200,
+      "output": "ExerciseSummaryPage",
+      "errors": [
+        400,
+        422,
+        429,
+        503
+      ],
+      "paths": {},
+      "queries": {
+        "q": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 100
+        },
+        "muscleGroupId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$",
+          "examples": [
+            "bodyweight_squat"
+          ]
+        },
+        "equipmentId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$",
+          "examples": [
+            "bodyweight_squat"
+          ]
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "cursor": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        }
+      },
+      "requiredQueries": [],
+      "headers": {},
+      "etag": false,
+      "location": false
+    },
+    {
+      "path": "/api/v1/workout-plans",
+      "method": "GET",
+      "name": "listWorkoutPlans",
+      "public": false,
+      "status": 200,
+      "output": "WorkoutPlanPage",
+      "errors": [
+        400,
+        401,
+        403,
+        422,
+        429,
+        503
+      ],
+      "paths": {},
+      "queries": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "ACTIVE",
+            "ARCHIVED"
+          ]
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "cursor": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        }
+      },
+      "requiredQueries": [],
+      "headers": {},
+      "etag": false,
+      "location": false
+    },
+    {
+      "path": "/api/v1/workout-plans",
+      "method": "POST",
+      "name": "createWorkoutPlan",
+      "public": false,
+      "status": 201,
+      "input": "WorkoutPlanCreate",
+      "output": "WorkoutPlan",
+      "errors": [
+        400,
+        401,
+        403,
+        409,
+        422,
+        429,
+        503
+      ],
+      "paths": {},
+      "queries": {},
+      "requiredQueries": [],
+      "headers": {
+        "idempotency-key": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9._-]+$"
+        }
+      },
+      "etag": true,
+      "location": true
+    },
+    {
+      "path": "/api/v1/workout-plans/{planId}",
+      "method": "GET",
+      "name": "getWorkoutPlan",
+      "public": false,
+      "status": 200,
+      "output": "WorkoutPlan",
+      "errors": [
+        400,
+        401,
+        403,
+        404,
+        422,
+        429,
+        503
+      ],
+      "paths": {
+        "planId": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "queries": {},
+      "requiredQueries": [],
+      "headers": {},
+      "etag": true,
+      "location": false
+    },
+    {
+      "path": "/api/v1/workout-plans/{planId}",
+      "method": "PUT",
+      "name": "updateWorkoutPlan",
+      "public": false,
+      "status": 200,
+      "input": "WorkoutPlanCreate",
+      "output": "WorkoutPlan",
+      "errors": [
+        400,
+        401,
+        403,
+        404,
+        409,
+        412,
+        422,
+        428,
+        429,
+        503
+      ],
+      "paths": {
+        "planId": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "queries": {},
+      "requiredQueries": [],
+      "headers": {
+        "if-match": {
+          "type": "string",
+          "pattern": "^\"v[1-9][0-9]*\"$",
+          "examples": [
+            "\"v3\""
+          ]
+        }
+      },
+      "etag": true,
+      "location": false
+    },
+    {
+      "path": "/api/v1/workout-plans/{planId}",
+      "method": "DELETE",
+      "name": "archiveWorkoutPlan",
+      "public": false,
+      "status": 204,
+      "errors": [
+        400,
+        401,
+        403,
+        404,
+        409,
+        412,
+        422,
+        428,
+        429,
+        503
+      ],
+      "paths": {
+        "planId": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "queries": {},
+      "requiredQueries": [],
+      "headers": {
+        "if-match": {
+          "type": "string",
+          "pattern": "^\"v[1-9][0-9]*\"$",
+          "examples": [
+            "\"v3\""
+          ]
+        }
+      },
+      "etag": false,
+      "location": false
+    },
+    {
+      "path": "/api/v1/workout-schedules",
+      "method": "GET",
+      "name": "listWorkoutSchedules",
+      "public": false,
+      "status": 200,
+      "output": "WorkoutSchedulePage",
+      "errors": [
+        400,
+        401,
+        403,
+        422,
+        429,
+        503
+      ],
+      "paths": {},
+      "queries": {
+        "status": {
+          "type": "string",
+          "enum": [
+            "ACTIVE",
+            "CANCELED"
+          ]
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "cursor": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        }
+      },
+      "requiredQueries": [],
+      "headers": {},
+      "etag": false,
+      "location": false
+    },
+    {
+      "path": "/api/v1/workout-schedules",
+      "method": "POST",
+      "name": "createWorkoutSchedule",
+      "public": false,
+      "status": 201,
+      "input": "WorkoutScheduleCreate",
+      "output": "WorkoutSchedule",
+      "errors": [
+        400,
+        401,
+        403,
+        404,
+        409,
+        422,
+        429,
+        503
+      ],
+      "paths": {},
+      "queries": {},
+      "requiredQueries": [],
+      "headers": {
+        "idempotency-key": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 128,
+          "pattern": "^[A-Za-z0-9._-]+$"
+        }
+      },
+      "etag": true,
+      "location": true
+    },
+    {
+      "path": "/api/v1/workout-schedules/{scheduleId}",
+      "method": "GET",
+      "name": "getWorkoutSchedule",
+      "public": false,
+      "status": 200,
+      "output": "WorkoutSchedule",
+      "errors": [
+        400,
+        401,
+        403,
+        404,
+        422,
+        429,
+        503
+      ],
+      "paths": {
+        "scheduleId": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "queries": {},
+      "requiredQueries": [],
+      "headers": {},
+      "etag": true,
+      "location": false
+    },
+    {
+      "path": "/api/v1/workout-schedules/{scheduleId}",
+      "method": "PUT",
+      "name": "updateWorkoutSchedule",
+      "public": false,
+      "status": 200,
+      "input": "WorkoutScheduleCreate",
+      "output": "WorkoutSchedule",
+      "errors": [
+        400,
+        401,
+        403,
+        404,
+        409,
+        412,
+        422,
+        428,
+        429,
+        503
+      ],
+      "paths": {
+        "scheduleId": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "queries": {},
+      "requiredQueries": [],
+      "headers": {
+        "if-match": {
+          "type": "string",
+          "pattern": "^\"v[1-9][0-9]*\"$",
+          "examples": [
+            "\"v3\""
+          ]
+        }
+      },
+      "etag": true,
+      "location": false
+    },
+    {
+      "path": "/api/v1/workout-schedules/{scheduleId}",
+      "method": "DELETE",
+      "name": "cancelWorkoutSchedule",
+      "public": false,
+      "status": 204,
+      "errors": [
+        400,
+        401,
+        403,
+        404,
+        412,
+        422,
+        428,
+        429,
+        503
+      ],
+      "paths": {
+        "scheduleId": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "queries": {},
+      "requiredQueries": [],
+      "headers": {
+        "if-match": {
+          "type": "string",
+          "pattern": "^\"v[1-9][0-9]*\"$",
+          "examples": [
+            "\"v3\""
+          ]
+        }
+      },
+      "etag": false,
+      "location": false
+    },
+    {
+      "path": "/api/v1/workout-occurrences",
+      "method": "GET",
+      "name": "listWorkoutOccurrences",
+      "public": false,
+      "status": 200,
+      "output": "WorkoutOccurrencePage",
+      "errors": [
+        400,
+        401,
+        403,
+        422,
+        429,
+        503
+      ],
+      "paths": {},
+      "queries": {
+        "from": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "to": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "cursor": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        }
+      },
+      "requiredQueries": [
+        "from",
+        "to"
+      ],
+      "headers": {},
+      "etag": false,
+      "location": false
+    },
+    {
+      "path": "/api/v1/workout-occurrences/{occurrenceId}",
+      "method": "GET",
+      "name": "getWorkoutOccurrence",
+      "public": false,
+      "status": 200,
+      "output": "WorkoutOccurrence",
+      "errors": [
+        400,
+        401,
+        403,
+        404,
+        422,
+        429,
+        503
+      ],
+      "paths": {
+        "occurrenceId": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "queries": {},
+      "requiredQueries": [],
+      "headers": {},
+      "etag": true,
+      "location": false
+    },
+    {
+      "path": "/api/v1/workout-occurrences/{occurrenceId}",
+      "method": "PATCH",
+      "name": "rescheduleWorkoutOccurrence",
+      "public": false,
+      "status": 200,
+      "input": "WorkoutOccurrenceChange",
+      "output": "WorkoutOccurrence",
+      "errors": [
+        400,
+        401,
+        403,
+        404,
+        409,
+        412,
+        422,
+        428,
+        429,
+        503
+      ],
+      "paths": {
+        "occurrenceId": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "queries": {},
+      "requiredQueries": [],
+      "headers": {
+        "if-match": {
+          "type": "string",
+          "pattern": "^\"v[1-9][0-9]*\"$",
+          "examples": [
+            "\"v3\""
+          ]
+        }
+      },
+      "etag": true,
+      "location": false
+    },
+    {
+      "path": "/api/v1/workout-occurrences/{occurrenceId}/cancel",
+      "method": "POST",
+      "name": "cancelWorkoutOccurrence",
+      "public": false,
+      "status": 204,
+      "errors": [
+        400,
+        401,
+        403,
+        404,
+        409,
+        412,
+        422,
+        428,
+        429,
+        503
+      ],
+      "paths": {
+        "occurrenceId": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "queries": {},
+      "requiredQueries": [],
+      "headers": {
+        "if-match": {
+          "type": "string",
+          "pattern": "^\"v[1-9][0-9]*\"$",
+          "examples": [
+            "\"v3\""
+          ]
+        }
+      },
+      "etag": false,
+      "location": false
+    }
+  ]
+}

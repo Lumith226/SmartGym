@@ -1,0 +1,411 @@
+{
+  "schemas": {
+    "Profile": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "email",
+        "displayName",
+        "emailVerified",
+        "roles",
+        "timeZone",
+        "createdAt"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 254
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "emailVerified": {
+          "type": "boolean"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "ADMIN"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "timeZone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "examples": [
+            "Asia/Bangkok"
+          ]
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "Problem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "title",
+        "status",
+        "code",
+        "requestId"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "format": "uri"
+        },
+        "title": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer",
+          "minimum": 400,
+          "maximum": 599
+        },
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "field",
+              "message"
+            ],
+            "properties": {
+              "field": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "IdentityAssertion": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "accessToken",
+        "expiresAt",
+        "userId",
+        "roles",
+        "emailVerified"
+      ],
+      "properties": {
+        "accessToken": {
+          "type": "string",
+          "minLength": 16,
+          "maxLength": 4096
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "userId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "roles": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "enum": [
+              "USER",
+              "ADMIN"
+            ]
+          },
+          "minItems": 1,
+          "uniqueItems": true
+        },
+        "emailVerified": {
+          "type": "boolean"
+        }
+      }
+    },
+    "IdentityIntrospection": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sessionHandle"
+      ],
+      "properties": {
+        "sessionHandle": {
+          "type": "string",
+          "minLength": 32,
+          "maxLength": 256
+        }
+      }
+    },
+    "RegisterRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "email",
+        "password",
+        "displayName"
+      ],
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 254
+        },
+        "password": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 128,
+          "format": "password"
+        },
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        }
+      }
+    },
+    "TokenRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "token"
+      ],
+      "properties": {
+        "token": {
+          "type": "string",
+          "minLength": 32,
+          "maxLength": 256
+        }
+      }
+    },
+    "EmailRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "email"
+      ],
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 254
+        }
+      }
+    },
+    "LoginRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "email",
+        "password"
+      ],
+      "properties": {
+        "email": {
+          "type": "string",
+          "format": "email",
+          "maxLength": 254
+        },
+        "password": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128,
+          "format": "password"
+        }
+      }
+    },
+    "ResetPasswordRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "token",
+        "newPassword"
+      ],
+      "properties": {
+        "token": {
+          "type": "string",
+          "minLength": 32,
+          "maxLength": 256
+        },
+        "newPassword": {
+          "type": "string",
+          "minLength": 8,
+          "maxLength": 128,
+          "format": "password"
+        }
+      }
+    },
+    "ProfileUpdate": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "displayName": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "timeZone": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80,
+          "examples": [
+            "Asia/Bangkok"
+          ]
+        }
+      },
+      "minProperties": 1
+    }
+  },
+  "operations": {
+    "POST /api/v1/auth/register": {
+      "request": "RegisterRequest",
+      "response": null,
+      "success": 202,
+      "errors": [
+        400,
+        403,
+        422,
+        429,
+        503
+      ],
+      "cookie": null
+    },
+    "POST /api/v1/auth/verify-email": {
+      "request": "TokenRequest",
+      "response": null,
+      "success": 204,
+      "errors": [
+        400,
+        403,
+        410,
+        422,
+        429,
+        503
+      ],
+      "cookie": null
+    },
+    "POST /api/v1/auth/verification-requests": {
+      "request": "EmailRequest",
+      "response": null,
+      "success": 202,
+      "errors": [
+        400,
+        403,
+        422,
+        429,
+        503
+      ],
+      "cookie": null
+    },
+    "POST /api/v1/auth/login": {
+      "request": "LoginRequest",
+      "response": "Profile",
+      "success": 200,
+      "errors": [
+        400,
+        401,
+        403,
+        422,
+        429,
+        503
+      ],
+      "cookie": "session"
+    },
+    "POST /api/v1/auth/logout": {
+      "request": null,
+      "response": null,
+      "success": 204,
+      "errors": [
+        400,
+        403,
+        422,
+        429,
+        503
+      ],
+      "cookie": "clear"
+    },
+    "POST /api/v1/auth/password-reset-requests": {
+      "request": "EmailRequest",
+      "response": null,
+      "success": 202,
+      "errors": [
+        400,
+        403,
+        422,
+        429,
+        503
+      ],
+      "cookie": null
+    },
+    "POST /api/v1/auth/password-reset": {
+      "request": "ResetPasswordRequest",
+      "response": null,
+      "success": 204,
+      "errors": [
+        400,
+        403,
+        410,
+        422,
+        429,
+        503
+      ],
+      "cookie": "clear"
+    },
+    "GET /api/v1/me": {
+      "request": null,
+      "response": "Profile",
+      "success": 200,
+      "errors": [
+        400,
+        401,
+        403,
+        429,
+        503
+      ],
+      "cookie": null
+    },
+    "PATCH /api/v1/me": {
+      "request": "ProfileUpdate",
+      "response": "Profile",
+      "success": 200,
+      "errors": [
+        400,
+        401,
+        403,
+        422,
+        429,
+        503
+      ],
+      "cookie": null
+    }
+  }
+}

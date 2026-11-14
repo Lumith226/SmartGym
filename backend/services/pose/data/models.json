@@ -1,0 +1,702 @@
+[
+  {
+    "catalogId": "bodyweight_squat",
+    "poseId": "squat",
+    "sha256": "eb6f2cefefbdcba392c0f2eda3bbcf0f9df6f0c6d1877ee3fcd5ad801668eb04",
+    "schemaVersion": "qualcomm-squat-14-clipbatch-v1",
+    "modelFile": "best_stgcnpp_squat_v4_multihead.onnx",
+    "labels": [
+      {
+        "key": "depth_90",
+        "kind": "attribute",
+        "raw_label": "squats - 90 degrees",
+        "threshold": 0.4,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "depth_over_90",
+        "kind": "attribute",
+        "raw_label": "squats - over 90 degrees",
+        "threshold": 0.8250000000000001,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "shallow",
+        "kind": "error",
+        "raw_label": "squats - shallow",
+        "threshold": 0.5750000000000001,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "insufficient",
+        "kind": "error",
+        "raw_label": "squats - insufficient",
+        "threshold": 0.30000000000000004,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "back_not_straight",
+        "kind": "error",
+        "raw_label": "squats - back not straight",
+        "threshold": 0.325,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "shoulder_width",
+        "kind": "attribute",
+        "raw_label": "squats - shoulder-width",
+        "threshold": 0.625,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "wide",
+        "kind": "attribute",
+        "raw_label": "squats - wide",
+        "threshold": 0.5750000000000001,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "narrow",
+        "kind": "attribute",
+        "raw_label": "squats - narrow",
+        "threshold": 0.17500000000000002,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "plie",
+        "kind": "attribute",
+        "raw_label": "squats - plie",
+        "threshold": 0.35,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "knees_over_toes",
+        "kind": "attribute",
+        "raw_label": "squats - knees over toes",
+        "threshold": 0.325,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "no_obvious_issue",
+        "kind": "positive",
+        "raw_label": "squats - no obvious issue",
+        "threshold": 0.4,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "not_visible",
+        "kind": "visibility",
+        "raw_label": "squats - not visible",
+        "threshold": 0.75,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "hold",
+        "kind": "context",
+        "raw_label": "squats - hold",
+        "threshold": 0.775,
+        "calibrated": true,
+        "rep_supported": false
+      },
+      {
+        "key": "starting_late",
+        "kind": "context",
+        "raw_label": "squats - starting late",
+        "threshold": 0.9,
+        "calibrated": true,
+        "rep_supported": false
+      }
+    ]
+  },
+  {
+    "catalogId": "push_up",
+    "poseId": "push_up",
+    "sha256": "a61e117cd9563881cf0b1654f2f2c0c7c3733dfe802496bc59405556dd29226c",
+    "schemaVersion": "qualcomm-pushup-21-128frames-context32-v1",
+    "modelFile": "best_stgcnpp_pushup_v4_multihead.onnx",
+    "labels": [
+      {
+        "key": "depth_90",
+        "kind": "attribute",
+        "raw_label": "pushups - 90 degrees",
+        "threshold": 0.6,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "too_deep",
+        "kind": "error",
+        "raw_label": "pushups - deep",
+        "threshold": 0.35,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "shallow",
+        "kind": "error",
+        "raw_label": "pushups - shallow",
+        "threshold": 0.5,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "insufficient",
+        "kind": "error",
+        "raw_label": "pushups - insufficient",
+        "threshold": 0.55,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "shoulder_width",
+        "kind": "attribute",
+        "raw_label": "pushups - shoulder-width",
+        "threshold": 0.55,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "wide",
+        "kind": "attribute",
+        "raw_label": "pushups - wide",
+        "threshold": 0.6,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "very_wide",
+        "kind": "error",
+        "raw_label": "pushups - very wide",
+        "threshold": 0.5,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "narrow",
+        "kind": "error",
+        "raw_label": "pushups - narrow",
+        "threshold": 0.45000000000000007,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "elevated_hips",
+        "kind": "error",
+        "raw_label": "pushups - elevated hips",
+        "threshold": 0.775,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "butt_sinking",
+        "kind": "error",
+        "raw_label": "pushups - butt sinking",
+        "threshold": 0.15000000000000002,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "legs_on_floor",
+        "kind": "error",
+        "raw_label": "pushups - legs on the floor",
+        "threshold": 0.325,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "side_to_side",
+        "kind": "error",
+        "raw_label": "pushups - side to side",
+        "threshold": 0.5,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "child_pose_cheat",
+        "kind": "error",
+        "raw_label": "pushups - child pose cheat",
+        "threshold": 0.5,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "sloppy",
+        "kind": "error",
+        "raw_label": "pushups - sloppy",
+        "threshold": 0.45000000000000007,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "moving_head",
+        "kind": "attribute",
+        "raw_label": "pushups - moving head",
+        "threshold": 0.7000000000000001,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "head_down",
+        "kind": "attribute",
+        "raw_label": "pushups - head down",
+        "threshold": 0.875,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "head_out_of_frame",
+        "kind": "visibility",
+        "raw_label": "pushups - head moving in an out of frame",
+        "threshold": 0.5,
+        "calibrated": true,
+        "rep_supported": false
+      },
+      {
+        "key": "waiting_position",
+        "kind": "context",
+        "raw_label": "pushups - waiting position",
+        "threshold": 0.55,
+        "calibrated": true,
+        "rep_supported": false
+      },
+      {
+        "key": "early_stopping",
+        "kind": "context",
+        "raw_label": "pushups - early stopping",
+        "threshold": 0.5750000000000001,
+        "calibrated": true,
+        "rep_supported": false
+      },
+      {
+        "key": "fast",
+        "kind": "attribute",
+        "raw_label": "pushups - fast",
+        "threshold": 0.525,
+        "calibrated": true,
+        "rep_supported": false
+      },
+      {
+        "key": "not_visible",
+        "kind": "visibility",
+        "raw_label": "pushups - not visible",
+        "threshold": 0.42500000000000004,
+        "calibrated": true,
+        "rep_supported": true
+      }
+    ]
+  },
+  {
+    "catalogId": "jumping_jacks",
+    "poseId": "jump_jack",
+    "sha256": "2af00a3ae132e3e684d44a04d49ed471e8e54f0d7ef71536aad0861535d7633f",
+    "schemaVersion": "qualcomm-jumpjack-29-128frames-context32-v1",
+    "modelFile": "best_stgcnpp_jumpjack_v4_multihead.onnx",
+    "labels": [
+      {
+        "key": "only_arms",
+        "kind": "error",
+        "raw_label": "jumping jacks - only arms",
+        "threshold": 0.5,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "only_legs",
+        "kind": "error",
+        "raw_label": "jumping jacks - only legs",
+        "threshold": 0.625,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "not_jumping",
+        "kind": "error",
+        "raw_label": "jumping jacks - not jumping",
+        "threshold": 0.475,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "puppet_dance",
+        "kind": "error",
+        "raw_label": "jumping jacks - puppet dance",
+        "threshold": 0.5,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "opposite",
+        "kind": "error",
+        "raw_label": "jumping jacks - opposite",
+        "threshold": 0.1,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "not_synchronized",
+        "kind": "error",
+        "raw_label": "jumping jacks - not synchronized",
+        "threshold": 0.17500000000000002,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "single_repetition",
+        "kind": "context",
+        "raw_label": "jumping jacks - single repetition",
+        "threshold": 0.4,
+        "calibrated": true,
+        "rep_supported": false
+      },
+      {
+        "key": "early_stopping",
+        "kind": "context",
+        "raw_label": "jumping jacks - early stopping",
+        "threshold": 0.2,
+        "calibrated": true,
+        "rep_supported": false
+      },
+      {
+        "key": "arms_rom_1_0",
+        "kind": "attribute",
+        "raw_label": "jumping jacks - arms_rom=1.0",
+        "threshold": 0.875,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "arms_rom_1_5",
+        "kind": "attribute",
+        "raw_label": "jumping jacks - arms_rom=1.5",
+        "threshold": 0.45000000000000007,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "arms_rom_2_0",
+        "kind": "attribute",
+        "raw_label": "jumping jacks - arms_rom=2.0",
+        "threshold": 0.30000000000000004,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "arms_rom_2_5",
+        "kind": "attribute",
+        "raw_label": "jumping jacks - arms_rom=2.5",
+        "threshold": 0.5,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "arms_rom_3_0",
+        "kind": "attribute",
+        "raw_label": "jumping jacks - arms_rom=3.0",
+        "threshold": 0.675,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "arms_rom_3_5",
+        "kind": "attribute",
+        "raw_label": "jumping jacks - arms_rom=3.5",
+        "threshold": 0.42500000000000004,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "arms_rom_4_0",
+        "kind": "attribute",
+        "raw_label": "jumping jacks - arms_rom=4.0",
+        "threshold": 0.17500000000000002,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "legs_rom_1_0",
+        "kind": "attribute",
+        "raw_label": "jumping jacks - legs_rom=1.0",
+        "threshold": 0.875,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "legs_rom_1_5",
+        "kind": "attribute",
+        "raw_label": "jumping jacks - legs_rom=1.5",
+        "threshold": 1.01,
+        "calibrated": false,
+        "rep_supported": true
+      },
+      {
+        "key": "legs_rom_2_0",
+        "kind": "attribute",
+        "raw_label": "jumping jacks - legs_rom=2.0",
+        "threshold": 0.42500000000000004,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "legs_rom_2_5",
+        "kind": "attribute",
+        "raw_label": "jumping jacks - legs_rom=2.5",
+        "threshold": 0.5,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "legs_rom_3_0",
+        "kind": "attribute",
+        "raw_label": "jumping jacks - legs_rom=3.0",
+        "threshold": 0.525,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "legs_rom_3_5",
+        "kind": "attribute",
+        "raw_label": "jumping jacks - legs_rom=3.5",
+        "threshold": 1.01,
+        "calibrated": false,
+        "rep_supported": true
+      },
+      {
+        "key": "legs_rom_4_0",
+        "kind": "attribute",
+        "raw_label": "jumping jacks - legs_rom=4.0",
+        "threshold": 0.1,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "speed_0_25",
+        "kind": "attribute",
+        "raw_label": "jumping jacks - speed=0.25 rps",
+        "threshold": 0.5,
+        "calibrated": true,
+        "rep_supported": false
+      },
+      {
+        "key": "speed_0_50",
+        "kind": "attribute",
+        "raw_label": "jumping jacks - speed=0.50 rps",
+        "threshold": 0.9,
+        "calibrated": true,
+        "rep_supported": false
+      },
+      {
+        "key": "speed_0_75",
+        "kind": "attribute",
+        "raw_label": "jumping jacks - speed=0.75 rps",
+        "threshold": 0.1,
+        "calibrated": true,
+        "rep_supported": false
+      },
+      {
+        "key": "speed_1_00",
+        "kind": "attribute",
+        "raw_label": "jumping jacks - speed=1.00 rps",
+        "threshold": 0.875,
+        "calibrated": true,
+        "rep_supported": false
+      },
+      {
+        "key": "speed_1_25",
+        "kind": "attribute",
+        "raw_label": "jumping jacks - speed=1.25 rps",
+        "threshold": 0.15000000000000002,
+        "calibrated": true,
+        "rep_supported": false
+      },
+      {
+        "key": "speed_1_50",
+        "kind": "attribute",
+        "raw_label": "jumping jacks - speed=1.50 rps",
+        "threshold": 0.4,
+        "calibrated": true,
+        "rep_supported": false
+      },
+      {
+        "key": "speed_1_75",
+        "kind": "attribute",
+        "raw_label": "jumping jacks - speed=1.75 rps",
+        "threshold": 1.01,
+        "calibrated": false,
+        "rep_supported": false
+      }
+    ]
+  },
+  {
+    "catalogId": "reverse_crunch",
+    "poseId": "situp",
+    "sha256": "b6150a5b98884df6e0e73e9dd0a85e78d160ff5c6f8eeb055fa98b39850520c7",
+    "schemaVersion": "qualcomm-reverse-crunch-19-128frames-context32-v1",
+    "modelFile": "best_stgcnpp_crunch_v4_multihead.onnx",
+    "labels": [
+      {
+        "key": "range_90",
+        "kind": "attribute",
+        "raw_label": "reverse crunches - 90 degrees",
+        "threshold": 0.475,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "range_over_90",
+        "kind": "attribute",
+        "raw_label": "reverse crunches - over 90 degrees",
+        "threshold": 0.6,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "range_below_90",
+        "kind": "error",
+        "raw_label": "reverse crunches - below 90 degrees",
+        "threshold": 0.325,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "not_raising_hips",
+        "kind": "error",
+        "raw_label": "reverse crunches - not raising hips",
+        "threshold": 0.725,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "extending_legs",
+        "kind": "attribute",
+        "raw_label": "reverse crunches - extending legs",
+        "threshold": 0.875,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "feet_down",
+        "kind": "attribute",
+        "raw_label": "reverse crunches - feet down",
+        "threshold": 0.75,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "thighs_not_moving",
+        "kind": "error",
+        "raw_label": "reverse crunches - thighs not moving",
+        "threshold": 0.8250000000000001,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "head_up",
+        "kind": "attribute",
+        "raw_label": "reverse crunches - head up",
+        "threshold": 0.4,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "frontal",
+        "kind": "attribute",
+        "raw_label": "reverse crunches - frontal",
+        "threshold": 0.65,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "not_moving",
+        "kind": "context",
+        "raw_label": "reverse crunches - not moving",
+        "threshold": 0.9,
+        "calibrated": true,
+        "rep_supported": false
+      },
+      {
+        "key": "getting_into_position",
+        "kind": "context",
+        "raw_label": "reverse crunches - getting into position",
+        "threshold": 0.55,
+        "calibrated": true,
+        "rep_supported": false
+      },
+      {
+        "key": "slow",
+        "kind": "attribute",
+        "raw_label": "reverse crunches - slow",
+        "threshold": 0.625,
+        "calibrated": true,
+        "rep_supported": false
+      },
+      {
+        "key": "fast",
+        "kind": "attribute",
+        "raw_label": "reverse crunches - fast",
+        "threshold": 0.35,
+        "calibrated": true,
+        "rep_supported": false
+      },
+      {
+        "key": "not_visible",
+        "kind": "visibility",
+        "raw_label": "reverse crunches - not visible",
+        "threshold": 0.5,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "height_1",
+        "kind": "attribute",
+        "raw_label": "reverse crunches - height=1",
+        "threshold": 0.625,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "height_2",
+        "kind": "attribute",
+        "raw_label": "reverse crunches - height=2",
+        "threshold": 0.30000000000000004,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "height_3",
+        "kind": "attribute",
+        "raw_label": "reverse crunches - height=3",
+        "threshold": 0.5,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "height_4",
+        "kind": "attribute",
+        "raw_label": "reverse crunches - height=4",
+        "threshold": 0.375,
+        "calibrated": true,
+        "rep_supported": true
+      },
+      {
+        "key": "height_5",
+        "kind": "attribute",
+        "raw_label": "reverse crunches - height=5",
+        "threshold": 0.6,
+        "calibrated": true,
+        "rep_supported": true
+      }
+    ]
+  }
+]

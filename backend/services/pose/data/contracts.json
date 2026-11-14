@@ -1,0 +1,506 @@
+{
+  "$id": "pose-contract",
+  "components": {
+    "schemas": {
+      "Jwks": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "keys"
+        ],
+        "properties": {
+          "keys": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kid",
+                "kty",
+                "alg",
+                "use",
+                "n",
+                "e"
+              ],
+              "properties": {
+                "kid": {
+                  "type": "string"
+                },
+                "kty": {
+                  "type": "string",
+                  "enum": [
+                    "RSA"
+                  ]
+                },
+                "alg": {
+                  "type": "string",
+                  "enum": [
+                    "RS256"
+                  ]
+                },
+                "use": {
+                  "type": "string",
+                  "enum": [
+                    "sig"
+                  ]
+                },
+                "n": {
+                  "type": "string"
+                },
+                "e": {
+                  "type": "string"
+                }
+              }
+            },
+            "minItems": 1
+          }
+        }
+      },
+      "PoseUploadRequest": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "mimeType",
+          "sizeBytes",
+          "sha256",
+          "consentVersion"
+        ],
+        "properties": {
+          "consentVersion": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,120}$"
+          },
+          "mimeType": {
+            "type": "string",
+            "enum": [
+              "video/mp4",
+              "video/webm"
+            ]
+          },
+          "sizeBytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 104857600
+          },
+          "sha256": {
+            "type": "string",
+            "pattern": "^[a-f0-9]{64}$"
+          }
+        }
+      },
+      "PoseJobCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "uploadId",
+          "exerciseId",
+          "consentVersion"
+        ],
+        "properties": {
+          "uploadId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "exerciseId": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$",
+            "examples": [
+              "bodyweight_squat"
+            ]
+          },
+          "consentVersion": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,120}$"
+          }
+        }
+      },
+      "PoseJob": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "exerciseId",
+          "status",
+          "createdAt",
+          "updatedAt",
+          "expiresAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "exerciseId": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$",
+            "examples": [
+              "bodyweight_squat"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "QUEUED",
+              "RUNNING",
+              "SUCCEEDED",
+              "FAILED",
+              "CANCELED"
+            ]
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "result": {
+            "$ref": "#/components/schemas/PoseResult"
+          },
+          "failureCode": {
+            "type": "string"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PoseResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "source",
+          "exerciseId",
+          "modelVersion",
+          "configVersion",
+          "repCount",
+          "reps",
+          "formStatus",
+          "limitations",
+          "completedAt",
+          "expiresAt",
+          "repCountStatus"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "VIDEO",
+              "LIVE"
+            ]
+          },
+          "exerciseId": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$",
+            "examples": [
+              "bodyweight_squat"
+            ]
+          },
+          "modelVersion": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,120}$"
+          },
+          "configVersion": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,120}$"
+          },
+          "repCount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 500,
+            "description": "Null means unavailable, never an inferred zero. Whole-video V4 does not count reps."
+          },
+          "reps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PoseRep"
+            },
+            "maxItems": 500
+          },
+          "formStatus": {
+            "type": "string",
+            "enum": [
+              "ASSESSED",
+              "INSUFFICIENT_EVIDENCE",
+              "UNSUPPORTED"
+            ]
+          },
+          "limitations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "maxItems": 20
+          },
+          "formNotes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "maxItems": 30
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "repCountStatus": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "UNAVAILABLE"
+            ]
+          }
+        },
+        "x-provider-gap": "Whole-video has unavailable rep count. Live stores observed count and only a validated current window/rep observation when available.",
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "repCountStatus": {
+                  "const": "UNAVAILABLE"
+                }
+              },
+              "required": [
+                "repCountStatus"
+              ]
+            },
+            "then": {
+              "properties": {
+                "repCount": {
+                  "type": "null"
+                },
+                "reps": {
+                  "maxItems": 0
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "repCount": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "source": {
+                  "const": "VIDEO"
+                }
+              },
+              "required": [
+                "source"
+              ]
+            },
+            "then": {
+              "properties": {
+                "repCountStatus": {
+                  "const": "UNAVAILABLE"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "PoseCapabilityList": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "consentVersion"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PoseCapability"
+            }
+          },
+          "consentVersion": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,120}$"
+          }
+        }
+      },
+      "PoseLiveCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "exerciseId",
+          "consentVersion"
+        ],
+        "properties": {
+          "exerciseId": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$",
+            "examples": [
+              "bodyweight_squat"
+            ]
+          },
+          "consentVersion": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,120}$"
+          }
+        }
+      },
+      "PoseLiveSession": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "exerciseId",
+          "status",
+          "streamPath",
+          "maxFps",
+          "maxFrameBytes",
+          "expiresAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "exerciseId": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$",
+            "examples": [
+              "bodyweight_squat"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "READY",
+              "ACTIVE",
+              "COMPLETED",
+              "FAILED",
+              "EXPIRED"
+            ]
+          },
+          "streamPath": {
+            "type": "string",
+            "pattern": "^/api/v1/pose/live-sessions/"
+          },
+          "maxFps": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "maxFrameBytes": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 262144
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "result": {
+            "$ref": "#/components/schemas/PoseResult"
+          }
+        }
+      },
+      "PoseRep": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sequence",
+          "endedAtMs"
+        ],
+        "properties": {
+          "sequence": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500
+          },
+          "endedAtMs": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 900000
+          },
+          "feedbackCode": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      },
+      "PoseCapability": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "exerciseId",
+          "modelVersion",
+          "uploadEnabled",
+          "liveEnabled",
+          "formFeedback",
+          "limitations",
+          "uploadRepCounting",
+          "liveRepCounting"
+        ],
+        "properties": {
+          "exerciseId": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$",
+            "examples": [
+              "bodyweight_squat"
+            ]
+          },
+          "modelVersion": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,120}$"
+          },
+          "uploadEnabled": {
+            "type": "boolean"
+          },
+          "liveEnabled": {
+            "type": "boolean"
+          },
+          "formFeedback": {
+            "type": "boolean"
+          },
+          "limitations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "maxItems": 20
+          },
+          "uploadRepCounting": {
+            "type": "boolean",
+            "description": "False for delivered whole-video V4. Does not indicate whether upload/form analysis is enabled."
+          },
+          "liveRepCounting": {
+            "type": "boolean",
+            "description": "True only after runtime acceptance for this exercise and live mode."
+          }
+        }
+      }
+    }
+  }
+}

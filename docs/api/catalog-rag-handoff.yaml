@@ -1,0 +1,162 @@
+{
+  "version": 1,
+  "checkedAt": "2026-11-08",
+  "status": "PRODUCER_LOCAL_ONLY",
+  "decision": "../adr/0022-catalog-rag-producer.md",
+  "provider": {
+    "agreement": "UNCONFIRMED",
+    "acceptedBy": null,
+    "acceptedRuntimeRevision": null,
+    "acknowledgementEvidence": null,
+    "stagingEvidence": null,
+    "userConfirmedNoAdditionalHandoff": true,
+    "sourceAudit": {
+      "mode": "READ_ONLY_STATIC",
+      "appFile": "kb_service/app.py",
+      "appSha256": "d4b0ddc5d92feeeb789d0b34a7b517e7b043ed87b194af23799977def8f809b1",
+      "catalogIngestEndpoint": "ABSENT",
+      "catalogConsumer": "ABSENT",
+      "canonicalChapterRules": "NOT_FOUND",
+      "corpusFiles": {
+        "raw": 0,
+        "curated": 0,
+        "index": 0
+      },
+      "generation": "NOT_VERIFIED"
+    }
+  },
+  "producer": {
+    "package": "@smartgym/catalog",
+    "migration": 8,
+    "runtimeEvidence": ".local/catalog-t36-feed-final.log",
+    "validationScope": "LOCAL_PG_MTLS_RABBITMQ_PUBLISHER_PROBE_ONLY",
+    "providerExecuted": false,
+    "operations": [
+      {
+        "operationId": "getCatalogHead",
+        "method": "GET",
+        "path": "/internal/v1/catalog/snapshots/head",
+        "schema": "CatalogHead"
+      },
+      {
+        "operationId": "getCatalogSnapshot",
+        "method": "GET",
+        "path": "/internal/v1/catalog/snapshots/{revision}",
+        "schema": "CatalogSnapshot"
+      }
+    ],
+    "auth": {
+      "transport": "mTLS",
+      "caller": "rag",
+      "fingerprintsConfig": "CATALOG_RAG_FINGERPRINTS",
+      "endUserJwt": false,
+      "bffCertificateAllowed": false,
+      "databaseAccess": false
+    },
+    "snapshots": {
+      "encoding": "UTF-8",
+      "cacheControl": "no-store",
+      "maxBytes": 16777216,
+      "maxExercises": 50000,
+      "maxSources": 50000,
+      "maxTombstones": 50000,
+      "retentionSeconds": 604800,
+      "currentRevisionMayOutliveTtl": true,
+      "oldRevisionMayReturn410": true,
+      "materialization": "LAZY_CURRENT_HEAD_ONLY",
+      "sourceId": "ex_ + lowercase SHA256(UTF-8 exerciseId)",
+      "sourceDigest": "lowercase SHA256(UTF-8 bodyMarkdown)",
+      "content": "summary + instructions + commonMistakes joined with two LF",
+      "drafts": false,
+      "rawMedia": false,
+      "privateUploadMetadata": false,
+      "tombstoneHistory": "publication_revisions.reason, independent of outbox retention"
+    },
+    "events": {
+      "exchange": "smartgym.events.v1",
+      "exchangeType": "topic",
+      "producer": "catalog",
+      "aggregateId": "catalog",
+      "versionScope": "GLOBAL_MONOTONIC_WITH_POSSIBLE_GAPS",
+      "delivery": "AT_LEAST_ONCE",
+      "schemaVersion": 1,
+      "routingKeys": [
+        "catalog.exercise.published.v1",
+        "catalog.exercise.updated.v1",
+        "catalog.exercise.unpublished.v1"
+      ],
+      "queue": "smartgym.rag.catalog.v1",
+      "dlx": "smartgym.catalog.dlx.v1",
+      "dlq": "smartgym.rag.catalog.dlq.v1",
+      "topologyStatus": "PROPOSED_NOT_DEPLOYED_TO_PROVIDER",
+      "runtimePublisherPermissions": {
+        "configure": "^$",
+        "read": "^$",
+        "write": "^smartgym\\.events\\.v1$",
+        "topicWrite": "^catalog\\.exercise\\.(published|updated|unpublished)\\.v1$"
+      },
+      "runtimeConsumerPermissions": {
+        "configure": "^$",
+        "write": "^$",
+        "read": "^smartgym\\.rag\\.catalog\\.v1$"
+      }
+    }
+  },
+  "consumerPolicy": {
+    "status": "PROPOSED_REQUIRES_PROVIDER_ACK",
+    "pollHeadSeconds": 30,
+    "maximumHeadAgeSeconds": 60,
+    "namespace": "CATALOG separate from book/HTML kb_version",
+    "mapping": {
+      "sourceId": "source.sourceId",
+      "exerciseId": "source.exerciseId",
+      "catalogRevision": "snapshot.revision",
+      "catalogAggregateVersion": "snapshot.aggregateVersion",
+      "provenance": "source.sourceRef and digestSha256",
+      "locator": "Web-owned published exercise route; do not fetch media URLs"
+    },
+    "requirements": [
+      "Validate event/envelope and canonical hash; inbox dedup + durable effect before ACK.",
+      "Keep highest known global aggregateVersion, tolerate duplicates/reorder and sequence gaps; event is invalidation hint.",
+      "Fetch current head; if behind known event version retry, never roll back. Fetch its snapshot; 410 means reconcile latest head.",
+      "On observed head change stop serving old Catalog evidence/citations while reconciling; preserve independent book/HTML corpus.",
+      "Atomically apply full public allowlist/tombstones, validate body digests and swap index generation only when aligned to current head.",
+      "Persist version/tombstone across restart; ignore stale publish after unpublish, restore draft is not a new publication.",
+      "If head stale over budget or visibility unavailable, fail closed Catalog evidence and citations, including in-flight model responses.",
+      "Treat bodyMarkdown as untrusted evidence, not instructions. Do not execute links or fetch arbitrary URLs/media.",
+      "Invalidate retrieval/answer/citation caches on withdrawal; test removed content cannot reappear after replay or rebuild."
+    ]
+  },
+  "acceptance": [
+    {
+      "id": "ACK-01",
+      "owner": "RAG provider + Web owner",
+      "status": "OPEN",
+      "requirement": "Confirm exact HTTP/event/schema/source mapping and poll/visibility budgets with runtime revision and dated evidence."
+    },
+    {
+      "id": "INGEST-01",
+      "owner": "RAG provider",
+      "status": "NOT_RUN",
+      "requirement": "Actual consumer persists inbox/max version/tombstones; materializes source documents and atomic index generation."
+    },
+    {
+      "id": "VIS-01",
+      "owner": "RAG provider + Web integration",
+      "status": "NOT_RUN",
+      "requirement": "Staging publish/update/unpublish/restore-draft/replay/reorder/restart plus stale-head/provider outage suppress evidence and citations."
+    },
+    {
+      "id": "GEN-01",
+      "owner": "RAG provider",
+      "status": "NOT_RUN",
+      "requirement": "Approved real corpus/index and generation environment; no synthetic corpus substituted for readiness."
+    },
+    {
+      "id": "SEC-01",
+      "owner": "Deployment owner",
+      "status": "NOT_RUN",
+      "requirement": "Real service CA, queue/topic ACL, rotation, broker HA/DLQ durability and snapshot limits in target environment."
+    }
+  ]
+}

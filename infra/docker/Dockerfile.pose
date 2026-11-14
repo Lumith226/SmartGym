@@ -1,0 +1,23 @@
+FROM node:24.22.1-bookworm-slim
+RUN apt-get update && apt-get install -y --no-install-recommends ffmpeg && rm -rf /var/lib/apt/lists/*
+RUN corepack enable
+WORKDIR /app
+COPY package.json pnpm-workspace.yaml pnpm-lock.yaml ./
+COPY backend/services/catalog/package.json backend/services/catalog/
+COPY backend/services/identity/package.json backend/services/identity/
+COPY backend/services/notification/package.json backend/services/notification/
+COPY backend/services/pose/package.json backend/services/pose/
+COPY backend/services/workout/package.json backend/services/workout/
+COPY backend/services/progress/package.json backend/services/progress/
+COPY frontend/package.json frontend/
+RUN pnpm install --frozen-lockfile --ignore-scripts
+COPY backend/services/pose/tsconfig.json backend/services/pose/
+COPY backend/services/pose/src backend/services/pose/src
+COPY backend/services/pose/data backend/services/pose/data
+COPY backend/services/pose/migrations backend/services/pose/migrations
+RUN pnpm --filter @smartgym/pose build
+WORKDIR /app/backend/services/pose
+USER node
+ENV POSE_HOST=0.0.0.0
+EXPOSE 3443
+CMD ["node", "dist/main.js"]

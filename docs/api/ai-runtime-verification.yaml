@@ -1,0 +1,114 @@
+{
+  "checked_at": "2026-11-07",
+  "scope": "T21_LOCAL_CPU_PROVIDER_HANDOFF",
+  "status": "PASS_WITH_RELEASE_GATES",
+  "profile": "../adr/0010-local-ai-cpu-runtime.md",
+  "runtime": {
+    "uv": "0.13.7",
+    "uv_archive_sha256": "0cdc5b38fe5a8168ed6a25814f5ba43c21d313dd3187314fccb37b7cec46e021",
+    "python": "3.12.16",
+    "python_build": "20261026",
+    "onnxruntime": "1.31.1",
+    "torch": "2.5.1+cpu",
+    "opencv": "4.12.0",
+    "cuda": false,
+    "pose_packages": 54,
+    "rag_packages": 23
+  },
+  "locks": {
+    "pose": {
+      "file": "infra/ai/pose.windows-x64.lock.txt",
+      "sha256": "3a0410ec44d5d7d405d70c08c6fcf67f480c12622554d93fd420eeab89d557d4"
+    },
+    "rag": {
+      "file": "infra/ai/rag.windows-x64.lock.txt",
+      "sha256": "e6569e2a2d4d947a88940558fa6456bd4ed2772084e81bd14296b7202a0cbfba"
+    }
+  },
+  "exercises": [
+    {
+      "exercise": "squat",
+      "scopes": [
+        "rep",
+        "video",
+        "window"
+      ],
+      "usable_video_source_sha256": "55e0ab09c6fd99b2abbdc43c378b65707906e7c8f537fc1363661e136cfda592",
+      "initial_insufficient_observation": false,
+      "quality_benchmark": "NOT_RUN"
+    },
+    {
+      "exercise": "push_up",
+      "scopes": [
+        "rep",
+        "video",
+        "window"
+      ],
+      "usable_video_source_sha256": "cbd838d1bf9d4c9faeabc5e66473562970a1ab6ea47f0b60abae180aaab04a2e",
+      "initial_insufficient_observation": true,
+      "quality_benchmark": "NOT_RUN"
+    },
+    {
+      "exercise": "jump_jack",
+      "scopes": [
+        "rep",
+        "video",
+        "window"
+      ],
+      "usable_video_source_sha256": "5e153619406e4fe0cc03cb6978e8f08703a021573aadce6307013e4d9d400acb",
+      "initial_insufficient_observation": false,
+      "quality_benchmark": "NOT_RUN"
+    },
+    {
+      "exercise": "situp",
+      "scopes": [
+        "rep",
+        "video",
+        "window"
+      ],
+      "usable_video_source_sha256": "109e7469c0e82c05eac631d5fdc5f1d8e6d2290cf2dbe981e3196e136aeb18b2",
+      "initial_insufficient_observation": true,
+      "quality_benchmark": "NOT_RUN"
+    }
+  ],
+  "transport": "FastAPI TestClient upload and WebSocket; in-process, not deployed network/mTLS",
+  "raw_fixtures_accepted_by_rag": 14,
+  "model_hash_mismatch_rejected": true,
+  "provider_regressions": {
+    "tests": 16,
+    "passed": 16,
+    "data": "SYNTHETIC_NOT_CORPUS"
+  },
+  "rag_auth": {
+    "missing_token": 401,
+    "valid_token_with_empty_kb": 503,
+    "kb_ready": false
+  },
+  "evidence": [
+    {
+      "directory": ".local/ai/smoke-t21-20261107-1",
+      "pose_report_sha256": "235f73ddb8bc3881212feb3908ee6d899dc3f728b18e43a8508bba72b07e4b3a",
+      "rag_report_sha256": "bdcb0a39a028e0f3d8a10076a582bd23584841df77aa1b34e501309e0d7b035c",
+      "elapsed_seconds": 92
+    },
+    {
+      "directory": ".local/ai/smoke-t21-20261107-floor-2",
+      "pose_report_sha256": "b7c0102214c81f6af010a4a23983faf8e93aa611aaa21765c11b1bd69f915166",
+      "rag_report_sha256": "0d4caf8637103fe5985dae71d60b3181b0faec615894aa46a4ec673f158cc2a2",
+      "elapsed_seconds": 47.53
+    }
+  ],
+  "release_gates": {
+    "T22": "Owner/job/raw storage API, authenticated Pose ingress/mTLS",
+    "T23": "Authenticated browser live session/protocol adapter",
+    "T27": "Real corpus/index and Ollama generation; BFF task/status contract",
+    "T28": "Deployment/fault isolation/quality/load/production namespace packaging"
+  },
+  "limitations": [
+    "OpenCV core/contrib share namespace; local profile pins same version; production packaging remains open",
+    "Two initial clips insufficient; later baseline clips exercised usable output. This is no accuracy benchmark.",
+    "No video copied or published; raw observation files remain ignored under .local/ai",
+    "Catalog BFF AI adapters are not implemented",
+    "RAG corpus/index absent from source and services.rar; Neo4j and Ollama not run"
+  ]
+}

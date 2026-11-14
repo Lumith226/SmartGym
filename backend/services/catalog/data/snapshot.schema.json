@@ -1,0 +1,83 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "type": "object",
+  "additionalProperties": false,
+  "required": ["revision", "approval", "source", "muscleGroups", "equipment", "exercises"],
+  "properties": {
+    "revision": {"type": "string", "pattern": "^[A-Za-z0-9._-]{1,120}$"},
+    "approval": {"enum": ["development-only", "approved"]},
+    "source": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": ["path", "sha256", "rights"],
+      "properties": {
+        "path": {"$ref": "#/$defs/text"},
+        "sha256": {"$ref": "#/$defs/hash"},
+        "rights": {"$ref": "#/$defs/text"},
+        "files": {
+          "type": "array", "maxItems": 10000,
+          "items": {
+            "type": "object", "additionalProperties": false,
+            "required": ["path", "sha256"],
+            "properties": {
+              "path": {"$ref": "#/$defs/text"}, "sha256": {"$ref": "#/$defs/hash"},
+              "exerciseId": {"$ref": "#/$defs/id"}, "needsClipCheck": {"type": "boolean"}
+            }
+          }
+        }
+      }
+    },
+    "muscleGroups": {
+      "type": "array", "minItems": 1, "maxItems": 100,
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "labelVi", "slug", "svgRegions"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"}, "labelVi": {"$ref": "#/$defs/label"}, "slug": {"$ref": "#/$defs/slug"},
+          "svgRegions": {"type": "array", "uniqueItems": true, "items": {"type": "string", "pattern": "^[A-Za-z][A-Za-z0-9_-]{0,79}$"}}
+        }
+      }
+    },
+    "equipment": {
+      "type": "array", "minItems": 1, "maxItems": 100,
+      "items": {
+        "type": "object", "additionalProperties": false, "required": ["id", "labelVi", "slug"],
+        "properties": {"id": {"$ref": "#/$defs/id"}, "labelVi": {"$ref": "#/$defs/label"}, "slug": {"$ref": "#/$defs/slug"}}
+      }
+    },
+    "exercises": {
+      "type": "array", "minItems": 1, "maxItems": 10000,
+      "items": {
+        "type": "object", "additionalProperties": false,
+        "required": ["id", "slug", "nameVi", "summary", "primaryMuscleIds", "secondaryMuscleIds", "equipmentIds", "instructions", "commonMistakes", "media", "variants", "publishedRevision"],
+        "properties": {
+          "id": {"$ref": "#/$defs/id"}, "slug": {"$ref": "#/$defs/slug"},
+          "nameVi": {"$ref": "#/$defs/label"}, "nameEn": {"$ref": "#/$defs/label"},
+          "summary": {"type": "string", "minLength": 1, "maxLength": 500, "pattern": "\\S"},
+          "primaryMuscleIds": {"type": "array", "$ref": "#/$defs/ids", "minItems": 1, "maxItems": 8},
+          "secondaryMuscleIds": {"type": "array", "$ref": "#/$defs/ids", "maxItems": 12},
+          "equipmentIds": {"type": "array", "$ref": "#/$defs/ids", "maxItems": 10},
+          "instructions": {"type": "array", "minItems": 1, "maxItems": 30, "items": {"$ref": "#/$defs/instruction"}},
+          "commonMistakes": {"type": "array", "maxItems": 20, "items": {"$ref": "#/$defs/instruction"}},
+          "workoutType": {"type": "string", "enum": ["STRENGTH", "CARDIO", "HIIT", "CORE", "STRETCHING"]},
+          "focusArea": {"type": "string", "enum": ["FULL_BODY", "UPPER_BODY", "LOWER_BODY", "ABS"]},
+          "difficulty": {"type": "integer", "minimum": 1, "maximum": 5},
+          "levelSets": {"type": "array", "minItems": 3, "maxItems": 3, "items": {"type": "integer", "minimum": 1, "maximum": 20}},
+          "restSeconds": {"type": "integer", "minimum": 0, "maximum": 600},
+          "poseStyle": {"type": "string", "enum": ["squat", "pushup", "plank", "jump", "pull", "lunge", "core", "barbell"]},
+          "media": {"type": "array", "maxItems": 0},
+          "variants": {"type": "array", "maxItems": 0},
+          "publishedRevision": {"type": "string", "pattern": "^[A-Za-z0-9._-]{1,120}$"}
+        }
+      }
+    }
+  },
+  "$defs": {
+    "id": {"type": "string", "pattern": "^[a-z][a-z0-9_]{0,79}$"},
+    "slug": {"type": "string", "maxLength": 100, "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$"},
+    "text": {"type": "string", "minLength": 1, "maxLength": 2000, "pattern": "\\S"},
+    "label": {"type": "string", "minLength": 1, "maxLength": 120, "pattern": "\\S"},
+    "instruction": {"type": "string", "minLength": 1, "maxLength": 2000, "pattern": "\\S"},
+    "hash": {"type": "string", "pattern": "^[a-f0-9]{64}$"},
+    "ids": {"type": "array", "uniqueItems": true, "items": {"$ref": "#/$defs/id"}}
+  }
+}

@@ -1,0 +1,810 @@
+{
+  "schemas": {
+    "ChatRequest": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "message",
+        "task"
+      ],
+      "properties": {
+        "message": {
+          "type": "string",
+          "maxLength": 3000,
+          "minLength": 2
+        },
+        "task": {
+          "type": "string",
+          "enum": [
+            "knowledge",
+            "score",
+            "summary",
+            "practice"
+          ]
+        },
+        "poseResultIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "maxItems": 50,
+          "uniqueItems": true
+        },
+        "conversation": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "role",
+              "content"
+            ],
+            "properties": {
+              "role": {
+                "enum": [
+                  "user",
+                  "assistant"
+                ]
+              },
+              "content": {
+                "type": "string",
+                "maxLength": 3000,
+                "minLength": 0
+              }
+            }
+          },
+          "maxItems": 8
+        },
+        "videoState": {
+          "enum": [
+            "none",
+            "selected",
+            "analyzing"
+          ]
+        }
+      }
+    },
+    "ChatAnswer": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reply",
+        "task",
+        "status",
+        "generation_used",
+        "generation_mode",
+        "kb_version",
+        "model_version",
+        "references",
+        "user_notices",
+        "session"
+      ],
+      "properties": {
+        "reply": {
+          "type": "string",
+          "maxLength": 32000,
+          "minLength": 1
+        },
+        "task": {
+          "enum": [
+            "knowledge",
+            "score",
+            "summary",
+            "practice"
+          ]
+        },
+        "status": {
+          "enum": [
+            "generated",
+            "grounded_guidance",
+            "evidence_only",
+            "insufficient_evidence",
+            "insufficient_observation",
+            "conversational",
+            "needs_clarification",
+            "out_of_scope",
+            "unavailable"
+          ]
+        },
+        "generation_used": {
+          "type": "boolean"
+        },
+        "generation_mode": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "kb_version": {
+          "type": "string",
+          "maxLength": 300,
+          "minLength": 1
+        },
+        "model_version": {
+          "type": "string",
+          "maxLength": 300,
+          "minLength": 1
+        },
+        "references": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChatReference"
+          },
+          "maxItems": 50
+        },
+        "user_notices": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 3000,
+            "minLength": 0
+          },
+          "maxItems": 50
+        },
+        "session": {
+          "$ref": "#/$defs/ChatSession"
+        }
+      }
+    },
+    "PoseRawResultEnvelope": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "result",
+        "rawModelResult",
+        "sourceId",
+        "modelSha256"
+      ],
+      "properties": {
+        "result": {
+          "$ref": "#/$defs/PoseResult"
+        },
+        "sourceId": {
+          "type": "string",
+          "pattern": "^sha256:[a-f0-9]{64}$"
+        },
+        "modelSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "rawModelResult": {
+          "type": "object",
+          "required": [
+            "exercise",
+            "schema_version",
+            "scope",
+            "quality",
+            "label_results",
+            "model_provenance",
+            "source"
+          ],
+          "properties": {
+            "exercise": {
+              "type": "string",
+              "enum": [
+                "squat",
+                "push_up",
+                "jump_jack",
+                "situp"
+              ]
+            },
+            "schema_version": {
+              "type": "string",
+              "minLength": 1
+            },
+            "scope": {
+              "type": "string",
+              "enum": [
+                "video",
+                "window",
+                "rep"
+              ]
+            },
+            "quality": {
+              "type": "object",
+              "required": [
+                "usable"
+              ],
+              "properties": {
+                "usable": {
+                  "type": "boolean"
+                }
+              }
+            },
+            "label_results": {
+              "type": "array",
+              "minItems": 14,
+              "maxItems": 29,
+              "items": {
+                "type": "object",
+                "required": [
+                  "key",
+                  "kind",
+                  "raw_label",
+                  "probability",
+                  "threshold"
+                ],
+                "properties": {
+                  "key": {
+                    "type": "string"
+                  },
+                  "kind": {
+                    "type": "string"
+                  },
+                  "raw_label": {
+                    "type": "string"
+                  },
+                  "probability": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1
+                  },
+                  "threshold": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "minimum": 0,
+                    "maximum": 1
+                  }
+                }
+              }
+            },
+            "model_provenance": {
+              "type": "object",
+              "required": [
+                "model_sha256"
+              ],
+              "properties": {
+                "model_sha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              }
+            },
+            "source": {
+              "type": "object",
+              "oneOf": [
+                {
+                  "required": [
+                    "video_sha256"
+                  ]
+                },
+                {
+                  "required": [
+                    "live_session_sha256"
+                  ]
+                }
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "video_sha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                },
+                "live_session_sha256": {
+                  "type": "string",
+                  "pattern": "^[a-f0-9]{64}$"
+                }
+              }
+            }
+          }
+        }
+      }
+    },
+    "ChatReference": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "number",
+        "namespace",
+        "chunk_id",
+        "source_id",
+        "title",
+        "publisher",
+        "url",
+        "pdf_page",
+        "section",
+        "excerpt"
+      ],
+      "properties": {
+        "number": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "namespace": {
+          "const": "kb"
+        },
+        "chunk_id": {
+          "type": "string",
+          "maxLength": 300,
+          "minLength": 1
+        },
+        "source_id": {
+          "type": "string",
+          "maxLength": 300,
+          "minLength": 1
+        },
+        "title": {
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 1
+        },
+        "publisher": {
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 0
+        },
+        "url": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 2048
+        },
+        "pdf_page": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 1
+        },
+        "section": {
+          "type": [
+            "string",
+            "null"
+          ],
+          "maxLength": 500
+        },
+        "excerpt": {
+          "type": "string",
+          "maxLength": 800,
+          "minLength": 0
+        }
+      }
+    },
+    "ChatSession": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observations",
+        "units",
+        "errors",
+        "penalty_total",
+        "scoring_policy",
+        "practice_suggestions"
+      ],
+      "properties": {
+        "observations": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChatObservation"
+          },
+          "maxItems": 50
+        },
+        "units": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChatUnit"
+          },
+          "maxItems": 50
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChatHabit"
+          },
+          "maxItems": 83
+        },
+        "penalty_total": {
+          "type": "null"
+        },
+        "scoring_policy": {
+          "type": "null"
+        },
+        "practice_suggestions": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ChatPractice"
+          },
+          "maxItems": 83
+        }
+      }
+    },
+    "PoseResult": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "source",
+        "exerciseId",
+        "modelVersion",
+        "configVersion",
+        "repCount",
+        "reps",
+        "formStatus",
+        "limitations",
+        "completedAt",
+        "expiresAt",
+        "repCountStatus"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "source": {
+          "type": "string",
+          "enum": [
+            "VIDEO",
+            "LIVE"
+          ]
+        },
+        "exerciseId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$",
+          "examples": [
+            "bodyweight_squat"
+          ]
+        },
+        "modelVersion": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]{1,120}$"
+        },
+        "configVersion": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]{1,120}$"
+        },
+        "repCount": {
+          "type": [
+            "integer",
+            "null"
+          ],
+          "minimum": 0,
+          "maximum": 500,
+          "description": "Null means unavailable, never an inferred zero. Whole-video V4 does not count reps."
+        },
+        "reps": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/PoseRep"
+          },
+          "maxItems": 500
+        },
+        "formStatus": {
+          "type": "string",
+          "enum": [
+            "ASSESSED",
+            "INSUFFICIENT_EVIDENCE",
+            "UNSUPPORTED"
+          ]
+        },
+        "limitations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "maxItems": 20
+        },
+        "formNotes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "maxItems": 30
+        },
+        "completedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "expiresAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "repCountStatus": {
+          "type": "string",
+          "enum": [
+            "AVAILABLE",
+            "UNAVAILABLE"
+          ]
+        }
+      },
+      "x-provider-gap": "Whole-video has unavailable rep count. Live stores observed count and only a validated current window/rep observation when available.",
+      "allOf": [
+        {
+          "if": {
+            "properties": {
+              "repCountStatus": {
+                "const": "UNAVAILABLE"
+              }
+            },
+            "required": [
+              "repCountStatus"
+            ]
+          },
+          "then": {
+            "properties": {
+              "repCount": {
+                "type": "null"
+              },
+              "reps": {
+                "maxItems": 0
+              }
+            }
+          },
+          "else": {
+            "properties": {
+              "repCount": {
+                "type": "integer"
+              }
+            }
+          }
+        },
+        {
+          "if": {
+            "properties": {
+              "source": {
+                "const": "VIDEO"
+              }
+            },
+            "required": [
+              "source"
+            ]
+          },
+          "then": {
+            "properties": {
+              "repCountStatus": {
+                "const": "UNAVAILABLE"
+              }
+            }
+          }
+        }
+      ]
+    },
+    "ChatObservation": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observation_id",
+        "exercise_code",
+        "unit",
+        "observation_status",
+        "simulated",
+        "labels"
+      ],
+      "properties": {
+        "observation_id": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "exercise_code": {
+          "type": "string",
+          "maxLength": 40,
+          "minLength": 1
+        },
+        "unit": {
+          "enum": [
+            "video",
+            "window",
+            "rep"
+          ]
+        },
+        "observation_status": {
+          "enum": [
+            "sufficient",
+            "insufficient",
+            "unknown"
+          ]
+        },
+        "simulated": {
+          "type": "boolean"
+        },
+        "labels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "maxItems": 40
+        }
+      }
+    },
+    "ChatUnit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "observation_id",
+        "exercise_code",
+        "scope",
+        "usable",
+        "simulated",
+        "error_labels"
+      ],
+      "properties": {
+        "observation_id": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "exercise_code": {
+          "type": "string",
+          "maxLength": 40,
+          "minLength": 1
+        },
+        "scope": {
+          "enum": [
+            "video",
+            "window",
+            "rep"
+          ]
+        },
+        "usable": {
+          "type": "boolean"
+        },
+        "simulated": {
+          "type": "boolean"
+        },
+        "error_labels": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 100,
+            "minLength": 0
+          },
+          "maxItems": 40
+        }
+      }
+    },
+    "ChatHabit": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exercise_code",
+        "label_key",
+        "name_vi",
+        "observed_units"
+      ],
+      "properties": {
+        "exercise_code": {
+          "type": "string",
+          "maxLength": 40,
+          "minLength": 1
+        },
+        "label_key": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 1
+        },
+        "name_vi": {
+          "type": "string",
+          "maxLength": 300,
+          "minLength": 1
+        },
+        "observed_units": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        }
+      }
+    },
+    "ChatPractice": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "exercise_code",
+        "activity",
+        "focus_label",
+        "observed_units",
+        "cue",
+        "criterion_id",
+        "citations"
+      ],
+      "properties": {
+        "exercise_code": {
+          "type": "string",
+          "maxLength": 40,
+          "minLength": 1
+        },
+        "activity": {
+          "type": "string",
+          "maxLength": 500,
+          "minLength": 0
+        },
+        "focus_label": {
+          "type": "string",
+          "maxLength": 100,
+          "minLength": 0
+        },
+        "observed_units": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 50
+        },
+        "cue": {
+          "type": "string",
+          "maxLength": 3000,
+          "minLength": 0
+        },
+        "criterion_id": {
+          "type": "string",
+          "maxLength": 300,
+          "minLength": 0
+        },
+        "citations": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "maxItems": 50
+        }
+      }
+    },
+    "PoseRep": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sequence",
+        "endedAtMs"
+      ],
+      "properties": {
+        "sequence": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 500
+        },
+        "endedAtMs": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 900000
+        },
+        "feedbackCode": {
+          "type": "string",
+          "maxLength": 80
+        },
+        "confidence": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 1
+        }
+      }
+    }
+  },
+  "models": [
+    {
+      "catalogId": "bodyweight_squat",
+      "exercise": "squat",
+      "schemaVersion": "qualcomm-squat-14-clipbatch-v1",
+      "sha256": "eb6f2cefefbdcba392c0f2eda3bbcf0f9df6f0c6d1877ee3fcd5ad801668eb04"
+    },
+    {
+      "catalogId": "push_up",
+      "exercise": "push_up",
+      "schemaVersion": "qualcomm-pushup-21-128frames-context32-v1",
+      "sha256": "a61e117cd9563881cf0b1654f2f2c0c7c3733dfe802496bc59405556dd29226c"
+    },
+    {
+      "catalogId": "jumping_jacks",
+      "exercise": "jump_jack",
+      "schemaVersion": "qualcomm-jumpjack-29-128frames-context32-v1",
+      "sha256": "2af00a3ae132e3e684d44a04d49ed471e8e54f0d7ef71536aad0861535d7633f"
+    },
+    {
+      "catalogId": "reverse_crunch",
+      "exercise": "situp",
+      "schemaVersion": "qualcomm-reverse-crunch-19-128frames-context32-v1",
+      "sha256": "b6150a5b98884df6e0e73e9dd0a85e78d160ff5c6f8eeb055fa98b39850520c7"
+    }
+  ]
+}

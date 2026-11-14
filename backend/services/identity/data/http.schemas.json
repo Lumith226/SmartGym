@@ -1,0 +1,159 @@
+{
+  "RegisterRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "email",
+      "password",
+      "displayName"
+    ],
+    "properties": {
+      "email": {
+        "type": "string",
+        "format": "email",
+        "maxLength": 254
+      },
+      "password": {
+        "type": "string",
+        "minLength": 8,
+        "maxLength": 128,
+        "format": "password"
+      },
+      "displayName": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120
+      }
+    }
+  },
+  "LoginRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "email",
+      "password"
+    ],
+    "properties": {
+      "email": {
+        "type": "string",
+        "format": "email",
+        "maxLength": 254
+      },
+      "password": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 128,
+        "format": "password"
+      }
+    }
+  },
+  "EmailRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "email"
+    ],
+    "properties": {
+      "email": {
+        "type": "string",
+        "format": "email",
+        "maxLength": 254
+      }
+    }
+  },
+  "TokenRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "token"
+    ],
+    "properties": {
+      "token": {
+        "type": "string",
+        "minLength": 32,
+        "maxLength": 256
+      }
+    }
+  },
+  "ResetPasswordRequest": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "token",
+      "newPassword"
+    ],
+    "properties": {
+      "token": {
+        "type": "string",
+        "minLength": 32,
+        "maxLength": 256
+      },
+      "newPassword": {
+        "type": "string",
+        "minLength": 8,
+        "maxLength": 128,
+        "format": "password"
+      }
+    }
+  },
+  "ProfileUpdate": {
+    "type": "object",
+    "additionalProperties": false,
+    "properties": {
+      "displayName": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120
+      },
+      "timeZone": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 80,
+        "examples": [
+          "Asia/Bangkok"
+        ]
+      }
+    },
+    "minProperties": 1
+  },
+  "IdentityIntrospection": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "sessionHandle"
+    ],
+    "properties": {
+      "sessionHandle": {
+        "type": "string",
+        "minLength": 32,
+        "maxLength": 256
+      }
+    }
+  },
+  "GoogleLoginIdentity": {
+    "type": "object",
+    "required": [
+      "subject",
+      "email",
+      "displayName"
+    ],
+    "additionalProperties": false,
+    "properties": {
+      "subject": {
+        "type": "string",
+        "pattern": "^[!-~]{1,255}$"
+      },
+      "email": {
+        "type": "string",
+        "format": "email",
+        "maxLength": 254
+      },
+      "displayName": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 120,
+        "pattern": "\\S"
+      }
+    }
+  }
+}

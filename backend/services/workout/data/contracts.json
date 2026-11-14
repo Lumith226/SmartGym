@@ -1,0 +1,741 @@
+{
+  "$id": "workout-contract",
+  "components": {
+    "schemas": {
+      "Jwks": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "keys"
+        ],
+        "properties": {
+          "keys": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kid",
+                "kty",
+                "alg",
+                "use",
+                "n",
+                "e"
+              ],
+              "properties": {
+                "kid": {
+                  "type": "string"
+                },
+                "kty": {
+                  "type": "string",
+                  "enum": [
+                    "RSA"
+                  ]
+                },
+                "alg": {
+                  "type": "string",
+                  "enum": [
+                    "RS256"
+                  ]
+                },
+                "use": {
+                  "type": "string",
+                  "enum": [
+                    "sig"
+                  ]
+                },
+                "n": {
+                  "type": "string"
+                },
+                "e": {
+                  "type": "string"
+                }
+              }
+            },
+            "minItems": 1
+          }
+        }
+      },
+      "Problem": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "requestId"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer",
+            "minimum": 400,
+            "maximum": 599
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "field",
+                "message"
+              ],
+              "properties": {
+                "field": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "WorkoutPlanCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "name",
+          "exercises"
+        ],
+        "properties": {
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "exercises": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkoutPlanItemInput"
+            },
+            "minItems": 1,
+            "maxItems": 40
+          }
+        }
+      },
+      "WorkoutPlan": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "name",
+          "exercises",
+          "status",
+          "version",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "name": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "description": {
+            "type": "string",
+            "maxLength": 500
+          },
+          "exercises": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkoutPlanItem"
+            },
+            "minItems": 1,
+            "maxItems": 40
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "ARCHIVED"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WorkoutPlanPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkoutPlan"
+            }
+          },
+          "nextCursor": {
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "ExerciseRefBatch": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "exerciseIds"
+        ],
+        "properties": {
+          "exerciseIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,79}$",
+              "examples": [
+                "bodyweight_squat"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 100,
+            "uniqueItems": true
+          }
+        }
+      },
+      "ExerciseRefList": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "exerciseId",
+                "available"
+              ],
+              "properties": {
+                "exerciseId": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]{0,79}$",
+                  "examples": [
+                    "bodyweight_squat"
+                  ]
+                },
+                "available": {
+                  "type": "boolean"
+                },
+                "nameVi": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              }
+            }
+          }
+        }
+      },
+      "WorkoutScheduleCreate": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "planId",
+          "timeZone",
+          "startDate",
+          "startLocalTime",
+          "durationMinutes",
+          "recurrence"
+        ],
+        "properties": {
+          "planId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "timeZone": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "examples": [
+              "Asia/Bangkok"
+            ]
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "startLocalTime": {
+            "type": "string",
+            "pattern": "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "minimum": 5,
+            "maximum": 240
+          },
+          "recurrence": {
+            "type": "string",
+            "enum": [
+              "ONCE",
+              "WEEKLY"
+            ]
+          },
+          "weekdays": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 7
+            },
+            "minItems": 1,
+            "maxItems": 7,
+            "uniqueItems": true
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "recurrence": {
+                  "const": "WEEKLY"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "weekdays"
+              ]
+            },
+            "else": {
+              "not": {
+                "anyOf": [
+                  {
+                    "required": [
+                      "weekdays"
+                    ]
+                  },
+                  {
+                    "required": [
+                      "endDate"
+                    ]
+                  }
+                ]
+              }
+            }
+          }
+        ]
+      },
+      "WorkoutSchedule": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "planId",
+          "timeZone",
+          "startDate",
+          "startLocalTime",
+          "durationMinutes",
+          "recurrence",
+          "status",
+          "version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "planId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "timeZone": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "examples": [
+              "Asia/Bangkok"
+            ]
+          },
+          "startDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "endDate": {
+            "type": "string",
+            "format": "date"
+          },
+          "startLocalTime": {
+            "type": "string",
+            "pattern": "^(?:[01][0-9]|2[0-3]):[0-5][0-9]$"
+          },
+          "durationMinutes": {
+            "type": "integer",
+            "minimum": 5,
+            "maximum": 240
+          },
+          "recurrence": {
+            "type": "string",
+            "enum": [
+              "ONCE",
+              "WEEKLY"
+            ]
+          },
+          "weekdays": {
+            "type": "array",
+            "items": {
+              "type": "integer",
+              "minimum": 1,
+              "maximum": 7
+            },
+            "minItems": 1,
+            "maxItems": 7,
+            "uniqueItems": true
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "ACTIVE",
+              "CANCELED"
+            ]
+          },
+          "projectionConflicts": {
+            "type": "array",
+            "readOnly": true,
+            "maxItems": 35,
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "status",
+                "localDate",
+                "startAt",
+                "endAt",
+                "code"
+              ],
+              "properties": {
+                "status": {
+                  "const": "CONFLICT"
+                },
+                "localDate": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "startAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "endAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "code": {
+                  "const": "SCHEDULE_OVERLAP"
+                }
+              }
+            }
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          }
+        }
+      },
+      "WorkoutSchedulePage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkoutSchedule"
+            }
+          },
+          "nextCursor": {
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "WorkoutOccurrence": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "scheduleId",
+          "planId",
+          "plannedExercises",
+          "startAt",
+          "endAt",
+          "timeZone",
+          "status",
+          "version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scheduleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "planId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "plannedExercises": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkoutPlanItem"
+            },
+            "maxItems": 40
+          },
+          "startAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "timeZone": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "examples": [
+              "Asia/Bangkok"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SCHEDULED",
+              "CANCELED"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          }
+        }
+      },
+      "WorkoutOccurrencePage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkoutOccurrence"
+            }
+          },
+          "nextCursor": {
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "WorkoutOccurrenceChange": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "startAt",
+          "endAt",
+          "timeZone"
+        ],
+        "properties": {
+          "startAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "timeZone": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "examples": [
+              "Asia/Bangkok"
+            ]
+          }
+        }
+      },
+      "WorkoutPlanItemInput": {
+        "type": "object",
+        "required": [
+          "exerciseId",
+          "sets"
+        ],
+        "oneOf": [
+          {
+            "required": [
+              "targetReps"
+            ]
+          },
+          {
+            "required": [
+              "targetDurationSeconds"
+            ]
+          }
+        ],
+        "unevaluatedProperties": false,
+        "properties": {
+          "exerciseId": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$"
+          },
+          "sets": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 30
+          },
+          "targetReps": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "targetDurationSeconds": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          },
+          "restSeconds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 600
+          }
+        }
+      },
+      "WorkoutPlanItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "exerciseId",
+          "sets",
+          "exerciseNameVi"
+        ],
+        "oneOf": [
+          {
+            "required": [
+              "targetReps"
+            ]
+          },
+          {
+            "required": [
+              "targetDurationSeconds"
+            ]
+          }
+        ],
+        "properties": {
+          "exerciseId": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$"
+          },
+          "exerciseNameVi": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "sets": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 30
+          },
+          "targetReps": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "targetDurationSeconds": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          },
+          "restSeconds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 600
+          }
+        }
+      }
+    }
+  }
+}

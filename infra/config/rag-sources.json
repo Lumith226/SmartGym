@@ -1,0 +1,8 @@
+[
+  {
+    "id": "openstax_anatomy",
+    "rightsStatus": "APPROVED",
+    "kind": "BOOK",
+    "allowedOrigins": ["https://openstax.org"]
+  }
+]

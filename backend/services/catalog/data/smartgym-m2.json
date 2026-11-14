@@ -1,0 +1,1697 @@
+{
+  "revision": "kb-m2-9644078731a2135dafa0",
+  "approval": "development-only",
+  "source": {
+    "path": "exercise_catalog.json + wiki/exercises + smartgym-taxonomy-m2-v1",
+    "sha256": "9644078731a2135dafa0e51528c89dce5109b02e006a4f202da5bbe7d41825b6",
+    "rights": "Nguồn SmartGym và taxonomy phục vụ phát triển local. Quyền công bố, nội dung, phân nhóm và biến thể còn chờ duyệt. Không sao chép media.",
+    "files": [
+      {
+        "path": "exercise_catalog.json",
+        "sha256": "930790740f1e2dc3428050a72a38da9b36226e94610e34423b44462df1374cd4"
+      },
+      {
+        "path": "wiki/exercises/bodyweight_squat.md",
+        "sha256": "a057147aa2ebcb37d1fe2c9122496616095b136d13dd903f657a83869ca1d1c0",
+        "exerciseId": "bodyweight_squat",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/push_up.md",
+        "sha256": "ea57c7e8919781dc698e65e44e34c5f07ceb357e39739914703896dcde0a58de",
+        "exerciseId": "push_up",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/jumping_jacks.md",
+        "sha256": "852f756d65e90bd6d2fe9441be7751a0e782c77ca89e6ab290bec61d6fc051a4",
+        "exerciseId": "jumping_jacks",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/reverse_crunch.md",
+        "sha256": "d93903c3f2e2b9f7ad65ab2aca56a6717d68be1398a25ab7daf61e26b89f8bdb",
+        "exerciseId": "reverse_crunch",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/elbow_plank.md",
+        "sha256": "e0dba6c00adb0ab4130f9c95fa62de4fb939f2c0e2445a7efdb9cb89a4a32053",
+        "exerciseId": "elbow_plank",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/high_plank.md",
+        "sha256": "6b2f7a1fd77c43e233a715cc8919e981689d5ba2deb0c320278107f000996839",
+        "exerciseId": "high_plank",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/side_plank.md",
+        "sha256": "9ef4c1d30e730075b9637f16e5cc5ef3893f4ea676b585b568e41dc5a158abea",
+        "exerciseId": "side_plank",
+        "needsClipCheck": true
+      },
+      {
+        "path": "wiki/exercises/spiderman_push_up.md",
+        "sha256": "d6aa8cd56f55fe4c9d32c42555e4d45c3d70865a5bda21c23a021f726deaad94",
+        "exerciseId": "spiderman_push_up",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/yoga_push_up.md",
+        "sha256": "89069466727603aa3e8c522e8434162e695268733d19a7eb4d9ac9f318de512a",
+        "exerciseId": "yoga_push_up",
+        "needsClipCheck": true
+      },
+      {
+        "path": "wiki/exercises/knee_push_up.md",
+        "sha256": "31639aeb6f9cf9d71bf805ce03a76a328f02ce71950fdf182d5458002a52f8c0",
+        "exerciseId": "knee_push_up",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/squat_jump.md",
+        "sha256": "e8727da7181f4f0cac79fd9ef7293609c6bb9dddcf6e07412d1201b404bc354c",
+        "exerciseId": "squat_jump",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/squat_kick.md",
+        "sha256": "439a8c0361a34c5fbc490582f2000f48e60d46e468b84add4c93a5566c05265e",
+        "exerciseId": "squat_kick",
+        "needsClipCheck": true
+      },
+      {
+        "path": "wiki/exercises/alternating_forward_lunges.md",
+        "sha256": "363c91ff9e1736240df4108fd72c91c5f5aeacb6a85c7eb290425939eccfe30b",
+        "exerciseId": "alternating_forward_lunges",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/jumping_lunges.md",
+        "sha256": "015f2d32270f32a0d3481ed97088cce82cc2e1024a562d581c068d5ab0029149",
+        "exerciseId": "jumping_lunges",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/alternating_lateral_lunge.md",
+        "sha256": "723d3d5020503188f2c6080fea08a5cb98bc7ea0b04076d6e4618149ddea895e",
+        "exerciseId": "alternating_lateral_lunge",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/burpee.md",
+        "sha256": "6c7a9ce70848b93fa79ab54354d09503a2d6dc0ae2e15adf90888de94b520c2a",
+        "exerciseId": "burpee",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/burpee_no_push_up.md",
+        "sha256": "7fcbab12edc152ebf767317b9334bc013af74f8e8b47a4ea456cf03dcfc0c85d",
+        "exerciseId": "burpee_no_push_up",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/mountain_climbers.md",
+        "sha256": "65999d020407c202bea937be71e8e1f93567cd090f2404dbcc71e460a9c6198f",
+        "exerciseId": "mountain_climbers",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/high_knees.md",
+        "sha256": "3989828f317fca361965275e0670414cac7efe70b76e24b180aed0d36d1b3682",
+        "exerciseId": "high_knees",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/butt_kicks.md",
+        "sha256": "ff326f89fe714be1723ccfb6629d82affcabe9ae78cda52b59184607c217b08b",
+        "exerciseId": "butt_kicks",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/air_jump_rope.md",
+        "sha256": "1188f6ea90d75a9266053075667cfa92c38b1c17333de3cc0144ed005e5ffb27",
+        "exerciseId": "air_jump_rope",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/glute_bridge.md",
+        "sha256": "ceddda14186d9a3086aff10dbd64b4786510e1e896c4c22d1e08b7926d4a1e2a",
+        "exerciseId": "glute_bridge",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/alternating_single_leg_glute_bridge.md",
+        "sha256": "dee8facf57b8479e672066a76bad6d0217d7ca9041826eedc53d5cecfbb42442",
+        "exerciseId": "alternating_single_leg_glute_bridge",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/glute_hamstring_walkout.md",
+        "sha256": "7462eb1b1fbad0b4ea7a2f09a8aabdc8b261c42de26ece0f662a85b87083fd54",
+        "exerciseId": "glute_hamstring_walkout",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/inchworm.md",
+        "sha256": "d9449721fd2cb012598ac25008b8636c99cf01a132a532a7eb0aaec160fb443c",
+        "exerciseId": "inchworm",
+        "needsClipCheck": true
+      },
+      {
+        "path": "wiki/exercises/dead_bug.md",
+        "sha256": "635368e27ded9e27d9e70d07a2a5a39d41b440684a315baa869ff2f32154f305",
+        "exerciseId": "dead_bug",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/alternating_v_ups.md",
+        "sha256": "d13b8d8370bdb9bfd292fa1c6f760cecae27d86d79e6ec30534e0cd20d7cc688",
+        "exerciseId": "alternating_v_ups",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/fire_hydrant.md",
+        "sha256": "628032ce8a23936a8ef2d310b30deffb712715859366ad6f08de44c526c08f8b",
+        "exerciseId": "fire_hydrant",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/downward_dog.md",
+        "sha256": "efedff4ab7112caa48dbc165da32b14c05d17567c7e1003908cb224e16b68123",
+        "exerciseId": "downward_dog",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/cobra_pose.md",
+        "sha256": "caf2a7e64ff2c67ad54a36478ff2f4ca61ae4007bb32fd2ab16ba2e2acb2330c",
+        "exerciseId": "cobra_pose",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/child_pose.md",
+        "sha256": "2dc41c6be56fd56fd9ee2d2512af2cdafb6320dd4f0e2da15d453945474f38b5",
+        "exerciseId": "child_pose",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/standing_knee_to_elbow.md",
+        "sha256": "70706566c8995fb889145a404cea91e97e2b08a0405a4a56559e757c8a1050e3",
+        "exerciseId": "standing_knee_to_elbow",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/bodyweight_good_morning.md",
+        "sha256": "0757288eb45b17f3c309f84c5e870f71b2967a0cbac9feb315dadf8855ee5ba8",
+        "exerciseId": "bodyweight_good_morning",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/pull_up.md",
+        "sha256": "31a835f5d97e908a5337f010086c88967f4a2ff3f537fa948e96306698b2a7c6",
+        "exerciseId": "pull_up",
+        "needsClipCheck": false
+      },
+      {
+        "path": "wiki/exercises/barbell_bench_press.md",
+        "sha256": "857bbc03eddf94298a14d95f481aba8d1c580358f3615155f72265b3c558003c",
+        "exerciseId": "barbell_bench_press",
+        "needsClipCheck": false
+      }
+    ]
+  },
+  "muscleGroups": [
+    {
+      "id": "quadriceps",
+      "labelVi": "Đùi trước",
+      "slug": "dui-truoc",
+      "svgRegions": []
+    },
+    {
+      "id": "glutes",
+      "labelVi": "Cơ mông",
+      "slug": "co-mong",
+      "svgRegions": []
+    },
+    {
+      "id": "chest",
+      "labelVi": "Ngực",
+      "slug": "nguc",
+      "svgRegions": []
+    },
+    {
+      "id": "shoulders",
+      "labelVi": "Vai",
+      "slug": "vai",
+      "svgRegions": []
+    },
+    {
+      "id": "triceps",
+      "labelVi": "Tay sau",
+      "slug": "tay-sau",
+      "svgRegions": []
+    },
+    {
+      "id": "core",
+      "labelVi": "Cơ bụng",
+      "slug": "co-bung",
+      "svgRegions": []
+    },
+    {
+      "id": "obliques",
+      "labelVi": "Cơ bụng chéo",
+      "slug": "co-bung-cheo",
+      "svgRegions": []
+    },
+    {
+      "id": "hip_flexors",
+      "labelVi": "Cơ gập hông",
+      "slug": "co-gap-hong",
+      "svgRegions": []
+    },
+    {
+      "id": "calves",
+      "labelVi": "Bắp chân",
+      "slug": "bap-chan",
+      "svgRegions": []
+    },
+    {
+      "id": "hamstrings",
+      "labelVi": "Đùi sau",
+      "slug": "dui-sau",
+      "svgRegions": []
+    },
+    {
+      "id": "adductors",
+      "labelVi": "Đùi trong",
+      "slug": "dui-trong",
+      "svgRegions": []
+    },
+    {
+      "id": "lats",
+      "labelVi": "Cơ xô",
+      "slug": "co-xo",
+      "svgRegions": []
+    },
+    {
+      "id": "upper_back",
+      "labelVi": "Lưng trên",
+      "slug": "lung-tren",
+      "svgRegions": []
+    },
+    {
+      "id": "biceps",
+      "labelVi": "Tay trước",
+      "slug": "tay-truoc",
+      "svgRegions": []
+    },
+    {
+      "id": "forearms",
+      "labelVi": "Cẳng tay",
+      "slug": "cang-tay",
+      "svgRegions": []
+    },
+    {
+      "id": "lower_back",
+      "labelVi": "Lưng dưới",
+      "slug": "lung-duoi",
+      "svgRegions": []
+    }
+  ],
+  "equipment": [
+    {
+      "id": "bodyweight",
+      "labelVi": "Không cần dụng cụ",
+      "slug": "khong-dung-cu"
+    },
+    {
+      "id": "pull_up_bar",
+      "labelVi": "Xà đơn",
+      "slug": "xa-don"
+    },
+    {
+      "id": "bench",
+      "labelVi": "Ghế đẩy",
+      "slug": "ghe-day"
+    },
+    {
+      "id": "barbell",
+      "labelVi": "Thanh tạ",
+      "slug": "thanh-ta"
+    },
+    {
+      "id": "rack",
+      "labelVi": "Giá đỡ tạ",
+      "slug": "gia-do-ta"
+    }
+  ],
+  "exercises": [
+    {
+      "id": "bodyweight_squat",
+      "slug": "squat-khong-ta",
+      "nameVi": "Squat không tạ",
+      "nameEn": "Bodyweight Squat",
+      "summary": "Bài tập gập rồi duỗi hông và gối với trọng lượng cơ thể. Bản không tạ là động tác nền cho [Squat bật nhảy](squat_jump.md).",
+      "primaryMuscleIds": [
+        "quadriceps",
+        "glutes"
+      ],
+      "secondaryMuscleIds": [],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Đứng với hai bàn chân ở khoảng rộng dễ giữ thăng bằng. Hướng mũi chân hơi chếch ra nếu thấy tự nhiên.",
+        "Gập hông và gối để hạ người. Giữ bàn chân tiếp xúc với sàn và để đầu gối di chuyển cùng hướng mũi chân.",
+        "Dừng ở độ sâu phù hợp với bài đang tập và vẫn kiểm soát được tư thế. Đẩy sàn để đứng lên."
+      ],
+      "commonMistakes": [
+        "Lưng tròn khi hạ",
+        "Đầu gối lệch hướng bàn chân",
+        "Đầu gối chụm vào trong",
+        "Xuống chưa đủ sâu"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "STRENGTH",
+      "focusArea": "LOWER_BODY",
+      "difficulty": 2,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 120,
+      "poseStyle": "squat"
+    },
+    {
+      "id": "push_up",
+      "slug": "push-up",
+      "nameVi": "Chống đẩy tiêu chuẩn",
+      "nameEn": "Push-up",
+      "summary": "Chống đẩy từ tư thế hai bàn tay và mũi chân chống sàn. Vai, hông và chân di chuyển cùng nhau khi hạ và đẩy lên.",
+      "primaryMuscleIds": [
+        "chest"
+      ],
+      "secondaryMuscleIds": [
+        "shoulders",
+        "triceps",
+        "core"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Đặt tay gần ngang vai hoặc rộng hơn một chút. Duỗi chân ra sau và chống mũi chân.",
+        "Gập khuỷu tay để đưa ngực về phía sàn. Giữ đầu, thân và chân di chuyển cùng nhau.",
+        "Đẩy sàn để duỗi tay và trở lại vị trí ban đầu."
+      ],
+      "commonMistakes": [
+        "Hạ ngực chưa đủ",
+        "Hông võng hoặc nhô cao",
+        "Vị trí đặt tay khó giữ ổn định"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "STRENGTH",
+      "focusArea": "UPPER_BODY",
+      "difficulty": 3,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 120,
+      "poseStyle": "pushup"
+    },
+    {
+      "id": "jumping_jacks",
+      "slug": "jumping-jacks",
+      "nameVi": "Nhảy dang tay chân",
+      "nameEn": "Jumping Jacks",
+      "summary": "Bài bật nhịp nhàng giữa thế chân khép và chân mở, đồng thời đưa tay lên qua đầu.",
+      "primaryMuscleIds": [
+        "quadriceps",
+        "calves",
+        "shoulders"
+      ],
+      "secondaryMuscleIds": [],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Đứng chân gần nhau, tay dọc thân.",
+        "Bật nhẹ để mở hai chân và đưa hai tay lên qua đầu.",
+        "Bật trở lại tư thế chân khép, hạ tay và lặp theo nhịp."
+      ],
+      "commonMistakes": [
+        "Tay chưa lên hết biên độ mục tiêu",
+        "Chân mở ít",
+        "Thiếu pha bật ở biến thể bật"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "CARDIO",
+      "focusArea": "FULL_BODY",
+      "difficulty": 1,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 60,
+      "poseStyle": "jump"
+    },
+    {
+      "id": "reverse_crunch",
+      "slug": "reverse-crunch",
+      "nameVi": "Gập bụng ngược",
+      "nameEn": "Reverse Crunch",
+      "summary": "Từ tư thế nằm ngửa, đưa đùi về phía thân và cuộn xương chậu để hông nhấc nhẹ. Chuyển động chính xảy ra ở hông và xương chậu trong khi thân trên tựa sàn.",
+      "primaryMuscleIds": [
+        "core"
+      ],
+      "secondaryMuscleIds": [],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Nằm ngửa, tay dọc thân. Nhấc đùi lên và giữ gối gập.",
+        "Đưa gối về phía thân và cuộn xương chậu để hông nhấc nhẹ khỏi thảm.",
+        "Hạ hông từ từ và đưa đùi về tư thế ban đầu."
+      ],
+      "commonMistakes": [
+        "Biên độ cuộn quá ngắn",
+        "Hông chưa nhấc khỏi thảm",
+        "Căng cổ hoặc giật đầu"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "CORE",
+      "focusArea": "ABS",
+      "difficulty": 2,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 60,
+      "poseStyle": "core"
+    },
+    {
+      "id": "elbow_plank",
+      "slug": "elbow-plank",
+      "nameVi": "Plank chống khuỷu tay",
+      "nameEn": "Forearm Plank",
+      "summary": "Bài giữ tĩnh với cẳng tay và mũi chân chống sàn, thường theo dõi theo thời gian.",
+      "primaryMuscleIds": [
+        "core"
+      ],
+      "secondaryMuscleIds": [
+        "shoulders"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Đặt hai cẳng tay xuống sàn, khuỷu tay gần ngay dưới vai.",
+        "Duỗi hai chân về sau và nhấc thân lên. Giữ đầu, hông và chân gần cùng một đường.",
+        "Thở đều khi giữ. Hạ gối xuống sàn để kết thúc."
+      ],
+      "commonMistakes": [
+        "Hông võng",
+        "Hông nhô cao",
+        "Khuỷu tay quá xa vai"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "CORE",
+      "focusArea": "ABS",
+      "difficulty": 2,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 60,
+      "poseStyle": "plank"
+    },
+    {
+      "id": "high_plank",
+      "slug": "high-plank",
+      "nameVi": "Plank chống thẳng tay",
+      "nameEn": "High Plank",
+      "summary": "Tư thế giữ tĩnh trên hai bàn tay và mũi chân, tính theo thời gian giữ. Plank chống khuỷu tay dùng cẳng tay làm điểm tựa.",
+      "primaryMuscleIds": [
+        "core"
+      ],
+      "secondaryMuscleIds": [
+        "shoulders",
+        "triceps"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Chống bàn tay gần dưới vai, duỗi chân ra sau.",
+        "Đưa hông về gần đường nối vai và gót chân.",
+        "Giữ tư thế và thở đều, sau đó hạ gối để kết thúc."
+      ],
+      "commonMistakes": [
+        "Hông võng"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "CORE",
+      "focusArea": "ABS",
+      "difficulty": 2,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 60,
+      "poseStyle": "plank"
+    },
+    {
+      "id": "side_plank",
+      "slug": "side-plank",
+      "nameVi": "Plank nghiêng chống khuỷu",
+      "nameEn": "Side Plank",
+      "summary": "Giữ thân nghiêng trên một cẳng tay và cạnh bàn chân. Có thể chống gối dưới để tập biến thể ngắn đòn bẩy.",
+      "primaryMuscleIds": [
+        "obliques"
+      ],
+      "secondaryMuscleIds": [
+        "glutes",
+        "shoulders"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Nằm nghiêng, đặt khuỷu tay dưới vai và xếp chân ổn định.",
+        "Nâng hông để thân và chân gần thẳng hàng.",
+        "Giữ ngực hướng ngang và thở đều rồi hạ xuống. Đổi bên."
+      ],
+      "commonMistakes": [
+        "Hông tụt"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "CORE",
+      "focusArea": "ABS",
+      "difficulty": 3,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 60,
+      "poseStyle": "plank"
+    },
+    {
+      "id": "spiderman_push_up",
+      "slug": "spiderman-push-up",
+      "nameVi": "Chống đẩy Người Nhện",
+      "nameEn": "Spiderman Push-up",
+      "summary": "Biến thể chống đẩy đưa một gối về phía khuỷu cùng bên khi hạ người.",
+      "primaryMuscleIds": [
+        "chest"
+      ],
+      "secondaryMuscleIds": [
+        "shoulders",
+        "triceps",
+        "core"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Bắt đầu ở tư thế chống thẳng tay.",
+        "Gập khuỷu để hạ ngực, đồng thời kéo một gối về khuỷu cùng bên.",
+        "Đẩy lên, đưa chân về sau và đổi bên ở rep sau."
+      ],
+      "commonMistakes": [
+        "Thân xoay nhiều"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "STRENGTH",
+      "focusArea": "UPPER_BODY",
+      "difficulty": 4,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 120,
+      "poseStyle": "pushup"
+    },
+    {
+      "id": "yoga_push_up",
+      "slug": "yoga-push-up",
+      "nameVi": "Chống đẩy Yoga",
+      "nameEn": "Yoga Push-up",
+      "summary": "Biến thể trong hồ sơ này đi từ hông cao, hạ ngực có kiểm soát rồi đưa hông trở lại hình chữ V ngược.",
+      "primaryMuscleIds": [
+        "shoulders",
+        "chest"
+      ],
+      "secondaryMuscleIds": [
+        "triceps",
+        "core"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Chống hai tay và mũi chân, đẩy hông lên và về sau.",
+        "Gập khuỷu và đưa ngực xuống rồi ra trước trong biên độ có thể kiểm soát.",
+        "Đẩy qua hai tay, lùi hông về tư thế ban đầu."
+      ],
+      "commonMistakes": [
+        "Chuyển pha mất kiểm soát"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "STRENGTH",
+      "focusArea": "UPPER_BODY",
+      "difficulty": 3,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 90,
+      "poseStyle": "pushup"
+    },
+    {
+      "id": "knee_push_up",
+      "slug": "knee-push-up",
+      "nameVi": "Chống đẩy quỳ gối",
+      "nameEn": "Knee Push-up",
+      "summary": "Biến thể chống đẩy với hai gối làm điểm tựa phía sau. Có thể thử biến thể này khi khó giữ thân thẳng trong bài chống đẩy tiêu chuẩn.",
+      "primaryMuscleIds": [
+        "chest"
+      ],
+      "secondaryMuscleIds": [
+        "shoulders",
+        "triceps"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Đặt tay gần ngang vai, chống hai gối và đưa hông về đường nối vai với gối.",
+        "Gập khuỷu, hạ ngực và hông cùng lúc.",
+        "Đẩy sàn để tay duỗi và thân trở lại điểm đầu."
+      ],
+      "commonMistakes": [
+        "Hông lùi về gót"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "STRENGTH",
+      "focusArea": "UPPER_BODY",
+      "difficulty": 1,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 90,
+      "poseStyle": "pushup"
+    },
+    {
+      "id": "squat_jump",
+      "slug": "squat-jump",
+      "nameVi": "Squat bật nhảy",
+      "nameEn": "Squat Jump",
+      "summary": "Biến thể động của [Squat không tạ](bodyweight_squat.md). Mỗi nhịp có pha bật thẳng lên và tiếp đất bằng hai chân.",
+      "primaryMuscleIds": [
+        "quadriceps",
+        "glutes"
+      ],
+      "secondaryMuscleIds": [
+        "calves"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Đứng hai chân vững. Gập hông và gối để vào tư thế squat có kiểm soát.",
+        "Đẩy sàn bằng hai chân để bật lên. Có thể giữ tay trước ngực như biến thể trong dữ liệu nguồn.",
+        "Đáp bằng hai chân, gập hông và gối để giảm lực tiếp đất. Lấy lại thăng bằng trước nhịp tiếp theo."
+      ],
+      "commonMistakes": [
+        "Tiếp đất cứng",
+        "Đáp lệch sang một chân"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "HIIT",
+      "focusArea": "LOWER_BODY",
+      "difficulty": 4,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 90,
+      "poseStyle": "jump"
+    },
+    {
+      "id": "squat_kick",
+      "slug": "squat-kick",
+      "nameVi": "Squat kết hợp đá chân",
+      "nameEn": "Squat Kick",
+      "summary": "Bản mô tả dùng cú đá ngang sau khi đứng lên khỏi squat và đổi chân qua từng rep.",
+      "primaryMuscleIds": [
+        "quadriceps",
+        "glutes"
+      ],
+      "secondaryMuscleIds": [],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Thực hiện một nhịp squat có kiểm soát.",
+        "Đứng lên, chuyển trọng lượng sang chân trụ rồi nâng gối và duỗi chân còn lại sang bên ở tầm thấp.",
+        "Thu chân và đặt lại vững trước nhịp squat tiếp theo. Đổi bên."
+      ],
+      "commonMistakes": [
+        "Mất thăng bằng khi đá"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "CARDIO",
+      "focusArea": "LOWER_BODY",
+      "difficulty": 2,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 60,
+      "poseStyle": "squat"
+    },
+    {
+      "id": "alternating_forward_lunges",
+      "slug": "alternating-forward-lunges",
+      "nameVi": "Chùng chân về trước luân phiên",
+      "nameEn": "Alternating Forward Lunges",
+      "summary": "Bước về trước, chùng gối rồi đẩy trở lại vị trí đứng ban đầu trước khi đổi chân.",
+      "primaryMuscleIds": [
+        "quadriceps",
+        "glutes"
+      ],
+      "secondaryMuscleIds": [
+        "core"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Đứng thẳng và bước một chân ra trước.",
+        "Gập hai gối, giữ bàn chân trước vững và gối cùng hướng mũi chân.",
+        "Ấn chân trước để trở lại vị trí ban đầu, sau đó đổi bên."
+      ],
+      "commonMistakes": [
+        "Bước quá hẹp theo chiều ngang"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "STRENGTH",
+      "focusArea": "LOWER_BODY",
+      "difficulty": 2,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 90,
+      "poseStyle": "lunge"
+    },
+    {
+      "id": "jumping_lunges",
+      "slug": "jumping-lunges",
+      "nameVi": "Nhảy đổi chân chùng gối",
+      "nameEn": "Jumping Lunges",
+      "summary": "Bắt đầu ở tư thế chùng gối, bật lên rồi đổi vị trí chân trước và chân sau trên không.",
+      "primaryMuscleIds": [
+        "quadriceps",
+        "glutes"
+      ],
+      "secondaryMuscleIds": [
+        "calves"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Đứng chân trước chân sau, gập hai gối và giữ thân ổn định.",
+        "Đẩy sàn bằng hai chân, đổi chân trên không.",
+        "Tiếp đất trong thế chùng gối với chân đối diện ở trước. Gập gối để hãm nhịp trước khi bật tiếp."
+      ],
+      "commonMistakes": [
+        "Loạng choạng khi đáp",
+        "Đáp với gối quá cứng"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "HIIT",
+      "focusArea": "LOWER_BODY",
+      "difficulty": 4,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 90,
+      "poseStyle": "jump"
+    },
+    {
+      "id": "alternating_lateral_lunge",
+      "slug": "alternating-lateral-lunge",
+      "nameVi": "Chùng chân sang ngang luân phiên",
+      "nameEn": "Alternating Lateral Lunge",
+      "summary": "Bước sang ngang, đưa trọng lượng vào chân bước rồi trở về giữa trước khi đổi bên.",
+      "primaryMuscleIds": [
+        "quadriceps",
+        "glutes",
+        "adductors"
+      ],
+      "secondaryMuscleIds": [],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Đứng thẳng rồi bước một chân sang ngang.",
+        "Gập hông và gối của chân vừa bước, giữ chân kia tương đối thẳng và bàn chân ổn định.",
+        "Ấn chân trụ bên để trở về giữa rồi đổi bên."
+      ],
+      "commonMistakes": [
+        "Gối đổ vào trong"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "STRENGTH",
+      "focusArea": "LOWER_BODY",
+      "difficulty": 2,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 90,
+      "poseStyle": "lunge"
+    },
+    {
+      "id": "burpee",
+      "slug": "burpee",
+      "nameVi": "Burpee có chống đẩy",
+      "nameEn": "Burpee with Push-up",
+      "summary": "Một chu kỳ gồm xuống sàn, chống đẩy, thu chân rồi bật lên.",
+      "primaryMuscleIds": [
+        "quadriceps",
+        "glutes",
+        "chest"
+      ],
+      "secondaryMuscleIds": [
+        "shoulders",
+        "triceps",
+        "core"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Hạ người, chống tay xuống sàn và đưa chân ra sau thành plank cao.",
+        "Thực hiện một lần chống đẩy rồi đưa chân về gần tay.",
+        "Đứng lên, bật nhẹ và tiếp đất với gối mềm."
+      ],
+      "commonMistakes": [
+        "Hông võng ở pha chống"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "HIIT",
+      "focusArea": "FULL_BODY",
+      "difficulty": 5,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 120,
+      "poseStyle": "jump"
+    },
+    {
+      "id": "burpee_no_push_up",
+      "slug": "burpee-no-push-up",
+      "nameVi": "Burpee không chống đẩy",
+      "nameEn": "Burpee without Push-up",
+      "summary": "Chuyển giữa đứng và plank cao, bỏ pha gập khuỷu hạ ngực. Hồ sơ này giữ cú bật cuối chu kỳ.",
+      "primaryMuscleIds": [
+        "quadriceps",
+        "glutes"
+      ],
+      "secondaryMuscleIds": [
+        "core",
+        "shoulders"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Hạ hông, đặt tay vững rồi đưa hai chân ra sau.",
+        "Giữ tay duỗi, thu chân về gần tay khi thân đã ổn định.",
+        "Đứng lên, bật nhẹ rồi tiếp đất có kiểm soát."
+      ],
+      "commonMistakes": [
+        "Bỏ qua tư thế plank"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "HIIT",
+      "focusArea": "FULL_BODY",
+      "difficulty": 3,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 90,
+      "poseStyle": "jump"
+    },
+    {
+      "id": "mountain_climbers",
+      "slug": "mountain-climbers",
+      "nameVi": "Leo núi tại chỗ",
+      "nameEn": "Mountain Climbers",
+      "summary": "Từ tư thế chống tay như chuẩn bị chống đẩy, kéo từng gối về phía thân và đổi chân luân phiên.",
+      "primaryMuscleIds": [
+        "core",
+        "hip_flexors"
+      ],
+      "secondaryMuscleIds": [
+        "shoulders",
+        "triceps"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Chống hai tay gần dưới vai, duỗi chân ra sau và giữ thân ổn định.",
+        "Kéo một gối về phía dưới thân trong biên độ vẫn giữ được vị trí hông.",
+        "Đưa chân về rồi đổi bên. Có thể tập chậm trước khi tăng nhịp."
+      ],
+      "commonMistakes": [
+        "Hông nảy theo nhịp",
+        "Vai trôi xa điểm chống"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "HIIT",
+      "focusArea": "FULL_BODY",
+      "difficulty": 3,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 60,
+      "poseStyle": "plank"
+    },
+    {
+      "id": "high_knees",
+      "slug": "high-knees",
+      "nameVi": "Chạy nâng cao đùi tại chỗ",
+      "nameEn": "High Knees",
+      "summary": "Chạy tại chỗ, đưa từng gối lên phía trước và đổi chân đều.",
+      "primaryMuscleIds": [
+        "hip_flexors",
+        "quadriceps"
+      ],
+      "secondaryMuscleIds": [
+        "calves"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Đứng thẳng, chuẩn bị tay ở tư thế chạy.",
+        "Nâng một gối trong tầm giữ được thân ổn định rồi đặt chân xuống.",
+        "Đổi chân luân phiên và phối hợp tay đối bên."
+      ],
+      "commonMistakes": [
+        "Ngả người ra sau"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "CARDIO",
+      "focusArea": "FULL_BODY",
+      "difficulty": 2,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 60,
+      "poseStyle": "jump"
+    },
+    {
+      "id": "butt_kicks",
+      "slug": "butt-kicks",
+      "nameVi": "Chạy gót hướng về mông",
+      "nameEn": "Butt Kicks",
+      "summary": "Chạy tại chỗ, gập gối để gót hướng về mông luân phiên.",
+      "primaryMuscleIds": [
+        "hamstrings",
+        "calves"
+      ],
+      "secondaryMuscleIds": [],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Đứng thẳng và bắt đầu nhịp chạy nhẹ tại chỗ.",
+        "Gập một gối để gót hướng về sau rồi đặt chân xuống.",
+        "Đổi bên liên tục với nhịp đều và đánh tay tự nhiên."
+      ],
+      "commonMistakes": [
+        "Gối lao về trước"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "CARDIO",
+      "focusArea": "LOWER_BODY",
+      "difficulty": 1,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 60,
+      "poseStyle": "jump"
+    },
+    {
+      "id": "air_jump_rope",
+      "slug": "air-jump-rope",
+      "nameVi": "Nhảy dây tưởng tượng",
+      "nameEn": "Air Jump Rope",
+      "summary": "Bật thấp như nhảy dây, kết hợp động tác quay cổ tay với tay không.",
+      "primaryMuscleIds": [
+        "calves"
+      ],
+      "secondaryMuscleIds": [
+        "quadriceps",
+        "shoulders",
+        "forearms"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Đứng chân gần nhau, khuỷu hơi gập sát thân.",
+        "Xoay cổ tay nhỏ như đang quay dây và bật thấp theo nhịp.",
+        "Đáp nhẹ rồi lặp với cùng nhịp, giữ thân thẳng tự nhiên."
+      ],
+      "commonMistakes": [
+        "Quay cả cánh tay quá rộng"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "CARDIO",
+      "focusArea": "FULL_BODY",
+      "difficulty": 1,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 60,
+      "poseStyle": "jump"
+    },
+    {
+      "id": "glute_bridge",
+      "slug": "glute-bridge",
+      "nameVi": "Nâng hông cây cầu",
+      "nameEn": "Glute Bridge",
+      "summary": "Bài duỗi hông từ tư thế nằm ngửa, hai chân cùng đạp sàn và vai tựa thảm.",
+      "primaryMuscleIds": [
+        "glutes"
+      ],
+      "secondaryMuscleIds": [
+        "hamstrings",
+        "core"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Nằm ngửa, gập gối, đặt hai bàn chân lên sàn và để tay dọc thân.",
+        "Ấn bàn chân xuống để nâng hông tới khi thân và đùi gần tạo thành một đường.",
+        "Dừng ngắn ở trên rồi hạ hông có kiểm soát."
+      ],
+      "commonMistakes": [
+        "Ưỡn lưng ở điểm cao",
+        "Hông nâng lệch"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "STRENGTH",
+      "focusArea": "LOWER_BODY",
+      "difficulty": 1,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 60,
+      "poseStyle": "core"
+    },
+    {
+      "id": "alternating_single_leg_glute_bridge",
+      "slug": "alternating-single-leg-glute-bridge",
+      "nameVi": "Nâng hông một chân luân phiên",
+      "nameEn": "Alternating Single-Leg Glute Bridge",
+      "summary": "Nâng và hạ hông bằng một chân trụ, rồi đổi chân ở rep kế tiếp.",
+      "primaryMuscleIds": [
+        "glutes",
+        "hamstrings"
+      ],
+      "secondaryMuscleIds": [
+        "core"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Nằm ngửa, gập gối, đặt bàn chân trụ xuống và nhấc chân kia.",
+        "Ấn chân trụ để nâng hông, giữ hai bên chậu cân bằng.",
+        "Hạ hông về sàn, đổi chân trụ và lặp."
+      ],
+      "commonMistakes": [
+        "Chậu nghiêng khi nâng"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "STRENGTH",
+      "focusArea": "LOWER_BODY",
+      "difficulty": 3,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 90,
+      "poseStyle": "core"
+    },
+    {
+      "id": "glute_hamstring_walkout",
+      "slug": "glute-hamstring-walkout",
+      "nameVi": "Bước chân từ tư thế cây cầu",
+      "nameEn": "Glute Hamstring Walkout",
+      "summary": "Từ tư thế cây cầu, bước gót từng đoạn nhỏ ra xa rồi bước trở vào, giữ hông nâng trong tầm kiểm soát.",
+      "primaryMuscleIds": [
+        "hamstrings",
+        "glutes"
+      ],
+      "secondaryMuscleIds": [
+        "core"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Nằm ngửa gập gối và nâng hông như cầu mông.",
+        "Luân phiên bước gót ra xa bằng các bước ngắn.",
+        "Bước gót trở về gần hông rồi hạ chậu có kiểm soát."
+      ],
+      "commonMistakes": [
+        "Hông tụt khi bước ra"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "STRENGTH",
+      "focusArea": "LOWER_BODY",
+      "difficulty": 3,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 90,
+      "poseStyle": "core"
+    },
+    {
+      "id": "inchworm",
+      "slug": "inchworm",
+      "nameVi": "Động tác bò sâu đo",
+      "nameEn": "Inchworm",
+      "summary": "Hồ sơ này mô tả biến thể đi tay ra tư thế chống thẳng tay rồi bước chân về gần tay, theo JSON nguồn.",
+      "primaryMuscleIds": [
+        "shoulders",
+        "core"
+      ],
+      "secondaryMuscleIds": [
+        "triceps",
+        "hamstrings"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Đứng và gập hông, đưa hai tay xuống sàn. Gập gối nhẹ nếu cần để đặt tay vững.",
+        "Bước từng tay ra trước cho đến tư thế chống thẳng tay ổn định.",
+        "Giữ tay tại chỗ, bước từng bước nhỏ đưa chân về gần tay."
+      ],
+      "commonMistakes": [
+        "Võng hông ở tư thế chống",
+        "Bước quá nhanh và mất kiểm soát"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "STRETCHING",
+      "focusArea": "FULL_BODY",
+      "difficulty": 2,
+      "levelSets": [
+        3,
+        4,
+        5
+      ],
+      "restSeconds": 60,
+      "poseStyle": "plank"
+    },
+    {
+      "id": "dead_bug",
+      "slug": "dead-bug",
+      "nameVi": "Dead Bug duỗi chéo tay chân",
+      "nameEn": "Dead Bug",
+      "summary": "Nằm ngửa, đưa một tay và chân đối bên ra xa trong khi giữ thân ổn định.",
+      "primaryMuscleIds": [
+        "core"
+      ],
+      "secondaryMuscleIds": [],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Nằm ngửa, đưa tay hướng lên và nhấc hai đùi với gối gập.",
+        "Duỗi một tay qua đầu và chân đối diện về phía sàn trong tầm kiểm soát.",
+        "Trở lại vị trí đầu rồi đổi bên."
+      ],
+      "commonMistakes": [
+        "Lưng dưới ưỡn khi duỗi"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "CORE",
+      "focusArea": "ABS",
+      "difficulty": 1,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 60,
+      "poseStyle": "core"
+    },
+    {
+      "id": "alternating_v_ups",
+      "slug": "alternating-v-ups",
+      "nameVi": "Gập bụng chữ V luân phiên",
+      "nameEn": "Alternating V-Ups",
+      "summary": "Nâng một chân và thân trên để tay hướng về bàn chân, rồi đổi bên.",
+      "primaryMuscleIds": [
+        "core",
+        "hip_flexors"
+      ],
+      "secondaryMuscleIds": [],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Nằm ngửa với chân duỗi và tay chuẩn bị vươn.",
+        "Nâng một chân và thân trên có kiểm soát, đưa tay đối diện về phía bàn chân.",
+        "Hạ người và chân chậm rồi lặp bên còn lại."
+      ],
+      "commonMistakes": [
+        "Vung tay và chân lấy đà"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "CORE",
+      "focusArea": "ABS",
+      "difficulty": 3,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 60,
+      "poseStyle": "core"
+    },
+    {
+      "id": "fire_hydrant",
+      "slug": "fire-hydrant",
+      "nameVi": "Quỳ nâng gối sang ngang",
+      "nameEn": "Fire Hydrant",
+      "summary": "Từ quỳ chống tay, mở một đùi sang bên với gối gập rồi hạ về.",
+      "primaryMuscleIds": [
+        "glutes"
+      ],
+      "secondaryMuscleIds": [
+        "core"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Chống tay dưới vai và gối dưới hông.",
+        "Giữ gối gập, nâng một gối sang ngang trong tầm chậu ổn định.",
+        "Hạ gối chậm. Đổi bên theo lượt tập."
+      ],
+      "commonMistakes": [
+        "Chậu lật theo đùi"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "STRENGTH",
+      "focusArea": "LOWER_BODY",
+      "difficulty": 1,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 60,
+      "poseStyle": "plank"
+    },
+    {
+      "id": "downward_dog",
+      "slug": "downward-dog",
+      "nameVi": "Tư thế chó úp mặt",
+      "nameEn": "Downward-Facing Dog",
+      "summary": "Tư thế chữ V ngược với tay và chân làm điểm tựa, hông là điểm cao.",
+      "primaryMuscleIds": [
+        "shoulders",
+        "hamstrings"
+      ],
+      "secondaryMuscleIds": [
+        "upper_back",
+        "calves"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Bắt đầu quỳ chống tay và chống mũi chân.",
+        "Đẩy sàn bằng tay, nâng hông lên và lùi về sau. Có thể gập gối nhẹ.",
+        "Giữ cổ thoải mái, thở đều rồi hạ gối để ra khỏi tư thế."
+      ],
+      "commonMistakes": [
+        "Cố ép gót xuống sàn"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "STRETCHING",
+      "focusArea": "FULL_BODY",
+      "difficulty": 1,
+      "levelSets": [
+        3,
+        4,
+        5
+      ],
+      "restSeconds": 45,
+      "poseStyle": "plank"
+    },
+    {
+      "id": "cobra_pose",
+      "slug": "cobra-pose",
+      "nameVi": "Tư thế rắn hổ mang",
+      "nameEn": "Cobra Pose",
+      "summary": "Tư thế nằm sấp nâng ngực nhẹ, giữ chậu và chân tựa thảm.",
+      "primaryMuscleIds": [
+        "lower_back"
+      ],
+      "secondaryMuscleIds": [
+        "chest",
+        "core"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Nằm sấp, đặt tay gần dưới vai và để khuỷu gần thân.",
+        "Nâng ngực trong tầm thoải mái, giữ vai xa tai và chậu tựa thảm.",
+        "Thở đều rồi từ từ hạ ngực."
+      ],
+      "commonMistakes": [
+        "Ngửa cổ quá mức"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "STRETCHING",
+      "focusArea": "UPPER_BODY",
+      "difficulty": 1,
+      "levelSets": [
+        3,
+        4,
+        5
+      ],
+      "restSeconds": 45,
+      "poseStyle": "plank"
+    },
+    {
+      "id": "child_pose",
+      "slug": "child-pose",
+      "nameVi": "Tư thế đứa trẻ",
+      "nameEn": "Child’s Pose",
+      "summary": "Tư thế nghỉ từ quỳ, với hông lùi về gót và thân trên hạ về phía sàn. Có thể để tay vươn ra trước hoặc nghỉ dọc thân.",
+      "primaryMuscleIds": [
+        "lower_back",
+        "upper_back"
+      ],
+      "secondaryMuscleIds": [
+        "shoulders"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Bắt đầu ở tư thế quỳ chống tay và lùi hông về phía gót trong biên độ thoải mái.",
+        "Hạ thân về trước, tựa trán lên thảm hoặc vật kê phù hợp.",
+        "Thả lỏng tay và thở đều. Chống tay để từ từ trở lại tư thế quỳ."
+      ],
+      "commonMistakes": [
+        "Cố ép hông xuống",
+        "Vai nhô và tay căng"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "STRETCHING",
+      "focusArea": "FULL_BODY",
+      "difficulty": 1,
+      "levelSets": [
+        3,
+        4,
+        5
+      ],
+      "restSeconds": 45,
+      "poseStyle": "plank"
+    },
+    {
+      "id": "standing_knee_to_elbow",
+      "slug": "standing-knee-to-elbow",
+      "nameVi": "Đứng co gối chạm khuỷu tay chéo",
+      "nameEn": "Standing Knee-to-Elbow",
+      "summary": "Đứng nâng gối, đưa khuỷu tay đối diện về phía gối với xoay thân nhẹ.",
+      "primaryMuscleIds": [
+        "obliques",
+        "hip_flexors"
+      ],
+      "secondaryMuscleIds": [],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Đứng vững, giữ tay ở vị trí chuẩn bị cạnh thân hoặc đầu.",
+        "Nâng một gối, xoay thân nhẹ đưa khuỷu đối bên về phía gối.",
+        "Trở về tư thế đứng rồi đổi bên."
+      ],
+      "commonMistakes": [
+        "Kéo cổ để chạm gối"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "CARDIO",
+      "focusArea": "ABS",
+      "difficulty": 1,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 60,
+      "poseStyle": "jump"
+    },
+    {
+      "id": "bodyweight_good_morning",
+      "slug": "bodyweight-good-morning",
+      "nameVi": "Good Morning không tạ",
+      "nameEn": "Bodyweight Good Morning",
+      "summary": "Biến thể gập hông với trọng lượng cơ thể, gối hơi chùng và hông lùi ra sau.",
+      "primaryMuscleIds": [
+        "hamstrings",
+        "glutes"
+      ],
+      "secondaryMuscleIds": [
+        "lower_back"
+      ],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Đứng vững, gối hơi chùng và đặt tay trước ngực.",
+        "Đẩy hông ra sau để thân nghiêng tới khi vẫn kiểm soát được lưng và thăng bằng.",
+        "Đưa hông về trước để trở lại tư thế đứng."
+      ],
+      "commonMistakes": [
+        "Gập gối nhiều như squat"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "STRENGTH",
+      "focusArea": "LOWER_BODY",
+      "difficulty": 1,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 60,
+      "poseStyle": "squat"
+    },
+    {
+      "id": "pull_up",
+      "slug": "pull-up",
+      "nameVi": "Hít xà đơn",
+      "nameEn": "Pull-up",
+      "summary": "Bản kéo nghiêm ngặt dùng tay nắm sấp và thân có kiểm soát.",
+      "primaryMuscleIds": [
+        "lats",
+        "upper_back"
+      ],
+      "secondaryMuscleIds": [
+        "biceps",
+        "forearms"
+      ],
+      "equipmentIds": [
+        "pull_up_bar"
+      ],
+      "instructions": [
+        "Nắm xà sấp, bắt đầu từ tư thế treo có kiểm soát.",
+        "Kéo khuỷu xuống để đưa thân lên, giữ chân ổn định.",
+        "Hạ chậm về biên độ bắt đầu và ổn định trước rep tiếp theo."
+      ],
+      "commonMistakes": [
+        "Đung đưa lấy đà",
+        "Kéo chưa tới độ cao mục tiêu",
+        "Hạ chưa tới điểm bắt đầu"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "STRENGTH",
+      "focusArea": "UPPER_BODY",
+      "difficulty": 4,
+      "levelSets": [
+        3,
+        4,
+        5
+      ],
+      "restSeconds": 120,
+      "poseStyle": "pull"
+    },
+    {
+      "id": "barbell_bench_press",
+      "slug": "barbell-bench-press",
+      "nameVi": "Đẩy ngực nằm với thanh tạ",
+      "nameEn": "Barbell Bench Press",
+      "summary": "Nằm trên ghế và hạ rồi đẩy thanh tạ bằng hai tay với đường tạ có kiểm soát.",
+      "primaryMuscleIds": [
+        "chest"
+      ],
+      "secondaryMuscleIds": [
+        "shoulders",
+        "triceps"
+      ],
+      "equipmentIds": [
+        "bench",
+        "barbell",
+        "rack"
+      ],
+      "instructions": [
+        "Nằm chắc trên ghế, đặt chân vững và nắm thanh đối xứng.",
+        "Rời thanh khỏi giá và hạ có kiểm soát về vùng giữa ngực theo biên độ đang tập.",
+        "Đẩy thanh lên đều bằng hai tay. Trả thanh chắc chắn vào giá khi kết thúc."
+      ],
+      "commonMistakes": [
+        "Thanh tạ lệch",
+        "Khuỷu mở ngang quá mức",
+        "Hạ chưa tới biên độ mục tiêu"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-m2-9644078731a2135dafa0",
+      "workoutType": "STRENGTH",
+      "focusArea": "UPPER_BODY",
+      "difficulty": 4,
+      "levelSets": [
+        3,
+        4,
+        5
+      ],
+      "restSeconds": 150,
+      "poseStyle": "barbell"
+    }
+  ]
+}

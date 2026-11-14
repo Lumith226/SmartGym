@@ -1,0 +1,9 @@
+FROM python:3.12-slim-bookworm
+WORKDIR /app
+COPY --from=rag-source requirements.lock.txt ./
+RUN pip install --no-cache-dir -r requirements.lock.txt
+COPY --from=rag-source kb_service ./kb_service
+COPY --from=rag-source capabilities.json ./
+ENV PYTHONDONTWRITEBYTECODE=1
+USER 1000:1000
+ENTRYPOINT ["python", "-m", "uvicorn", "kb_service.app:app"]

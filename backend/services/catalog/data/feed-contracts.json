@@ -1,0 +1,959 @@
+{
+  "schemas": {
+    "CatalogHead": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "revision",
+        "aggregateVersion",
+        "publishedAt"
+      ],
+      "properties": {
+        "revision": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]{1,120}$",
+          "not": {
+            "const": "head"
+          }
+        },
+        "aggregateVersion": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 9007199254740991
+        },
+        "publishedAt": {
+          "type": "string",
+          "format": "date-time"
+        }
+      }
+    },
+    "CatalogSnapshot": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "revision",
+        "aggregateVersion",
+        "publishedAt",
+        "exercises",
+        "sources",
+        "tombstones"
+      ],
+      "properties": {
+        "revision": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]{1,120}$",
+          "not": {
+            "const": "head"
+          }
+        },
+        "aggregateVersion": {
+          "type": "integer",
+          "minimum": 1,
+          "description": "Version Catalog toàn cục, dùng để reconcile event.",
+          "maximum": 9007199254740991
+        },
+        "publishedAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "exercises": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExerciseDetail"
+          },
+          "maxItems": 50000
+        },
+        "sources": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/SnapshotSource"
+          },
+          "maxItems": 50000
+        },
+        "tombstones": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "properties": {
+              "exerciseId": {
+                "type": "string",
+                "pattern": "^[a-z][a-z0-9_]{0,79}$",
+                "examples": [
+                  "bodyweight_squat"
+                ]
+              },
+              "sourceIds": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]{0,79}$",
+                  "examples": [
+                    "bodyweight_squat"
+                  ]
+                },
+                "maxItems": 100,
+                "uniqueItems": true
+              },
+              "reason": {
+                "type": "string",
+                "enum": [
+                  "ARCHIVED",
+                  "WITHDRAWN"
+                ]
+              }
+            },
+            "required": [
+              "exerciseId",
+              "sourceIds",
+              "reason"
+            ]
+          },
+          "maxItems": 50000
+        }
+      },
+      "description": "Revision bất biến; chỉ bài/nguồn PUBLISHED, nguồn có provenance và tombstone tích lũy trong cửa sổ lưu đã chốt. Revision hiện hành đủ để đối chiếu đầy đủ visibility."
+    },
+    "ExerciseDetail": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "slug",
+        "nameVi",
+        "summary",
+        "primaryMuscleIds",
+        "secondaryMuscleIds",
+        "equipmentIds",
+        "instructions",
+        "commonMistakes",
+        "media",
+        "publishedRevision",
+        "variants"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$",
+          "examples": [
+            "bodyweight_squat"
+          ]
+        },
+        "slug": {
+          "type": "string",
+          "pattern": "^[a-z0-9]+(?:-[a-z0-9]+)*$",
+          "maxLength": 100,
+          "examples": [
+            "squat-khong-ta"
+          ]
+        },
+        "nameVi": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "nameEn": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "summary": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 500
+        },
+        "primaryMuscleIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$",
+            "examples": [
+              "bodyweight_squat"
+            ]
+          },
+          "minItems": 1,
+          "maxItems": 8,
+          "uniqueItems": true
+        },
+        "secondaryMuscleIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$",
+            "examples": [
+              "bodyweight_squat"
+            ]
+          },
+          "maxItems": 12,
+          "uniqueItems": true
+        },
+        "equipmentIds": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$",
+            "examples": [
+              "bodyweight_squat"
+            ]
+          },
+          "maxItems": 10,
+          "uniqueItems": true
+        },
+        "instructions": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "minItems": 1,
+          "maxItems": 30
+        },
+        "commonMistakes": {
+          "type": "array",
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000
+          },
+          "maxItems": 20
+        },
+        "media": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/ExercisePublicMedia"
+          }
+        },
+        "publishedRevision": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]{1,120}$"
+        },
+        "variants": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/CmsPublicVariant"
+          },
+          "maxItems": 20
+        },
+        "workoutType": {
+          "type": "string",
+          "enum": [
+            "STRENGTH",
+            "CARDIO",
+            "HIIT",
+            "CORE",
+            "STRETCHING"
+          ]
+        },
+        "focusArea": {
+          "type": "string",
+          "enum": [
+            "FULL_BODY",
+            "UPPER_BODY",
+            "LOWER_BODY",
+            "ABS"
+          ]
+        },
+        "difficulty": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 5
+        },
+        "levelSets": {
+          "type": "array",
+          "minItems": 3,
+          "maxItems": 3,
+          "items": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 20
+          }
+        },
+        "restSeconds": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 600
+        },
+        "poseStyle": {
+          "type": "string",
+          "enum": [
+            "squat",
+            "pushup",
+            "plank",
+            "jump",
+            "pull",
+            "lunge",
+            "core",
+            "barbell"
+          ]
+        },
+        "profile": {
+          "$ref": "#/$defs/ExerciseProfile"
+        }
+      }
+    },
+    "SnapshotSource": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "sourceId",
+        "title",
+        "bodyMarkdown",
+        "sourceRef",
+        "digestSha256",
+        "publicationStatus"
+      ],
+      "properties": {
+        "sourceId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$",
+          "examples": [
+            "bodyweight_squat"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "exerciseId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$",
+          "examples": [
+            "bodyweight_squat"
+          ]
+        },
+        "bodyMarkdown": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 250000
+        },
+        "sourceRef": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 250
+        },
+        "digestSha256": {
+          "type": "string",
+          "pattern": "^[a-f0-9]{64}$"
+        },
+        "publicationStatus": {
+          "const": "PUBLISHED"
+        }
+      }
+    },
+    "ExercisePublicMedia": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "kind",
+        "url",
+        "altText"
+      ],
+      "properties": {
+        "kind": {
+          "type": "string",
+          "enum": [
+            "IMAGE",
+            "VIDEO"
+          ]
+        },
+        "url": {
+          "type": "string",
+          "format": "uri"
+        },
+        "altText": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 240
+        },
+        "posterUrl": {
+          "type": "string",
+          "format": "uri"
+        },
+        "credit": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 300
+        },
+        "role": {
+          "type": "string",
+          "enum": [
+            "main",
+            "start",
+            "peak"
+          ]
+        }
+      }
+    },
+    "CmsPublicVariant": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "id": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$",
+          "examples": [
+            "bodyweight_squat"
+          ]
+        },
+        "nameVi": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "notes": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1500
+        }
+      },
+      "required": [
+        "id",
+        "nameVi"
+      ]
+    },
+    "ExerciseProfile": {
+      "type": "object",
+      "additionalProperties": false,
+      "properties": {
+        "category": {
+          "type": "string",
+          "enum": [
+            "strength",
+            "cardio",
+            "stretching",
+            "plyometrics",
+            "olympic"
+          ]
+        },
+        "forceType": {
+          "type": "string",
+          "enum": [
+            "static",
+            "dynamic",
+            "pull",
+            "push"
+          ]
+        },
+        "mechanic": {
+          "type": "string",
+          "enum": [
+            "compound",
+            "isolation"
+          ]
+        },
+        "bodyPart": {
+          "type": "string",
+          "enum": [
+            "upper_legs",
+            "core",
+            "full_body",
+            "back",
+            "chest",
+            "shoulders",
+            "upper_arms",
+            "lower_legs",
+            "lower_arms"
+          ]
+        },
+        "goals": {
+          "type": "array",
+          "maxItems": 30,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "\\S"
+          },
+          "uniqueItems": true
+        },
+        "tags": {
+          "type": "array",
+          "maxItems": 40,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "\\S"
+          },
+          "uniqueItems": true
+        },
+        "isUnilateral": {
+          "type": "boolean"
+        },
+        "isBodyweight": {
+          "type": "boolean"
+        },
+        "met": {
+          "type": "number",
+          "minimum": 0,
+          "maximum": 30
+        },
+        "primaryMuscles": {
+          "type": "array",
+          "maxItems": 30,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "\\S"
+          },
+          "uniqueItems": true
+        },
+        "secondaryMuscles": {
+          "type": "array",
+          "maxItems": 30,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 100,
+            "pattern": "\\S"
+          },
+          "uniqueItems": true
+        },
+        "variationGroup": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120,
+          "pattern": "\\S"
+        },
+        "tips": {
+          "type": "array",
+          "maxItems": 30,
+          "items": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 2000,
+            "pattern": "\\S"
+          }
+        },
+        "translations": {
+          "type": "object",
+          "additionalProperties": false,
+          "properties": {
+            "en": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "description": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000,
+                  "pattern": "\\S"
+                },
+                "instructions": {
+                  "type": "array",
+                  "maxItems": 30,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000,
+                    "pattern": "\\S"
+                  }
+                },
+                "tips": {
+                  "type": "array",
+                  "maxItems": 30,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000,
+                    "pattern": "\\S"
+                  }
+                }
+              }
+            },
+            "de": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120,
+                  "pattern": "\\S"
+                },
+                "description": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000,
+                  "pattern": "\\S"
+                },
+                "instructions": {
+                  "type": "array",
+                  "maxItems": 30,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000,
+                    "pattern": "\\S"
+                  }
+                },
+                "tips": {
+                  "type": "array",
+                  "maxItems": 30,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000,
+                    "pattern": "\\S"
+                  }
+                }
+              }
+            },
+            "es": {
+              "type": "object",
+              "additionalProperties": false,
+              "properties": {
+                "name": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120,
+                  "pattern": "\\S"
+                },
+                "description": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 2000,
+                  "pattern": "\\S"
+                },
+                "instructions": {
+                  "type": "array",
+                  "maxItems": 30,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000,
+                    "pattern": "\\S"
+                  }
+                },
+                "tips": {
+                  "type": "array",
+                  "maxItems": 30,
+                  "items": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 2000,
+                    "pattern": "\\S"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "event": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "oneOf": [
+      {
+        "$ref": "#/$defs/CatalogExercisePublished"
+      },
+      {
+        "$ref": "#/$defs/CatalogExerciseUpdated"
+      },
+      {
+        "$ref": "#/$defs/CatalogExerciseUnpublished"
+      }
+    ],
+    "$defs": {
+      "Envelope": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "producer",
+          "schemaVersion",
+          "occurredAt",
+          "aggregateId",
+          "aggregateVersion",
+          "correlationId",
+          "data"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID duy nhất. Giữ nguyên khi gửi lại."
+          },
+          "type": {
+            "type": "string"
+          },
+          "producer": {
+            "type": "string",
+            "enum": [
+              "identity",
+              "catalog",
+              "workout"
+            ]
+          },
+          "schemaVersion": {
+            "const": 1
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "aggregateId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "aggregateVersion": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "correlationId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "traceparent": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "data": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": false
+      },
+      "IdentityEmailActionRequested": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/Envelope"
+          },
+          {
+            "properties": {
+              "type": {
+                "const": "identity.email-action.requested.v1"
+              },
+              "producer": {
+                "const": "identity"
+              },
+              "aggregateId": {
+                "format": "uuid",
+                "description": "Bằng deliveryRef."
+              },
+              "aggregateVersion": {
+                "const": 1
+              },
+              "data": {
+                "type": "object",
+                "required": [
+                  "deliveryRef",
+                  "purpose",
+                  "expiresAt"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "deliveryRef": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "purpose": {
+                    "enum": [
+                      "VERIFY_EMAIL",
+                      "RESET_PASSWORD"
+                    ]
+                  },
+                  "expiresAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "CatalogChangeData": {
+        "type": "object",
+        "required": [
+          "exerciseId",
+          "revision",
+          "contentRevision"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "exerciseId": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$"
+          },
+          "revision": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,120}$"
+          },
+          "contentRevision": {
+            "type": "integer",
+            "minimum": 1
+          }
+        }
+      },
+      "CatalogExercisePublished": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/Envelope"
+          },
+          {
+            "properties": {
+              "type": {
+                "const": "catalog.exercise.published.v1"
+              },
+              "producer": {
+                "const": "catalog"
+              },
+              "aggregateId": {
+                "const": "catalog"
+              },
+              "data": {
+                "$ref": "#/$defs/CatalogChangeData"
+              }
+            }
+          }
+        ]
+      },
+      "CatalogExerciseUnpublished": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/Envelope"
+          },
+          {
+            "properties": {
+              "type": {
+                "const": "catalog.exercise.unpublished.v1"
+              },
+              "producer": {
+                "const": "catalog"
+              },
+              "aggregateId": {
+                "const": "catalog"
+              },
+              "data": {
+                "$ref": "#/$defs/CatalogUnpublishData"
+              }
+            }
+          }
+        ]
+      },
+      "WorkoutOccurrenceChanged": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/Envelope"
+          },
+          {
+            "properties": {
+              "type": {
+                "const": "workout.occurrence.changed.v1"
+              },
+              "producer": {
+                "const": "workout"
+              },
+              "aggregateId": {
+                "format": "uuid",
+                "description": "Bằng occurrenceId."
+              },
+              "data": {
+                "type": "object",
+                "required": [
+                  "occurrenceId",
+                  "userId",
+                  "status",
+                  "startAt",
+                  "endAt",
+                  "timeZone"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "occurrenceId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "userId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "status": {
+                    "enum": [
+                      "SCHEDULED",
+                      "CANCELED"
+                    ]
+                  },
+                  "startAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "endAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "timeZone": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  }
+                }
+              }
+            }
+          }
+        ]
+      },
+      "CatalogUnpublishData": {
+        "type": "object",
+        "required": [
+          "exerciseId",
+          "revision",
+          "contentRevision",
+          "reason"
+        ],
+        "additionalProperties": false,
+        "properties": {
+          "exerciseId": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$"
+          },
+          "revision": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,120}$"
+          },
+          "contentRevision": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "reason": {
+            "type": "string",
+            "enum": [
+              "ARCHIVED",
+              "WITHDRAWN"
+            ]
+          }
+        }
+      },
+      "CatalogExerciseUpdated": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/Envelope"
+          },
+          {
+            "properties": {
+              "type": {
+                "const": "catalog.exercise.updated.v1"
+              },
+              "producer": {
+                "const": "catalog"
+              },
+              "aggregateId": {
+                "const": "catalog"
+              },
+              "data": {
+                "$ref": "#/$defs/CatalogChangeData"
+              }
+            }
+          }
+        ]
+      }
+    }
+  }
+}

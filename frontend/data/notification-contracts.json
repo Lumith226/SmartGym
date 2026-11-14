@@ -1,0 +1,317 @@
+{
+  "schemas": {
+    "Problem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "title",
+        "status",
+        "code",
+        "requestId"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "format": "uri"
+        },
+        "title": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer",
+          "minimum": 400,
+          "maximum": 599
+        },
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "field",
+              "message"
+            ],
+            "properties": {
+              "field": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "NotificationPage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "items",
+        "nextCursor",
+        "unreadCount"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Notification"
+          }
+        },
+        "nextCursor": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unreadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647,
+          "description": "Tổng thông báo chưa đọc của owner, cùng snapshot với trang; không giới hạn bởi filter hoặc limit."
+        }
+      }
+    },
+    "NotificationPreferences": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reminderInAppEnabled",
+        "reminderEmailEnabled",
+        "leadMinutes",
+        "version"
+      ],
+      "properties": {
+        "reminderInAppEnabled": {
+          "type": "boolean"
+        },
+        "reminderEmailEnabled": {
+          "type": "boolean"
+        },
+        "leadMinutes": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 1440
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        }
+      }
+    },
+    "NotificationPreferencesUpdate": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reminderInAppEnabled",
+        "reminderEmailEnabled",
+        "leadMinutes"
+      ],
+      "properties": {
+        "reminderInAppEnabled": {
+          "type": "boolean"
+        },
+        "reminderEmailEnabled": {
+          "type": "boolean"
+        },
+        "leadMinutes": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 1440
+        }
+      }
+    },
+    "Notification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "title",
+        "message",
+        "occurrenceId",
+        "createdAt",
+        "readAt"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "WORKOUT_REMINDER"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "occurrenceId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "readAt": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+  },
+  "operations": [
+    {
+      "path": "/api/v1/notifications",
+      "method": "GET",
+      "name": "listNotifications",
+      "public": false,
+      "status": 200,
+      "output": "NotificationPage",
+      "errors": [
+        400,
+        401,
+        403,
+        422,
+        429,
+        503
+      ],
+      "paths": {},
+      "queries": {
+        "unreadOnly": {
+          "type": "boolean"
+        },
+        "limit": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 100
+        },
+        "cursor": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 1024
+        }
+      },
+      "requiredQueries": [],
+      "headers": {},
+      "etag": false,
+      "location": false
+    },
+    {
+      "path": "/api/v1/notifications/{notificationId}/read",
+      "method": "PUT",
+      "name": "markNotificationRead",
+      "public": false,
+      "status": 204,
+      "errors": [
+        400,
+        401,
+        403,
+        404,
+        422,
+        429,
+        503
+      ],
+      "paths": {
+        "notificationId": {
+          "type": "string",
+          "format": "uuid"
+        }
+      },
+      "queries": {},
+      "requiredQueries": [],
+      "headers": {},
+      "etag": false,
+      "location": false
+    },
+    {
+      "path": "/api/v1/notification-preferences",
+      "method": "GET",
+      "name": "getNotificationPreferences",
+      "public": false,
+      "status": 200,
+      "output": "NotificationPreferences",
+      "errors": [
+        401,
+        403,
+        429,
+        503
+      ],
+      "paths": {},
+      "queries": {},
+      "requiredQueries": [],
+      "headers": {},
+      "etag": true,
+      "location": false
+    },
+    {
+      "path": "/api/v1/notification-preferences",
+      "method": "PUT",
+      "name": "updateNotificationPreferences",
+      "public": false,
+      "status": 200,
+      "input": "NotificationPreferencesUpdate",
+      "output": "NotificationPreferences",
+      "errors": [
+        400,
+        401,
+        403,
+        412,
+        422,
+        428,
+        429,
+        503
+      ],
+      "paths": {},
+      "queries": {},
+      "requiredQueries": [],
+      "headers": {
+        "if-match": {
+          "type": "string",
+          "pattern": "^\"v[1-9][0-9]*\"$",
+          "examples": [
+            "\"v3\""
+          ]
+        }
+      },
+      "etag": true,
+      "location": false
+    }
+  ]
+}

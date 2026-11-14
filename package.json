@@ -1,0 +1,55 @@
+{
+  "name": "smartgym-web",
+  "private": true,
+  "packageManager": "pnpm@11.25.0",
+  "engines": {
+    "node": ">=24 <25"
+  },
+  "scripts": {
+    "build": "pnpm -r build",
+    "test": "pnpm --filter @smartgym/catalog test && pnpm --filter @smartgym/identity test && pnpm --filter @smartgym/notification test",
+    "test:identity": "pnpm --filter @smartgym/identity test",
+    "test:bff": "pnpm --filter @smartgym/web test",
+    "test:catalog-admin": "pnpm --filter @smartgym/catalog build && pnpm --filter @smartgym/identity build && node --test tests/integration/catalog-admin.test.mjs",
+    "test:catalog-media": "pnpm --filter @smartgym/catalog build && pnpm --filter @smartgym/identity build && node --test tests/integration/catalog-media.test.mjs",
+    "test:library-load": "pnpm --filter @smartgym/catalog build && node --test tests/integration/catalog-read-load.test.mjs",
+    "test:workout": "pnpm --filter @smartgym/workout build && pnpm --filter @smartgym/catalog build && pnpm --filter @smartgym/identity build && node --test tests/contracts/workout-time.test.mjs tests/integration/workout.test.mjs",
+    "test:notification": "pnpm --filter @smartgym/notification test",
+    "test:reminders": "pnpm --filter @smartgym/notification build && pnpm --filter @smartgym/workout build && pnpm --filter @smartgym/identity build && node --test tests/integration/reminders.test.mjs",
+    "test:email": "pnpm --filter @smartgym/identity build && pnpm --filter @smartgym/notification build && node --test tests/integration/email.test.mjs",
+    "test:system": "pnpm run build && node --test tests/system/*.test.mjs",
+    "check:boundaries": "node scripts/check-boundaries.mjs",
+    "check:contracts": "node scripts/validate-contracts.mjs && node scripts/sync-identity-contract.mjs --check && node scripts/sync-notification-contract.mjs --check && node scripts/sync-web-auth-contract.mjs --check && node scripts/sync-catalog-admin-contract.mjs --check && node scripts/sync-catalog-feed-contract.mjs --check && node scripts/validate-catalog-handoff.mjs && node scripts/sync-web-admin-contract.mjs --check && node scripts/sync-web-chat-contract.mjs --check && node scripts/sync-pose-contract.mjs --check && node scripts/sync-workout-contract.mjs --check && node scripts/sync-progress-contract.mjs --check && node scripts/sync-web-progress-contract.mjs --check && node scripts/sync-web-notification-contract.mjs --check && node scripts/sync-web-workout-contract.mjs --check && node --test tests/contracts/ai-handoff.test.mjs",
+    "test:postgres": "pnpm --filter @smartgym/catalog build && pnpm --filter @smartgym/identity build && pnpm --filter @smartgym/notification build && node scripts/test-postgres.mjs",
+    "test:browser": "pnpm run build && playwright test",
+    "check:ai-handoff": "node scripts/check-ai-handoff.mjs",
+    "test:ai-contracts": "node --test tests/contracts/ai-handoff.test.mjs",
+    "prepare:ai-tools": "node scripts/prepare-ai-tools.mjs",
+    "prepare:ai-runtime": "node scripts/prepare-ai-runtime.mjs",
+    "test:ai-providers": "node scripts/test-ai-providers.mjs",
+    "test:pose": "pnpm --filter @smartgym/pose build && pnpm --filter @smartgym/identity build && pnpm --filter @smartgym/web build && node --test tests/integration/pose.test.mjs",
+    "test:workout-bff": "node --test tests/integration/workout-bff.test.mjs tests/contracts/web-workout-time.test.mjs",
+    "test:workout-ui": "pnpm run build && pnpm run test:workout-bff && playwright test tests/browser/workout.spec.mjs",
+    "test:progress": "pnpm --filter @smartgym/progress build && pnpm --filter @smartgym/workout build && pnpm --filter @smartgym/catalog build && pnpm --filter @smartgym/identity build && node --test tests/integration/progress.test.mjs",
+    "test:progress-bff": "node --test tests/integration/progress-bff.test.mjs",
+    "test:progress-ui": "pnpm run build && pnpm run test:progress-bff && playwright test tests/browser/progress.spec.mjs",
+    "test:notifications": "pnpm --filter @smartgym/notification build && pnpm --filter @smartgym/identity build && node --test tests/integration/notifications.test.mjs",
+    "test:notifications-bff": "node --test tests/integration/notifications-bff.test.mjs",
+    "test:notifications-ui": "pnpm run build && pnpm run test:notifications-bff && playwright test tests/browser/notifications.spec.mjs",
+    "test:pose-import": "pnpm run build && node --test tests/integration/pose-import.test.mjs",
+    "test:pose-import-ui": "pnpm run build && pnpm run test:progress-bff && playwright test tests/browser/pose-import.spec.mjs",
+    "test:catalog-feed": "pnpm --filter @smartgym/catalog build && pnpm --filter @smartgym/identity build && node --test tests/integration/catalog-feed.test.mjs",
+    "check:catalog-handoff": "node scripts/validate-catalog-handoff.mjs",
+    "test:chat-bff": "node --test tests/integration/chat-bff.test.mjs"
+  },
+  "devDependencies": {
+    "@apidevtools/swagger-parser": "13.1.0",
+    "@playwright/test": "1.65.0",
+    "ajv": "8.20.0",
+    "ajv-formats": "3.0.1",
+    "axe-core": "4.11.4"
+  },
+  "optionalDependencies": {
+    "@embedded-postgres/windows-x64": "18.6.0-beta.19"
+  }
+}

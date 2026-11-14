@@ -1,0 +1,517 @@
+name: smartgym
+
+services:
+  catalog-objects:
+    image: rustfs/rustfs:latest
+    env_file: ${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog-objects.env
+    environment:
+      RUSTFS_TLS_PATH: /run/secrets
+      RUSTFS_CONSOLE_ENABLE: "false"
+    volumes:
+      - catalog-objects-data:/data
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog-objects:/run/secrets:ro"
+
+  catalog-bucket-init:
+    image: smartgym/catalog:local
+    pull_policy: never
+    env_file: ${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog.storage.env
+    command: ["node", "/bootstrap/prepare-object-bucket.mjs"]
+    volumes:
+      - ./bootstrap/prepare-object-bucket.mjs:/bootstrap/prepare-object-bucket.mjs:ro
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog:/run/secrets:ro"
+    depends_on:
+      catalog-objects:
+        condition: service_started
+
+  pose-objects:
+    image: rustfs/rustfs:latest
+    env_file: ${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose-objects.env
+    environment:
+      RUSTFS_TLS_PATH: /run/secrets
+      RUSTFS_CONSOLE_ENABLE: "false"
+    volumes:
+      - pose-objects-data:/data
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose-objects:/run/secrets:ro"
+
+  pose-bucket-init:
+    image: smartgym/catalog:local
+    pull_policy: never
+    env_file: ${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose.storage.env
+    command: ["node", "/bootstrap/prepare-object-bucket.mjs"]
+    volumes:
+      - ./bootstrap/prepare-object-bucket.mjs:/bootstrap/prepare-object-bucket.mjs:ro
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose:/run/secrets:ro"
+    depends_on:
+      pose-objects:
+        condition: service_started
+
+  clamav:
+    image: clamav/clamav:stable
+    volumes:
+      - clamav-data:/var/lib/clamav
+
+  broker:
+    image: rabbitmq:4.4
+    hostname: broker
+    volumes:
+      - broker-data:/var/lib/rabbitmq
+      - ./config/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/broker:/run/secrets:ro"
+    healthcheck:
+      test: ["CMD", "rabbitmq-diagnostics", "-q", "check_port_connectivity"]
+      interval: 5s
+      timeout: 5s
+      retries: 24
+
+  mail:
+    image: axllent/mailpit:v1
+    environment:
+      MP_DATABASE: /data/mailpit.db
+      MP_SMTP_TLS_CERT: /run/secrets/server.crt
+      MP_SMTP_TLS_KEY: /run/secrets/server.key
+      MP_SMTP_REQUIRE_STARTTLS: "true"
+    volumes:
+      - mail-data:/data
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/mail:/run/secrets:ro"
+
+  pose-engine:
+    image: smartgym/pose-engine:local
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.pose-engine
+    command: ["--source", "/source", "--host", "0.0.0.0", "--port", "8001",
+      "--key", "/run/secrets/server.key", "--cert", "/run/secrets/server.crt", "--ca", "/run/secrets/ca.crt"]
+    volumes:
+      - "${SMARTGYM_POSE_SOURCE:-../../SmartGym}/smart_gym_web_v4:/source/smart_gym_web_v4:ro"
+      - "${SMARTGYM_POSE_SOURCE:-../../SmartGym}/smart_gym_test_rtmpose_v4:/source/smart_gym_test_rtmpose_v4:ro"
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose-engine:/run/secrets:ro"
+
+  ollama:
+    image: ollama/ollama:latest
+    environment:
+      OLLAMA_MODELS: /models
+      OLLAMA_NOPRUNE: "1"
+      OLLAMA_NO_CLOUD: "1"
+    volumes:
+      - "${SMARTGYM_OLLAMA_MODELS:-${USERPROFILE}/.ollama/models}:/models:ro"
+
+  rag:
+    image: smartgym/rag:local
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.rag
+      additional_contexts:
+        rag-source: ${SMARTGYM_RAG_SOURCE:-../../smart-gym-ai/services/kb_rag}
+    command: ["--host", "0.0.0.0", "--port", "8010", "--ssl-keyfile", "/run/secrets/server.key",
+      "--ssl-certfile", "/run/secrets/server.crt", "--ssl-ca-certs", "/run/secrets/ca.crt", "--ssl-cert-reqs", "2"]
+    env_file: ${SMARTGYM_CONFIG_DIR:-../.local/compose}/rag.provider.env
+    environment:
+      KB_INDEX_DIR: /index
+      KB_GRAPH_BACKEND: local
+      OLLAMA_BASE_URL: http://ollama:11434
+      OLLAMA_CHAT_MODEL: ${SMARTGYM_CHAT_MODEL:-qwen2.5:3b}
+      OLLAMA_EMBED_MODEL: ${SMARTGYM_EMBED_MODEL:-nomic-embed-text:latest}
+    volumes:
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/rag-index:/index:ro"
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/rag:/run/secrets:ro"
+    depends_on:
+      ollama:
+        condition: service_started
+
+  catalog-db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: smartgym_catalog
+      POSTGRES_DB: smartgym_catalog
+      POSTGRES_PASSWORD: ${CATALOG_DB_PASSWORD:?Set CATALOG_DB_PASSWORD}
+    volumes:
+      - catalog-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartgym_catalog -d smartgym_catalog"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  identity-db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: smartgym_identity
+      POSTGRES_DB: smartgym_identity
+      POSTGRES_PASSWORD: ${IDENTITY_DB_PASSWORD:?Set IDENTITY_DB_PASSWORD}
+    volumes:
+      - identity-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartgym_identity -d smartgym_identity"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  notification-db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: smartgym_notification
+      POSTGRES_DB: smartgym_notification
+      POSTGRES_PASSWORD: ${NOTIFICATION_DB_PASSWORD:?Set NOTIFICATION_DB_PASSWORD}
+    volumes:
+      - notification-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartgym_notification -d smartgym_notification"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  workout-db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: smartgym_workout
+      POSTGRES_DB: smartgym_workout
+      POSTGRES_PASSWORD: ${WORKOUT_DB_PASSWORD:?Set WORKOUT_DB_PASSWORD}
+    volumes:
+      - workout-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartgym_workout -d smartgym_workout"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  progress-db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: smartgym_progress
+      POSTGRES_DB: smartgym_progress
+      POSTGRES_PASSWORD: ${PROGRESS_DB_PASSWORD:?Set PROGRESS_DB_PASSWORD}
+    volumes:
+      - progress-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartgym_progress -d smartgym_progress"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  pose-db:
+    image: postgres:18
+    environment:
+      POSTGRES_USER: smartgym_pose
+      POSTGRES_DB: smartgym_pose
+      POSTGRES_PASSWORD: ${POSE_DB_PASSWORD:?Set POSE_DB_PASSWORD}
+    volumes:
+      - pose-data:/var/lib/postgresql
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U smartgym_pose -d smartgym_pose"]
+      interval: 3s
+      timeout: 3s
+      retries: 20
+
+  catalog:
+    image: smartgym/catalog:local
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.catalog
+    env_file:
+      - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog.storage.env
+      - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog.env
+    volumes:
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog:/run/secrets:ro"
+    environment:
+      DATABASE_URL: ${CATALOG_DATABASE_URL:?Set CATALOG_DATABASE_URL}
+      HOST: 0.0.0.0
+      PORT: "3001"
+      CATALOG_ADMIN_ENABLED: "true"
+      CATALOG_MEDIA_ENABLED: ${SMARTGYM_CATALOG_MEDIA_ENABLED:-true}
+      CATALOG_MEDIA_PUBLIC_ORIGIN: ${SMARTGYM_WEB_ORIGIN:-https://127.0.0.1:3100}
+      CATALOG_MEDIA_S3_SIGNING_ORIGIN: ${SMARTGYM_WEB_ORIGIN:-https://127.0.0.1:3100}
+      CATALOG_ADMIN_HOST: 0.0.0.0
+      CATALOG_ADMIN_PORT: "3101"
+    depends_on:
+      catalog-db:
+        condition: service_healthy
+      catalog-bucket-init:
+        condition: service_completed_successfully
+      identity:
+        condition: service_started
+    command: ["sh", "-c", "node dist/migrate.js && exec node dist/main.js"]
+
+  identity:
+    image: smartgym/identity:local
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.identity
+    env_file: ${SMARTGYM_CONFIG_DIR:-../.local/compose}/identity.env
+    volumes:
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/identity:/run/secrets:ro"
+    environment:
+      IDENTITY_DATABASE_URL: ${IDENTITY_DATABASE_URL:?Set IDENTITY_DATABASE_URL}
+      HOST: 0.0.0.0
+      PORT: "3002"
+    depends_on:
+      identity-db:
+        condition: service_healthy
+    command: ["sh", "-c", "node dist/migrate.js && exec node dist/main.js"]
+
+  notification:
+    image: smartgym/notification:local
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.notification
+    env_file:
+      - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/notification.infrastructure.env
+      - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/notification.env
+    volumes:
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/notification:/run/secrets:ro"
+    environment:
+      NOTIFICATION_DATABASE_URL: ${NOTIFICATION_DATABASE_URL:?Set NOTIFICATION_DATABASE_URL}
+      HOST: 0.0.0.0
+      PORT: "3003"
+      NOTIFICATION_API_ENABLED: "true"
+    depends_on:
+      notification-db:
+        condition: service_healthy
+      broker:
+        condition: service_healthy
+      mail:
+        condition: service_started
+      identity:
+        condition: service_started
+    command: ["sh", "-c", "node dist/migrate.js && exec node dist/main.js"]
+
+  workout:
+    image: smartgym/workout:local
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.workout
+    env_file: ${SMARTGYM_CONFIG_DIR:-../.local/compose}/workout.env
+    volumes:
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/workout:/run/secrets:ro"
+    environment:
+      DATABASE_URL: ${WORKOUT_DATABASE_URL:?Set WORKOUT_DATABASE_URL}
+      WORKOUT_HOST: 0.0.0.0
+      WORKOUT_PORT: "3444"
+    depends_on:
+      workout-db:
+        condition: service_healthy
+      identity:
+        condition: service_started
+      catalog:
+        condition: service_started
+    command: ["sh", "-c", "node dist/migrate.js && exec node dist/main.js"]
+
+  progress:
+    image: smartgym/progress:local
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.progress
+    env_file: ${SMARTGYM_CONFIG_DIR:-../.local/compose}/progress.env
+    volumes:
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/progress:/run/secrets:ro"
+    environment:
+      DATABASE_URL: ${PROGRESS_DATABASE_URL:?Set PROGRESS_DATABASE_URL}
+      PROGRESS_HOST: 0.0.0.0
+      PROGRESS_PORT: "3445"
+    depends_on:
+      progress-db:
+        condition: service_healthy
+      identity:
+        condition: service_started
+      catalog:
+        condition: service_started
+      workout:
+        condition: service_started
+      pose:
+        condition: service_started
+    command: ["sh", "-c", "node dist/migrate.js && exec node dist/main.js"]
+
+  pose:
+    image: smartgym/pose:local
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.pose
+    env_file:
+      - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose.engine.env
+      - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose.storage.env
+      - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose.env
+    volumes:
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose:/run/secrets:ro"
+    environment:
+      DATABASE_URL: ${POSE_DATABASE_URL:?Set POSE_DATABASE_URL}
+      POSE_HOST: 0.0.0.0
+      POSE_PORT: "3443"
+      POSE_ENGINE_ORIGIN: ${SMARTGYM_POSE_ENGINE_ORIGIN:-https://pose-engine:8001}
+      POSE_LIVE_ENABLED: "true"
+      POSE_UPLOAD_ENABLED: "true"
+      POSE_S3_SIGNING_ORIGIN: ${SMARTGYM_WEB_ORIGIN:-https://127.0.0.1:3100}
+    depends_on:
+      pose-db:
+        condition: service_healthy
+      pose-bucket-init:
+        condition: service_completed_successfully
+      pose-engine:
+        condition: service_started
+      identity:
+        condition: service_started
+    command: ["sh", "-c", "node dist/migrate.js && exec node dist/main.js"]
+
+  identity-relay:
+    image: smartgym/identity:local
+    pull_policy: never
+    env_file:
+      - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/identity.infrastructure.env
+      - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/identity.env
+    volumes:
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/identity:/run/secrets:ro"
+    environment:
+      IDENTITY_DATABASE_URL: ${IDENTITY_DATABASE_URL:?Set IDENTITY_DATABASE_URL}
+    depends_on:
+      identity:
+        condition: service_started
+      broker:
+        condition: service_healthy
+    restart: on-failure
+    command: ["node", "dist/relay-main.js"]
+
+  workout-relay:
+    image: smartgym/workout:local
+    pull_policy: never
+    env_file:
+      - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/workout.infrastructure.env
+      - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/workout.env
+    volumes:
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/workout:/run/secrets:ro"
+    environment:
+      DATABASE_URL: ${WORKOUT_DATABASE_URL:?Set WORKOUT_DATABASE_URL}
+    depends_on:
+      workout:
+        condition: service_started
+      broker:
+        condition: service_healthy
+    restart: on-failure
+    command: ["node", "dist/relay-main.js"]
+
+  workout-materializer:
+    image: smartgym/workout:local
+    pull_policy: never
+    env_file: ${SMARTGYM_CONFIG_DIR:-../.local/compose}/workout.env
+    volumes:
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/workout:/run/secrets:ro"
+    environment:
+      DATABASE_URL: ${WORKOUT_DATABASE_URL:?Set WORKOUT_DATABASE_URL}
+    depends_on:
+      workout:
+        condition: service_started
+    restart: on-failure
+    command: ["node", "dist/materializer-main.js"]
+
+  catalog-relay:
+    image: smartgym/catalog:local
+    pull_policy: never
+    env_file:
+      - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog.infrastructure.env
+      - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog.env
+    volumes:
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog:/run/secrets:ro"
+    environment:
+      DATABASE_URL: ${CATALOG_DATABASE_URL:?Set CATALOG_DATABASE_URL}
+    depends_on:
+      catalog:
+        condition: service_started
+      broker:
+        condition: service_healthy
+    restart: on-failure
+    command: ["node", "dist/relay-main.js"]
+
+  catalog-media-worker:
+    image: smartgym/catalog:local
+    pull_policy: never
+    env_file:
+      - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog.storage.env
+      - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog.env
+    volumes:
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/catalog:/run/secrets:ro"
+    environment:
+      DATABASE_URL: ${CATALOG_DATABASE_URL:?Set CATALOG_DATABASE_URL}
+      CATALOG_MEDIA_ENABLED: "true"
+      CATALOG_MEDIA_PUBLIC_ORIGIN: ${SMARTGYM_WEB_ORIGIN:-https://127.0.0.1:3100}
+    depends_on:
+      catalog:
+        condition: service_started
+      clamav:
+        condition: service_started
+    restart: on-failure
+    command: ["node", "dist/media-worker.js"]
+
+  pose-worker:
+    image: smartgym/pose:local
+    pull_policy: never
+    env_file:
+      - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose.engine.env
+      - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose.storage.env
+      - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose.env
+    volumes:
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/pose:/run/secrets:ro"
+    environment:
+      DATABASE_URL: ${POSE_DATABASE_URL:?Set POSE_DATABASE_URL}
+      POSE_ENGINE_ORIGIN: ${SMARTGYM_POSE_ENGINE_ORIGIN:-https://pose-engine:8001}
+    depends_on:
+      pose:
+        condition: service_started
+    restart: on-failure
+    command: ["node", "dist/worker-main.js"]
+
+  web:
+    image: smartgym/web:local
+    build:
+      context: ..
+      dockerfile: infra/docker/Dockerfile.web
+    env_file:
+      - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/web.rag.env
+      - ${SMARTGYM_CONFIG_DIR:-../.local/compose}/web.env
+    volumes:
+      - "${SMARTGYM_CONFIG_DIR:-../.local/compose}/web:/run/secrets:ro"
+    environment:
+      HOST: 0.0.0.0
+      PORT: "3100"
+      CATALOG_URL: http://catalog:3001
+      BFF_AUTH_ENABLED: "true"
+      BFF_WEB_ORIGIN: ${SMARTGYM_WEB_ORIGIN:-https://127.0.0.1:3100}
+      BFF_CATALOG_MEDIA_ORIGIN: ${SMARTGYM_WEB_ORIGIN:-https://127.0.0.1:3100}
+      BFF_POSE_UPLOAD_ORIGIN: ${SMARTGYM_WEB_ORIGIN:-https://127.0.0.1:3100}
+      WEB_CATALOG_MEDIA_ORIGIN: ${SMARTGYM_WEB_ORIGIN:-https://127.0.0.1:3100}
+      WEB_CATALOG_OBJECT_ORIGIN: https://catalog-objects:9000
+      WEB_POSE_OBJECT_ORIGIN: https://pose-objects:9000
+      WEB_OBJECT_STORAGE_CA_FILE: /run/secrets/ca.crt
+      BFF_POSE_LIVE_ENABLED: ${SMARTGYM_WEB_POSE_LIVE_ENABLED:-true}
+      BFF_POSE_STUDIO_ENGINE_ORIGIN: ${SMARTGYM_POSE_ENGINE_ORIGIN:-https://pose-engine:8001}
+      BFF_POSE_STUDIO_TLS_KEY_FILE: /run/secrets/pose-studio-client.key
+      BFF_POSE_STUDIO_TLS_CERT_FILE: /run/secrets/pose-studio-client.crt
+      BFF_POSE_STUDIO_TLS_CA_FILE: /run/secrets/pose-studio-ca.crt
+      BFF_RAG_ENABLED: ${SMARTGYM_WEB_RAG_ENABLED:-true}
+      BFF_RAG_DEADLINE_MS: ${SMARTGYM_RAG_DEADLINE_MS:-180000}
+    ports:
+      - "127.0.0.1:3100:3100"
+    depends_on:
+      catalog:
+        condition: service_started
+      identity:
+        condition: service_started
+      notification:
+        condition: service_started
+      workout:
+        condition: service_started
+      progress:
+        condition: service_started
+      pose:
+        condition: service_started
+      rag:
+        condition: service_started
+
+volumes:
+  catalog-objects-data:
+  pose-objects-data:
+  clamav-data:
+  broker-data:
+  mail-data:
+  catalog-data:
+  identity-data:
+  notification-data:
+  workout-data:
+  progress-data:
+  pose-data:

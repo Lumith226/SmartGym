@@ -1,0 +1,155 @@
+[
+  {
+    "id": "bench-press",
+    "viewBox": "0 0 320 200",
+    "svgInner": "<!-- Flat Bench Structure -->\n                <rect x=\"50\" y=\"140\" width=\"220\" height=\"14\" rx=\"4\" fill=\"#181a20\" stroke=\"#181a20\" stroke-width=\"2\"/>\n                <rect x=\"75\" y=\"154\" width=\"12\" height=\"32\" fill=\"#2d313d\"/>\n                <rect x=\"233\" y=\"154\" width=\"12\" height=\"32\" fill=\"#2d313d\"/>\n                <!-- Bench Uprights & Rack -->\n                <rect x=\"68\" y=\"70\" width=\"8\" height=\"70\" fill=\"#4b5563\"/>\n                <rect x=\"62\" y=\"65\" width=\"20\" height=\"6\" rx=\"2\" fill=\"#1f2937\"/>\n                <!-- Human Figure on Bench -->\n                <!-- Head -->\n                <circle cx=\"95\" cy=\"130\" r=\"11\" fill=\"#181a20\"/>\n                <!-- Torso with Pec Highlight (Indigo Accent) -->\n                <path d=\"M106 132 C125 130 160 131 185 136 L185 140 L106 140 Z\" fill=\"#181a20\"/>\n                <!-- Highlighted Chest Area (Biomechanics Vector) -->\n                <path d=\"M118 126 C132 120 152 122 160 130 C145 134 130 133 118 126 Z\" fill=\"#6366f1\" fill-opacity=\"0.85\"/>\n                <!-- Arms pushing up -->\n                <path d=\"M125 128 L142 85 L156 58\" stroke=\"#181a20\" stroke-width=\"8\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n                <!-- Barbell (Thanh tạ đòn) -->\n                <rect x=\"25\" y=\"52\" width=\"270\" height=\"7\" rx=\"3.5\" fill=\"#181a20\"/>\n                <!-- Weight Plates -->\n                <rect x=\"42\" y=\"32\" width=\"10\" height=\"47\" rx=\"3\" fill=\"#181a20\"/>\n                <rect x=\"34\" y=\"38\" width=\"6\" height=\"35\" rx=\"2\" fill=\"#4338ca\"/>\n                <rect x=\"268\" y=\"32\" width=\"10\" height=\"47\" rx=\"3\" fill=\"#181a20\"/>\n                <rect x=\"280\" y=\"38\" width=\"6\" height=\"35\" rx=\"2\" fill=\"#4338ca\"/>\n                <!-- Motion Vector Force Arrows -->\n                <path d=\"M156 50 L156 26 M152 32 L156 25 L160 32\" stroke=\"#6366f1\" stroke-width=\"2.5\" stroke-linecap=\"round\"/>\n                <!-- Feet planted on floor -->\n                <path d=\"M185 136 L210 155 L214 186\" stroke=\"#181a20\" stroke-width=\"8\" stroke-linecap=\"round\"/>",
+    "titleVi": "Bench Press — Nằm đẩy tạ đòn ngang",
+    "titleEn": "Barbell Flat Bench Press",
+    "specs": "3–4 hiệp × 8–10 lần · Nghỉ 90s",
+    "tags": [
+      "Cơ ngực lớn",
+      "Tay sau",
+      "Thanh tạ đòn"
+    ]
+  },
+  {
+    "id": "incline-dumbbell",
+    "viewBox": "0 0 320 200",
+    "svgInner": "<!-- 30° Incline Bench -->\n                <path d=\"M70 165 L180 90 L188 100 L78 175 Z\" fill=\"#181a20\"/>\n                <rect x=\"75\" y=\"170\" width=\"100\" height=\"12\" fill=\"#2d313d\"/>\n                <!-- Upper Chest Highlight -->\n                <circle cx=\"170\" cy=\"80\" r=\"10\" fill=\"#181a20\"/>\n                <path d=\"M155 94 C140 108 120 120 100 135\" stroke=\"#181a20\" stroke-width=\"12\" stroke-linecap=\"round\"/>\n                <path d=\"M140 92 C148 88 158 95 154 105 Z\" fill=\"#6366f1\"/>\n                <!-- Arms with Dumbbells -->\n                <path d=\"M142 98 L128 65\" stroke=\"#181a20\" stroke-width=\"7\" stroke-linecap=\"round\"/>\n                <path d=\"M152 102 L175 62\" stroke=\"#181a20\" stroke-width=\"7\" stroke-linecap=\"round\"/>\n                <!-- Dumbbells -->\n                <rect x=\"115\" y=\"58\" width=\"26\" height=\"8\" rx=\"3\" fill=\"#181a20\"/>\n                <rect x=\"110\" y=\"52\" width=\"7\" height=\"20\" rx=\"2\" fill=\"#4f46e5\"/>\n                <rect x=\"139\" y=\"52\" width=\"7\" height=\"20\" rx=\"2\" fill=\"#4f46e5\"/>\n                <rect x=\"162\" y=\"55\" width=\"26\" height=\"8\" rx=\"3\" fill=\"#181a20\"/>\n                <rect x=\"157\" y=\"49\" width=\"7\" height=\"20\" rx=\"2\" fill=\"#4f46e5\"/>\n                <rect x=\"186\" y=\"49\" width=\"7\" height=\"20\" rx=\"2\" fill=\"#4f46e5\"/>\n                <!-- Motion arrows -->\n                <path d=\"M128 50 L128 35 M175 45 L175 30\" stroke=\"#6366f1\" stroke-width=\"2\" stroke-linecap=\"round\"/>",
+    "titleVi": "Incline Dumbbell Press — Đẩy tạ đôi dốc lên",
+    "titleEn": "Incline Dumbbell Chest Press",
+    "specs": "3 hiệp × 10–12 lần · Nghỉ 75s",
+    "tags": [
+      "Cơ ngực trên",
+      "Vai trước",
+      "Tạ đôi (Dumbbell)"
+    ]
+  },
+  {
+    "id": "pull-up",
+    "viewBox": "0 0 320 200",
+    "svgInner": "<!-- Overhead Pull-up Bar -->\n                <rect x=\"30\" y=\"25\" width=\"260\" height=\"7\" rx=\"3.5\" fill=\"#181a20\"/>\n                <path d=\"M40 25 L40 5 M280 25 L280 5\" stroke=\"#4b5563\" stroke-width=\"4\"/>\n                <!-- Wide Grip Hands -->\n                <circle cx=\"95\" cy=\"28\" r=\"5\" fill=\"#181a20\"/>\n                <circle cx=\"225\" cy=\"28\" r=\"5\" fill=\"#181a20\"/>\n                <!-- Arms flexed pulling up -->\n                <path d=\"M95 28 L125 55 L145 70\" stroke=\"#181a20\" stroke-width=\"8\" stroke-linecap=\"round\"/>\n                <path d=\"M225 28 L195 55 L175 70\" stroke=\"#181a20\" stroke-width=\"8\" stroke-linecap=\"round\"/>\n                <!-- Head chin clearing bar -->\n                <circle cx=\"160\" cy=\"55\" r=\"11\" fill=\"#181a20\"/>\n                <!-- V-Taper Lats Highlight (Indigo Glow) -->\n                <path d=\"M145 68 C135 90 145 120 152 135 L168 135 C175 120 185 90 175 68 Z\" fill=\"#181a20\"/>\n                <path d=\"M142 75 C132 92 144 112 150 118 L152 95 Z\" fill=\"#6366f1\"/>\n                <path d=\"M178 75 C188 92 176 112 170 118 L168 95 Z\" fill=\"#6366f1\"/>\n                <!-- Legs crossed -->\n                <path d=\"M152 135 L155 175 L162 188\" stroke=\"#181a20\" stroke-width=\"7\" stroke-linecap=\"round\"/>\n                <path d=\"M168 135 L165 175 L158 188\" stroke=\"#181a20\" stroke-width=\"7\" stroke-linecap=\"round\"/>\n                <!-- Upward Motion Vector -->\n                <path d=\"M160 38 L160 14 M155 20 L160 12 L165 20\" stroke=\"#6366f1\" stroke-width=\"2.5\" stroke-linecap=\"round\"/>",
+    "titleVi": "Pull-up — Hít xà đơn tay rộng phát triển xô",
+    "titleEn": "Wide-Grip Bodyweight Pull-up",
+    "specs": "4 hiệp × 6–10 lần · Nghỉ 90s",
+    "tags": [
+      "Cơ lưng xô (Lats)",
+      "Cơ nhị đầu",
+      "Khung xà đơn"
+    ]
+  },
+  {
+    "id": "barbell-squat",
+    "viewBox": "0 0 320 200",
+    "svgInner": "<!-- Squat Depth Guide Line (90° parallel) -->\n                <line x1=\"60\" y1=\"135\" x2=\"260\" y2=\"135\" stroke=\"#f97316\" stroke-dasharray=\"4 4\" stroke-width=\"1.5\"/>\n                <!-- Lifter in deep squat position -->\n                <circle cx=\"140\" cy=\"88\" r=\"10\" fill=\"#181a20\"/>\n                <!-- Torso inclined -->\n                <path d=\"M140 98 L160 135\" stroke=\"#181a20\" stroke-width=\"14\" stroke-linecap=\"round\"/>\n                <!-- High Barbell across traps -->\n                <rect x=\"40\" y=\"80\" width=\"240\" height=\"7\" rx=\"3.5\" fill=\"#181a20\"/>\n                <rect x=\"55\" y=\"60\" width=\"12\" height=\"47\" rx=\"3\" fill=\"#181a20\"/>\n                <rect x=\"253\" y=\"60\" width=\"12\" height=\"47\" rx=\"3\" fill=\"#181a20\"/>\n                <!-- Thigh parallel: Quad highlight (Indigo) -->\n                <path d=\"M160 135 L125 136\" stroke=\"#6366f1\" stroke-width=\"14\" stroke-linecap=\"round\"/>\n                <!-- Shin & Foot -->\n                <path d=\"M125 136 L130 180 L115 183\" stroke=\"#181a20\" stroke-width=\"9\" stroke-linecap=\"round\"/>\n                <!-- Glute power point -->\n                <circle cx=\"165\" cy=\"138\" r=\"5\" fill=\"#f97316\"/>\n                <!-- Vertical Force Arrow -->\n                <path d=\"M160 68 L160 48 M155 54 L160 46 L165 54\" stroke=\"#6366f1\" stroke-width=\"2.5\" stroke-linecap=\"round\"/>",
+    "titleVi": "Barbell Back Squat — Gánh tạ đòn sâu",
+    "titleEn": "High-Bar Barbell Squat",
+    "specs": "4 hiệp × 6–8 lần · Nghỉ 120s",
+    "tags": [
+      "Cơ đùi trước (Quads)",
+      "Cơ mông",
+      "Khung gánh tạ"
+    ]
+  },
+  {
+    "id": "barbell-deadlift",
+    "viewBox": "0 0 320 200",
+    "svgInner": "<!-- Olympic Bar on floor -->\n                <rect x=\"35\" y=\"152\" width=\"250\" height=\"7\" rx=\"3.5\" fill=\"#181a20\"/>\n                <!-- Bumper Plates on floor -->\n                <circle cx=\"65\" cy=\"155\" r=\"28\" fill=\"#181a20\"/>\n                <circle cx=\"255\" cy=\"155\" r=\"28\" fill=\"#181a20\"/>\n                <circle cx=\"65\" cy=\"155\" r=\"8\" fill=\"#6366f1\"/>\n                <circle cx=\"255\" cy=\"155\" r=\"8\" fill=\"#6366f1\"/>\n                <!-- Setup human figure with neutral spine -->\n                <circle cx=\"130\" cy=\"95\" r=\"10\" fill=\"#181a20\"/>\n                <!-- Spine line with posture check -->\n                <path d=\"M136 102 L185 125\" stroke=\"#181a20\" stroke-width=\"12\" stroke-linecap=\"round\"/>\n                <!-- Arms hanging straight down to bar -->\n                <path d=\"M145 106 L158 152\" stroke=\"#181a20\" stroke-width=\"7\" stroke-linecap=\"round\"/>\n                <!-- Legs / Hamstrings stretch highlight -->\n                <path d=\"M185 125 L168 150 L166 182\" stroke=\"#6366f1\" stroke-width=\"9\" stroke-linecap=\"round\"/>\n                <!-- Kinematic angle angle arc -->\n                <path d=\"M172 135 A 15 15 0 0 1 182 120\" stroke=\"#f97316\" stroke-width=\"2\" fill=\"none\"/>",
+    "titleVi": "Barbell Deadlift — Cử tạ nhấc sàn truyền thống",
+    "titleEn": "Conventional Barbell Deadlift",
+    "specs": "3 hiệp × 5 lần · Nghỉ 150s",
+    "tags": [
+      "Đùi sau & Mông",
+      "Lưng dưới",
+      "Thanh đòn Olympic"
+    ]
+  },
+  {
+    "id": "push-up",
+    "viewBox": "0 0 320 200",
+    "svgInner": "<!-- Ground line -->\n                <line x1=\"30\" y1=\"165\" x2=\"290\" y2=\"165\" stroke=\"#181a20\" stroke-width=\"3\"/>\n                <!-- Figure in perfect plank pushup position -->\n                <circle cx=\"95\" cy=\"100\" r=\"10\" fill=\"#181a20\"/>\n                <!-- Body straight line (Heels to head) -->\n                <path d=\"M104 105 L245 152\" stroke=\"#181a20\" stroke-width=\"12\" stroke-linecap=\"round\"/>\n                <!-- Chest & Arm pressing floor -->\n                <path d=\"M115 110 L115 165\" stroke=\"#6366f1\" stroke-width=\"7\" stroke-linecap=\"round\"/>\n                <path d=\"M108 108 C120 102 135 106 140 115 Z\" fill=\"#6366f1\"/>\n                <!-- Toe pivot on floor -->\n                <circle cx=\"246\" cy=\"158\" r=\"4\" fill=\"#181a20\"/>\n                <!-- Biomechanical angle validation tick -->\n                <path d=\"M125 150 L128 153 L134 147\" stroke=\"#10b981\" stroke-width=\"2.5\" stroke-linecap=\"round\"/>",
+    "titleVi": "Push-up — Chống đẩy hít đất tiêu chuẩn",
+    "titleEn": "Standard Bodyweight Push-up",
+    "specs": "3 hiệp × 15–20 lần · Nghỉ 60s",
+    "tags": [
+      "Cơ ngực",
+      "Cơ bụng Core",
+      "Trọng lượng cơ thể"
+    ]
+  },
+  {
+    "id": "overhead-press",
+    "viewBox": "0 0 320 200",
+    "svgInner": "<!-- Barbell overhead lockout -->\n                <rect x=\"50\" y=\"32\" width=\"220\" height=\"6\" rx=\"3\" fill=\"#181a20\"/>\n                <rect x=\"68\" y=\"20\" width=\"10\" height=\"30\" rx=\"2\" fill=\"#181a20\"/>\n                <rect x=\"242\" y=\"20\" width=\"10\" height=\"30\" rx=\"2\" fill=\"#181a20\"/>\n                <!-- Standing athlete -->\n                <circle cx=\"160\" cy=\"75\" r=\"10\" fill=\"#181a20\"/>\n                <!-- Arms locked out overhead -->\n                <path d=\"M160 88 L142 55 L135 34\" stroke=\"#181a20\" stroke-width=\"7\" stroke-linecap=\"round\"/>\n                <path d=\"M160 88 L178 55 L185 34\" stroke=\"#181a20\" stroke-width=\"7\" stroke-linecap=\"round\"/>\n                <!-- Deltoids Highlight (Indigo) -->\n                <circle cx=\"145\" cy=\"85\" r=\"6\" fill=\"#6366f1\"/>\n                <circle cx=\"175\" cy=\"85\" r=\"6\" fill=\"#6366f1\"/>\n                <!-- Torso & legs -->\n                <path d=\"M160 88 L160 135\" stroke=\"#181a20\" stroke-width=\"12\" stroke-linecap=\"round\"/>\n                <path d=\"M160 135 L150 185 M160 135 L170 185\" stroke=\"#181a20\" stroke-width=\"8\" stroke-linecap=\"round\"/>",
+    "titleVi": "Overhead Press — Đẩy tạ đòn qua đầu đứng",
+    "titleEn": "Standing Military Barbell Press",
+    "specs": "4 hiệp × 6–8 lần · Nghỉ 90s",
+    "tags": [
+      "Cơ vai (Deltoids)",
+      "Cơ tay sau",
+      "Thanh tạ đòn"
+    ]
+  },
+  {
+    "id": "bicep-curl",
+    "viewBox": "0 0 320 200",
+    "svgInner": "<!-- Standing figure side angle -->\n                <circle cx=\"150\" cy=\"65\" r=\"10\" fill=\"#181a20\"/>\n                <path d=\"M150 75 L150 135\" stroke=\"#181a20\" stroke-width=\"12\" stroke-linecap=\"round\"/>\n                <!-- Upper arm pinned to rib cage -->\n                <path d=\"M150 82 L152 110\" stroke=\"#181a20\" stroke-width=\"8\" stroke-linecap=\"round\"/>\n                <!-- Forearm flexed 90 degrees -->\n                <path d=\"M152 110 L180 92\" stroke=\"#181a20\" stroke-width=\"7\" stroke-linecap=\"round\"/>\n                <!-- Biceps Peak Highlight (Indigo) -->\n                <ellipse cx=\"160\" cy=\"98\" rx=\"8\" ry=\"6\" transform=\"rotate(-30 160 98)\" fill=\"#6366f1\"/>\n                <!-- Dumbbell -->\n                <rect x=\"175\" y=\"85\" width=\"20\" height=\"7\" rx=\"2\" fill=\"#181a20\"/>\n                <rect x=\"171\" y=\"80\" width=\"5\" height=\"17\" rx=\"1.5\" fill=\"#4338ca\"/>\n                <rect x=\"194\" y=\"80\" width=\"5\" height=\"17\" rx=\"1.5\" fill=\"#4338ca\"/>\n                <!-- Legs -->\n                <path d=\"M150 135 L145 185 M150 135 L155 185\" stroke=\"#181a20\" stroke-width=\"8\" stroke-linecap=\"round\"/>",
+    "titleVi": "Dumbbell Bicep Curl — Cuốn tạ đơn tay trước",
+    "titleEn": "Standing Dumbbell Bicep Curl",
+    "specs": "3 hiệp × 10–12 lần · Nghỉ 60s",
+    "tags": [
+      "Cơ tay trước (Biceps)",
+      "Tạ đơn (Dumbbell)"
+    ]
+  },
+  {
+    "id": "elbow-plank",
+    "viewBox": "0 0 320 200",
+    "svgInner": "<!-- Mat / Floor line -->\n                <line x1=\"30\" y1=\"162\" x2=\"290\" y2=\"162\" stroke=\"#181a20\" stroke-width=\"3\"/>\n                <!-- Figure in elbow plank -->\n                <circle cx=\"85\" cy=\"115\" r=\"9\" fill=\"#181a20\"/>\n                <!-- Forearm on ground 90° -->\n                <path d=\"M102 125 L102 162 L120 162\" stroke=\"#181a20\" stroke-width=\"7\" stroke-linecap=\"round\" stroke-linejoin=\"round\"/>\n                <!-- Torso & Core in tension -->\n                <path d=\"M102 125 L230 152\" stroke=\"#181a20\" stroke-width=\"12\" stroke-linecap=\"round\"/>\n                <!-- Core Abs Six-pack tension zone (Indigo) -->\n                <rect x=\"135\" y=\"128\" width=\"45\" height=\"10\" rx=\"3\" fill=\"#6366f1\" transform=\"rotate(12 135 128)\"/>\n                <!-- Toes tucked -->\n                <circle cx=\"230\" cy=\"158\" r=\"4\" fill=\"#181a20\"/>\n                <!-- Pose tracking line -->\n                <line x1=\"85\" y1=\"115\" x2=\"230\" y2=\"152\" stroke=\"#06b6d4\" stroke-width=\"1.5\" stroke-dasharray=\"3 3\"/>",
+    "titleVi": "Elbow Plank — Gập người giữ phẳng bụng Core",
+    "titleEn": "Forearm Isometric Core Plank",
+    "specs": "3 hiệp × 45–60 giây · Nghỉ 45s",
+    "tags": [
+      "Cơ bụng thẳng",
+      "Cơ liên sườn",
+      "Thảm tập"
+    ]
+  },
+  {
+    "id": "romanian-deadlift",
+    "viewBox": "0 0 320 200",
+    "svgInner": "<!-- Hip hinge RDL -->\n                <circle cx=\"115\" cy=\"80\" r=\"10\" fill=\"#181a20\"/>\n                <!-- Torso hinged forward -->\n                <path d=\"M122 88 L175 115\" stroke=\"#181a20\" stroke-width=\"12\" stroke-linecap=\"round\"/>\n                <!-- Arms holding dumbbells below knee -->\n                <path d=\"M135 94 L138 145\" stroke=\"#181a20\" stroke-width=\"7\" stroke-linecap=\"round\"/>\n                <rect x=\"128\" y=\"142\" width=\"20\" height=\"7\" rx=\"2\" fill=\"#181a20\"/>\n                <!-- Hamstrings stretch stretch (Indigo) -->\n                <path d=\"M175 115 L165 150 L163 185\" stroke=\"#6366f1\" stroke-width=\"10\" stroke-linecap=\"round\"/>\n                <!-- Hip push-back vector -->\n                <path d=\"M175 115 L200 115 M195 110 L203 115 L195 120\" stroke=\"#f59e0b\" stroke-width=\"2.5\" stroke-linecap=\"round\"/>",
+    "titleVi": "Romanian Deadlift — Cúi gập tạ đùi sau & mông",
+    "titleEn": "Dumbbell Romanian Deadlift (RDL)",
+    "specs": "3 hiệp × 10–12 lần · Nghỉ 75s",
+    "tags": [
+      "Cơ đùi sau",
+      "Cơ mông lớn",
+      "Tạ đôi (Dumbbell)"
+    ]
+  },
+  {
+    "id": "triceps-pushdown",
+    "viewBox": "0 0 320 200",
+    "svgInner": "<!-- Cable Pulley top -->\n                <circle cx=\"190\" cy=\"25\" r=\"7\" fill=\"#181a20\"/>\n                <line x1=\"190\" y1=\"32\" x2=\"175\" y2=\"105\" stroke=\"#4b5563\" stroke-width=\"2.5\"/>\n                <!-- Standing athlete -->\n                <circle cx=\"130\" cy=\"65\" r=\"10\" fill=\"#181a20\"/>\n                <path d=\"M130 75 L135 130\" stroke=\"#181a20\" stroke-width=\"12\" stroke-linecap=\"round\"/>\n                <!-- Upper arm pinned, Triceps horseshoe highlight -->\n                <path d=\"M135 85 L145 115\" stroke=\"#6366f1\" stroke-width=\"9\" stroke-linecap=\"round\"/>\n                <!-- Forearm pushing rope down -->\n                <path d=\"M145 115 L175 142\" stroke=\"#181a20\" stroke-width=\"7\" stroke-linecap=\"round\"/>\n                <circle cx=\"178\" cy=\"144\" r=\"4\" fill=\"#181a20\"/>\n                <!-- Legs slightly bent -->\n                <path d=\"M135 130 L125 180 M135 130 L145 180\" stroke=\"#181a20\" stroke-width=\"8\" stroke-linecap=\"round\"/>",
+    "titleVi": "Triceps Pushdown — Kéo cáp dây thừng tay sau",
+    "titleEn": "Cable Rope Triceps Extension",
+    "specs": "3 hiệp × 12–15 lần · Nghỉ 60s",
+    "tags": [
+      "Cơ tay sau (Triceps)",
+      "Máy kéo cáp Cable"
+    ]
+  },
+  {
+    "id": "calf-raise",
+    "viewBox": "0 0 320 200",
+    "svgInner": "<!-- Step platform -->\n                <rect x=\"100\" y=\"165\" width=\"120\" height=\"15\" rx=\"3\" fill=\"#181a20\"/>\n                <!-- Standing figure on tiptoes -->\n                <circle cx=\"160\" cy=\"55\" r=\"9\" fill=\"#181a20\"/>\n                <path d=\"M160 64 L160 120\" stroke=\"#181a20\" stroke-width=\"11\" stroke-linecap=\"round\"/>\n                <!-- Calves diamond highlight on tiptoe (Indigo) -->\n                <path d=\"M160 120 L158 145\" stroke=\"#181a20\" stroke-width=\"8\" stroke-linecap=\"round\"/>\n                <ellipse cx=\"158\" cy=\"148\" rx=\"8\" ry=\"11\" fill=\"#6366f1\"/>\n                <!-- Foot plantar-flexed high -->\n                <path d=\"M158 158 L152 165\" stroke=\"#181a20\" stroke-width=\"7\" stroke-linecap=\"round\"/>\n                <!-- Upward arrow -->\n                <path d=\"M135 150 L135 130 M131 136 L135 128 L139 136\" stroke=\"#10b981\" stroke-width=\"2.5\" stroke-linecap=\"round\"/>",
+    "titleVi": "Standing Calf Raise — Kiễng gót bắp chân tạ đơn",
+    "titleEn": "Single-Leg Standing Calf Raise",
+    "specs": "4 hiệp × 15–20 lần · Nghỉ 45s",
+    "tags": [
+      "Cơ bắp chân (Gastrocnemius)",
+      "Bục kiễng"
+    ]
+  }
+]

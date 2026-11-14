@@ -1,0 +1,567 @@
+{
+  "event": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$ref": "#/$defs/IdentityEmailActionRequested",
+    "$defs": {
+      "Envelope": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "producer",
+          "schemaVersion",
+          "occurredAt",
+          "aggregateId",
+          "aggregateVersion",
+          "correlationId",
+          "data"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID duy nhất. Giữ nguyên khi gửi lại."
+          },
+          "type": {
+            "type": "string"
+          },
+          "producer": {
+            "type": "string",
+            "enum": [
+              "identity",
+              "catalog",
+              "workout"
+            ]
+          },
+          "schemaVersion": {
+            "const": 1
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "aggregateId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "aggregateVersion": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "correlationId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "traceparent": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "data": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": false
+      },
+      "IdentityEmailActionRequested": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/Envelope"
+          },
+          {
+            "properties": {
+              "type": {
+                "const": "identity.email-action.requested.v1"
+              },
+              "producer": {
+                "const": "identity"
+              },
+              "aggregateId": {
+                "format": "uuid",
+                "description": "Bằng deliveryRef."
+              },
+              "aggregateVersion": {
+                "const": 1
+              },
+              "data": {
+                "type": "object",
+                "required": [
+                  "deliveryRef",
+                  "purpose",
+                  "expiresAt"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "deliveryRef": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "purpose": {
+                    "enum": [
+                      "VERIFY_EMAIL",
+                      "RESET_PASSWORD"
+                    ]
+                  },
+                  "expiresAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "occurrenceEvent": {
+    "$schema": "https://json-schema.org/draft/2020-12/schema",
+    "$ref": "#/$defs/WorkoutOccurrenceChanged",
+    "$defs": {
+      "Envelope": {
+        "type": "object",
+        "required": [
+          "id",
+          "type",
+          "producer",
+          "schemaVersion",
+          "occurredAt",
+          "aggregateId",
+          "aggregateVersion",
+          "correlationId",
+          "data"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid",
+            "description": "ID duy nhất. Giữ nguyên khi gửi lại."
+          },
+          "type": {
+            "type": "string"
+          },
+          "producer": {
+            "type": "string",
+            "enum": [
+              "identity",
+              "catalog",
+              "workout"
+            ]
+          },
+          "schemaVersion": {
+            "const": 1
+          },
+          "occurredAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "aggregateId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80
+          },
+          "aggregateVersion": {
+            "type": "integer",
+            "minimum": 1
+          },
+          "correlationId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "traceparent": {
+            "type": "string",
+            "maxLength": 100
+          },
+          "data": {
+            "type": "object"
+          }
+        },
+        "additionalProperties": false
+      },
+      "WorkoutOccurrenceChanged": {
+        "allOf": [
+          {
+            "$ref": "#/$defs/Envelope"
+          },
+          {
+            "properties": {
+              "type": {
+                "const": "workout.occurrence.changed.v1"
+              },
+              "producer": {
+                "const": "workout"
+              },
+              "aggregateId": {
+                "format": "uuid",
+                "description": "Bằng occurrenceId."
+              },
+              "data": {
+                "type": "object",
+                "required": [
+                  "occurrenceId",
+                  "userId",
+                  "status",
+                  "startAt",
+                  "endAt",
+                  "timeZone"
+                ],
+                "additionalProperties": false,
+                "properties": {
+                  "occurrenceId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "userId": {
+                    "type": "string",
+                    "format": "uuid"
+                  },
+                  "status": {
+                    "enum": [
+                      "SCHEDULED",
+                      "CANCELED"
+                    ]
+                  },
+                  "startAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "endAt": {
+                    "type": "string",
+                    "format": "date-time"
+                  },
+                  "timeZone": {
+                    "type": "string",
+                    "minLength": 1,
+                    "maxLength": 80
+                  }
+                }
+              }
+            }
+          }
+        ]
+      }
+    }
+  },
+  "delivery": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "deliveryRef",
+      "purpose",
+      "recipient",
+      "actionUrl",
+      "expiresAt"
+    ],
+    "properties": {
+      "deliveryRef": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "purpose": {
+        "type": "string",
+        "enum": [
+          "VERIFY_EMAIL",
+          "RESET_PASSWORD"
+        ]
+      },
+      "recipient": {
+        "type": "string",
+        "format": "email",
+        "maxLength": 254
+      },
+      "actionUrl": {
+        "type": "string",
+        "format": "uri"
+      },
+      "expiresAt": {
+        "type": "string",
+        "format": "date-time"
+      }
+    }
+  },
+  "contact": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "userId",
+      "email",
+      "emailVerified",
+      "timeZone"
+    ],
+    "properties": {
+      "userId": {
+        "type": "string",
+        "format": "uuid"
+      },
+      "email": {
+        "type": "string",
+        "format": "email",
+        "maxLength": 254
+      },
+      "emailVerified": {
+        "type": "boolean"
+      },
+      "timeZone": {
+        "type": "string",
+        "minLength": 1,
+        "maxLength": 80,
+        "examples": [
+          "Asia/Bangkok"
+        ]
+      }
+    }
+  },
+  "preferences": {
+    "type": "object",
+    "additionalProperties": false,
+    "required": [
+      "reminderInAppEnabled",
+      "reminderEmailEnabled",
+      "leadMinutes"
+    ],
+    "properties": {
+      "reminderInAppEnabled": {
+        "type": "boolean"
+      },
+      "reminderEmailEnabled": {
+        "type": "boolean"
+      },
+      "leadMinutes": {
+        "type": "integer",
+        "minimum": 5,
+        "maximum": 1440
+      }
+    }
+  },
+  "schemas": {
+    "Jwks": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "keys"
+      ],
+      "properties": {
+        "keys": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "kid",
+              "kty",
+              "alg",
+              "use",
+              "n",
+              "e"
+            ],
+            "properties": {
+              "kid": {
+                "type": "string"
+              },
+              "kty": {
+                "type": "string",
+                "enum": [
+                  "RSA"
+                ]
+              },
+              "alg": {
+                "type": "string",
+                "enum": [
+                  "RS256"
+                ]
+              },
+              "use": {
+                "type": "string",
+                "enum": [
+                  "sig"
+                ]
+              },
+              "n": {
+                "type": "string"
+              },
+              "e": {
+                "type": "string"
+              }
+            }
+          },
+          "minItems": 1
+        }
+      }
+    },
+    "NotificationPage": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "items",
+        "nextCursor",
+        "unreadCount"
+      ],
+      "properties": {
+        "items": {
+          "type": "array",
+          "items": {
+            "$ref": "#/$defs/Notification"
+          }
+        },
+        "nextCursor": {
+          "oneOf": [
+            {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 1024
+            },
+            {
+              "type": "null"
+            }
+          ]
+        },
+        "unreadCount": {
+          "type": "integer",
+          "minimum": 0,
+          "maximum": 2147483647,
+          "description": "Tổng thông báo chưa đọc của owner, cùng snapshot với trang; không giới hạn bởi filter hoặc limit."
+        }
+      }
+    },
+    "NotificationPreferences": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "reminderInAppEnabled",
+        "reminderEmailEnabled",
+        "leadMinutes",
+        "version"
+      ],
+      "properties": {
+        "reminderInAppEnabled": {
+          "type": "boolean"
+        },
+        "reminderEmailEnabled": {
+          "type": "boolean"
+        },
+        "leadMinutes": {
+          "type": "integer",
+          "minimum": 5,
+          "maximum": 1440
+        },
+        "version": {
+          "type": "integer",
+          "minimum": 1,
+          "maximum": 2147483647
+        }
+      }
+    },
+    "Problem": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "type",
+        "title",
+        "status",
+        "code",
+        "requestId"
+      ],
+      "properties": {
+        "type": {
+          "type": "string",
+          "format": "uri"
+        },
+        "title": {
+          "type": "string"
+        },
+        "status": {
+          "type": "integer",
+          "minimum": 400,
+          "maximum": 599
+        },
+        "code": {
+          "type": "string",
+          "pattern": "^[A-Z][A-Z0-9_]*$"
+        },
+        "detail": {
+          "type": "string"
+        },
+        "requestId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "errors": {
+          "type": "array",
+          "items": {
+            "type": "object",
+            "additionalProperties": false,
+            "required": [
+              "field",
+              "message"
+            ],
+            "properties": {
+              "field": {
+                "type": "string"
+              },
+              "message": {
+                "type": "string"
+              }
+            }
+          }
+        }
+      }
+    },
+    "Notification": {
+      "type": "object",
+      "additionalProperties": false,
+      "required": [
+        "id",
+        "kind",
+        "title",
+        "message",
+        "occurrenceId",
+        "createdAt",
+        "readAt"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "kind": {
+          "type": "string",
+          "enum": [
+            "WORKOUT_REMINDER"
+          ]
+        },
+        "title": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 120
+        },
+        "message": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 2000
+        },
+        "occurrenceId": {
+          "type": "string",
+          "format": "uuid"
+        },
+        "createdAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "readAt": {
+          "oneOf": [
+            {
+              "type": "string",
+              "format": "date-time"
+            },
+            {
+              "type": "null"
+            }
+          ]
+        }
+      }
+    }
+  }
+}

@@ -1,0 +1,320 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$id": "https://contracts.smartgym.example/events/v1",
+  "title": "SmartGym — Event Envelope v1",
+  "description": "Thiết kế hợp đồng event trên RabbitMQ. Routing key khớp trường type. Xem API_CONTRACTS.md cho delivery, retry và replay.",
+  "oneOf": [
+    {
+      "$ref": "#/$defs/IdentityEmailActionRequested"
+    },
+    {
+      "$ref": "#/$defs/CatalogExercisePublished"
+    },
+    {
+      "$ref": "#/$defs/CatalogExerciseUpdated"
+    },
+    {
+      "$ref": "#/$defs/CatalogExerciseUnpublished"
+    },
+    {
+      "$ref": "#/$defs/WorkoutOccurrenceChanged"
+    }
+  ],
+  "$defs": {
+    "Envelope": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "producer",
+        "schemaVersion",
+        "occurredAt",
+        "aggregateId",
+        "aggregateVersion",
+        "correlationId",
+        "data"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "ID duy nhất. Giữ nguyên khi gửi lại."
+        },
+        "type": {
+          "type": "string"
+        },
+        "producer": {
+          "type": "string",
+          "enum": [
+            "identity",
+            "catalog",
+            "workout"
+          ]
+        },
+        "schemaVersion": {
+          "const": 1
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "aggregateId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "aggregateVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "correlationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "traceparent": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "data": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "IdentityEmailActionRequested": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "identity.email-action.requested.v1"
+            },
+            "producer": {
+              "const": "identity"
+            },
+            "aggregateId": {
+              "format": "uuid",
+              "description": "Bằng deliveryRef."
+            },
+            "aggregateVersion": {
+              "const": 1
+            },
+            "data": {
+              "type": "object",
+              "required": [
+                "deliveryRef",
+                "purpose",
+                "expiresAt"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "deliveryRef": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "purpose": {
+                  "enum": [
+                    "VERIFY_EMAIL",
+                    "RESET_PASSWORD"
+                  ]
+                },
+                "expiresAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CatalogChangeData": {
+      "type": "object",
+      "required": [
+        "exerciseId",
+        "revision",
+        "contentRevision"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "exerciseId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$"
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]{1,120}$"
+        },
+        "contentRevision": {
+          "type": "integer",
+          "minimum": 1
+        }
+      }
+    },
+    "CatalogExercisePublished": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "catalog.exercise.published.v1"
+            },
+            "producer": {
+              "const": "catalog"
+            },
+            "aggregateId": {
+              "const": "catalog"
+            },
+            "data": {
+              "$ref": "#/$defs/CatalogChangeData"
+            }
+          }
+        }
+      ]
+    },
+    "CatalogExerciseUnpublished": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "catalog.exercise.unpublished.v1"
+            },
+            "producer": {
+              "const": "catalog"
+            },
+            "aggregateId": {
+              "const": "catalog"
+            },
+            "data": {
+              "$ref": "#/$defs/CatalogUnpublishData"
+            }
+          }
+        }
+      ]
+    },
+    "WorkoutOccurrenceChanged": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "workout.occurrence.changed.v1"
+            },
+            "producer": {
+              "const": "workout"
+            },
+            "aggregateId": {
+              "format": "uuid",
+              "description": "Bằng occurrenceId."
+            },
+            "data": {
+              "type": "object",
+              "required": [
+                "occurrenceId",
+                "userId",
+                "status",
+                "startAt",
+                "endAt",
+                "timeZone"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "occurrenceId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "userId": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "status": {
+                  "enum": [
+                    "SCHEDULED",
+                    "CANCELED"
+                  ]
+                },
+                "startAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "endAt": {
+                  "type": "string",
+                  "format": "date-time"
+                },
+                "timeZone": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 80
+                }
+              }
+            }
+          }
+        }
+      ]
+    },
+    "CatalogUnpublishData": {
+      "type": "object",
+      "required": [
+        "exerciseId",
+        "revision",
+        "contentRevision",
+        "reason"
+      ],
+      "additionalProperties": false,
+      "properties": {
+        "exerciseId": {
+          "type": "string",
+          "pattern": "^[a-z][a-z0-9_]{0,79}$"
+        },
+        "revision": {
+          "type": "string",
+          "pattern": "^[A-Za-z0-9._-]{1,120}$"
+        },
+        "contentRevision": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "reason": {
+          "type": "string",
+          "enum": [
+            "ARCHIVED",
+            "WITHDRAWN"
+          ]
+        }
+      }
+    },
+    "CatalogExerciseUpdated": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "catalog.exercise.updated.v1"
+            },
+            "producer": {
+              "const": "catalog"
+            },
+            "aggregateId": {
+              "const": "catalog"
+            },
+            "data": {
+              "$ref": "#/$defs/CatalogChangeData"
+            }
+          }
+        }
+      ]
+    }
+  }
+}

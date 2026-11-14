@@ -1,0 +1,911 @@
+{
+  "$id": "progress-contract",
+  "components": {
+    "schemas": {
+      "Jwks": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "keys"
+        ],
+        "properties": {
+          "keys": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "kid",
+                "kty",
+                "alg",
+                "use",
+                "n",
+                "e"
+              ],
+              "properties": {
+                "kid": {
+                  "type": "string"
+                },
+                "kty": {
+                  "type": "string",
+                  "enum": [
+                    "RSA"
+                  ]
+                },
+                "alg": {
+                  "type": "string",
+                  "enum": [
+                    "RS256"
+                  ]
+                },
+                "use": {
+                  "type": "string",
+                  "enum": [
+                    "sig"
+                  ]
+                },
+                "n": {
+                  "type": "string"
+                },
+                "e": {
+                  "type": "string"
+                }
+              }
+            },
+            "minItems": 1
+          }
+        }
+      },
+      "Problem": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "type",
+          "title",
+          "status",
+          "code",
+          "requestId"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "format": "uri"
+          },
+          "title": {
+            "type": "string"
+          },
+          "status": {
+            "type": "integer",
+            "minimum": 400,
+            "maximum": 599
+          },
+          "code": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$"
+          },
+          "detail": {
+            "type": "string"
+          },
+          "requestId": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 128
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "field",
+                "message"
+              ],
+              "properties": {
+                "field": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                }
+              }
+            }
+          }
+        }
+      },
+      "WorkoutLogInput": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "performedAt",
+          "sets"
+        ],
+        "properties": {
+          "occurrenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "performedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "durationSeconds": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 14400
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "sets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkoutLoggedSet"
+            },
+            "minItems": 1,
+            "maxItems": 200
+          }
+        }
+      },
+      "WorkoutLog": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "performedAt",
+          "sets",
+          "source",
+          "version",
+          "createdAt",
+          "updatedAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurrenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "performedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "durationSeconds": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 14400
+          },
+          "notes": {
+            "type": "string",
+            "maxLength": 2000
+          },
+          "sets": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkoutLoggedSetView"
+            },
+            "minItems": 1,
+            "maxItems": 200
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "MANUAL",
+              "OCCURRENCE",
+              "POSE"
+            ]
+          },
+          "poseResultId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          },
+          "createdAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "updatedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "poseSummary": {
+            "$ref": "#/components/schemas/ImportedPoseSummary",
+            "readOnly": true
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "source": {
+                  "const": "POSE"
+                }
+              },
+              "required": [
+                "source"
+              ]
+            },
+            "then": {
+              "required": [
+                "poseResultId",
+                "poseSummary"
+              ]
+            }
+          }
+        ]
+      },
+      "WorkoutLogPage": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items",
+          "nextCursor"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkoutLog"
+            }
+          },
+          "nextCursor": {
+            "oneOf": [
+              {
+                "type": "string",
+                "minLength": 1,
+                "maxLength": 1024
+              },
+              {
+                "type": "null"
+              }
+            ]
+          }
+        }
+      },
+      "ProgressSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "from",
+          "to",
+          "timeZone",
+          "workoutCount",
+          "totalRepetitions",
+          "totalVolumeKg",
+          "series"
+        ],
+        "properties": {
+          "from": {
+            "type": "string",
+            "format": "date"
+          },
+          "to": {
+            "type": "string",
+            "format": "date"
+          },
+          "timeZone": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "examples": [
+              "Asia/Bangkok"
+            ]
+          },
+          "workoutCount": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "totalRepetitions": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 2147483647
+          },
+          "totalVolumeKg": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000000000000
+          },
+          "series": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "date",
+                "workoutCount",
+                "repetitions",
+                "volumeKg"
+              ],
+              "properties": {
+                "date": {
+                  "type": "string",
+                  "format": "date"
+                },
+                "workoutCount": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 2147483647
+                },
+                "repetitions": {
+                  "type": "integer",
+                  "minimum": 0,
+                  "maximum": 2147483647
+                },
+                "volumeKg": {
+                  "type": "number",
+                  "minimum": 0,
+                  "maximum": 1000000000000
+                }
+              }
+            },
+            "maxItems": 366
+          }
+        }
+      },
+      "PoseResult": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "source",
+          "exerciseId",
+          "modelVersion",
+          "configVersion",
+          "repCount",
+          "reps",
+          "formStatus",
+          "limitations",
+          "completedAt",
+          "expiresAt",
+          "repCountStatus"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "VIDEO",
+              "LIVE"
+            ]
+          },
+          "exerciseId": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$",
+            "examples": [
+              "bodyweight_squat"
+            ]
+          },
+          "modelVersion": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,120}$"
+          },
+          "configVersion": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,120}$"
+          },
+          "repCount": {
+            "type": [
+              "integer",
+              "null"
+            ],
+            "minimum": 0,
+            "maximum": 500,
+            "description": "Null means unavailable, never an inferred zero. Whole-video V4 does not count reps."
+          },
+          "reps": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PoseRep"
+            },
+            "maxItems": 500
+          },
+          "formStatus": {
+            "type": "string",
+            "enum": [
+              "ASSESSED",
+              "INSUFFICIENT_EVIDENCE",
+              "UNSUPPORTED"
+            ]
+          },
+          "limitations": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "maxItems": 20
+          },
+          "formNotes": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "minLength": 1,
+              "maxLength": 2000
+            },
+            "maxItems": 30
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "repCountStatus": {
+            "type": "string",
+            "enum": [
+              "AVAILABLE",
+              "UNAVAILABLE"
+            ]
+          }
+        },
+        "x-provider-gap": "Whole-video has unavailable rep count. Live stores observed count and only a validated current window/rep observation when available.",
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "repCountStatus": {
+                  "const": "UNAVAILABLE"
+                }
+              },
+              "required": [
+                "repCountStatus"
+              ]
+            },
+            "then": {
+              "properties": {
+                "repCount": {
+                  "type": "null"
+                },
+                "reps": {
+                  "maxItems": 0
+                }
+              }
+            },
+            "else": {
+              "properties": {
+                "repCount": {
+                  "type": "integer"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "source": {
+                  "const": "VIDEO"
+                }
+              },
+              "required": [
+                "source"
+              ]
+            },
+            "then": {
+              "properties": {
+                "repCountStatus": {
+                  "const": "UNAVAILABLE"
+                }
+              }
+            }
+          }
+        ]
+      },
+      "PoseResultImport": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "poseResultId"
+        ],
+        "properties": {
+          "poseResultId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "occurrenceId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "performedAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "WorkoutOccurrence": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "scheduleId",
+          "planId",
+          "plannedExercises",
+          "startAt",
+          "endAt",
+          "timeZone",
+          "status",
+          "version"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "scheduleId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "planId": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "plannedExercises": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/WorkoutPlanItem"
+            },
+            "maxItems": 40
+          },
+          "startAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "endAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "timeZone": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 80,
+            "examples": [
+              "Asia/Bangkok"
+            ]
+          },
+          "status": {
+            "type": "string",
+            "enum": [
+              "SCHEDULED",
+              "CANCELED"
+            ]
+          },
+          "version": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 2147483647
+          }
+        }
+      },
+      "ExerciseRefBatch": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "exerciseIds"
+        ],
+        "properties": {
+          "exerciseIds": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "pattern": "^[a-z][a-z0-9_]{0,79}$",
+              "examples": [
+                "bodyweight_squat"
+              ]
+            },
+            "minItems": 1,
+            "maxItems": 100,
+            "uniqueItems": true
+          }
+        }
+      },
+      "ExerciseRefList": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "items"
+        ],
+        "properties": {
+          "items": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "additionalProperties": false,
+              "required": [
+                "exerciseId",
+                "available"
+              ],
+              "properties": {
+                "exerciseId": {
+                  "type": "string",
+                  "pattern": "^[a-z][a-z0-9_]{0,79}$",
+                  "examples": [
+                    "bodyweight_squat"
+                  ]
+                },
+                "available": {
+                  "type": "boolean"
+                },
+                "nameVi": {
+                  "type": "string",
+                  "minLength": 1,
+                  "maxLength": 120
+                }
+              }
+            }
+          }
+        }
+      },
+      "WorkoutLoggedSet": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "exerciseId",
+          "ordinal"
+        ],
+        "anyOf": [
+          {
+            "required": [
+              "repetitions"
+            ]
+          },
+          {
+            "required": [
+              "durationSeconds"
+            ]
+          }
+        ],
+        "properties": {
+          "exerciseId": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$"
+          },
+          "ordinal": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "repetitions": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500
+          },
+          "weightKg": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "durationSeconds": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 14400
+          },
+          "rpe": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          }
+        }
+      },
+      "WorkoutLoggedSetView": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "exerciseId",
+          "ordinal",
+          "exerciseNameVi"
+        ],
+        "anyOf": [
+          {
+            "required": [
+              "repetitions"
+            ]
+          },
+          {
+            "required": [
+              "durationSeconds"
+            ]
+          }
+        ],
+        "properties": {
+          "exerciseId": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$"
+          },
+          "ordinal": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "repetitions": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500
+          },
+          "weightKg": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1000
+          },
+          "durationSeconds": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 14400
+          },
+          "rpe": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 10
+          },
+          "exerciseNameVi": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120,
+            "readOnly": true
+          }
+        }
+      },
+      "ImportedPoseSummary": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "id",
+          "source",
+          "exerciseId",
+          "modelVersion",
+          "configVersion",
+          "repCount",
+          "repCountStatus",
+          "formStatus",
+          "completedAt",
+          "expiresAt"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "format": "uuid"
+          },
+          "source": {
+            "type": "string",
+            "enum": [
+              "VIDEO",
+              "LIVE"
+            ]
+          },
+          "exerciseId": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$",
+            "examples": [
+              "bodyweight_squat"
+            ]
+          },
+          "modelVersion": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,120}$"
+          },
+          "configVersion": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9._-]{1,120}$"
+          },
+          "repCount": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500
+          },
+          "repCountStatus": {
+            "type": "string",
+            "const": "AVAILABLE"
+          },
+          "formStatus": {
+            "type": "string",
+            "enum": [
+              "ASSESSED",
+              "INSUFFICIENT_EVIDENCE",
+              "UNSUPPORTED"
+            ]
+          },
+          "completedAt": {
+            "type": "string",
+            "format": "date-time"
+          },
+          "expiresAt": {
+            "type": "string",
+            "format": "date-time"
+          }
+        }
+      },
+      "PoseRep": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "sequence",
+          "endedAtMs"
+        ],
+        "properties": {
+          "sequence": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 500
+          },
+          "endedAtMs": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 900000
+          },
+          "feedbackCode": {
+            "type": "string",
+            "maxLength": 80
+          },
+          "confidence": {
+            "type": "number",
+            "minimum": 0,
+            "maximum": 1
+          }
+        }
+      },
+      "WorkoutPlanItem": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "exerciseId",
+          "sets",
+          "exerciseNameVi"
+        ],
+        "oneOf": [
+          {
+            "required": [
+              "targetReps"
+            ]
+          },
+          {
+            "required": [
+              "targetDurationSeconds"
+            ]
+          }
+        ],
+        "properties": {
+          "exerciseId": {
+            "type": "string",
+            "pattern": "^[a-z][a-z0-9_]{0,79}$"
+          },
+          "exerciseNameVi": {
+            "type": "string",
+            "minLength": 1,
+            "maxLength": 120
+          },
+          "sets": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 30
+          },
+          "targetReps": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 200
+          },
+          "targetDurationSeconds": {
+            "type": "integer",
+            "minimum": 1,
+            "maximum": 3600
+          },
+          "restSeconds": {
+            "type": "integer",
+            "minimum": 0,
+            "maximum": 600
+          }
+        }
+      }
+    }
+  }
+}

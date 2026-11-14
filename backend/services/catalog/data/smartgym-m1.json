@@ -1,0 +1,71 @@
+{
+  "revision": "kb-squat-m1-20261107",
+  "approval": "development-only",
+  "source": {
+    "path": "knowledge_base/wiki/exercises/bodyweight_squat.md",
+    "sha256": "a057147aa2ebcb37d1fe2c9122496616095b136d13dd903f657a83869ca1d1c0",
+    "rights": "Nguồn SmartGym do người dùng cung cấp. Chỉ dùng local Development, chưa xác minh quyền công bố. Media không được sao chép."
+  },
+  "muscleGroups": [
+    {
+      "id": "quadriceps",
+      "labelVi": "Đùi trước",
+      "slug": "dui-truoc",
+      "svgRegions": []
+    },
+    {
+      "id": "glutes",
+      "labelVi": "Cơ mông",
+      "slug": "co-mong",
+      "svgRegions": []
+    }
+  ],
+  "equipment": [
+    {
+      "id": "bodyweight",
+      "labelVi": "Không cần dụng cụ",
+      "slug": "khong-dung-cu"
+    }
+  ],
+  "exercises": [
+    {
+      "id": "bodyweight_squat",
+      "slug": "squat-khong-ta",
+      "nameVi": "Squat không tạ",
+      "nameEn": "Bodyweight Squat",
+      "summary": "Bài tập gập rồi duỗi hông và gối với trọng lượng cơ thể. Bản không tạ là động tác nền cho [Squat bật nhảy](squat_jump.md).",
+      "primaryMuscleIds": [
+        "quadriceps",
+        "glutes"
+      ],
+      "secondaryMuscleIds": [],
+      "equipmentIds": [
+        "bodyweight"
+      ],
+      "instructions": [
+        "Đứng với hai bàn chân ở khoảng rộng dễ giữ thăng bằng. Hướng mũi chân hơi chếch ra nếu thấy tự nhiên.",
+        "Gập hông và gối để hạ người. Giữ bàn chân tiếp xúc với sàn và để đầu gối di chuyển cùng hướng mũi chân.",
+        "Dừng ở độ sâu phù hợp với bài đang tập và vẫn kiểm soát được tư thế. Đẩy sàn để đứng lên."
+      ],
+      "commonMistakes": [
+        "Lưng tròn khi hạ",
+        "Đầu gối lệch hướng bàn chân",
+        "Đầu gối chụm vào trong",
+        "Xuống chưa đủ sâu"
+      ],
+      "media": [],
+      "variants": [],
+      "publishedRevision": "kb-squat-m1-20261107",
+      "workoutType": "STRENGTH",
+      "focusArea": "LOWER_BODY",
+      "difficulty": 2,
+      "levelSets": [
+        3,
+        5,
+        7
+      ],
+      "restSeconds": 120,
+      "poseStyle": "squat"
+    }
+  ]
+}

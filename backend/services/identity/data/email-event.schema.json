@@ -1,0 +1,116 @@
+{
+  "$schema": "https://json-schema.org/draft/2020-12/schema",
+  "$ref": "#/$defs/IdentityEmailActionRequested",
+  "$defs": {
+    "Envelope": {
+      "type": "object",
+      "required": [
+        "id",
+        "type",
+        "producer",
+        "schemaVersion",
+        "occurredAt",
+        "aggregateId",
+        "aggregateVersion",
+        "correlationId",
+        "data"
+      ],
+      "properties": {
+        "id": {
+          "type": "string",
+          "format": "uuid",
+          "description": "ID duy nhất. Giữ nguyên khi gửi lại."
+        },
+        "type": {
+          "type": "string"
+        },
+        "producer": {
+          "type": "string",
+          "enum": [
+            "identity",
+            "catalog",
+            "workout"
+          ]
+        },
+        "schemaVersion": {
+          "const": 1
+        },
+        "occurredAt": {
+          "type": "string",
+          "format": "date-time"
+        },
+        "aggregateId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 80
+        },
+        "aggregateVersion": {
+          "type": "integer",
+          "minimum": 1
+        },
+        "correlationId": {
+          "type": "string",
+          "minLength": 1,
+          "maxLength": 128
+        },
+        "traceparent": {
+          "type": "string",
+          "maxLength": 100
+        },
+        "data": {
+          "type": "object"
+        }
+      },
+      "additionalProperties": false
+    },
+    "IdentityEmailActionRequested": {
+      "allOf": [
+        {
+          "$ref": "#/$defs/Envelope"
+        },
+        {
+          "properties": {
+            "type": {
+              "const": "identity.email-action.requested.v1"
+            },
+            "producer": {
+              "const": "identity"
+            },
+            "aggregateId": {
+              "format": "uuid",
+              "description": "Bằng deliveryRef."
+            },
+            "aggregateVersion": {
+              "const": 1
+            },
+            "data": {
+              "type": "object",
+              "required": [
+                "deliveryRef",
+                "purpose",
+                "expiresAt"
+              ],
+              "additionalProperties": false,
+              "properties": {
+                "deliveryRef": {
+                  "type": "string",
+                  "format": "uuid"
+                },
+                "purpose": {
+                  "enum": [
+                    "VERIFY_EMAIL",
+                    "RESET_PASSWORD"
+                  ]
+                },
+                "expiresAt": {
+                  "type": "string",
+                  "format": "date-time"
+                }
+              }
+            }
+          }
+        }
+      ]
+    }
+  }
+}
