@@ -68,7 +68,7 @@ M0 là gói thiết kế của lượt hiện tại, kiểm tra theo [review](..
 | T43 | M5 | P1 | POS-001 POS-002 | T21 T22 T23 | Tích hợp DirectML trên máy Windows chạy đồ án | Web, Pose API và worker dùng cùng engine mTLS, thử live và phân tích cả video, so sánh độ trễ CPU và DirectML trên cùng mẫu | Kiểm health, WebSocket và upload toàn video từ Docker | DONE |
 | T44 | M4 | P1 | ADM-003 ADM-005 | T12 T33 | Đồng bộ cấu trúc bài tập trong CMS | Thêm và sửa dùng chung form, 23 bản nháp có dữ liệu gốc đầy đủ theo nguồn, kiểm vai trò ảnh và tương thích bài cũ | catalog-media, Chromium CMS, kiểm tra hợp đồng, đối chiếu 23 bản nháp | DONE |
 
-Đọc [roadmap](IMPLEMENTATION_PLAN.md), [ma trận](TRACEABILITY.md), [test plan](TEST_PLAN.md) và [AGENTS](../../AGENTS.md). Ghi bằng chứng và file thực tế trong lúc triển khai. Khi một giả định đổi, cập nhật requirement, task, hợp đồng và test cùng nhau.
+Đọc [roadmap](IMPLEMENTATION_PLAN.md), [ma trận](TRACEABILITY.md) và [test plan](TEST_PLAN.md). Ghi bằng chứng và file thực tế trong lúc triển khai. Khi một giả định đổi, cập nhật requirement, task, hợp đồng và test cùng nhau.
 
 T44 PASS build Docker Web và Catalog, kiểm tra OpenAPI/schema Catalog và kiểm tra biên import. Ca Chromium tạo, lưu, xem trước và công bố bài đạt. Catalog media đạt 8/8 trên PostgreSQL 18.6. Đọc lại PostgreSQL qua Catalog trên Docker đã đối chiếu 23/23 bản nháp và checksum của 37 ảnh WebP gốc, gồm ảnh một tư thế hoặc cặp bắt đầu và điểm cao nhất. Dữ liệu tiếng Việt do SmartGym biên soạn được giữ. Độ khó nguồn sơ cấp, trung cấp và nâng cao tương ứng cấp II, III và V trong SmartGym.
 

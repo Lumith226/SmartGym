@@ -95,7 +95,7 @@ Review T34: bốn operation import/export đã có runtime, migration 007 giữ 
 | Roadmap | [M0–M6](../planning/IMPLEMENTATION_PLAN.md) |
 | Task breakdown | [Tasks](../planning/TASKS.md) |
 | Test và acceptance | [Test plan](../planning/TEST_PLAN.md), [ma trận](../planning/TRACEABILITY.md) |
-| Review | Tài liệu này và [AGENTS](../../AGENTS.md) |
+| Review | Tài liệu này |
 
 ## Các điểm đã thống nhất khi kiểm tra chéo
 
