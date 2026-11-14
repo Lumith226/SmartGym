@@ -114,9 +114,13 @@ import jumpjack_schema
 import squat_schema
 import pushup_schema
 import crunch_schema
+import highknees_schema
+import buttkickers_schema
 V4_SCHEMAS={'squat':squat_schema,'jump_jack':jumpjack_schema,
-            'push_up':pushup_schema,'situp':crunch_schema}
-V4_STEMS={'squat':'squat','jump_jack':'jumpjack','push_up':'pushup','situp':'crunch'}
+            'push_up':pushup_schema,'situp':crunch_schema,
+            'high_knees':highknees_schema,'butt_kickers':buttkickers_schema}
+V4_STEMS={'squat':'squat','jump_jack':'jumpjack','push_up':'pushup','situp':'crunch',
+          'high_knees':'highknees','butt_kickers':'buttkickers'}
 EXERCISE_CONFIG['jump_jack'] = {
     'name_vi': 'Jumping jacks V4 — 29 nhãn Qualcomm',
     'onnx_file': 'best_stgcnpp_jumpjack_v4_multihead.onnx',
@@ -126,6 +130,11 @@ for _key,_schema in [('push_up',pushup_schema),('situp',crunch_schema)]:
     _stem=V4_STEMS[_key]
     EXERCISE_CONFIG[_key]={'name_vi':('Chống đẩy' if _key=='push_up' else 'Gập bụng ngược')+f' V4 — {len(_schema.LABELS)} nhãn Qualcomm',
                          'onnx_file':f'best_stgcnpp_{_stem}_v4_multihead.onnx',
+                         'is_multihead':True,'classes':_schema.RAW_LABELS}
+for _key,_schema,_name in [('high_knees',highknees_schema,'High knees — nâng cao gối'),
+                          ('butt_kickers',buttkickers_schema,'Butt kickers — gót chạm mông')]:
+    EXERCISE_CONFIG[_key]={'name_vi':f'{_name} (V4 — {len(_schema.LABELS)} nhãn)',
+                         'onnx_file':f'best_stgcnpp_{V4_STEMS[_key]}_v4_multihead.onnx',
                          'is_multihead':True,'classes':_schema.RAW_LABELS}
 
 EXERCISE_ALIASES = {
@@ -146,6 +155,8 @@ EXERCISE_ALIASES = {
     'crunch': 'situp',
     'crunches': 'situp'
 }
+EXERCISE_ALIASES.update({'high_knees':'high_knees','highknees':'high_knees',
+                         'butt_kickers':'butt_kickers','buttkickers':'butt_kickers','butt_kicks':'butt_kickers'})
 
 
 def calc_angle_3p(p1, p2, p3):
@@ -182,6 +193,8 @@ class ONNXGymAnalyzer:
             'jump_jack': EnhancedPoseProcessor('jump_jack'),
             'situp': EnhancedPoseProcessor('crunch')
         }
+        for key in ('high_knees','butt_kickers'):
+            self.pose_processors[key]=EnhancedPoseProcessor(key)
 
     def normalize_exercise(self, exercise_type: str) -> str:
         key = exercise_type.lower().strip().replace(' ', '_').replace('-', '_')
@@ -254,6 +267,12 @@ class ONNXGymAnalyzer:
     def predict_crunch_sequence(self,raw_sequence,duration_seconds,scope='video'):
         return self.predict_squat_sequence(raw_sequence,duration_seconds,scope,_exercise='situp')
 
+    def predict_highknees_sequence(self,raw_sequence,duration_seconds,scope='video'):
+        return self.predict_squat_sequence(raw_sequence,duration_seconds,scope,_exercise='high_knees')
+
+    def predict_buttkickers_sequence(self,raw_sequence,duration_seconds,scope='video'):
+        return self.predict_squat_sequence(raw_sequence,duration_seconds,scope,_exercise='butt_kickers')
+
     def predict_squat_sequence(self, raw_sequence, duration_seconds, scope='video', _exercise='squat'):
         """raw_sequence=(T,3,17), x/image_height,y/image_height; không chuẩn hóa trước."""
         if scope not in ('video', 'rep', 'window'):
@@ -293,7 +312,8 @@ class ONNXGymAnalyzer:
         probabilities = 1/(1+np.exp(-np.clip(logits,-50,50)))
         errors, detected, rows = [], [], []
         for cfg,p in zip(contract['labels'],probabilities):
-            supported = (scope == 'video' or cfg['rep_supported']) and cfg.get('calibrated', True)
+            supported = (scope == 'video' or (scope=='window' and cfg.get('window_supported',cfg['rep_supported']))
+                         or (scope=='rep' and cfg['rep_supported'])) and cfg.get('calibrated', True)
             active = bool(p >= cfg['threshold']) and supported
             row = {**cfg,'probability':float(p),'detected':active,'supported':supported,
                    'status':'Có nhãn' if active else ('Chưa phát hiện' if supported else

@@ -1,8 +1,8 @@
 ﻿{
-    "server_pid":  39060,
-    "web_pid":  51636,
+    "server_pid":  55400,
+    "server":  "http://127.0.0.1:8001",
     "web":  "http://localhost:8080",
-    "web_started_utc":  "2026-10-30T14:55:28.8004891Z",
-    "server_started_utc":  "2026-10-30T14:55:22.4358134Z",
-    "server":  "http://127.0.0.1:8001"
+    "web_started_utc":  "2026-11-14T06:29:53.4761895Z",
+    "server_started_utc":  "2026-11-14T06:29:53.4723294Z",
+    "web_pid":  64296
 }

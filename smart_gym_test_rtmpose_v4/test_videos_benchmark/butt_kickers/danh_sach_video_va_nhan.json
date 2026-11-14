@@ -1,0 +1,154 @@
+{
+  "exercise": "buttkickers",
+  "selection": "random without predictions; official held-out test subset",
+  "seed": 20261115,
+  "count": 10,
+  "videos": [
+    {
+      "video": "00293923.mp4",
+      "raw_labels": [
+        "buttkickers - feet disappear behind knees",
+        "buttkickers - speed=2.00 rps"
+      ],
+      "labels_vi": [
+        "Bàn chân khuất sau gối",
+        "Tốc độ: mức 2 rps"
+      ],
+      "source_path": "D:\\1.E22CQCN03-B\\GYM\\stgcn_squat_project\\Dataset\\Qualcom dataset\\QEVD-FIT-300k-Part-4\\QEVD-FIT-300k-Part-4\\00293923.mp4",
+      "sha256": "5b04424bf397f9b339a066c64aafcfc8377a95eb02f047260f53d6de6cd15d8a",
+      "source_split": "test",
+      "excluded_from_train_and_validation": true
+    },
+    {
+      "video": "00282702.mp4",
+      "raw_labels": [
+        "buttkickers - feet disappear behind knees",
+        "buttkickers - speed=3.00 rps"
+      ],
+      "labels_vi": [
+        "Bàn chân khuất sau gối",
+        "Tốc độ: mức 3 rps"
+      ],
+      "source_path": "D:\\1.E22CQCN03-B\\GYM\\stgcn_squat_project\\Dataset\\Qualcom dataset\\QEVD-FIT-300k-Part-4\\QEVD-FIT-300k-Part-4\\00282702.mp4",
+      "sha256": "f8dd4d12ebfd63be24ad33c7184b3b70bda11e11f11595ee440fd18902c0936b",
+      "source_split": "test",
+      "excluded_from_train_and_validation": true
+    },
+    {
+      "video": "00297414.mp4",
+      "raw_labels": [
+        "buttkickers - feet disappear behind knees",
+        "buttkickers - speed=2.50 rps"
+      ],
+      "labels_vi": [
+        "Bàn chân khuất sau gối",
+        "Tốc độ: mức 2.5 rps"
+      ],
+      "source_path": "D:\\1.E22CQCN03-B\\GYM\\stgcn_squat_project\\Dataset\\Qualcom dataset\\QEVD-FIT-300k-Part-4\\QEVD-FIT-300k-Part-4\\00297414.mp4",
+      "sha256": "14d1a0b31f078dbb3faa5c633e12b2cc734f8b076e70668e22be4c34097a1d9e",
+      "source_split": "test",
+      "excluded_from_train_and_validation": true
+    },
+    {
+      "video": "00289053.mp4",
+      "raw_labels": [
+        "buttkickers - not in place"
+      ],
+      "labels_vi": [
+        "Di chuyển khỏi vị trí"
+      ],
+      "source_path": "D:\\1.E22CQCN03-B\\GYM\\stgcn_squat_project\\Dataset\\Qualcom dataset\\QEVD-FIT-300k-Part-4\\QEVD-FIT-300k-Part-4\\00289053.mp4",
+      "sha256": "ec4971695d0a62703176c25920c07c88ddfea2aceb1f8a2cf3ecf6dd024afd59",
+      "source_split": "test",
+      "excluded_from_train_and_validation": true
+    },
+    {
+      "video": "00295210.mp4",
+      "raw_labels": [
+        "buttkickers - bringing knees forward",
+        "buttkickers - speed=2.00 rps"
+      ],
+      "labels_vi": [
+        "Đưa gối ra trước thay vì bàn chân ra sau",
+        "Tốc độ: mức 2 rps"
+      ],
+      "source_path": "D:\\1.E22CQCN03-B\\GYM\\stgcn_squat_project\\Dataset\\Qualcom dataset\\QEVD-FIT-300k-Part-4\\QEVD-FIT-300k-Part-4\\00295210.mp4",
+      "sha256": "e3e593d209d9d67a86c3dd6759f05c2c1060b38c5d4884f68419a5a6090c75f8",
+      "source_split": "test",
+      "excluded_from_train_and_validation": true
+    },
+    {
+      "video": "00289329.mp4",
+      "raw_labels": [
+        "buttkickers - bringing knees forward",
+        "buttkickers - speed=2.50 rps"
+      ],
+      "labels_vi": [
+        "Đưa gối ra trước thay vì bàn chân ra sau",
+        "Tốc độ: mức 2.5 rps"
+      ],
+      "source_path": "D:\\1.E22CQCN03-B\\GYM\\stgcn_squat_project\\Dataset\\Qualcom dataset\\QEVD-FIT-300k-Part-4\\QEVD-FIT-300k-Part-4\\00289329.mp4",
+      "sha256": "46f9664921d236b3c3a2b621539bc916829f62b6fb22d33f00e43a0dd7c41d5a",
+      "source_split": "test",
+      "excluded_from_train_and_validation": true
+    },
+    {
+      "video": "00297160.mp4",
+      "raw_labels": [
+        "buttkickers - speed=1.00 rps",
+        "buttkickers - stepping"
+      ],
+      "labels_vi": [
+        "Tốc độ: mức 1 rps",
+        "Bước từng chân một"
+      ],
+      "source_path": "D:\\1.E22CQCN03-B\\GYM\\stgcn_squat_project\\Dataset\\Qualcom dataset\\QEVD-FIT-300k-Part-4\\QEVD-FIT-300k-Part-4\\00297160.mp4",
+      "sha256": "a51e220f7d15f98bca24a4bd99ce03a66421a34d99d5811844c5baba62234f0e",
+      "source_split": "test",
+      "excluded_from_train_and_validation": true
+    },
+    {
+      "video": "00289935.mp4",
+      "raw_labels": [
+        "buttkickers - feet disappear behind knees",
+        "buttkickers - speed=2.00 rps"
+      ],
+      "labels_vi": [
+        "Bàn chân khuất sau gối",
+        "Tốc độ: mức 2 rps"
+      ],
+      "source_path": "D:\\1.E22CQCN03-B\\GYM\\stgcn_squat_project\\Dataset\\Qualcom dataset\\QEVD-FIT-300k-Part-4\\QEVD-FIT-300k-Part-4\\00289935.mp4",
+      "sha256": "b93666ff086fb66a37c96199a6fc88d5cde5c14999d239193feba7c8556c141a",
+      "source_split": "test",
+      "excluded_from_train_and_validation": true
+    },
+    {
+      "video": "00286126.mp4",
+      "raw_labels": [
+        "buttkickers - bringing knees forward",
+        "buttkickers - speed=2.00 rps"
+      ],
+      "labels_vi": [
+        "Đưa gối ra trước thay vì bàn chân ra sau",
+        "Tốc độ: mức 2 rps"
+      ],
+      "source_path": "D:\\1.E22CQCN03-B\\GYM\\stgcn_squat_project\\Dataset\\Qualcom dataset\\QEVD-FIT-300k-Part-4\\QEVD-FIT-300k-Part-4\\00286126.mp4",
+      "sha256": "377b14d7ec4c6f752951677a4bb7022f45c582cca0f7d311f0474b2fdaa9e2a5",
+      "source_split": "test",
+      "excluded_from_train_and_validation": true
+    },
+    {
+      "video": "00283107.mp4",
+      "raw_labels": [
+        "buttkickers - not in place"
+      ],
+      "labels_vi": [
+        "Di chuyển khỏi vị trí"
+      ],
+      "source_path": "D:\\1.E22CQCN03-B\\GYM\\stgcn_squat_project\\Dataset\\Qualcom dataset\\QEVD-FIT-300k-Part-4\\QEVD-FIT-300k-Part-4\\00283107.mp4",
+      "sha256": "7e419b7317f83d74c5564d7f0566e756e7519d04ac388aa7e55adaab3893a3ac",
+      "source_split": "test",
+      "excluded_from_train_and_validation": true
+    }
+  ]
+}

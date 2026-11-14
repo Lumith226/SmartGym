@@ -49,6 +49,25 @@ def test_health_and_exercise_catalog(api):
     assert response.headers['access-control-allow-origin'] == 'http://localhost:8080'
 
 
+@pytest.mark.parametrize('key,stem',[('high_knees','highknees'),('butt_kickers','buttkickers')])
+def test_running_model_is_enabled_only_after_matching_verification(tmp_path,monkeypatch,key,stem):
+    from server import engine
+    legacy=tmp_path/'app';weights=legacy/'weights';weights.mkdir(parents=True)
+    output=tmp_path/'stgcn_squat_project/outputs/v4';output.mkdir(parents=True)
+    monkeypatch.setattr(engine,'LEGACY_APP',legacy)
+    monkeypatch.setattr(engine,'PROJECT',tmp_path)
+    (weights/f'best_stgcnpp_{stem}_v4_multihead.onnx').write_bytes(b'fixture')
+    (weights/f'{stem}_v4_contract.json').write_text(json.dumps({'onnx_sha256':'expected'}))
+    assert not engine.model_ready(key)
+    verification=output/f'verification_{stem}_v4.json'
+    verification.write_text(json.dumps({'passed':True,'onnx_sha256':'other'}))
+    assert not engine.model_ready(key)
+    verification.write_text(json.dumps({'passed':True,'onnx_sha256':'expected'}))
+    assert engine.model_ready(key)
+    verification.write_text(json.dumps({'passed':False,'onnx_sha256':'expected'}))
+    assert not engine.model_ready(key)
+
+
 def configure(ws, generation=1, exercise='squat'):
     ws.send_json({'type': 'configure', 'exercise': exercise, 'source': 'camera', 'generation': generation})
     assert ws.receive_json()['type'] == 'ready'

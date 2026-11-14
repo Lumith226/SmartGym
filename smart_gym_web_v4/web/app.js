@@ -1,12 +1,14 @@
 const $ = (id) => document.getElementById(id);
 const video = $("preview"), overlay = $("overlay"), context = overlay.getContext("2d");
 const capture = document.createElement("canvas"), captureContext = capture.getContext("2d");
-const ORDER = ["squat", "push_up", "jump_jack", "situp"];
+const ORDER = ["squat", "push_up", "jump_jack", "situp", "high_knees", "butt_kickers"];
 const FALLBACK = [
   {id: "squat", name: "Squat", subtitle: "Gánh đùi", version: "V4", label_count: 14, labels: []},
   {id: "push_up", name: "Chống đẩy", subtitle: "Nhiều nhãn Qualcomm", version: "V4", label_count: 21, labels: []},
   {id: "jump_jack", name: "Jumping jacks", subtitle: "Bật nhảy dang tay chân", version: "V4", label_count: 29, labels: []},
   {id: "situp", name: "Gập bụng ngược", subtitle: "Nhiều nhãn Qualcomm", version: "V4", label_count: 19, labels: []},
+  {id: "high_knees", name: "High knees", subtitle: "Chạy nâng cao gối", version: "V4", label_count: 31, labels: []},
+  {id: "butt_kickers", name: "Butt kickers", subtitle: "Chạy gót chạm mông", version: "V4", label_count: 14, labels: []},
 ];
 const PAIRS = [[0,1],[0,2],[1,3],[2,4],[5,6],[5,7],[7,9],[6,8],[8,10],[5,11],[6,12],[11,12],[11,13],[13,15],[12,14],[14,16]];
 const S = {
@@ -48,23 +50,25 @@ function updateControls() {
   $("camera-source").disabled = S.busy;
   $("video-source").disabled = S.busy;
   $("video-file").disabled = S.busy;
-  for (const button of $("exercise-tabs").querySelectorAll("button")) button.disabled = S.busy;
+  for (const button of $("exercise-tabs").querySelectorAll("button")) button.disabled = S.busy || !S.exercises.some((item) => item.id === button.dataset.exercise);
   $("start-analysis").classList.toggle("running", S.running);
   $("start-analysis").textContent = S.running ? "■  Dừng phân tích" : "▶  Bắt đầu phân tích";
 }
 function drawExercises() {
   $("exercise-tabs").replaceChildren();
   for (const [index, id] of ORDER.entries()) {
-    const item = S.exercises.find((row) => row.id === id);
+    const available = S.exercises.some((row) => row.id === id);
+    const item = S.exercises.find((row) => row.id === id) || FALLBACK.find((row) => row.id === id);
     const button = document.createElement("button");
     button.type = "button";
     button.className = `exercise-tab ${id === S.exercise ? "active" : ""}`;
     button.setAttribute("aria-pressed", String(id === S.exercise));
     button.dataset.exercise = id;
+    button.disabled = S.busy || !available;
     const number = document.createElement("span"); number.className = "exercise-number"; number.textContent = String(index + 1);
     const content = document.createElement("span");
     const title = document.createElement("strong"); title.textContent = item.name;
-    const sub = document.createElement("small"); sub.textContent = `${item.version} · ${item.label_count} ${item.version === "V4" ? "nhãn độc lập" : "lớp"}`;
+    const sub = document.createElement("small"); sub.textContent = available ? `${item.version} · ${item.label_count} ${item.version === "V4" ? "nhãn độc lập" : "lớp"}` : "Đang chuẩn bị mô hình";
     content.append(title, sub);
     const check = document.createElement("span"); check.className = "check"; check.textContent = id === S.exercise ? "✓" : "↗";
     button.append(number, content, check);
@@ -72,7 +76,8 @@ function drawExercises() {
     $("exercise-tabs").append(button);
   }
   const info = exerciseInfo();
-  $("model-note").textContent=S.exercises.every((item)=>item.version==="V4") ? "Bốn bài sử dụng mô hình V4 nhiều nhãn: squat 14, chống đẩy 21, jumping jacks 29, gập bụng ngược 19." : "Squat và jumping jacks dùng V4. Hai bài còn lại dùng phiên bản hiện có trên server.";
+  $("model-note").textContent = S.exercises.map((item) => `${item.name}: ${item.label_count} nhãn`).join(" · ");
+  $("rep-count-label").textContent = ["high_knees", "butt_kickers"].includes(S.exercise) ? "LƯỢT CHÂN ƯỚC LƯỢNG" : "LƯỢT TẬP";
   $("selected-name").replaceChildren(document.createTextNode(info.name + " "));
   const badge = document.createElement("span"); badge.className = "version-pill"; badge.textContent = info.version;
   $("selected-name").append(badge);
@@ -109,7 +114,7 @@ function renderResults(force = false) {
         kind: id === "CORRECT" ? "positive" : "error"};
     }
     const {label} = entry;
-    const supported = row ? row.supported : label.calibrated !== false && (S.view === "whole" || label.rep_supported !== false);
+    const supported = row ? row.supported : label.calibrated !== false && (S.view === "whole" || (label.window_supported ?? label.rep_supported) !== false);
     const active = Boolean(row?.detected);
     const kind = row?.kind || label.kind;
     if (active) { if (kind === "error") errors++; else attributes++; }
@@ -149,6 +154,7 @@ function configure(clearWhole = false) {
   updateControls();
 }
 function selectExercise(id) {
+  if (!S.exercises.some((item) => item.id === id)) { notice("Mô hình bài này đang được chuẩn bị trên server."); return; }
   if (S.busy || S.exercise === id) return;
   S.exercise = id;
   if (S.source === "video" && S.hasMedia) video.currentTime = 0;
@@ -173,8 +179,10 @@ async function connect() {
     const exerciseResponse = await fetch(`${S.api}/api/exercises`, {signal: AbortSignal.timeout(5000)});
     if (!exerciseResponse.ok) throw new Error("Không đọc được danh sách bài tập.");
     const exercises = (await exerciseResponse.json()).exercises;
-    if (!Array.isArray(exercises) || !ORDER.every((id) => exercises.some((item) => item.id === id))) throw new Error("Server không có đủ cấu hình bài tập.");
-    S.exercises = exercises; drawExercises(); buildRows();
+    if (!Array.isArray(exercises) || !exercises.length || exercises.some((item) => !ORDER.includes(item.id))) throw new Error("Danh sách bài tập từ server không hợp lệ.");
+    S.exercises = exercises;
+    if (!exercises.some((item) => item.id === S.exercise)) S.exercise = exercises[0].id;
+    drawExercises(); buildRows();
     const wsUrl = new URL("/ws/live", S.api); wsUrl.protocol = base.protocol === "https:" ? "wss:" : "ws:";
     const socket = new WebSocket(wsUrl); S.socket = socket;
     socket.onopen = () => {
@@ -463,9 +471,22 @@ video.addEventListener("error", () => { stopAnalysis(false); S.hasMedia = false;
 document.addEventListener("keydown", (event) => {
   if (/input|select|textarea/i.test(event.target.tagName) || S.busy) return;
   const index = Number(event.key) - 1;
-  if (index >= 0 && index < 4 && Number.isInteger(index)) selectExercise(ORDER[index]);
+  if (index >= 0 && index < ORDER.length && Number.isInteger(index)) selectExercise(ORDER[index]);
 });
 window.addEventListener("beforeunload", () => { S.socket?.close(); if (S.stream) for (const track of S.stream.getTracks()) track.stop(); });
+
+// While training finishes, refresh the catalog without resetting the current exercise.
+setInterval(async () => {
+  if (!S.connected || S.busy || S.exercises.length === ORDER.length) return;
+  try {
+    const response = await fetch(`${S.api}/api/exercises`, {signal: AbortSignal.timeout(5000)});
+    if (!response.ok) return;
+    const rows = (await response.json()).exercises;
+    if (!Array.isArray(rows) || rows.length <= S.exercises.length || rows.some((row) => !ORDER.includes(row.id))) return;
+    S.exercises = rows; drawExercises(); updateControls();
+    notice("Đã nạp thêm bài tập có mô hình được kiểm tra xong.");
+  } catch { /* Keep the current exercise and its results during transient network errors. */ }
+}, 10000);
 
 $("server-url").value = S.api; $("web-address").textContent = location.host;
 $("api-address").textContent = new URL(S.api).host;

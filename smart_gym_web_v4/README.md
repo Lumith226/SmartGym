@@ -2,6 +2,12 @@
 
 Bản web dùng lại mô hình trong `../smart_gym_test_rtmpose_v4/weights`. Không sao chép hoặc thay trọng số và ngưỡng. Camera được mở bởi trình duyệt trên máy người dùng; server (máy chủ) không mở webcam bằng OpenCV.
 
+Hai lựa chọn bổ sung là **High knees — nâng cao gối (31 nhãn)** và **Butt kickers — gót chạm mông (14 nhãn)**. Web hiển thị sáu lựa chọn, phím tắt **1–6**; bài chưa có trọng số được xác minh sẽ hiện trạng thái đang chuẩn bị và bị khóa. Các bài đang có vẫn dùng được trong thời gian chuẩn bị.
+
+Server kiểm tra mô hình mới khi web làm mới danh mục mỗi 10 giây. Khi trọng số, cấu hình nhãn và kết quả xác minh có cùng mã kiểm tra nội dung, bài mới tự được nạp mà không đặt lại phiên tập hiện tại. Nếu đang chạy server từ trước lần cập nhật mã này, cần khởi động lại một lần để dùng cơ chế mới.
+
+Với hai bài chạy, kết quả camera là dự đoán trên đoạn chuyển động gần đây; phân tích toàn video dùng đủ nhãn ngữ cảnh. Lượt chân hiển thị là số ước lượng từng chân nâng/gập rồi hạ, không dùng để gán lỗi hay thay thế quy ước tốc độ của nhãn nguồn.
+
 ## Hai phần chạy riêng
 
 | Phần | Thư mục | Địa chỉ mặc định | Nhiệm vụ |

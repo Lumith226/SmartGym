@@ -64,6 +64,7 @@ def ui(monkeypatch,tmp_path):
             mouse['handler'](app.cv2.EVENT_LBUTTONDOWN,240,65,0,None);return -1
         return value
     monkeypatch.setattr(app,'ONNXGymAnalyzer',Analyzer)
+    monkeypatch.setattr(app,'model_ready',lambda exercise:True)
     monkeypatch.setattr(app,'RTMPoseTracker',Pose)
     monkeypatch.setattr(app,'ExerciseRepTracker',Tracker)
     monkeypatch.setattr(app,'SessionLogger',lambda:object())
@@ -93,6 +94,13 @@ def test_all_four_keys_change_visible_exercise_and_clear_previous_result(ui):
     assert [r['exercise'] for r in renders]==['squat','push_up','jump_jack','situp']
     assert all(r['result'] is None for r in renders[1:])
     assert len([e for e in events if e[0]=='rewind'])==3
+
+
+def test_running_exercise_keys_change_visible_selection(ui):
+    run,_=ui
+    renders,events=run([ord('5'),ord('6'),ord('q')])
+    assert [r['exercise'] for r in renders]==['squat','high_knees','butt_kickers']
+    assert all(r['result'] is None for r in renders[1:])
 
 
 def test_switch_after_eof_restarts_video_for_new_exercise(ui):

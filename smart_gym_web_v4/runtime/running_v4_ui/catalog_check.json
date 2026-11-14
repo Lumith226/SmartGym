@@ -1,0 +1,11 @@
+{
+  "passed": true,
+  "page_errors": [],
+  "mode": "mock API catalog and socket; no pose or model accuracy measured",
+  "checks": [
+    "four ready plus two locked",
+    "catalog refresh unlocks new exercises",
+    "current selection survives refresh",
+    "keys 5/6 show 31/14 label rows"
+  ]
+}

@@ -10,6 +10,7 @@ import time
 import numpy as np
 
 from enhanced_pose_processor import EnhancedPoseProcessor
+from running_rep_counter import RunningRepCounter
 
 
 def calc_angle(p1, p2, p3):
@@ -48,6 +49,7 @@ class ExerciseRepTracker:
         self.floor_side = None
         # Tích hợp bộ xử lý 4 cải tiến cơ sinh học
         self.pose_processor = EnhancedPoseProcessor(self.current_exercise)
+        self.running_counter=RunningRepCounter()
 
     def reset(self, new_exercise: str = None):
         if new_exercise:
@@ -75,6 +77,7 @@ class ExerciseRepTracker:
         self.last_rep_tensor = None
         self.last_raw_frames_count = 0
         self.floor_side = None
+        self.running_counter.reset()
 
     def notify_missing(self, timestamp=None):
         now = time.monotonic() if timestamp is None else float(timestamp)
@@ -106,6 +109,14 @@ class ExerciseRepTracker:
             self.missing_since = None
         norm_kpts = self.smooth_kpts(raw_norm_kpts)
         kpts = norm_kpts[:2].copy()  # (2,17)
+        if self.current_exercise in ('high_knees','butt_kickers'):
+            kpts[0]*=self.analyzer.frame_aspect_ratio
+            info=self.running_counter.update(kpts,norm_kpts[2],self.timestamp,self.current_exercise)
+            self.rep_count=info['rep_count'];self.state=info['state']
+            # Classification uses the recent movement window, not these geometric events.
+            info.update(exercise=self.current_exercise,smoothed_kpts=norm_kpts,last_result=None,
+                        just_finished_leg=info['just_finished_rep'],just_finished_rep=False)
+            return info
         if self.current_exercise in ('squat','jump_jack','push_up','situp'):
             kpts[0] *= self.analyzer.frame_aspect_ratio
 

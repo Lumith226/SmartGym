@@ -18,10 +18,13 @@ from camera_capture import CameraCapture
 APP=Path(__file__).resolve().parent
 PAIRS=[(0,1),(0,2),(1,3),(2,4),(5,6),(5,7),(7,9),(6,8),(8,10),
        (5,11),(6,12),(11,12),(11,13),(13,15),(12,14),(14,16)]
-EXERCISES=['squat','push_up','jump_jack','situp']
+EXERCISES=['squat','push_up','jump_jack','situp','high_knees','butt_kickers']
 EXERCISE_NAMES={'squat':'Squat (V4)','push_up':'Chống đẩy (V3)',
                 'jump_jack':'Bật nhảy dang tay chân (V4)','situp':'Gập bụng ngược (V3)'}
-EXERCISE_SHORT=['Squat','Chống đẩy','Bật nhảy','Gập bụng']
+EXERCISE_SHORT=['Squat','Chống đẩy','Bật nhảy','Gập bụng','Nâng gối','Gót chạm mông']
+EXERCISE_NAMES.update({'high_knees':'High knees — nâng cao gối (V4)',
+                       'butt_kickers':'Butt kickers — gót chạm mông (V4)'})
+TAB_WIDTH=132
 for _key in ('push_up','situp'):
     if EXERCISE_CONFIG[_key].get('is_multihead',False):
         EXERCISE_NAMES[_key]=('Chống đẩy' if _key=='push_up' else 'Gập bụng ngược')+' (V4)'
@@ -31,10 +34,22 @@ def is_v4(exercise):
     return EXERCISE_CONFIG[exercise].get('is_multihead',False)
 
 
+def model_ready(exercise):
+    config=EXERCISE_CONFIG[exercise]
+    exists=(APP/'weights'/config['onnx_file']).is_file() and (
+        not is_v4(exercise) or (APP/f'weights/{V4_STEMS[exercise]}_v4_contract.json').is_file())
+    if not exists or exercise not in ('high_knees','butt_kickers'):return exists
+    try:
+        verified=json.loads((APP.parent/f'stgcn_squat_project/outputs/v4/verification_{V4_STEMS[exercise]}_v4.json').read_text(encoding='utf-8'))
+        contract=json.loads((APP/f'weights/{V4_STEMS[exercise]}_v4_contract.json').read_text(encoding='utf-8'))
+        return verified.get('passed') is True and verified.get('onnx_sha256')==contract.get('onnx_sha256')
+    except (OSError,ValueError):return False
+
+
 def exercise_at_point(x,y):
     if 50<=y<=82:
         for i,key in enumerate(EXERCISES):
-            if 20+i*200<=x<=214+i*200:return key
+            if 20+i*TAB_WIDTH<=x<=20+(i+1)*TAB_WIDTH-6:return key
     return None
 
 
@@ -94,16 +109,17 @@ def render_dashboard(frame,result,rep_count=0,state='READY',source='',paused=Fal
     number=EXERCISES.index(exercise)+1
     text(20,14,f'ĐANG CHỌN [{number}]: '+EXERCISE_NAMES[exercise].upper(),24,(90,220,185))
     for i,key in enumerate(EXERCISES):
-        active=key==exercise;x=20+i*200
-        d.rounded_rectangle((x,50,x+194,82),radius=6,fill=(28,110,90) if active else (43,48,54),
+        active=key==exercise;x=20+i*TAB_WIDTH
+        d.rounded_rectangle((x,50,x+TAB_WIDTH-6,82),radius=6,fill=(28,110,90) if active else (43,48,54),
                             outline=(100,235,190) if active else (65,72,80),width=2)
-        text(x+10,57,f'[{i+1}] {EXERCISE_SHORT[i]}',16,(255,255,255) if active else (190,200,205))
+        text(x+6,58,f'[{i+1}] {EXERCISE_SHORT[i]}',14,(255,255,255) if active else (190,200,205))
     text(20,91,source[:105],14)
     if frame is None:
         text(95,290,'Đang chờ hình từ camera…' if camera_state and camera_state['state']=='opening' else 'Chưa có hình từ nguồn phát',24)
         if camera_state and camera_state['state']=='error':
             wrap(75,340,camera_state['message'],width=700,size=20,color=(255,185,110))
-    text(20,610,f'Rep: {rep_count}    Trạng thái: {state}    FPS xử lý: {fps:.1f}',20)
+    count_label='Lượt chân ≈' if exercise in ('high_knees','butt_kickers') else 'Rep:'
+    text(20,610,f'{count_label} {rep_count}    Trạng thái: {state}    FPS xử lý: {fps:.1f}',20)
     play_state=('CHỜ CAMERA' if camera_state['state']=='opening' else 'LỖI CAMERA') if camera_state and camera_state['state']!='live' else ('TẠM DỪNG' if paused else 'ĐANG PHÁT')
     text(20,648,play_state,18,(255,200,90) if paused or play_state!='ĐANG PHÁT' else (100,220,180))
     if notice:wrap(205,648,notice,width=610,size=14,color=(255,205,130))
@@ -155,7 +171,7 @@ def render_dashboard(frame,result,rep_count=0,state='READY',source='',paused=Fal
         text(850,776,'Vàng: bỏ sót nhãn gốc | Đỏ: dự đoán nhãn không được ghi',14)
         text(850,802,'N/A: thiếu ngữ cảnh hoặc mẫu xác thực. Điểm chưa hiệu chuẩn.',14)
     text(20,844,'[V] Video  [C] Camera  [P/Space] Dừng  [T] Toàn video/Rep  [R] Phát lại',16)
-    text(20,871,'Bấm nút chọn bài hoặc phím 1–4 trong cửa sổ này. [S] Lưu ảnh  [Q/Esc] Thoát.',14)
+    text(20,871,'Bấm nút chọn bài hoặc phím 1–6 trong cửa sổ này. [S] Lưu ảnh  [Q/Esc] Thoát.',14)
     return cv2.cvtColor(np.array(image),cv2.COLOR_RGB2BGR)
 
 
@@ -172,6 +188,7 @@ def main():
     if args.video and not Path(args.video).is_file():parser.error('Không tìm thấy video: '+args.video)
     analyzer=ONNXGymAnalyzer(args.device);exercise=analyzer.normalize_exercise(args.exercise)
     if exercise not in EXERCISES:parser.error('Bài tập không được hỗ trợ')
+    if not model_ready(exercise):parser.error('Mô hình bài này chưa xuất xong; xem outputs/v4/running_drills_pipeline_status.json')
     pose=RTMPoseTracker(mode=args.mode,device=args.device)
     if exercise=='squat':analyzer.load_squat_contract()
     elif exercise=='jump_jack':analyzer.load_jumpjack_contract()
@@ -240,6 +257,8 @@ def main():
                             logger.log_rep(tracker.rep_count,exercise,latest,last_info['rep_tensor_32'],
                                            last_info['raw_frames_count'],Path(source).name if source else 'Webcam')
                         corrected=last_kpts.copy();corrected[0]*=w/h;history.append((now,corrected))
+                        if exercise in ('high_knees','butt_kickers'):
+                            while history and now-history[0][0]>8.:history.popleft()
                         if not source and last_info.get('need_full_body') and exercise in ('push_up','situp'):
                             history.clear();whole=None;latest=None
                         elif not source and is_v4(exercise) and len(history)>=20 and time.monotonic()-last_window>3:
@@ -265,10 +284,13 @@ def main():
             delay=max(1,int(1000/(cap.get(cv2.CAP_PROP_FPS) or 30)-(time.monotonic()-iteration)*1000)) if source and not paused else 20
             key=cv2.waitKey(min(delay,100))&255
             selected=clicks.popleft() if clicks else None
-            if selected is None and key in [ord(str(i)) for i in range(1,5)]:selected=EXERCISES[int(chr(key))-1]
+            if selected is None and key in [ord(str(i)) for i in range(1,len(EXERCISES)+1)]:selected=EXERCISES[int(chr(key))-1]
             if key in [ord('q'),27]:break
             if args.max_frames and processed>=args.max_frames:break
             if selected is not None:
+                if not model_ready(selected):
+                    notice='Bài này đang được chuẩn bị; mô hình chưa xuất xong.'
+                    continue
                 exercise=selected;tracker.reset(exercise);pose.reset();history.clear()
                 whole=None;latest=None;last_kpts=None;last_info={};last_window=0.;show_whole=True
                 paused=False;eof=False;empty_since=None

@@ -32,7 +32,7 @@ def evaluate_rows(rows):
 def main():
     global LABELS, RAW_LABELS, encode_labels
     parser=argparse.ArgumentParser()
-    parser.add_argument('--exercise',choices=['squat','jumpjack','pushup','crunch'],default='squat')
+    parser.add_argument('--exercise',choices=['squat','jumpjack','pushup','crunch','highknees','buttkickers'],default='squat')
     parser.add_argument('--device',choices=['cuda','cpu'],default='cuda')
     parser.add_argument('--folder',default=None)
     parser.add_argument('--output',default=None)
@@ -40,7 +40,7 @@ def main():
     import importlib
     schema=importlib.import_module(args.exercise+'_schema')
     LABELS,RAW_LABELS,encode_labels=schema.LABELS,schema.RAW_LABELS,schema.encode_labels
-    args.folder=args.folder or str(APP/'test_videos_benchmark'/dict(squat='squats',jumpjack='jumping_jacks',pushup='pushups',crunch='reverse_crunches')[args.exercise])
+    args.folder=args.folder or str(APP/'test_videos_benchmark'/dict(squat='squats',jumpjack='jumping_jacks',pushup='pushups',crunch='reverse_crunches',highknees='high_knees',buttkickers='butt_kickers')[args.exercise])
     args.output=args.output or str(APP/f'logs/benchmark_{args.exercise}_v4.json')
     folder=Path(args.folder)
     if not folder.is_dir():raise ValueError('Không có thư mục benchmark: '+str(folder))

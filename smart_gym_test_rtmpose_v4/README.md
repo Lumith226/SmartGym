@@ -1,6 +1,30 @@
-# Smart Gym V4 — Bốn bài tập đa nhãn Qualcomm
+# Smart Gym V4 — Các bài tập đa nhãn Qualcomm
 
 Squat có 14 nhãn; chống đẩy 21 nhãn; jumping jacks (bật nhảy dang tay chân) 29 nhãn; gập bụng ngược 19 nhãn. Mỗi video có thể có nhiều nhãn đồng thời. Cả bốn bài yêu cầu đúng trọng số V4 và cấu hình nhãn đi kèm trong `weights`; thiếu bộ này sẽ báo lỗi thay vì tự chuyển về bản bốn lớp.
+
+## Bổ sung high knees và butt kickers
+
+High knees (chạy nâng cao gối) có 31 nhãn; butt kickers (chạy gót chạm mông) có 14 nhãn gốc Qualcomm. Hai bài sử dụng 192 thời điểm lấy mẫu trên một video và 48 đặc trưng ngữ cảnh. 192 thời điểm không phải 192 FPS.
+
+Pipeline chuẩn bị dữ liệu, trích khớp, huấn luyện, kiểm tra ONNX và xuất ảnh:
+
+```powershell
+python stgcn_model_training/train_pipeline/run_running_v4_pipeline.py
+```
+
+Theo dõi `stgcn_model_training/outputs/v4/running_drills_pipeline_status.json` và `running_drills_pipeline.log`. Chỉ coi quá trình hoàn tất khi `complete` là `true` và có `completed_running_v4.json`. Không chạy thêm một pipeline trong khi pipeline hiện tại đang hoạt động.
+
+Sau khi hoàn tất, chạy từ thư mục gốc dự án:
+
+```powershell
+python smart_gym_test_rtmpose_v4/app.py --exercise high_knees --device cuda
+python smart_gym_test_rtmpose_v4/app.py --exercise butt_kickers --device cuda
+python smart_gym_test_rtmpose_v4/app.py --exercise high_knees --video "duong_dan_video.mp4" --headless --output "ket_qua.json"
+```
+
+Phím **5** chọn high knees; phím **6** chọn butt kickers. Lượt chân là số ước lượng: mỗi lần một chân nâng/gập rồi hạ được tính một lượt. Bộ đếm không tạo nhãn lỗi và không định nghĩa lại rps của Qualcomm. Các nhãn ngữ cảnh như dừng sớm hoặc chỉ một lượt cần phân tích toàn video; những nhãn khác có thể được dự đoán trên đoạn camera gần đây.
+
+Trọng số lưu tại `stgcn_model_training/models/v4`, bản dùng thử tại `weights`; lịch sử học, loss, ma trận nhầm lẫn từng nhãn và báo cáo lưu trong `stgcn_model_training/outputs/v4`.
 
 Nguồn nhãn cố định: `stgcn_model_training/Dataset/Qualcom dataset/fine_grained_labels.json`. Tệp gốc chỉ được đọc; dữ liệu chuyển đổi lưu riêng trong `data/v4`. SHA-256 (mã kiểm tra nội dung) xác nhận tệp gốc không bị sửa.
 

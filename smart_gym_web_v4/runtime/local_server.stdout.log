@@ -1,0 +1,5 @@
+>>> [RTMPose Engine] Khởi tạo từ tệp weights cục bộ:
+    • Detector ONNX: yolox_m_8xb8-300e_humanart-c2c7a14a.onnx
+    • Pose ONNX:     rtmpose-m_simcc-body7_pt-body7_420e-256x192-e48f03d0_20230504.onnx
+load D:\1.E22CQCN03-B\GYM\smart_gym_test_rtmpose_v4\weights\yolox_m_8xb8-300e_humanart-c2c7a14a.onnx with onnxruntime backend
+load D:\1.E22CQCN03-B\GYM\smart_gym_test_rtmpose_v4\weights\rtmpose-m_simcc-body7_pt-body7_420e-256x192-e48f03d0_20230504.onnx with onnxruntime backend

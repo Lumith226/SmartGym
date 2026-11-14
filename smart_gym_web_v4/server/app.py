@@ -57,7 +57,9 @@ def create_app(engine=None, device=None):
 
     @app.get('/api/exercises')
     async def exercises():
-        return {'exercises': require_engine().exercises()}
+        async with app.state.gpu_lock:
+            rows=await asyncio.to_thread(require_engine().exercises)
+        return {'exercises': rows}
 
     @app.websocket('/ws/live')
     async def live(socket: WebSocket):

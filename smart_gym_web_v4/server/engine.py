@@ -16,8 +16,27 @@ EXERCISES = (
     {'id': 'jump_jack', 'name': 'Jumping jacks', 'subtitle': 'Bật nhảy dang tay chân', 'version': 'V4', 'label_count': 29},
     {'id': 'push_up', 'name': 'Chống đẩy', 'subtitle': 'Nhiều nhãn Qualcomm', 'version': 'V4', 'label_count': 21},
     {'id': 'situp', 'name': 'Gập bụng ngược', 'subtitle': 'Nhiều nhãn Qualcomm', 'version': 'V4', 'label_count': 19},
+    {'id': 'high_knees', 'name': 'High knees', 'subtitle': 'Chạy nâng cao gối', 'version': 'V4', 'label_count': 31},
+    {'id': 'butt_kickers', 'name': 'Butt kickers', 'subtitle': 'Chạy gót chạm mông', 'version': 'V4', 'label_count': 14},
 )
-ALLOWED_EXERCISES = {row['id'] for row in EXERCISES}
+_MODEL_STEMS={'squat':'squat','push_up':'pushup','jump_jack':'jumpjack','situp':'crunch',
+              'high_knees':'highknees','butt_kickers':'buttkickers'}
+def model_ready(key):
+    import json
+    stem=_MODEL_STEMS[key]
+    model=LEGACY_APP/f'weights/best_stgcnpp_{stem}_v4_multihead.onnx'
+    contract=LEGACY_APP/f'weights/{stem}_v4_contract.json'
+    if not model.is_file() or not contract.is_file():return False
+    if key not in ('high_knees','butt_kickers'):return True
+    verification=PROJECT/f'stgcn_squat_project/outputs/v4/verification_{stem}_v4.json'
+    try:
+        checked=json.loads(verification.read_text(encoding='utf-8'))
+        cfg=json.loads(contract.read_text(encoding='utf-8'))
+        return checked.get('passed') is True and checked.get('onnx_sha256')==cfg.get('onnx_sha256')
+    except (OSError,ValueError):return False
+
+
+ALLOWED_EXERCISES = {row['id'] for row in EXERCISES if model_ready(row['id'])}
 
 
 class LiveSession:
@@ -76,14 +95,19 @@ class InferenceEngine:
         from onnx_gym_analyzer import EXERCISE_CONFIG
         rows = []
         for exercise in EXERCISES:
+            if not model_ready(exercise['id']):continue
             row = dict(exercise)
             key = row['id']
+            # Newly verified models become available without restarting existing sessions.
+            self.analyzer.load_v4_contract(key)
+            self.analyzer.get_session(key)
+            ALLOWED_EXERCISES.add(key)
             if EXERCISE_CONFIG[key].get('is_multihead',False):
                 contract = self.analyzer.load_v4_contract(key)
                 row['version']='V4';row['label_count']=len(contract['labels'])
                 row['subtitle']='Nhiều nhãn Qualcomm'
                 row['labels'] = [{k: label.get(k) for k in
-                                  ('key', 'raw_label', 'name_vi', 'kind', 'threshold', 'rep_supported', 'calibrated')}
+                                  ('key', 'raw_label', 'name_vi', 'kind', 'threshold', 'rep_supported', 'window_supported', 'calibrated')}
                                  for label in contract['labels']]
             else:
                 row['labels'] = [{'key': key_, 'name_vi': value['name_vi'], 'kind': 'legacy', 'threshold': None}
@@ -140,6 +164,8 @@ class InferenceEngine:
             corrected = keypoints.copy()
             corrected[0] *= w / h
             state.history.append((timestamp, corrected))
+            if state.exercise in ('high_knees','butt_kickers'):
+                while state.history and timestamp-state.history[0][0]>8.:state.history.popleft()
             # Keep an actual six-second window, independent of transport FPS.
             while state.history and timestamp - state.history[0][0] > 6:
                 state.history.popleft()

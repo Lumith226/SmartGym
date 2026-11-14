@@ -1,0 +1,16 @@
+{
+  "passed": true,
+  "page_errors": [],
+  "exercises": {
+    "highknees": {
+      "whole_video_label_rows": 31,
+      "sample": "00281889.mp4",
+      "screenshot": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_web_v4\\runtime\\running_v4\\web_highknees_whole.png"
+    },
+    "buttkickers": {
+      "whole_video_label_rows": 14,
+      "sample": "00281956.mp4",
+      "screenshot": "D:\\1.E22CQCN03-B\\GYM\\smart_gym_web_v4\\runtime\\running_v4\\web_buttkickers_whole.png"
+    }
+  }
+}
