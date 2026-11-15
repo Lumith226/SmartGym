@@ -6,5 +6,7 @@ export default async function ChatPage({searchParams}:{searchParams:Promise<{res
   const query=await searchParams;const ids=Array.isArray(query.resultId)?query.resultId:query.resultId?[query.resultId]:[];
   const valid=ids.length<=50&&ids.every(id=>/^[a-f0-9]{8}(?:-[a-f0-9]{4}){3}-[a-f0-9]{12}$/i.test(id));
   const selected=valid?[...new Set(ids)]:[];
-  return <Chat key={selected.join(':')+(valid?'':':invalid')} resultIds={selected} invalidSelection={!valid}/>;
+  return <Chat key={selected.join(':')+(valid?'':':invalid')} resultIds={selected} invalidSelection={!valid}
+    qwenEnabled={process.env.SMARTGYM_QWEN_ENABLED === 'true'}
+    geminiEnabled={process.env.SMARTGYM_GEMINI_ENABLED === 'true'}/>;
 }

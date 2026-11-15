@@ -7,7 +7,7 @@ const pause=ms=>new Promise(r=>setTimeout(r,ms));
 test('T27 BFF over mTLS provider/Pose fixtures; no real corpus or generation claimed',{timeout:60000},async t=>{
   const tls=await createTestTls(),cleanup=[tls.stop];t.after(async()=>{for(const close of cleanup.reverse())await close();});
   const token='provider-test-token-not-a-real-secret-123456',assertionToken='owner-assertion-fixture',owner=randomUUID(),id=randomUUID(),revision='a'.repeat(16);
-  let mode='valid',last,calls=0,healthCalls=0,rawCalls=0,revoked=false,now=Date.now(),delay=0;
+  let mode='valid',last,calls=0,healthCalls=0,rawCalls=0,inventoryCalls=0,revoked=false,now=Date.now(),delay=0;
   const model=JSON.parse(await readFile('docs/api/ai-provider-compatibility.yaml','utf8')).models[0];
   const raw={result:{id,source:'VIDEO',exerciseId:model.catalog_id,modelVersion:'ST-GCNpp-V4',configVersion:'v4',repCount:null,repCountStatus:'UNAVAILABLE',reps:[],formStatus:'ASSESSED',limitations:[],completedAt:new Date().toISOString(),expiresAt:"2100-01-01T00:00:00Z"},sourceId:'sha256:'+'b'.repeat(64),modelSha256:model.model_sha256,
     rawModelResult:{exercise:model.pose_id,schema_version:model.schema_version,scope:'video',quality:{usable:true},label_results:Array.from({length:14},(_,i)=>({key:'fixture_'+i,kind:'error',raw_label:'fixture',probability:.2,threshold:.5})),model_provenance:{model_sha256:model.model_sha256},source:{video_sha256:'b'.repeat(64)}}};
@@ -16,8 +16,21 @@ test('T27 BFF over mTLS provider/Pose fixtures; no real corpus or generation cla
   const privateTls={...tls.clients.server,ca:tls.ca,requestCert:true,rejectUnauthorized:true};
   async function serve(handler){const s=createServer(privateTls,handler);s.on('tlsClientError',()=>{});await new Promise(r=>s.listen(0,'127.0.0.1',r));cleanup.push(()=>new Promise(r=>s.close(r)));return 'https://127.0.0.1:'+s.address().port;}
   const origin=await serve(async(req,res)=>{assert.equal(req.socket.getPeerCertificate().fingerprint256,tls.callers.bff[0]);assert.equal(req.headers.authorization,'Bearer '+token);
-    res.setHeader('content-type','application/json');if(req.url==='/health'){healthCalls++;res.end(JSON.stringify({kb_ready:mode!=='not-ready',runtime_revision:mode==='revision'?'f'.repeat(16):revision}));return;}
-    assert.equal(req.url,'/v1/chatbot');calls++;let text='';for await(const c of req)text+=c;last={headers:req.headers,body:JSON.parse(text)};
+    res.setHeader('content-type','application/json');if(req.url==='/health'){healthCalls++;res.end(JSON.stringify({kb_ready:mode!=='not-ready',kb_version:'book-kb.v1',runtime_revision:mode==='revision'?'f'.repeat(16):revision}));return;}
+    if(req.url==='/v1/kb/sources'){
+      assert.equal(req.method,'GET');
+      inventoryCalls++;
+      res.end(JSON.stringify([
+        {id:'approved-book',title:'Sách đã lập chỉ mục',publisher:'Nhà xuất bản',chunks:4,file:'/private/book.pdf'},
+        {id:'unapproved-book',title:'Sách chưa duyệt',publisher:'Nhà xuất bản',chunks:4},
+        {id:'missing-book',title:'Sách chưa lập chỉ mục',publisher:'Nhà xuất bản',chunks:0},
+      ]));
+      return;
+    }
+    if(req.url==='/internal/v1/ollama/runtime'){
+      res.end(JSON.stringify({state:mode==='unknown-runtime'?'unknown':req.method==='POST'?'gpu':'idle',private:'hide me'}));return;
+    }
+    assert.ok(['/v1/chatbot','/internal/v1/chatbot/qwen','/internal/v1/chatbot/gemini'].includes(req.url));calls++;let text='';for await(const c of req)text+=c;last={path:req.url,headers:req.headers,body:JSON.parse(text)};
     if(delay)await pause(delay);if(res.destroyed)return;let out=output(last.body.task);
     if(mode==='unavailable'){out.status='unavailable';out.reply='Chưa kết nối được model.';out.user_notices=[];}
     if(mode.startsWith('status:')){out.status=mode.slice(7);out.generation_used=out.status==='generated';}
@@ -30,7 +43,10 @@ test('T27 BFF over mTLS provider/Pose fixtures; no real corpus or generation cla
   });
   const poseOrigin=await serve(async(req,res)=>{assert.equal(req.headers.authorization,'Bearer '+assertionToken);assert.equal(req.url,'/internal/v1/pose/results/'+id+'/raw');rawCalls++;res.setHeader('content-type','application/json');res.setHeader('cache-control','no-store');let body=structuredClone(raw);
     if(mode==='other-owner'){res.statusCode=404;body={};}if(mode==='expired')body.result.expiresAt='2000-01-01T00:00:00Z';if(mode==='digest')body.modelSha256='f'.repeat(64);if(mode==='raw-id')body.result.id=randomUUID();res.end(JSON.stringify(body));});
-  const config={origin,tls:{...tls.clients.bff,ca:tls.ca},token,revision,sources:new Map([['approved-book',{origins:new Set(['https://example.org'])}]])};
+  const config={origin,tls:{...tls.clients.bff,ca:tls.ca},token,revision,sources:new Map([
+    ['approved-book',{origins:new Set(['https://example.org'])}],
+    ['missing-book',{origins:new Set(['https://example.org'])}],
+  ])};
   const principal=async cookie=>{if(cookie!=='__Host-sg_session='+'s'.repeat(43)||revoked)throw Object.assign(new (await import('../../frontend/server/identity-client.mjs')).AuthError(401,'UNAUTHENTICATED'));return {userId:owner,accessToken:assertionToken};};
   let handler=createChatHandler({configuration:async()=>config,assertion:principal,poseConfiguration:async()=>({origin:poseOrigin,tls:config.tls}),clock:()=>now});
   const web=createServer(tls.clients.server,(req,res)=>handler(req,res,'https://127.0.0.1:'+web.address().port));await new Promise(r=>web.listen(0,'127.0.0.1',r));cleanup.push(()=>new Promise(r=>web.close(r)));const webOrigin='https://127.0.0.1:'+web.address().port;
@@ -39,7 +55,66 @@ test('T27 BFF over mTLS provider/Pose fixtures; no real corpus or generation cla
     const payload=rawBody??JSON.stringify(body);const q=request(webOrigin+path,{method,ca:tls.ca,headers:{origin:webOrigin,'x-smartgym-csrf':'1','content-type':'application/json',...headers}},res=>{let text='';res.setEncoding('utf8');res.on('data',c=>text+=c);res.on('end',()=>resolve({status:res.statusCode,headers:res.headers,text,body:JSON.parse(text)}));});q.on('error',reject);q.end(payload);
   });
   await t.test('knowledge anonymous; projection keeps KB version/references and strips technical trace and browser headers',async()=>{fresh();const r=await call({headers:{authorization:'Bearer forged','x-user-id':'forged','x-forwarded-for':'evil'}});assert.equal(r.status,200,r.text);assert.equal(r.body.kb_version,'book-kb.v1');assert.equal(r.body.references[0].namespace,'kb');assert.equal(r.body.references[0].pdf_page,12);assert.equal(r.headers['cache-control'],'no-store');assert.ok(!r.text.includes('must-not-leak'));assert.ok(!r.text.includes(token));assert.equal(last.headers.cookie,undefined);assert.equal(last.headers['x-user-id'],undefined);assert.equal(last.body.generate,true);assert.deepEqual(last.body.rules,[]);assert.equal(last.body.scoring_policy,null);});
-  await t.test('route, CSRF, query, body and forged records/policy denied before provider',async()=>{fresh();const before=calls;for(const opt of [{method:'GET'},{path:'/api/v1/chat/sources/x'},{path:'/internal'},{headers:{origin:'https://evil.test'}},{headers:{'x-smartgym-csrf':''}},{path:'/api/v1/chat?owner=x'},{body:{message:'ok',task:'knowledge',records:[]}},{body:{message:'ok',task:'score',rules:[]}},{body:{message:' ',task:'knowledge'}},{rawBody:'x'.repeat(140000)}])assert.ok((await call(opt)).status>=400);assert.equal(calls,before);});
+  await t.test('lists only indexed and approved sources without generation, preserving citation follow-ups',async()=>{
+    fresh();
+    const before = calls;
+    const inventoryBefore = inventoryCalls;
+    const conversation = [{role:'user',content:'chao'},{role:'assistant',content:'Chào bạn!'}];
+    const r = await call({body:{message:'bạn có những nguồn dữ liệu nào',task:'knowledge',conversation}});
+    assert.equal(r.status,200,r.text);
+    assert.equal(r.body.generation_mode,'source_inventory');
+    assert.equal(r.body.generation_used,false);
+    assert.equal(r.body.kb_version,'book-kb.v1');
+    assert.deepEqual(r.body.references,[]);
+    assert.match(r.body.reply,/Sách đã lập chỉ mục/);
+    assert.doesNotMatch(r.text,/Sách chưa duyệt|Sách chưa lập chỉ mục|private\/book/);
+    assert.equal(calls,before);
+    assert.equal(inventoryCalls,inventoryBefore+1);
+    const followUp = await call({body:{message:'Nguồn của câu trả lời trước là gì?',task:'knowledge',conversation}});
+    assert.equal(followUp.status,200,followUp.text);
+    assert.equal(calls,before+1);
+    assert.equal(inventoryCalls,inventoryBefore+1);
+  });
+  await t.test('Ollama placement is private upstream and active check requires same origin',async()=>{
+    fresh();const path='/api/v1/chat/ollama-runtime';
+    const read=await call({path,method:'GET',rawBody:''});
+    assert.equal(read.headers['cache-control'],'no-store');
+    assert.deepEqual(read.body,{state:'idle'});
+    assert.equal((await call({path,headers:{origin:'https://evil.test'}})).status,403);
+    assert.deepEqual((await call({path,rawBody:''})).body,{state:'gpu'});
+    mode='unknown-runtime';
+    assert.equal((await call({path,method:'GET',rawBody:''})).status,503);
+  });
+  for (const provider of ['qwen', 'gemini']) {
+    await t.test(provider + ' is opt-in and cannot send session records or conversation history', async () => {
+      const code = provider.toUpperCase();
+      const flag = 'SMARTGYM_' + code + '_ENABLED';
+      const saved = process.env[flag];
+      const body = {message:'Cách tập squat?',task:'knowledge',provider};
+      try {
+        fresh();
+        process.env[flag] = 'false';
+        assert.equal((await call({body})).body.code,code + '_DISABLED');
+        process.env[flag] = 'true';
+        const before = calls;
+        for (const forbidden of [{poseResultIds:[id]},{task:'summary'},{conversation:[{role:'user',content:'Private context'}]}]) {
+          assert.equal((await call({body:{...body,...forbidden}})).body.code,code + '_KNOWLEDGE_ONLY');
+        }
+        assert.equal(calls,before);
+        assert.equal((await call({body})).status,200);
+        assert.equal(last.path,'/internal/v1/chatbot/' + provider);
+        assert.deepEqual(last.body.records,[]);
+        assert.deepEqual(last.body.conversation,[]);
+        fresh();
+        assert.equal((await call()).status,200);
+        assert.equal(last.path,'/v1/chatbot');
+      } finally {
+        if (saved === undefined) delete process.env[flag];
+        else process.env[flag] = saved;
+      }
+    });
+  }
+  await t.test('route, CSRF, query, body and forged records/policy denied before provider',async()=>{fresh();const before=calls;assert.equal((await call({method:'GET',rawBody:''})).status,200);for(const opt of [{method:'PUT'},{path:'/api/v1/chat/sources/x'},{path:'/internal'},{headers:{origin:'https://evil.test'}},{headers:{'x-smartgym-csrf':''}},{path:'/api/v1/chat?owner=x'},{body:{message:'ok',task:'knowledge',records:[]}},{body:{message:'ok',task:'score',rules:[]}},{body:{message:' ',task:'knowledge'}},{rawBody:'x'.repeat(140000)}])assert.ok((await call(opt)).status>=400,JSON.stringify(opt).slice(0,200));assert.equal(calls,before);});
   await t.test('all personal tasks require session; owner raw/manifest only, no automatic score; selected state is not observation',async()=>{for(const task of ['score','summary','practice']){fresh();assert.equal((await call({body:{message:'Nhận xét buổi tập',task}})).status,401);const r=await call({body:{message:'Nhận xét buổi tập',task,poseResultIds:[id]},headers:{cookie:'__Host-sg_session='+'s'.repeat(43)}});assert.equal(r.status,200,r.text);assert.equal(r.body.session.penalty_total,null);assert.equal(last.body.records[0].observation_id,id);assert.equal(last.body.records[0].source_id,raw.sourceId);assert.equal(last.body.records[0].simulated,false);assert.deepEqual(last.body.records[0].model_result,raw.rawModelResult);assert.equal(last.body.video_context.state,'analyzed');}
     fresh();assert.equal((await call({body:{message:'Nhận xét video này',task:'knowledge',videoState:'selected'}})).status,200);assert.equal(last.body.records.length,0);assert.equal(last.body.video_context.state,'selected');});
   await t.test('unknown owner, expired result, manifest digest mismatch, ID mismatch and duplicate IDs never reach chat',async()=>{for(const kind of ['other-owner','expired','digest','raw-id']){fresh();mode=kind;const before=calls;const r=await call({body:{message:'Nhận xét',task:'summary',poseResultIds:[id]},headers:{cookie:'__Host-sg_session='+'s'.repeat(43)}});assert.equal(r.status,kind==='other-owner'?404:kind==='expired'?410:503,r.text);assert.equal(calls,before);}fresh();assert.equal((await call({body:{message:'Nhận xét',task:'summary',poseResultIds:[id,id]},headers:{cookie:'__Host-sg_session='+'s'.repeat(43)}})).status,422);});

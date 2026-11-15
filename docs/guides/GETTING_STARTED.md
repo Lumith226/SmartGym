@@ -39,9 +39,39 @@ Script tạo cấu hình, mật khẩu cục bộ và chứng chỉ. Dùng [.env
 
 Nếu đã chọn đường dẫn AI khác mặc định, lưu các biến đường dẫn vào `.env` để Compose dùng lại khi bạn mở terminal mới.
 
+Nếu Ollama trên Windows báo `read error: Cannot allocate memory` khi nạp model từ ổ Windows, có thể sao chép model đã cài vào volume Linux của Docker. Chạy khi container Ollama đang dùng thư mục model gốc tại `/models`.
+
+```powershell
+docker run --rm --network none --volumes-from smartgym-ollama-1:ro --mount type=volume,source=smartgym-ollama-models,target=/model-cache --entrypoint sh ollama/ollama:latest -ec 'cp -a /models/. /model-cache/'
+```
+
+Đặt `SMARTGYM_OLLAMA_MODELS=smartgym-ollama-models` trong `.env` rồi chạy lại SmartGym. Volume chứa bản sao của các model đã cài và cần đủ dung lượng trống.
+
+### Thử Qwen API trong Hỏi đáp
+
+Tạo khóa của workspace Singapore trong [Alibaba Cloud Model Studio](https://www.alibabacloud.com/help/en/model-studio/get-api-key). Lưu khóa vào tệp văn bản UTF-8 `.local/compose/rag/qwen-api-key` với quyền đọc của container RAG. Nếu dùng `SMARTGYM_CONFIG_DIR`, đặt tệp vào thư mục `rag/` của cấu hình đó. Giữ khóa ngoài Git.
+
+Thêm `SMARTGYM_QWEN_ENABLED=true` vào `.env`. Nếu workspace có endpoint riêng, đặt `SMARTGYM_QWEN_BASE_URL` theo [tài liệu Model Studio](https://www.alibabacloud.com/help/en/model-studio/qwen-api-via-openai-chat-completions). Model mặc định là `qwen3.8-flash`.
+
+```powershell
+docker compose --env-file .env -f infra/compose.yaml up -d --build --no-deps rag web
+```
+
+Trong **Hỏi đáp**, chọn **Mô hình → Qwen API**. Qwen chỉ xử lý từng câu hỏi kiến thức độc lập. Câu hỏi và các đoạn tài liệu truy xuất được gửi tới Alibaba Cloud. Lịch sử chat và kết quả Pose không đi qua nhánh này. Ollama vẫn tạo embedding cho chỉ mục hiện tại.
+
+### Thử Gemini API trong Hỏi đáp
+
+Tạo API key ở [Google AI Studio](https://aistudio.google.com/apikey). Lưu khóa vào `.local/compose/rag/gemini-api-key` hoặc thư mục `rag/` của `SMARTGYM_CONFIG_DIR`. Đặt `SMARTGYM_GEMINI_ENABLED=true` trong `.env`, rồi tạo lại hai container `rag` và `web` bằng lệnh Compose ở trên. Model mặc định là `gemini-3.5-flash-lite`, có thể cấu hình qua `SMARTGYM_GEMINI_MODEL`.
+
+Chọn **Mô hình → Gemini API** để hỏi từng câu kiến thức. Gemini nhận câu hỏi và đoạn trích được truy xuất. Lịch sử chat, kết quả Pose và bước embedding được giữ cục bộ. Xem [tài liệu Gemini API tương thích OpenAI](https://ai.google.dev/gemini-api/docs/openai) và [điều khoản Gemini API](https://ai.google.dev/gemini-api/terms).
+
 ### Khởi động hằng ngày
 
 Trên Windows, mở Docker Desktop rồi nhấp đúp [Chay-SmartGym.cmd](../../Chay-SmartGym.cmd). Launcher chọn GPU, đợi Compose sẵn sàng và mở Web. Có thể dùng `pnpm start:local` trên các máy đã cài Node.js và Docker.
+
+Với **Ollama local**, launcher tự thử CUDA trong Docker trên máy NVIDIA, hoặc Vulkan trên Windows và Linux khi có thiết bị tương thích. Trên Windows AMD cần cài [Ollama cho Windows](https://ollama.com/download/windows) và có sẵn hai model của SmartGym. Launcher tự bật Ollama ngầm khi cần. Sau khi khởi động, RAG nạp thử model và xác nhận GPU. Nếu không xác nhận được, launcher dùng Ollama CPU trong Docker. `SMARTGYM_OLLAMA_ACCELERATION=cpu` bỏ qua bước thử GPU. Xem [hỗ trợ phần cứng Ollama](https://docs.ollama.com/gpu).
+
+Lần đầu trên mỗi máy, dùng launcher để tự dò phần cứng. Nút **Start** trong Docker Desktop dùng lại cấu hình container đã tạo. Trên Windows dùng Ollama native, chạy launcher sau khi khởi động lại máy hoặc đăng ký [tác vụ chạy ngầm](OPERATIONS.md#ollama-gpu-trên-windows).
 
 - NVIDIA x86-64 có GPU truy cập được từ Docker sẽ chạy Pose bằng CUDA trong container. Cần driver NVIDIA phù hợp CUDA 12.8 và Docker Desktop với WSL 2 trên Windows hoặc NVIDIA Container Toolkit trên Linux. Lần đầu Docker tải thư viện CUDA và cuDNN để tạo image Pose. Xem [Docker Desktop GPU](https://docs.docker.com/desktop/features/gpu/) và [NVIDIA Container Toolkit](https://docs.nvidia.com/datacenter/cloud-native/container-toolkit/latest/install-guide.html).
 - Windows x64 thử DirectML khi Docker không phát hiện GPU NVIDIA tương thích. Nếu mô hình GPU không thể khởi tạo hoặc Web không kết nối được, launcher chạy Pose CPU trong Docker.

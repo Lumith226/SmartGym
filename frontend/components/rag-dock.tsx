@@ -2,8 +2,9 @@
 
 import * as React from 'react';
 import Link from 'next/link';
-import { ArrowUp, ChevronDown, Sparkles, Trash2, X } from 'lucide-react';
+import { ArrowUp, ChevronDown, Clock, Sparkles, Trash2, X } from 'lucide-react';
 import { cn } from '../lib/utils';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from './ui/select';
 
 type Reference = {
   number: number;
@@ -20,17 +21,58 @@ type Answer = {
   status: string;
   references: Reference[];
   user_notices: string[];
+  provider?: string;
+  model?: string;
+  model_version?: string;
+  kb_version?: string;
 };
 
-type Turn = { role: 'user' | 'assistant'; content: string; answer?: Answer };
+type Turn = {
+  role: 'user' | 'assistant';
+  content: string;
+  answer?: Answer;
+  durationMs?: number;
+};
+
+function getModelDisplayName(provider: 'ollama' | 'qwen' | 'gemini') {
+  if (provider === 'gemini') return 'Gemini 2.5 Flash';
+  if (provider === 'qwen') return 'Qwen 2.5';
+  return 'Ollama (Qwen 2.5)';
+}
+
+function resolveTurnModel(turn: Turn, currentProvider?: 'ollama' | 'qwen' | 'gemini'): string {
+  if (turn.answer?.provider === 'gemini') return 'Gemini 2.5 Flash';
+  if (turn.answer?.provider === 'qwen') return 'Qwen 2.5';
+  if (turn.answer?.provider === 'ollama') return 'Ollama (Qwen 2.5)';
+
+  if (turn.answer?.model_version && turn.answer.model_version !== 'none') {
+    if (turn.answer.model_version.includes('gemini')) return 'Gemini 2.5 Flash';
+    if (turn.answer.model_version.includes('qwen')) return 'Ollama (Qwen 2.5)';
+    return turn.answer.model_version;
+  }
+
+  if (turn.answer?.kb_version?.includes('local')) {
+    return 'Ollama (Qwen 2.5)';
+  }
+
+  if (currentProvider) {
+    return getModelDisplayName(currentProvider);
+  }
+
+  return 'Ollama (Qwen 2.5)';
+}
 
 const ERROR_TEXT: Record<string, string> = {
   RAG_DISABLED: 'Trợ lý chưa được bật.',
   RAG_NOT_READY: 'Kho tri thức chưa sẵn sàng. Câu hỏi của bạn vẫn được giữ để gửi lại.',
   RAG_TIMEOUT: 'Trợ lý trả lời quá lâu. Bạn có thể gửi lại.',
   RATE_LIMITED: 'Bạn đang gửi quá nhanh. Hãy chờ khoảng một phút.',
-  UNAUTHENTICATED: 'Cần đăng nhập để hỏi về buổi tập của bạn.',
+  UNAUTHENTICATED: 'Cần đăng nhập để hỏi về kết quả buổi tập của bạn.',
   VALIDATION_ERROR: 'Kiểm tra lại nội dung câu hỏi.',
+  GEMINI_KNOWLEDGE_ONLY: 'Gemini API hiện chỉ nhận câu hỏi độc lập về kiến thức thể hình.',
+  QWEN_KNOWLEDGE_ONLY: 'Qwen API hiện chỉ nhận câu hỏi độc lập về kiến thức thể hình.',
+  GEMINI_DISABLED: 'Gemini API hiện chưa được bật trên máy chủ.',
+  QWEN_DISABLED: 'Qwen API hiện chưa được bật trên máy chủ.',
 };
 
 export function RagDock({
@@ -42,13 +84,46 @@ export function RagDock({
   minimized?: boolean;
   onToggleMinimize?: () => void;
 }) {
+  const [provider, setProvider] = React.useState<'ollama' | 'qwen' | 'gemini'>('ollama');
+  const [qwenEnabled, setQwenEnabled] = React.useState(false);
+  const [geminiEnabled, setGeminiEnabled] = React.useState(false);
   const [message, setMessage] = React.useState('');
   const [turns, setTurns] = React.useState<Turn[]>([]);
   const [pending, setPending] = React.useState(false);
   const [error, setError] = React.useState('');
+  const [errorCode, setErrorCode] = React.useState('');
   const [expanded, setExpanded] = React.useState(false);
+  const [elapsedDuration, setElapsedDuration] = React.useState(0);
+  const pendingStartRef = React.useRef(0);
   const abortRef = React.useRef<AbortController | null>(null);
   const scrollRef = React.useRef<HTMLDivElement | null>(null);
+
+  React.useEffect(() => {
+    try {
+      const saved = localStorage.getItem('smartgym_preferred_provider');
+      if (saved === 'ollama' || saved === 'qwen' || saved === 'gemini') {
+        setProvider(saved);
+      }
+    } catch {}
+
+    fetch('/api/v1/chat', { credentials: 'same-origin' })
+      .then(async (res) => {
+        if (!res.ok) return;
+        const data = await res.json();
+        setQwenEnabled(Boolean(data?.qwenEnabled));
+        setGeminiEnabled(Boolean(data?.geminiEnabled));
+      })
+      .catch(() => undefined);
+  }, []);
+
+  React.useEffect(() => {
+    if (!pending) return;
+    const interval = setInterval(() => {
+      const sec = Math.max(0, (Date.now() - pendingStartRef.current) / 1000);
+      setElapsedDuration(Number(sec.toFixed(1)));
+    }, 100);
+    return () => clearInterval(interval);
+  }, [pending]);
 
   React.useEffect(() => {
     scrollRef.current?.scrollTo({ top: scrollRef.current.scrollHeight, behavior: 'smooth' });
@@ -61,8 +136,11 @@ export function RagDock({
     if (question.length < 2 || pending) return;
     const controller = new AbortController();
     abortRef.current = controller;
+    pendingStartRef.current = Date.now();
+    setElapsedDuration(0);
     setPending(true);
     setError('');
+    setErrorCode('');
     setExpanded(true); // Khi ấn gửi chat thì mới mở to hơn để trả lời
     try {
       const conversation = turns
@@ -78,24 +156,28 @@ export function RagDock({
         body: JSON.stringify({
           message: body.slice(0, 3000),
           task: 'knowledge',
+          provider,
           poseResultIds: [],
-          conversation,
+          conversation: provider === 'ollama' ? conversation : [],
         }),
       });
       const data = await res.json();
       if (!res.ok) throw new Error(data?.code ?? 'RAG_UNAVAILABLE');
+      const durationMs = Date.now() - pendingStartRef.current;
       setTurns(old =>
         [
           ...old,
           { role: 'user' as const, content: question },
-          { role: 'assistant' as const, content: data.reply, answer: data as Answer },
+          { role: 'assistant' as const, content: data.reply, answer: data as Answer, durationMs },
         ].slice(-20),
       );
       if (data.status !== 'unavailable') setMessage('');
     } catch (e) {
       if (!controller.signal.aborted) {
+        const rawCode = (e as Error).message;
+        setErrorCode(rawCode);
         setError(
-          ERROR_TEXT[(e as Error).message] ??
+          ERROR_TEXT[rawCode] ??
             'Trợ lý hiện chưa trả lời được. Câu hỏi của bạn vẫn được giữ lại.',
         );
       }
@@ -188,22 +270,37 @@ export function RagDock({
                       </ol>
                     </details>
                   )}
+                  <div className="mt-1.5 flex items-center justify-between text-[10px] text-muted-foreground/80">
+                    <span className="font-mono">{resolveTurnModel(turn, provider)}</span>
+                    {turn.durationMs != null && (
+                      <span className="inline-flex items-center gap-1 font-mono">
+                        <Clock size={10} />
+                        <span>{(turn.durationMs / 1000).toFixed(1)}s</span>
+                      </span>
+                    )}
+                  </div>
                 </div>
               </div>
             ))}
             {pending && (
               <div className="flex">
-                <div className="rounded-2xl bg-muted px-3 py-1.5 text-xs text-muted-foreground animate-pulse">
-                  Đang phân tích và trả lời…
+                <div className="flex items-center gap-1.5 rounded-2xl bg-muted px-3 py-1.5 text-xs text-muted-foreground">
+                  <span className="h-1.5 w-1.5 rounded-full bg-primary animate-ping" />
+                  <span>Đang xử lý ({elapsedDuration}s)…</span>
                 </div>
               </div>
             )}
             {error && (
               <p role="alert" className="m-0 text-xs text-rose-500">
-                {error}{' '}
-                <Link href="/dang-nhap?next=%2F" className="text-primary font-semibold hover:underline">
-                  Đăng nhập
-                </Link>
+                {error}
+                {errorCode === 'UNAUTHENTICATED' && (
+                  <>
+                    {' '}
+                    <Link href="/dang-nhap?next=%2F" className="text-primary font-semibold hover:underline">
+                      Đăng nhập
+                    </Link>
+                  </>
+                )}
               </p>
             )}
           </div>
@@ -228,10 +325,41 @@ export function RagDock({
           spellCheck={false}
           autoComplete="off"
           onChange={e => setMessage(e.target.value)}
-          placeholder=""
+          placeholder="Hỏi trợ lý SmartGym..."
           aria-label="Câu hỏi cho trợ lý SmartGym"
-          className="flex-1 min-w-0 bg-transparent px-2 py-1 text-xs text-foreground outline-none"
+          className="flex-1 min-w-0 bg-transparent px-2 py-1 text-xs text-foreground outline-none placeholder:text-muted-foreground/60"
         />
+
+        {/* Bộ chọn mô hình AI chuẩn shadcn giống bên hỏi đáp */}
+        <Select
+          value={provider}
+          onValueChange={(val) => {
+            if (val === 'ollama' || val === 'qwen' || val === 'gemini') {
+              setProvider(val);
+              try {
+                localStorage.setItem('smartgym_preferred_provider', val);
+              } catch {}
+            }
+          }}
+          disabled={pending}
+        >
+          <SelectTrigger
+            aria-label="Chọn mô hình AI"
+            className="h-7 min-h-7 rounded-xl border-border/50 bg-muted/60 px-2 py-0 text-[11px] font-medium text-foreground hover:bg-muted shadow-none focus:ring-1 shrink-0 gap-1"
+          >
+            <SelectValue placeholder="Mô hình" />
+          </SelectTrigger>
+          <SelectContent align="end" className="w-52">
+            <SelectItem value="ollama">Ollama local</SelectItem>
+            <SelectItem value="qwen" disabled={!qwenEnabled}>
+              {qwenEnabled ? 'Qwen API' : 'Qwen API · Chưa cấu hình'}
+            </SelectItem>
+            <SelectItem value="gemini" disabled={!geminiEnabled}>
+              {geminiEnabled ? 'Gemini API' : 'Gemini API · Chưa cấu hình'}
+            </SelectItem>
+          </SelectContent>
+        </Select>
+
         {turns.length > 0 && !expanded && (
           <button
             type="button"

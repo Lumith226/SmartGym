@@ -8,6 +8,16 @@
         "task"
       ],
       "properties": {
+        "provider": {
+          "type": "string",
+          "enum": [
+            "ollama",
+            "qwen",
+            "gemini"
+          ],
+          "default": "ollama",
+          "description": "Qwen and Gemini require server configuration and accept standalone knowledge questions without Pose records or conversation history."
+        },
         "message": {
           "type": "string",
           "maxLength": 3000,
@@ -121,6 +131,19 @@
           "minLength": 1
         },
         "model_version": {
+          "type": "string",
+          "maxLength": 300,
+          "minLength": 1
+        },
+        "provider": {
+          "type": "string",
+          "enum": [
+            "ollama",
+            "qwen",
+            "gemini"
+          ]
+        },
+        "model": {
           "type": "string",
           "maxLength": 300,
           "minLength": 1

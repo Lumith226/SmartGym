@@ -28,7 +28,7 @@ export function AppShell({ children }: { children: React.ReactNode }) {
   if (isChat) {
     // Chatbot RAG: Giữ thanh điều hướng sidebar hệ thống, không padding ngoài để giao diện chat tràn màn hình
     return (
-      <div className="flex h-dvh w-full flex-col md:flex-row overflow-hidden bg-background">
+      <div className="fixed inset-0 flex h-dvh max-h-dvh w-full flex-col md:flex-row overflow-hidden bg-background">
         <Sidebar />
         <main id="noi-dung-chinh" tabIndex={-1} className="flex min-w-0 flex-1 h-full overflow-hidden">
           {children}

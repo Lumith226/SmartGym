@@ -74,13 +74,13 @@ Dependency Web/NestJS giữ theo manifest/lockfile hiện có. Pose V4 dùng Fas
 
 ### Module HTTP của Catalog
 
-Catalog đặt module HTTP và logic liên quan cạnh nhau trong [`src/modules/`](../../backend/apps/catalog/src/modules/). `exercises/` chứa thư viện, quản trị bài tập và tra cứu tham chiếu. `media/` chứa upload, phục vụ file công khai, xử lý xác minh và storage. `content/`, `revisions/`, `transfers/` và `feed/` chứa module cùng phần xử lý tương ứng. `admin/` chứa guard, hợp đồng và các tiện ích CMS dùng chung. Health check chỉ cần một file ở `modules/`.
+Catalog đặt controller, module và logic liên quan cạnh nhau trong [`src/modules/`](../../backend/apps/catalog/src/modules/). `exercises/` chứa thư viện, quản trị bài tập và tra cứu tham chiếu. `media/` chứa upload, phục vụ file công khai, xử lý xác minh và storage. `content/`, `revisions/`, `transfers/` và `feed/` chứa module cùng phần xử lý tương ứng. `admin/` chứa guard, hợp đồng và các tiện ích CMS dùng chung. Health check có controller và module riêng trong `src/modules/`.
 
-[Entrypoint công khai](../../backend/apps/catalog/src/app.ts) và [entrypoint mTLS](../../backend/apps/catalog/src/admin-app.ts) ghép các module tương ứng. Module tra cứu tham chiếu và module snapshot cho RAG có guard riêng theo danh tính service gọi. Hai listener thuộc cùng đơn vị triển khai Catalog và dùng dữ liệu do Catalog sở hữu. Database, migration CLI, entrypoint media worker và entrypoint relay đặt ở cấp service.
+Catalog khởi tạo hai listener từ `src/main.ts`. [Module gốc công khai](../../backend/apps/catalog/src/app.module.ts) và [module gốc quản trị mTLS](../../backend/apps/catalog/src/admin-app.module.ts) đăng ký các module tương ứng. Module tra cứu tham chiếu và module snapshot cho RAG có guard riêng theo danh tính service gọi. Hai listener thuộc cùng đơn vị triển khai Catalog và dùng dữ liệu do Catalog sở hữu. Database, migration CLI, entrypoint media worker và entrypoint relay đặt ở cấp service.
 
 ### Module HTTP của các service NestJS còn lại
 
-Mỗi service ghép module HTTP tại `src/app.ts`. Các file nghiệp vụ liên quan nằm cạnh module trong `src/modules/`. Health check dùng một file tại `src/modules/`. Các entrypoint tiến trình, migration CLI và database ở cấp service.
+Mỗi service khởi tạo ứng dụng HTTP tại `src/app.ts` và đăng ký module tính năng trong `src/app.module.ts`. Controller, provider và module nằm theo tính năng trong `src/modules/`. Health và trạng thái Pose có controller và module riêng. Các entrypoint tiến trình, migration CLI và database ở cấp service.
 
 | Service | Nhóm nghiệp vụ |
 |---|---|

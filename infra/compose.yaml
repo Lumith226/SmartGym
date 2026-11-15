@@ -257,7 +257,12 @@ services:
       OTEL_LOGS_EXPORTER: otlp
       KB_INDEX_DIR: /index
       KB_GRAPH_BACKEND: local
-      OLLAMA_BASE_URL: http://ollama:11434
+      SMARTGYM_QWEN_ENABLED: ${SMARTGYM_QWEN_ENABLED:-false}
+      SMARTGYM_QWEN_BASE_URL: ${SMARTGYM_QWEN_BASE_URL:-https://dashscope-intl.aliyuncs.com/compatible-mode/v1}
+      SMARTGYM_QWEN_MODEL: ${SMARTGYM_QWEN_MODEL:-qwen3.8-flash}
+      SMARTGYM_GEMINI_ENABLED: ${SMARTGYM_GEMINI_ENABLED:-false}
+      SMARTGYM_GEMINI_MODEL: ${SMARTGYM_GEMINI_MODEL:-gemini-3.5-flash-lite}
+      OLLAMA_BASE_URL: ${SMARTGYM_OLLAMA_ORIGIN:-http://ollama:11434}
       OLLAMA_CHAT_MODEL: ${SMARTGYM_CHAT_MODEL:-qwen2.5:3b}
       OLLAMA_EMBED_MODEL: ${SMARTGYM_EMBED_MODEL:-nomic-embed-text:latest}
     volumes:
@@ -940,7 +945,8 @@ services:
       BFF_POSE_STUDIO_TLS_CA_FILE: /run/secrets/pose-studio-ca.crt
       BFF_POSE_STUDIO_STARTUP_FILE: /run/secrets/pose-startup.json
       BFF_RAG_ENABLED: ${SMARTGYM_WEB_RAG_ENABLED:-true}
-      BFF_RAG_DEADLINE_MS: ${SMARTGYM_RAG_DEADLINE_MS:-180000}
+      SMARTGYM_QWEN_ENABLED: ${SMARTGYM_QWEN_ENABLED:-false}
+      SMARTGYM_GEMINI_ENABLED: ${SMARTGYM_GEMINI_ENABLED:-false}
     ports:
       - "127.0.0.1:3100:3100"
     depends_on:
@@ -973,6 +979,8 @@ networks:
     internal: true
 
 volumes:
+  smartgym-ollama-models:
+    name: smartgym-ollama-models
   alertmanager-data:
   redis-data:
   observability-data:

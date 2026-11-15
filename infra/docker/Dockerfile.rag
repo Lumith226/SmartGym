@@ -5,6 +5,9 @@ RUN pip install --no-cache-dir -r requirements.lock.txt \
     opentelemetry-distro==0.66b2 opentelemetry-instrumentation-fastapi==0.66b2 opentelemetry-exporter-otlp-proto-http==1.45.2
 COPY --from=rag-source kb_service ./kb_service
 COPY --from=rag-source capabilities.json ./
+COPY infra/rag/smartgym_cloud.py infra/rag/smartgym_ollama_status.py infra/rag/smartgym_app.py ./kb_service/
+COPY infra/rag/install-cloud-providers.py /tmp/install-cloud-providers.py
+RUN python -B /tmp/install-cloud-providers.py
 ENV PYTHONDONTWRITEBYTECODE=1
 USER 1000:1000
-ENTRYPOINT ["opentelemetry-instrument", "python", "-m", "uvicorn", "kb_service.app:app"]
+ENTRYPOINT ["opentelemetry-instrument", "python", "-m", "uvicorn", "kb_service.smartgym_app:app"]

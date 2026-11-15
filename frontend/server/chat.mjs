@@ -15,10 +15,10 @@ import { loadPoseLiveConfig } from './pose-live.mjs';
 import { claimSharedChat, createCircuitBreaker } from './resilience.mjs';
 
 /** @typedef {'knowledge' | 'score' | 'summary' | 'practice'} ChatTask */
-/** @typedef {{message: string, task: ChatTask, poseResultIds?: string[], videoState?: 'none' | 'selected' | 'analyzing', conversation?: {role: 'user' | 'assistant', content: string}[]}} ChatRequest */
+/** @typedef {{message: string, task: ChatTask, provider?: 'ollama' | 'qwen' | 'gemini', poseResultIds?: string[], videoState?: 'none' | 'selected' | 'analyzing', conversation?: {role: 'user' | 'assistant', content: string}[]}} ChatRequest */
 /** @typedef {{origin: string, tls: import('node:https').RequestOptions, token?: string}} UpstreamConfig */
 /** @typedef {UpstreamConfig & {token: string, revision: string, sources: Map<string, {origins: Set<string>}>}} ChatConfig */
-/** @typedef {{method?: string, body?: object, authorization?: string, signal?: AbortSignal, limit?: number, timeout?: number, privateResponse?: boolean}} UpstreamOptions */
+/** @typedef {{method?: string, body?: object, authorization?: string, signal?: AbortSignal, limit?: number, timeout?: number | null, privateResponse?: boolean}} UpstreamOptions */
 /** @typedef {{status: number, body: unknown}} UpstreamResponse */
 /** @typedef {{userId: string, accessToken: string}} Principal */
 /** @typedef {{result: {id: string, exerciseId: string, expiresAt: string, source: 'VIDEO' | 'LIVE'}, sourceId: string, modelSha256: string, rawModelResult: {exercise: string, schema_version: string, model_provenance: {model_sha256: string}, source: {video_sha256?: string, live_session_sha256?: string}}}} PoseRawResultEnvelope */
@@ -158,7 +158,7 @@ function call(
         ...config.tls,
         method,
         agent: false,
-        signal: AbortSignal.any(
+        signal: timeout === null ? signal : AbortSignal.any(
           signal
             ? [signal, AbortSignal.timeout(timeout)]
             : [AbortSignal.timeout(timeout)],
@@ -207,8 +207,48 @@ function call(
     req.end(payload);
   });
 }
-/** @param {unknown} output @param {ChatTask} task @param {ChatConfig} config */
-function project(output, task, config) {
+/** @param {string} message */
+function asksForSourceInventory(message) {
+  const normalized = message
+    .normalize('NFD')
+    .replace(/\p{M}/gu, '')
+    .toLowerCase()
+    .replace(/đ/g, 'd')
+    .replace(/[^a-z0-9]+/g, ' ')
+    .trim();
+  const question = /^(?:(?:ban|smartgym|chatbot) )?(?:dang )?(?:co(?: (?:dung|su dung))?|dung|su dung) (?:nhung |cac )?(?:nguon(?: du lieu| tai lieu| tham khao)?|tai lieu) (?:nao|gi)(?: (?:vay|a|the))?$/;
+  const list = /^(?:(?:hay|giup toi) )?liet ke (?:cac |nhung )?(?:nguon du lieu|(?:nguon(?: tai lieu| tham khao)?|tai lieu) (?:trong kho tri thuc|ban (?:dang )?(?:dung|su dung)|cua smartgym))$/;
+  return question.test(normalized) || list.test(normalized);
+}
+
+/** @param {unknown} body @param {unknown} kbVersion @param {ChatConfig} config */
+function sourceInventoryAnswer(body, kbVersion, config) {
+  if (!isList(body)) throw fail();
+  const sources = new Map();
+  for (const row of body) {
+    if (!isRecord(row) || typeof row.id !== 'string' || !config.sources.has(row.id) ||
+      typeof row.chunks !== 'number' || !Number.isInteger(row.chunks) || row.chunks <= 0) continue;
+    const title = text(row.title, 500).replace(/\s+/g, ' ').trim();
+    const publisher = text(row.publisher, 500).replace(/\s+/g, ' ').trim();
+    if (title) sources.set(row.id, publisher ? `${title} (${publisher})` : title);
+  }
+  const titles = [...sources.values()].slice(0, 25);
+  const reply = titles.length
+    ? [`Kho tri thức SmartGym hiện có ${sources.size} nguồn đã được lập chỉ mục và duyệt hiển thị.`,
+      ...titles.map((title, index) => `${index + 1}. ${title}`),
+      ...(sources.size > titles.length ? [`Đang hiển thị ${titles.length} nguồn đầu tiên.`] : []),
+    ].join('\n\n')
+    : 'Kho tri thức SmartGym hiện chưa có nguồn nào vừa được lập chỉ mục vừa được duyệt hiển thị.';
+  return {
+    reply, task: 'knowledge', status: 'grounded_guidance',
+    generation_used: false, generation_mode: 'source_inventory',
+    kb_version: kbVersion, model_version: 'none',
+    references: [], evidence: [], citations: [], user_notices: [], session: {},
+  };
+}
+
+/** @param {unknown} output @param {ChatTask} task @param {ChatConfig} config @param {string} [provider] */
+function project(output, task, config, provider = 'ollama') {
   if (
     !isRecord(output) ||
     output.task !== task ||
@@ -307,6 +347,15 @@ function project(output, task, config) {
     generation_mode: text(output.generation_mode, 100),
     kb_version: text(output.kb_version, 300),
     model_version: text(output.model_version, 300),
+    provider,
+    model:
+      provider === 'gemini'
+        ? 'Gemini 2.5 Flash'
+        : provider === 'qwen'
+          ? 'Qwen 2.5'
+          : text(output.model_version, 300) && text(output.model_version, 300) !== 'none'
+            ? text(output.model_version, 300)
+            : 'Ollama (Qwen 2.5)',
     references,
     user_notices: output.user_notices
       .filter((v) => typeof v === 'string' && !unsafeText.test(v))
@@ -371,7 +420,7 @@ export function createChatHandler({
   configuration = loadChatConfig,
   assertion = assertionForSession,
   poseConfiguration = loadPoseLiveConfig,
-  deadlineMs = 90000,
+  deadlineMs,
   clock = () => Date.now(),
 } = {}) {
   /** @type {Map<string, {until: number, count: number, active: boolean}>} */
@@ -406,13 +455,41 @@ export function createChatHandler({
     let release,
       slot = false;
     const controller = new AbortController(),
-      timer = setTimeout(() => controller.abort(), deadlineMs);
+      timer = deadlineMs === undefined ? undefined : setTimeout(() => controller.abort(), deadlineMs);
     const disconnected = () => controller.abort();
     res.once('close', disconnected);
     try {
       requireSameOrigin(req, webOrigin);
       if (!req.url || req.url.length > 8192) throw fail(400, 'BAD_REQUEST');
       const url = new URL(req.url, webOrigin);
+      if (url.pathname === '/api/v1/chat/ollama-runtime' &&
+        (req.method === 'GET' || req.method === 'POST')) {
+        if (url.search) throw fail(400, 'BAD_REQUEST');
+        const config = await within(configuration, controller.signal);
+        const response = await call(config, '/internal/v1/ollama/runtime', {
+          method: req.method,
+          signal: controller.signal,
+          timeout: req.method === 'POST' ? 70000 : 5500,
+          limit: 1024,
+        });
+        const state = field(response.body, 'state');
+        if (response.status !== 200 || typeof state !== 'string' ||
+          !['gpu', 'cpu', 'mixed', 'idle', 'checking', 'unavailable'].includes(state)) throw fail();
+        res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+        res.end(JSON.stringify({ state }));
+        return;
+      }
+      if (url.pathname === '/api/v1/chat' && req.method === 'GET') {
+        if (url.search) throw fail(400, 'BAD_REQUEST');
+        res.writeHead(200, { 'content-type': 'application/json', 'cache-control': 'no-store' });
+        res.end(
+          JSON.stringify({
+            qwenEnabled: process.env.SMARTGYM_QWEN_ENABLED === 'true',
+            geminiEnabled: process.env.SMARTGYM_GEMINI_ENABLED === 'true',
+          }),
+        );
+        return;
+      }
       if (req.method !== 'POST' || url.pathname !== '/api/v1/chat')
         throw fail(404, 'NOT_FOUND');
       if (url.search) throw fail(400, 'BAD_REQUEST');
@@ -423,22 +500,37 @@ export function createChatHandler({
       const input = await readJson(req, 131072);
       if (!isChatRequest(input) || !input.message.trim())
         throw fail(422, 'VALIDATION_ERROR');
+      const cloud = input.provider === 'ollama' ? undefined : input.provider;
+      const cloudCode = cloud?.toUpperCase();
+      if (cloud) {
+        if (process.env['SMARTGYM_' + cloudCode + '_ENABLED'] !== 'true')
+          throw fail(503, cloudCode + '_DISABLED');
+        if (input.task !== 'knowledge' || input.poseResultIds?.length ||
+          input.conversation?.length || (input.videoState && input.videoState !== 'none'))
+          throw fail(422, cloudCode + '_KNOWLEDGE_ONLY');
+      }
       if (active >= 2) throw fail(429, 'RATE_LIMITED');
       active++;
       slot = true;
       const ids = input.poseResultIds ?? [],
         personal = input.task !== 'knowledge' || ids.length > 0;
       let principal;
-      if (personal || sessionCookie(req.headers.cookie ?? ''))
-        principal = await within(
-          () => assertion(req.headers.cookie ?? ''),
-          controller.signal,
-        );
+      if (personal || sessionCookie(req.headers.cookie ?? '')) {
+        try {
+          principal = await within(
+            () => assertion(req.headers.cookie ?? ''),
+            controller.signal,
+          );
+        } catch (err) {
+          if (personal) throw err;
+          principal = undefined;
+        }
+      }
       const key = principal
         ? 'owner:' + principal.userId
         : 'ip:' + req.socket.remoteAddress;
       release = process.env.SMARTGYM_REDIS_URL
-        ? await claimSharedChat(key, deadlineMs)
+        ? await claimSharedChat(key)
         : claim(key);
       const signal = controller.signal,
         config = await within(configuration, signal);
@@ -538,22 +630,34 @@ export function createChatHandler({
           source_id: records[0]?.source_id ?? null,
         },
       };
-      const upstream = await generationBreaker(
-        () =>
-          call(config, '/v1/chatbot', {
-            method: 'POST',
-            body: payload,
-            signal,
-            timeout: deadlineMs,
-          }),
-        (response) => response.status >= 500,
-        () => res.destroyed,
-      );
+      const upstreamPath = cloud ? '/internal/v1/chatbot/' + cloud : '/v1/chatbot';
+      const sourceInventory =
+        input.task === 'knowledge' &&
+        !ids.length &&
+        (!input.videoState || input.videoState === 'none') &&
+        asksForSourceInventory(input.message);
+      const upstream = sourceInventory
+        ? await call(config, '/v1/kb/sources', { signal, timeout: 5000 })
+        : await generationBreaker(
+            () =>
+              call(config, upstreamPath, {
+                method: 'POST',
+                body: payload,
+                signal,
+                timeout: deadlineMs ?? null,
+              }),
+            (response) => response.status >= 500,
+            () => res.destroyed,
+          );
       signal.throwIfAborted();
       if (upstream.status !== 200)
         throw fail(
           503,
-          upstream.status === 503 ? 'RAG_NOT_READY' : 'RAG_UNAVAILABLE',
+          cloud && !sourceInventory
+            ? cloudCode + '_UNAVAILABLE'
+            : upstream.status === 503
+              ? 'RAG_NOT_READY'
+              : 'RAG_UNAVAILABLE',
         );
       const policy = await within(configuration, signal);
       if (
@@ -561,7 +665,10 @@ export function createChatHandler({
         policy.revision !== config.revision
       )
         throw fail(503, 'RAG_RUNTIME_MISMATCH');
-      const result = project(upstream.body, input.task, policy);
+      const answer = sourceInventory
+        ? sourceInventoryAnswer(upstream.body, field(health.body, 'kb_version'), policy)
+        : upstream.body;
+      const result = project(answer, input.task, policy, cloud || 'ollama');
       if (principal) {
         const current = await within(
           () => assertion(req.headers.cookie ?? ''),
@@ -597,11 +704,4 @@ export function createChatHandler({
     }
   };
 }
-const configuredDeadline = Number(process.env.BFF_RAG_DEADLINE_MS ?? 90000);
-const deadlineMs =
-  Number.isSafeInteger(configuredDeadline) &&
-  configuredDeadline >= 5000 &&
-  configuredDeadline <= 240000
-    ? configuredDeadline
-    : 90000;
-export const handleChat = createChatHandler({ deadlineMs });
+export const handleChat = createChatHandler();

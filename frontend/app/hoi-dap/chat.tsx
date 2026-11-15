@@ -22,6 +22,7 @@ import {
   PanelLeft,
   Sparkles,
   Clock,
+  Cloud,
   Trash2,
   Dumbbell,
   AlertCircle,
@@ -33,7 +34,8 @@ import {
 } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Card } from '../../components/ui/card';
-import { Badge } from '../../components/ui/badge';
+import { Select, SelectContent, SelectItem, SelectTrigger } from '../../components/ui/select';
+import { OllamaRuntime } from './ollama-runtime';
 import { cn } from '../../lib/utils';
 
 export type Task = 'knowledge' | 'score' | 'summary' | 'practice';
@@ -53,7 +55,11 @@ export type Answer = {
   task: Task;
   status: string;
   generation_used: boolean;
+  generation_mode?: string;
   kb_version: string;
+  model_version?: string;
+  provider?: string;
+  model?: string;
   references: Reference[];
   user_notices: string[];
   session: {
@@ -67,28 +73,54 @@ export type Turn = {
   role: 'user' | 'assistant';
   content: string;
   attachment?: { name: string; type: string };
-  reasoningTitle?: string;
   answer?: Answer;
   timestamp?: number;
+  durationMs?: number;
 };
 
 export type Selection = { id: string; name: string };
 
+function formatDuration(ms?: number) {
+  if (ms == null) return null;
+  if (ms < 1000) return `${ms}ms`;
+  const sec = ms / 1000;
+  if (sec < 60) return `${sec.toFixed(1)}s`;
+  const roundedSeconds = Math.round(sec);
+  const m = Math.floor(roundedSeconds / 60);
+  const s = roundedSeconds % 60;
+  return `${m}m ${s}s`;
+}
+
+function resolveAnswerModel(answer?: Answer) {
+  if (!answer) return null;
+  if (answer.generation_used === false) return 'Không dùng mô hình sinh câu trả lời';
+  const model = answer.model_version?.trim();
+  return model && model.toLowerCase() !== 'none' ? model : 'Chưa có tên mô hình';
+}
+
 type StoredConversation = {
   id: string;
   title: string;
-  task: Task;
   turns: Turn[];
   createdAt: number;
   updatedAt: number;
 };
 
-const tasks: Record<Task, { label: string; desc: string }> = {
-  knowledge: { label: 'Kiến thức thể hình', desc: 'Hỏi về kỹ thuật, cơ bắp, giáo án' },
-  score: { label: 'Đánh giá kỹ thuật', desc: 'Phân tích điểm số tư thế AI' },
-  summary: { label: 'Nhận xét buổi tập', desc: 'Tổng kết lỗi sai và cải thiện' },
-  practice: { label: 'Gợi ý bài tập bổ trợ', desc: 'Đề xuất bài khắc phục điểm yếu' },
+const taskLabels: Record<Task, string> = {
+  knowledge: 'Kiến thức thể hình',
+  score: 'Đánh giá kỹ thuật',
+  summary: 'Nhận xét buổi tập',
+  practice: 'Gợi ý cách sửa',
 };
+
+function inferTask(question: string, hasResults: boolean): Task {
+  if (!hasResults) return 'knowledge';
+  const text = question.toLowerCase().normalize('NFD').replace(/\p{M}/gu, '').replace(/đ/g, 'd');
+  if (/\b(cham diem|cho diem|bao nhieu diem|tru diem|may diem)\b/.test(text)) return 'score';
+  if (/\b(bo tro|khac phuc|sua loi|chinh sua|cai thien|sua the nao|sua nhu the nao|cach sua|tap lai)\b/.test(text))
+    return 'practice';
+  return 'summary';
+}
 
 const exerciseNames: Record<string, string> = {
   bodyweight_squat: 'Squat',
@@ -102,28 +134,24 @@ const PROMPT_SUGGESTIONS = [
     icon: Dumbbell,
     title: 'Kỹ thuật Squat chuẩn',
     desc: 'Cách mở gối, vị trí chân và gồng core tránh đau lưng.',
-    task: 'knowledge' as Task,
     prompt: 'Hướng dẫn chi tiết kỹ thuật Squat đúng chuẩn, cách mở gối và gồng bụng (bracing) để tránh chấn thương cột sống?',
   },
   {
     icon: Calendar,
     title: 'Lịch tập Push - Pull - Legs',
     desc: 'Thiết kế giáo án 4 buổi/tuần cân bằng các nhóm cơ.',
-    task: 'knowledge' as Task,
     prompt: 'Hãy thiết kế cho tôi một lịch tập Push - Pull - Legs 4 buổi/tuần cho người đã tập 6 tháng, mục tiêu tăng cơ giảm mỡ tối ưu.',
   },
   {
     icon: Flame,
     title: 'Tính Calo & Macro',
     desc: 'Xác định lượng Protein, Carb, Fat cần nạp mỗi ngày.',
-    task: 'knowledge' as Task,
     prompt: 'Tôi nặng 68kg, cao 1m72, tập 4 buổi/tuần. Hãy tính TDEE và phân bổ Macro (Protein/Carb/Fat) cho giai đoạn siết cơ nhẹ.',
   },
   {
     icon: Activity,
     title: 'Khắc phục đau khớp gối',
     desc: 'Bài tập bổ trợ củng cố cơ đùi trước và dây chằng.',
-    task: 'practice' as Task,
     prompt: 'Tôi thường bị mỏi và đau khớp gối sau khi tập chân. Có những bài tập bổ trợ và bài giãn cơ nào giúp khắc phục?',
   },
 ];
@@ -247,18 +275,28 @@ function FormattedContent({
 export function Chat({
   resultIds,
   invalidSelection = false,
+  qwenEnabled: initialQwen = false,
+  geminiEnabled: initialGemini = false,
 }: {
   resultIds: string[];
   invalidSelection?: boolean;
+  qwenEnabled?: boolean;
+  geminiEnabled?: boolean;
 }) {
+  const [qwenEnabled, setQwenEnabled] = useState(initialQwen);
+  const [geminiEnabled, setGeminiEnabled] = useState(initialGemini);
   const [message, setMessage] = useState('');
-  const [task, setTask] = useState<Task>('knowledge');
+  const [provider, setProvider] = useState<'ollama' | 'qwen' | 'gemini'>('ollama');
   const [turns, setTurns] = useState<Turn[]>([]);
   const [error, setError] = useState(
     invalidSelection ? 'Liên kết kết quả tập không hợp lệ.' : '',
   );
   const [pending, setPending] = useState(false);
   const [attached, setAttached] = useState<Selection[]>([]);
+  const cloudProvider = provider !== 'ollama';
+  const providerName = provider === 'gemini' ? 'Gemini API' : 'Qwen API';
+  const cloudHost = provider === 'gemini' ? 'Google' : 'Alibaba Cloud';
+  const cloudKnowledgeOnly = cloudProvider && attached.length > 0;
   const [selecting, setSelecting] = useState(resultIds.length > 0);
   const [blockedSelection, setBlockedSelection] = useState(
     invalidSelection || resultIds.length > 0,
@@ -266,6 +304,20 @@ export function Chat({
 
   // Modern chat history sidebar state (NO MOCK DATA)
   const [sidebarOpen, setSidebarOpen] = useState(true);
+  useEffect(() => {
+    if (window.matchMedia('(max-width: 767px)').matches) setSidebarOpen(false);
+  }, []);
+
+  useEffect(() => {
+    fetch('/api/v1/chat', { credentials: 'same-origin' })
+      .then(async (res) => {
+        if (!res.ok) return;
+        const data = await res.json();
+        if (data?.qwenEnabled !== undefined) setQwenEnabled(Boolean(data.qwenEnabled));
+        if (data?.geminiEnabled !== undefined) setGeminiEnabled(Boolean(data.geminiEnabled));
+      })
+      .catch(() => undefined);
+  }, []);
   const [conversations, setConversations] = useState<StoredConversation[]>([]);
   const [activeChatId, setActiveChatId] = useState<string>('new');
   const [copiedIndex, setCopiedIndex] = useState<number | null>(null);
@@ -273,7 +325,13 @@ export function Chat({
   const [expandedUserTurns, setExpandedUserTurns] = useState<Record<number, boolean>>({});
   const [openReasoning, setOpenReasoning] = useState<Record<number, boolean>>({});
   const [openReferences, setOpenReferences] = useState<Record<number, boolean>>({});
-  const [taskDropdownOpen, setTaskDropdownOpen] = useState(false);
+  const [elapsedDuration, setElapsedDuration] = useState<number>(0);
+  const pendingStartRef = useRef<number>(0);
+
+  // Resizable sidebar state
+  const [sidebarWidth, setSidebarWidth] = useState<number>(260);
+  const [isResizing, setIsResizing] = useState<boolean>(false);
+  const sidebarRef = useRef<HTMLElement>(null);
 
   const generation = useRef(0);
   const inFlight = useRef<AbortController | undefined>(undefined);
@@ -282,10 +340,31 @@ export function Chat({
   const focusInput = useRef(false);
   const input = useRef<HTMLTextAreaElement>(null);
   const formRef = useRef<HTMLFormElement>(null);
-  const scrollEndRef = useRef<HTMLDivElement>(null);
+  const messagesContainerRef = useRef<HTMLDivElement>(null);
+
+  useEffect(() => {
+    try {
+      const saved = localStorage.getItem('smartgym_preferred_provider');
+      if ((saved === 'qwen' && qwenEnabled) || (saved === 'gemini' && geminiEnabled)) {
+        setProvider(saved);
+      } else {
+        setProvider('ollama');
+      }
+    } catch {}
+  }, [qwenEnabled, geminiEnabled]);
 
   // Load REAL user chat history from localStorage
   useEffect(() => {
+    try {
+      const savedWidth = localStorage.getItem('smartgym.chat.sidebar-width');
+      if (savedWidth) {
+        const val = parseInt(savedWidth, 10);
+        if (val >= 180 && val <= 560) setSidebarWidth(val);
+      }
+    } catch {
+      // Ignore
+    }
+
     try {
       const saved = localStorage.getItem(STORAGE_KEY);
       if (saved) {
@@ -297,7 +376,6 @@ export function Chat({
           if (current) {
             setActiveChatId(current.id);
             setTurns(current.turns || []);
-            setTask(current.task || 'knowledge');
           }
         }
       }
@@ -306,8 +384,63 @@ export function Chat({
     }
   }, []);
 
+  // Bộ đếm thời gian tải khi đang xử lý câu trả lời
+  useEffect(() => {
+    if (!pending) return;
+    const interval = setInterval(() => {
+      const sec = Math.max(0, (Date.now() - pendingStartRef.current) / 1000);
+      setElapsedDuration(Number(sec.toFixed(1)));
+    }, 100);
+    return () => clearInterval(interval);
+  }, [pending]);
+
+  // Xử lý kéo thanh trượt mở rộng / thu gọn thanh lịch sử
+  const startResizing = useCallback((e: React.MouseEvent) => {
+    e.preventDefault();
+    setIsResizing(true);
+  }, []);
+
+  useEffect(() => {
+    if (!isResizing) return;
+
+    function handleMouseMove(e: MouseEvent) {
+      if (!sidebarRef.current) return;
+      const sidebarLeft = sidebarRef.current.getBoundingClientRect().left;
+      const newWidth = e.clientX - sidebarLeft;
+
+      if (newWidth < 140) {
+        setSidebarOpen(false);
+      } else {
+        if (!sidebarOpen) setSidebarOpen(true);
+        const clamped = Math.max(180, Math.min(560, newWidth));
+        setSidebarWidth(clamped);
+      }
+    }
+
+    function handleMouseUp() {
+      setIsResizing(false);
+    }
+
+    window.addEventListener('mousemove', handleMouseMove);
+    window.addEventListener('mouseup', handleMouseUp);
+    document.body.classList.add('cursor-col-resize-adaptive');
+    document.body.style.userSelect = 'none';
+
+    return () => {
+      window.removeEventListener('mousemove', handleMouseMove);
+      window.removeEventListener('mouseup', handleMouseUp);
+      document.body.classList.remove('cursor-col-resize-adaptive');
+      document.body.style.userSelect = '';
+      try {
+        localStorage.setItem('smartgym.chat.sidebar-width', sidebarWidth.toString());
+      } catch {
+        // Ignore
+      }
+    };
+  }, [isResizing, sidebarOpen, sidebarWidth]);
+
   const saveConversation = useCallback(
-    (newTurns: Turn[], currentTask: Task) => {
+    (newTurns: Turn[]) => {
       if (!newTurns.length) return;
       try {
         setConversations((prev) => {
@@ -328,7 +461,6 @@ export function Chat({
           const updatedItem: StoredConversation = {
             id: chatId,
             title,
-            task: currentTask,
             turns: newTurns,
             createdAt: existingIndex >= 0 ? list[existingIndex].createdAt : Date.now(),
             updatedAt: Date.now(),
@@ -356,7 +488,12 @@ export function Chat({
   }, [pending]);
 
   useEffect(() => {
-    scrollEndRef.current?.scrollIntoView({ behavior: 'smooth' });
+    if (messagesContainerRef.current) {
+      messagesContainerRef.current.scrollTo({
+        top: messagesContainerRef.current.scrollHeight,
+        behavior: 'smooth',
+      });
+    }
   }, [turns, pending]);
 
   useEffect(() => {
@@ -419,7 +556,6 @@ export function Chat({
     cancel();
     setActiveChatId(conv.id);
     setTurns(conv.turns);
-    setTask(conv.task);
     setError('');
     setMessage('');
     localStorage.setItem(CURRENT_CHAT_KEY, conv.id);
@@ -464,20 +600,21 @@ export function Chat({
   }
 
   function applySuggestion(item: typeof PROMPT_SUGGESTIONS[0]) {
-    setTask(item.task);
     setMessage(item.prompt);
     input.current?.focus();
   }
 
   async function send(event?: FormEvent) {
     event?.preventDefault();
-    if (active.current || selecting || blockedSelection || message.trim().length < 2) return;
+    if (active.current || selecting || blockedSelection || cloudKnowledgeOnly || message.trim().length < 2) return;
     const question = message;
-    const chosenTask = task;
+    const chosenTask = inferTask(question, attached.length > 0);
     const current = ++generation.current;
     const c = new AbortController();
     inFlight.current = c;
     active.current = true;
+    pendingStartRef.current = Date.now();
+    setElapsedDuration(0);
     setPending(true);
     setError('');
 
@@ -509,30 +646,44 @@ export function Chat({
           message: question,
           task: chosenTask,
           poseResultIds: attached.map((x) => x.id),
-          conversation,
+          provider,
+          conversation: cloudProvider ? [] : conversation,
         }),
       });
       const data = await r.json();
       if (current !== generation.current || c.signal.aborted) return;
-      if (!r.ok) {
+      if (!r.ok || (cloudProvider && data.status === 'unavailable')) {
         throw new Error(data.code ?? 'RAG_UNAVAILABLE');
       }
 
+      const durationMs = Date.now() - pendingStartRef.current;
       const completedTurns: Turn[] = [
         ...nextTurns,
         {
           role: 'assistant',
           content: data.reply,
           answer: data as Answer,
-          reasoningTitle: `Đã đối chiếu ${data.references?.length ?? 1} nguồn tri thức thể hình SmartGym RAG`,
           timestamp: Date.now(),
+          durationMs,
         },
       ];
       setTurns(completedTurns);
-      saveConversation(completedTurns, chosenTask);
-    } catch {
+      saveConversation(completedTurns);
+    } catch (failure) {
       if (current === generation.current && !c.signal.aborted) {
-        setError('Trợ lý SmartGym AI hiện đang xử lý nhiều yêu cầu. Vui lòng thử lại sau giây lát.');
+        const code = failure instanceof Error ? failure.message : '';
+        if (code === 'RATE_LIMITED') {
+          setError('Bạn đã gửi nhiều câu hỏi trong thời gian ngắn. Hãy thử lại sau một phút.');
+        } else if (code === 'RAG_TIMEOUT') {
+          setError('SmartGym chưa xử lý xong trong thời gian chờ. Hãy thử một câu hỏi ngắn hơn hoặc chọn mô hình API.');
+        } else if (code === 'UNAUTHENTICATED') {
+          setError('Phiên đăng nhập đã hết hiệu lực. Hãy đăng nhập lại để hỏi về kết quả tập.');
+        } else {
+          setError(cloudProvider
+            ? `${providerName} chưa trả lời được. Hãy thử lại hoặc chọn Ollama local.`
+            : 'Hỏi đáp chưa nhận được câu trả lời hợp lệ. Hãy thử lại hoặc kiểm tra kết nối Ollama.');
+        }
+        setTurns(turns);
         setMessage(question);
       }
     } finally {
@@ -547,28 +698,33 @@ export function Chat({
   const activeTitle = activeConversation ? activeConversation.title : 'Cuộc trò chuyện mới';
 
   return (
-    <div className="flex h-full w-full overflow-hidden bg-background text-foreground font-sans antialiased select-text">
-      {/* 1. THANH LỊCH SỬ CHAT (Collapsible Sidebar, đồng bộ 100% theme & sidebar hệ thống) */}
+    <div className="relative flex h-full w-full overflow-hidden bg-background text-foreground font-sans antialiased select-text">
+      {/* 1. THANH LỊCH SỬ CHAT (Collapsible & Resizable Sidebar) */}
       <aside
+        ref={sidebarRef}
+        style={{
+          width: sidebarOpen ? `${sidebarWidth}px` : 0,
+        }}
         className={cn(
-          'flex flex-col h-full bg-sidebar transition-all duration-300 ease-in-out shrink-0 select-none z-30 border-r border-border',
+          'relative flex flex-col h-full bg-sidebar shrink-0 select-none z-30 border-r border-border',
+          !isResizing && 'transition-[width] duration-200 ease-in-out',
           sidebarOpen
-            ? 'w-[250px] relative'
-            : 'w-0 -translate-x-full absolute md:relative overflow-hidden',
+            ? 'absolute inset-y-0 left-0 md:relative'
+            : 'w-0 -translate-x-full absolute md:relative overflow-hidden border-r-0',
         )}
       >
-        <div className="flex flex-col h-full w-[250px] p-2.5 text-[13px]">
+        <div className="flex flex-col h-full w-full p-2.5 text-[13px] overflow-hidden">
           {/* Top Bar trong Chat Sidebar: Nút Trò chuyện mới + Thu gọn */}
-          <div className="flex items-center justify-between pb-2 border-b border-border">
+          <div className="flex items-center justify-between pb-2 border-b border-border gap-1">
             <Button
               type="button"
               variant="outline"
               size="sm"
               onClick={startNewChat}
-              className="flex-1 mr-1 justify-start gap-2 h-8 px-2.5 text-xs font-medium"
+              className="flex-1 mr-1 justify-start gap-2 h-8 px-2.5 text-xs font-medium truncate"
             >
-              <Plus className="h-4 w-4 text-primary" />
-              <span>Đoạn chat mới</span>
+              <Plus className="h-4 w-4 text-primary shrink-0" />
+              <span className="truncate">Đoạn chat mới</span>
             </Button>
 
             <Button
@@ -576,15 +732,15 @@ export function Chat({
               variant="ghost"
               size="icon"
               onClick={() => setSidebarOpen(false)}
-              className="h-8 w-8 text-muted-foreground hover:text-foreground"
-              title="Đóng thanh lịch sử"
+              className="h-8 w-8 text-muted-foreground hover:text-foreground shrink-0"
+              title="Thu gọn thanh lịch sử"
             >
               <PanelLeft className="h-4 w-4" />
             </Button>
           </div>
 
           {/* Lịch sử trò chuyện thực tế của người dùng */}
-          <div className="flex-1 overflow-y-auto pt-3 space-y-1">
+          <div className="flex-1 overflow-y-auto pt-3 space-y-1 [scrollbar-width:thin]">
             <p className="px-2 text-[11px] font-semibold tracking-wider uppercase text-muted-foreground pb-1">
               Lịch sử hội thoại
             </p>
@@ -626,13 +782,23 @@ export function Chat({
             )}
           </div>
         </div>
+
+        {/* Vùng kéo chỉnh kích thước chiều ngang hoàn toàn tàng hình (không hiện bất kỳ thanh màu nào) */}
+        {sidebarOpen && (
+          <div
+            onMouseDown={startResizing}
+            onDoubleClick={() => setSidebarWidth(260)}
+            className="absolute -right-1 top-0 bottom-0 w-2 cursor-col-resize-adaptive z-40 bg-transparent select-none"
+            title="Kéo sang ngang để chỉnh độ rộng"
+          />
+        )}
       </aside>
 
       {/* 2. KHÔNG GIAN TRÒ CHUYỆN CHÍNH */}
       <div className="flex flex-1 flex-col h-full overflow-hidden bg-background relative">
         {/* Top Header thanh điều hướng */}
         <header className="flex h-12 shrink-0 items-center justify-between px-3 sm:px-4 text-foreground border-b border-border bg-background/80 backdrop-blur-md">
-          <div className="flex items-center gap-2">
+          <div className="flex min-w-0 items-center gap-2">
             {!sidebarOpen && (
               <Button
                 type="button"
@@ -646,49 +812,7 @@ export function Chat({
               </Button>
             )}
 
-            {/* Menu chuyển đổi Task / Chế độ tư vấn */}
-            <div className="relative">
-              <Button
-                type="button"
-                variant="ghost"
-                size="sm"
-                onClick={() => setTaskDropdownOpen((prev) => !prev)}
-                className="flex items-center gap-1.5 text-sm font-medium px-2.5 h-8 text-foreground"
-              >
-                <span className="truncate max-w-[180px] sm:max-w-[320px]">{activeTitle}</span>
-                <Badge variant="default" className="text-[11px] px-2 py-0 font-normal ml-1">
-                  {tasks[task].label}
-                </Badge>
-                <ChevronDown className="h-3.5 w-3.5 opacity-60 ml-0.5" />
-              </Button>
-
-              {taskDropdownOpen && (
-                <div className="absolute left-0 mt-1 w-64 rounded-xl bg-card border border-border shadow-xl p-1 z-50 text-xs">
-                  <p className="px-2.5 py-1 text-[11px] font-semibold text-muted-foreground uppercase tracking-wider">
-                    Chế độ phân tích RAG
-                  </p>
-                  {(Object.keys(tasks) as Task[]).map((t) => (
-                    <button
-                      key={t}
-                      type="button"
-                      onClick={() => {
-                        setTask(t);
-                        setTaskDropdownOpen(false);
-                      }}
-                      className={cn(
-                        'w-full flex flex-col text-left px-2.5 py-2 rounded-lg transition cursor-pointer',
-                        task === t
-                          ? 'bg-primary/10 text-primary font-medium'
-                          : 'text-foreground hover:bg-muted',
-                      )}
-                    >
-                      <span className="text-sm font-medium">{tasks[t].label}</span>
-                      <span className="text-[11px] text-muted-foreground">{tasks[t].desc}</span>
-                    </button>
-                  ))}
-                </div>
-              )}
-            </div>
+            <h1 className="max-w-[320px] truncate px-2.5 text-sm font-medium">{activeTitle}</h1>
           </div>
 
           <div className="flex items-center gap-1.5 text-muted-foreground">
@@ -706,7 +830,7 @@ export function Chat({
         </header>
 
         {/* Luồng tin nhắn */}
-        <div className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 space-y-6">
+        <div ref={messagesContainerRef} className="flex-1 overflow-y-auto px-4 py-6 sm:px-8 space-y-6">
           <div className="mx-auto max-w-[760px] space-y-7">
             {/* Trạng thái chào mừng (Màn hình trống khi chưa có câu hỏi) */}
             {turns.length === 0 && (
@@ -756,7 +880,10 @@ export function Chat({
               const isUser = turn.role === 'user';
               const isExpanded = expandedUserTurns[index];
               const isLong = turn.content.length > 320;
-              const hasReferences = turn.answer?.references && turn.answer.references.length > 0;
+              const referenceCount = turn.answer?.references?.length ?? 0;
+              const hasReferences = referenceCount > 0;
+              const duration = formatDuration(turn.durationMs);
+              const model = resolveAnswerModel(turn.answer);
 
               return (
                 <div
@@ -817,40 +944,56 @@ export function Chat({
                   ) : (
                     /* Phản hồi từ SmartGym AI: Trình bày trên nền canvas chuẩn shadcn */
                     <div className="w-full space-y-3 text-left">
-                      {/* Thanh thông tin tra cứu RAG */}
-                      {turn.reasoningTitle && (
-                        <div className="flex items-center justify-between text-xs text-muted-foreground pb-1 border-b border-border">
-                          <button
-                            type="button"
-                            onClick={() =>
-                              setOpenReasoning((prev) => ({
-                                ...prev,
-                                ...{ [index]: !prev[index] },
-                              }))
-                            }
-                            className="flex items-center gap-1.5 hover:text-foreground transition cursor-pointer text-[12px]"
-                          >
-                            <Sparkles className="h-3 w-3 text-primary" />
-                            <span>{turn.reasoningTitle}</span>
-                            <ChevronDown
-                              className={cn(
-                                'h-3.5 w-3.5 transition-transform',
-                                openReasoning[index] && 'rotate-180',
-                              )}
-                            />
-                          </button>
-                          <span className="text-[11px] text-muted-foreground font-mono">
-                            {turn.answer?.kb_version ? `v${turn.answer.kb_version}` : 'SmartGym RAG'}
-                          </span>
+                      {(hasReferences || duration || model) && (
+                        <div className="flex flex-wrap items-center gap-x-3 gap-y-1.5 border-b border-border pb-1 text-xs text-muted-foreground">
+                          {hasReferences && (
+                            <button
+                              type="button"
+                              aria-expanded={Boolean(openReasoning[index])}
+                              onClick={() =>
+                                setOpenReasoning((prev) => ({
+                                  ...prev,
+                                  [index]: !prev[index],
+                                }))
+                              }
+                              className="flex cursor-pointer items-center gap-1.5 transition hover:text-foreground"
+                            >
+                              <Sparkles className="h-3 w-3 text-primary" />
+                              <span>Nguồn tham khảo ({referenceCount})</span>
+                              <ChevronDown
+                                className={cn(
+                                  'h-3.5 w-3.5 transition-transform',
+                                  openReasoning[index] && 'rotate-180',
+                                )}
+                              />
+                            </button>
+                          )}
+                          <div className="ml-auto flex min-w-0 flex-wrap items-center justify-end gap-2">
+                            {duration && (
+                              <span
+                                className="inline-flex items-center gap-1 rounded bg-muted/80 px-1.5 py-0.5 text-[11px] font-mono text-muted-foreground border border-border/50"
+                                title="Thời gian hoàn thành câu trả lời"
+                              >
+                                <Clock className="h-2.5 w-2.5 text-primary" aria-hidden="true" />
+                                <span className="sr-only">Thời gian hoàn thành </span>
+                                <span>{duration}</span>
+                              </span>
+                            )}
+                            {model && (
+                              <span className="break-all font-mono text-[11px] font-medium">
+                                {model}
+                              </span>
+                            )}
+                          </div>
                         </div>
                       )}
 
                       {/* Chi tiết suy luận / tri thức RAG mở rộng */}
-                      {openReasoning[index] && turn.answer && (
+                      {hasReferences && openReasoning[index] && turn.answer && (
                         <Card className="p-3 text-xs text-muted-foreground space-y-1.5">
                           <p className="font-semibold text-foreground">Chi tiết xử lý mô hình:</p>
                           <p>• Trạng thái: {turn.answer.status}</p>
-                          <p>• Chế độ: {tasks[turn.answer.task]?.label || turn.answer.task}</p>
+                          <p>• Chế độ: {taskLabels[turn.answer.task] || turn.answer.task}</p>
                           <p>• Số tài liệu khoa học trích dẫn: {turn.answer.references?.length ?? 0}</p>
                         </Card>
                       )}
@@ -976,11 +1119,16 @@ export function Chat({
               );
             })}
 
-            {/* Trạng thái AI đang suy nghĩ / tra cứu tri thức */}
+            {/* Trạng thái AI đang suy nghĩ / tra cứu tri thức kèm thời gian load */}
             {pending && (
-              <div className="flex items-center gap-2.5 text-xs text-muted-foreground animate-pulse py-2">
-                <span className="h-2 w-2 rounded-full bg-primary animate-ping" />
-                <span>SmartGym AI đang tra cứu tri thức và chuẩn bị câu trả lời…</span>
+              <div className="flex items-center gap-2 text-xs text-muted-foreground py-2">
+                <span className="h-2 w-2 rounded-full bg-primary animate-ping shrink-0" />
+                <span className="font-semibold text-foreground">Đang xử lý</span>
+                <span className="inline-flex items-center gap-1 font-mono text-[11px] font-semibold text-primary bg-primary/10 border border-primary/25 px-1.5 py-0.5 rounded">
+                  <Clock className="h-2.5 w-2.5" />
+                  <span>{elapsedDuration}s</span>
+                </span>
+                <span>Đang tìm tài liệu và kiểm tra câu trả lời.</span>
               </div>
             )}
 
@@ -991,13 +1139,11 @@ export function Chat({
                 <span>{error}</span>
               </div>
             )}
-
-            <div ref={scrollEndRef} />
           </div>
         </div>
 
         {/* 3. THANH NHẬP LIỆU NỔI DẠNG VIÊN NANG (COMPOSER PILL) */}
-        <footer className="shrink-0 pb-3 pt-1 px-4 sm:px-6">
+        <footer className="shrink-0 pb-3 pt-1 px-4 sm:px-6 bg-background/90 backdrop-blur-md z-10">
           <div className="mx-auto max-w-[760px] space-y-2">
             {/* Hiển thị tệp đính kèm kết quả tập thật nếu có */}
             {attached.length > 0 && (
@@ -1018,7 +1164,7 @@ export function Chat({
             <form
               ref={formRef}
               onSubmit={send}
-              className="relative flex items-center rounded-[28px] bg-card px-3 py-1.5 border border-border shadow-lg focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-ring/20 transition-all"
+              className="flex min-w-0 flex-col gap-1 rounded-[24px] border border-border bg-card px-2.5 py-2 shadow-lg transition-colors focus-within:border-primary/50 focus-within:ring-2 focus-within:ring-ring/20"
             >
               {/* Textarea tự co giãn */}
               <textarea
@@ -1033,40 +1179,78 @@ export function Chat({
                 onKeyDown={handleKeyDown}
                 disabled={pending}
                 placeholder="Hỏi SmartGym AI về bài tập, lịch tập, kỹ thuật, dinh dưỡng..."
-                className="flex-1 resize-none bg-transparent px-3 py-1.5 text-[14.5px] text-foreground placeholder:text-muted-foreground focus:outline-none min-h-[36px] max-h-[160px]"
+                className="min-h-[36px] w-full max-h-[160px] resize-none bg-transparent px-2 py-1.5 text-[14.5px] text-foreground placeholder:text-muted-foreground focus:outline-none"
               />
 
-              {/* Công cụ bên phải */}
-              <div className="flex items-center gap-1 shrink-0">
-                {/* Nút gửi / dừng hình tròn bằng Button shadcn */}
-                {pending ? (
-                  <Button
-                    type="button"
-                    size="icon"
-                    onClick={cancel}
-                    className="h-8 w-8 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 min-h-0"
-                    title="Dừng sinh phản hồi"
-                  >
-                    <Square className="h-3.5 w-3.5 fill-current" />
-                  </Button>
-                ) : (
-                  <Button
-                    type="submit"
-                    size="icon"
-                    disabled={message.trim().length < 2}
-                    className="h-8 w-8 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-30 disabled:cursor-not-allowed min-h-0 shadow-xs"
-                    title="Gửi câu hỏi"
-                  >
-                    <ArrowUp className="h-4 w-4 stroke-[2.5]" />
-                  </Button>
+              <div className="flex flex-wrap items-center justify-end gap-x-2 gap-y-1">
+                {cloudProvider ? (
+                  <span className="inline-flex shrink-0 items-center gap-1.5 rounded-full border border-border px-2.5 py-1 text-xs text-muted-foreground">
+                    <Cloud aria-hidden="true" className="size-3.5" />
+                    Đám mây
+                  </span>
+                ) : <OllamaRuntime busy={pending} />}
+                {cloudKnowledgeOnly && (
+                  <span id="chat-provider-hint" className="min-w-0 grow basis-40 px-2 text-xs text-muted-foreground">
+                    Chọn Ollama local để hỏi về kết quả tập.
+                  </span>
                 )}
+                <div className="ml-auto flex min-w-0 items-center gap-1.5">
+                  <Select
+                    value={provider}
+                    onValueChange={(val) => {
+                      if (val === 'ollama' || val === 'qwen' || val === 'gemini') {
+                        setProvider(val);
+                        try {
+                          localStorage.setItem('smartgym_preferred_provider', val);
+                        } catch {}
+                      }
+                    }}
+                    disabled={pending}
+                  >
+                    <SelectTrigger
+                      id="chat-provider"
+                      aria-label="Mô hình"
+                      aria-describedby={cloudKnowledgeOnly ? 'chat-provider-hint' : undefined}
+                      className="min-h-8 h-8 rounded-lg border-transparent bg-transparent px-2.5 py-1 text-xs font-medium hover:bg-muted/80 shadow-none focus:ring-1"
+                    >
+                      <span className="truncate">{cloudProvider ? providerName : 'Ollama local'}</span>
+                    </SelectTrigger>
+                    <SelectContent align="end" className="w-56">
+                      <SelectItem value="ollama">Ollama local</SelectItem>
+                      <SelectItem value="qwen" disabled={!qwenEnabled}>
+                        {qwenEnabled ? 'Qwen API' : 'Qwen API · Chưa cấu hình'}
+                      </SelectItem>
+                      <SelectItem value="gemini" disabled={!geminiEnabled}>
+                        {geminiEnabled ? 'Gemini API' : 'Gemini API · Chưa cấu hình'}
+                      </SelectItem>
+                    </SelectContent>
+                  </Select>
+                  {/* Nút gửi / dừng hình tròn bằng Button shadcn */}
+                  {pending ? (
+                    <Button
+                      type="button"
+                      size="icon"
+                      onClick={cancel}
+                      className="h-8 w-8 rounded-full bg-destructive text-destructive-foreground hover:bg-destructive/90 min-h-0"
+                      title="Dừng sinh phản hồi"
+                    >
+                      <Square className="h-3.5 w-3.5 fill-current" />
+                    </Button>
+                  ) : (
+                    <Button
+                      type="submit"
+                      size="icon"
+                      disabled={message.trim().length < 2 || cloudKnowledgeOnly}
+                      className="h-8 w-8 rounded-full bg-primary text-primary-foreground hover:bg-primary/90 disabled:opacity-30 disabled:cursor-not-allowed min-h-0 shadow-xs"
+                      title="Gửi câu hỏi"
+                    >
+                      <ArrowUp className="h-4 w-4 stroke-[2.5]" />
+                    </Button>
+                  )}
+                </div>
               </div>
             </form>
 
-            {/* Dòng ghi chú an toàn thể hình */}
-            <p className="text-center text-[11px] text-muted-foreground">
-              SmartGym AI cung cấp gợi ý tham khảo. Luôn lắng nghe cơ thể và tham khảo ý kiến chuyên gia y tế khi gặp chấn thương.
-            </p>
           </div>
         </footer>
       </div>

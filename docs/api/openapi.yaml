@@ -5838,6 +5838,49 @@
         ]
       }
     },
+    "/api/v1/chat/ollama-runtime": {
+      "get": {
+        "operationId": "getOllamaRuntime",
+        "summary": "Read placement of the configured Ollama chat model",
+        "security": [],
+        "responses": {
+          "200": {
+            "description": "Current model placement",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OllamaRuntime" }
+              }
+            }
+          },
+          "503": { "description": "RAG gateway unavailable" }
+        }
+      },
+      "post": {
+        "operationId": "checkOllamaRuntime",
+        "summary": "Load the configured Ollama chat model if idle and check placement",
+        "security": [],
+        "parameters": [
+          {
+            "name": "X-SmartGym-CSRF",
+            "in": "header",
+            "required": true,
+            "schema": { "type": "string", "const": "1" }
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "Current model placement or another check in progress",
+            "content": {
+              "application/json": {
+                "schema": { "$ref": "#/components/schemas/OllamaRuntime" }
+              }
+            }
+          },
+          "403": { "description": "Same-origin check failed" },
+          "503": { "description": "RAG gateway unavailable" }
+        }
+      }
+    },
     "/api/v1/chat": {
       "post": {
         "tags": [
@@ -5845,6 +5888,7 @@
         ],
         "operationId": "askChat",
         "summary": "Hỏi đáp tiếng Việt có nguồn trích dẫn",
+        "description": "Khi người dùng hỏi kho tri thức đang dùng những nguồn nào, BFF đọc danh mục nguồn đã lập chỉ mục của RAG, lọc theo đăng ký nguồn được duyệt và trả lời với generation_mode=source_inventory. Câu hỏi về trích dẫn của phản hồi trước vẫn đi qua luồng hỏi đáp RAG.",
         "x-requirements": [
           "RAG-001"
         ],
@@ -5933,7 +5977,7 @@
         ],
         "x-provider-contract-source": "api/ai-provider-compatibility.yaml",
         "x-conditional-auth": "Verified session required for non-knowledge tasks, poseResultIds or supplied session cookie",
-        "description": "Web BFF vers /v1/chatbot. No raw/rules/scoring policy from browser. HTTP200 unavailable is preserved. 45s total deadline, no POST retry. Source registry excludes Catalog until T26."
+        "description": "Web BFF forwards to the configured RAG provider. Browser disconnect cancels the upstream connection. Individual provider calls have their own timeouts. No raw records, rules or scoring policy from the browser. No BFF POST retry. Source registry excludes Catalog until T26."
       }
     },
     "/api/v1/chat/sources/{sourceId}": {
@@ -12613,6 +12657,14 @@
           }
         ]
       },
+      "OllamaRuntime": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": ["state"],
+        "properties": {
+          "state": { "type": "string", "enum": ["gpu", "cpu", "mixed", "idle", "checking", "unavailable"] }
+        }
+      },
       "ChatRequest": {
         "type": "object",
         "additionalProperties": false,
@@ -12621,6 +12673,12 @@
           "task"
         ],
         "properties": {
+          "provider": {
+            "type": "string",
+            "enum": ["ollama", "qwen", "gemini"],
+            "default": "ollama",
+            "description": "Qwen and Gemini require server configuration and accept standalone knowledge questions without Pose records or conversation history."
+          },
           "message": {
             "type": "string",
             "maxLength": 3000,
@@ -12772,6 +12830,15 @@
             "minLength": 1
           },
           "model_version": {
+            "type": "string",
+            "maxLength": 300,
+            "minLength": 1
+          },
+          "provider": {
+            "type": "string",
+            "enum": ["ollama", "qwen", "gemini"]
+          },
+          "model": {
             "type": "string",
             "maxLength": 300,
             "minLength": 1

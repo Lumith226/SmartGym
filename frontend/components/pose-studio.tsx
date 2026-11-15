@@ -1886,7 +1886,7 @@ export function PoseStudio({
 
       {/* ===== KHUNG CHAT TRỢ LÝ SMARTGYM (CÙNG ĐƯỜNG CƠ SỞ VỚI THANH ĐIỀU KHIỂN ĐÁY) ===== */}
       {!dockMinimized && (
-        <div className="pointer-events-auto absolute right-3 bottom-4 z-30 w-[min(340px,calc(100%-1.5rem))] sm:right-4 transition-all duration-300">
+        <div className="pointer-events-auto absolute right-3 bottom-4 z-30 w-[min(440px,calc(100%-1.5rem))] sm:right-4 transition-all duration-300">
           <RagDock
             context={ragContext}
             minimized={false}

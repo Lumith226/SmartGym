@@ -21,6 +21,7 @@ import { type CatalogFacets, type ExerciseCard, type TaxonomyItem, type WorkoutT
 import { ExerciseBlueprintArt } from '../../components/exercise-blueprint-art';
 import { cn } from '../../lib/utils';
 import { Button } from '../../components/ui/button';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '../../components/ui/select';
 
 interface Props {
   results?: { items: ExerciseCard[]; totalCount: number; totalPages: number; page: number; pageSize: number };
@@ -434,21 +435,27 @@ export function ExerciseLibraryClient({
         </div>
 
         <div className="flex items-center gap-3">
-          {/* Dropdown Sắp xếp */}
+          {/* Dropdown Sắp xếp shadcn */}
           <div className="flex items-center gap-2 text-[12.5px] text-[#94a3b8] dark:text-[#596277]">
             <span>Sắp xếp:</span>
-            <select
-              value={sortBy}
+            <Select
+              value={sortBy || 'default'}
+              onValueChange={val => navigate({ sort: val === 'default' ? '' : val })}
               disabled={pending}
-              aria-label="Sắp xếp bài tập"
-              onChange={e => navigate({ sort: e.target.value })}
-              className="h-8 rounded-[6px] border border-[#e2e8f0] bg-white px-2.5 text-[12px] font-semibold text-[#0f172a] outline-none focus:border-[#4f46e5] dark:border-[#232736] dark:bg-[#151822] dark:text-[#f1f3f9] dark:focus:border-[#6366f1]"
             >
-              <option value="">Mặc định</option>
-              <option value="diff-asc">Độ khó tăng dần</option>
-              <option value="diff-desc">Độ khó giảm dần</option>
-              <option value="name">Tên A-Z</option>
-            </select>
+              <SelectTrigger
+                aria-label="Sắp xếp bài tập"
+                className="h-8 rounded-lg border border-[#e2e8f0] bg-white px-2.5 text-[12px] font-semibold text-[#0f172a] shadow-none focus:border-[#4f46e5] dark:border-[#232736] dark:bg-[#151822] dark:text-[#f1f3f9] dark:focus:border-[#6366f1]"
+              >
+                <SelectValue placeholder="Mặc định" />
+              </SelectTrigger>
+              <SelectContent className="w-44">
+                <SelectItem value="default">Mặc định</SelectItem>
+                <SelectItem value="diff-asc">Độ khó tăng dần</SelectItem>
+                <SelectItem value="diff-desc">Độ khó giảm dần</SelectItem>
+                <SelectItem value="name">Tên A-Z</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
 
           {/* Nút Grid / List Toggle */}

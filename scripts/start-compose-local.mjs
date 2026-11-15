@@ -6,6 +6,7 @@ import { setTimeout as delay } from 'node:timers/promises';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
 import { aiDirectory, localAIEnv } from './ai-local-env.mjs';
+import { ollamaDockerOrigin, selectOllama, verifyOllamaGpu } from './ollama-local.mjs';
 
 const root = fileURLToPath(new URL('../', import.meta.url));
 const compose = ['compose', '--env-file', '.env', '-f', 'infra/compose.yaml'];
@@ -13,11 +14,13 @@ const cudaCompose = ['-f', 'infra/compose.pose-cuda.yaml'];
 const cpuOrigin = 'https://pose-engine:8001';
 const env = { ...process.env };
 const mode = env.SMARTGYM_POSE_ACCELERATION || 'auto';
+const ollamaMode = env.SMARTGYM_OLLAMA_ACCELERATION || 'auto';
 const args = process.argv.slice(2);
 
 if (!['auto', 'cpu'].includes(mode) || args.some(arg => arg !== '--build')) {
   throw new Error('Usage: pnpm start:local [--build], SMARTGYM_POSE_ACCELERATION=auto|cpu');
 }
+if (!['auto', 'cpu'].includes(ollamaMode)) throw new Error('Expected SMARTGYM_OLLAMA_ACCELERATION=auto|cpu');
 if (env.SMARTGYM_OTEL_DISABLED === 'false') compose.push('--profile', 'observability');
 
 const exec = promisify(execFile);
@@ -141,8 +144,8 @@ const up = ['up', '-d', '--wait', '--wait-timeout', '180'];
 let activeCompose = compose;
 let device = 'cpu';
 let origin = cpuOrigin;
-const cudaAvailable = mode === 'auto' && process.arch === 'x64' && await dockerHasNvidiaGpu();
-if (cudaAvailable) {
+const cudaAvailable = (mode === 'auto' || ollamaMode === 'auto') && process.arch === 'x64' && await dockerHasNvidiaGpu();
+if (mode === 'auto' && cudaAvailable) {
   const candidate = [...compose, ...cudaCompose];
   try {
     console.log('Starting Pose CUDA in Docker. Waiting for model warm-up…');
@@ -163,10 +166,21 @@ if (mode === 'auto' && !cudaAvailable && process.platform === 'win32' && process
 }
 
 env.SMARTGYM_POSE_ENGINE_ORIGIN = origin;
+let ollama = await selectOllama(env, cudaAvailable);
+const withOllama = base => ollama.overlay ? [...base, '-f', ollama.overlay] : base;
+env.SMARTGYM_OLLAMA_ORIGIN = ollama.origin;
+if (ollama.overlay) {
+  try {
+    await run('docker', [...withOllama(activeCompose), ...up, '--no-deps', 'ollama']);
+  } catch (error) {
+    console.warn('Ollama GPU container could not start. Using Docker CPU:', error.message);
+    ollama = { origin: ollamaDockerOrigin };
+  }
+}
 const deviceLabel = { cpu: 'CPU (Docker)', dml: 'GPU DirectML (Windows)', cuda: 'GPU CUDA (Docker)' };
 console.log('Pose Engine:', deviceLabel[device]);
 try {
-  await run('docker', [...activeCompose, ...up, ...args]);
+  await run('docker', [...withOllama(activeCompose), ...up, ...args]);
   if (device !== 'cpu') {
     const verify = `
       const { readFileSync } = require('node:fs');
@@ -192,6 +206,20 @@ try {
   if (device === 'cpu') throw error;
   console.warn('GPU startup could not be verified from Docker. Retrying with CPU:', error.message);
   env.SMARTGYM_POSE_ENGINE_ORIGIN = cpuOrigin;
-  await run('docker', [...compose, ...up, ...args]);
+  activeCompose = compose;
+  await run('docker', [...withOllama(activeCompose), ...up, ...args]);
   console.log('Pose Engine: CPU (Docker)');
+}
+if (ollama.gpu) {
+  try {
+    console.log('Checking Ollama GPU:', ollama.gpu);
+    await run('docker', [...withOllama(activeCompose), 'exec', '-T', 'rag', 'python', '-B', '-c', verifyOllamaGpu]);
+    console.log('Ollama GPU verified from RAG:', ollama.gpu);
+  } catch (error) {
+    console.warn('Ollama GPU could not be verified. Using Docker CPU:', error.message);
+    env.SMARTGYM_OLLAMA_ORIGIN = ollamaDockerOrigin;
+    await run('docker', [...activeCompose, ...up, '--no-deps', 'ollama', 'rag']);
+  }
+} else {
+  console.log('Ollama:', ollama.origin === ollamaDockerOrigin ? 'CPU (Docker)' : 'configured endpoint');
 }

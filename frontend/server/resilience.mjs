@@ -25,8 +25,13 @@ const release = `
   if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('DEL', KEYS[1]) end
   return 0
 `;
+const renew = `
+  if redis.call('GET', KEYS[1]) == ARGV[1] then return redis.call('PEXPIRE', KEYS[1], ARGV[2]) end
+  return 0
+`;
+const chatLeaseMs = 45000;
 
-export async function claimSharedChat(key, deadlineMs) {
+export async function claimSharedChat(key) {
   const id = createHash('sha256').update(key).digest('hex');
   const prefix = 'smartgym:chat:{' + id + '}:';
   const token = randomUUID();
@@ -34,13 +39,23 @@ export async function claimSharedChat(key, deadlineMs) {
   try {
     client = await redis();
     allowed = await client.withCommandOptions({ abortSignal: AbortSignal.timeout(800) }).eval(claim, {
-      keys: [prefix + 'count', prefix + 'lease'], arguments: [token, String(deadlineMs + 5000)],
+      keys: [prefix + 'count', prefix + 'lease'], arguments: [token, String(chatLeaseMs)],
     });
   } catch {
     throw new AuthError(503, 'RAG_UNAVAILABLE');
   }
   if (!allowed) throw new AuthError(429, 'RATE_LIMITED');
-  return () => { void client.eval(release, { keys: [prefix + 'lease'], arguments: [token] }).catch(() => {}); };
+  const keys = [prefix + 'lease'];
+  const heartbeat = setInterval(() => {
+    void client.withCommandOptions({ abortSignal: AbortSignal.timeout(800) }).eval(renew, {
+      keys, arguments: [token, String(chatLeaseMs)],
+    }).catch(() => {});
+  }, 10000);
+  heartbeat.unref();
+  return () => {
+    clearInterval(heartbeat);
+    void client.eval(release, { keys, arguments: [token] }).catch(() => {});
+  };
 }
 
 /** @param {{ threshold?: number, cooldownMs?: number, clock?: () => number }} [options] */
