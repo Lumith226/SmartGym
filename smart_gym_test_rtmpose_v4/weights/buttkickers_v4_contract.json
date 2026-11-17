@@ -1,7 +1,7 @@
 {
-  "schema_version": "qualcomm-buttkickers-14-192frames-context48-v1",
-  "frames": 192,
-  "context_size": 48,
+  "schema_version": "qualcomm-buttkickers-14-192frames-context48-v1-rep-no-context-v1",
+  "frames": 64,
+  "context_size": 0,
   "coordinate_system": "x/image_height,y/image_height,confidence",
   "normalization": "sequence_median_pelvis_and_torso",
   "target_semantics": "presence_of_Qualcomm_annotation; absence_is_not_verified_correctness",
@@ -13,13 +13,14 @@
       "name_vi": "Đưa gối ra trước thay vì bàn chân ra sau",
       "group_vi": "Chuyển động",
       "kind": "error",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "buttkickers - bringing knees forward",
-      "threshold": 0.525,
-      "window_supported": true,
-      "train_positive_samples": 799,
-      "validation_positive_samples": 139,
-      "calibrated": true
+      "threshold": 0.45000000000000007,
+      "window_supported": false,
+      "train_positive_samples": 3931,
+      "validation_positive_samples": 656,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "feet_stay_below_knees",
@@ -27,13 +28,14 @@
       "name_vi": "Bàn chân nâng thấp, còn dưới gối",
       "group_vi": "Chuyển động",
       "kind": "error",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "buttkickers - feet stay below knees",
-      "threshold": 0.5,
-      "window_supported": true,
-      "train_positive_samples": 225,
-      "validation_positive_samples": 40,
-      "calibrated": true
+      "threshold": 0.65,
+      "window_supported": false,
+      "train_positive_samples": 798,
+      "validation_positive_samples": 134,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "stepping",
@@ -41,13 +43,14 @@
       "name_vi": "Bước từng chân một",
       "group_vi": "Chuyển động",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "buttkickers - stepping",
-      "threshold": 0.5,
-      "window_supported": true,
-      "train_positive_samples": 219,
-      "validation_positive_samples": 38,
-      "calibrated": true
+      "threshold": 0.8,
+      "window_supported": false,
+      "train_positive_samples": 719,
+      "validation_positive_samples": 125,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "looking_at_feet",
@@ -55,13 +58,14 @@
       "name_vi": "Nhìn xuống bàn chân",
       "group_vi": "Chuyển động",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "buttkickers - looking at feet",
-      "threshold": 0.5,
-      "window_supported": true,
-      "train_positive_samples": 149,
-      "validation_positive_samples": 26,
-      "calibrated": true
+      "threshold": 0.85,
+      "window_supported": false,
+      "train_positive_samples": 934,
+      "validation_positive_samples": 160,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "not_in_place",
@@ -69,13 +73,14 @@
       "name_vi": "Di chuyển khỏi vị trí",
       "group_vi": "Chuyển động",
       "kind": "error",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "buttkickers - not in place",
-      "threshold": 0.1,
-      "window_supported": true,
-      "train_positive_samples": 230,
-      "validation_positive_samples": 40,
-      "calibrated": true
+      "threshold": 0.55,
+      "window_supported": false,
+      "train_positive_samples": 1253,
+      "validation_positive_samples": 205,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "feet_disappear_behind_knees",
@@ -83,13 +88,14 @@
       "name_vi": "Bàn chân khuất sau gối",
       "group_vi": "Chuyển động",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "buttkickers - feet disappear behind knees",
-      "threshold": 0.30000000000000004,
-      "window_supported": true,
-      "train_positive_samples": 411,
-      "validation_positive_samples": 72,
-      "calibrated": true
+      "threshold": 0.4,
+      "window_supported": false,
+      "train_positive_samples": 2735,
+      "validation_positive_samples": 470,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "not_visible",
@@ -97,13 +103,14 @@
       "name_vi": "Không thấy đầy đủ người",
       "group_vi": "Chuyển động",
       "kind": "context",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "buttkickers - not visible",
       "threshold": 0.9,
       "window_supported": false,
-      "train_positive_samples": 28,
-      "validation_positive_samples": 5,
-      "calibrated": true
+      "train_positive_samples": 17,
+      "validation_positive_samples": 1,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "early_stopping",
@@ -111,13 +118,14 @@
       "name_vi": "Dừng bài sớm",
       "group_vi": "Chuyển động",
       "kind": "context",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "buttkickers - early stopping",
-      "threshold": 0.35,
+      "threshold": 0.525,
       "window_supported": false,
-      "train_positive_samples": 216,
-      "validation_positive_samples": 38,
-      "calibrated": true
+      "train_positive_samples": 530,
+      "validation_positive_samples": 80,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "speed_1_00",
@@ -125,13 +133,14 @@
       "name_vi": "Tốc độ: mức 1 rps",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "buttkickers - speed=1.00 rps",
-      "threshold": 0.475,
-      "window_supported": true,
-      "train_positive_samples": 119,
-      "validation_positive_samples": 21,
-      "calibrated": true
+      "threshold": 0.5,
+      "window_supported": false,
+      "train_positive_samples": 392,
+      "validation_positive_samples": 77,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "speed_1_20",
@@ -139,13 +148,14 @@
       "name_vi": "Tốc độ: mức 1.2 rps",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "buttkickers - speed=1.20 rps",
-      "threshold": 0.6,
-      "window_supported": true,
-      "train_positive_samples": 114,
-      "validation_positive_samples": 20,
-      "calibrated": true
+      "threshold": 0.55,
+      "window_supported": false,
+      "train_positive_samples": 382,
+      "validation_positive_samples": 65,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "speed_1_60",
@@ -153,13 +163,14 @@
       "name_vi": "Tốc độ: mức 1.6 rps",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "buttkickers - speed=1.60 rps",
-      "threshold": 0.55,
-      "window_supported": true,
-      "train_positive_samples": 155,
-      "validation_positive_samples": 27,
-      "calibrated": true
+      "threshold": 0.475,
+      "window_supported": false,
+      "train_positive_samples": 645,
+      "validation_positive_samples": 100,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "speed_2_00",
@@ -167,13 +178,14 @@
       "name_vi": "Tốc độ: mức 2 rps",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "buttkickers - speed=2.00 rps",
-      "threshold": 0.5,
-      "window_supported": true,
-      "train_positive_samples": 372,
-      "validation_positive_samples": 66,
-      "calibrated": true
+      "threshold": 0.275,
+      "window_supported": false,
+      "train_positive_samples": 1743,
+      "validation_positive_samples": 326,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "speed_2_50",
@@ -181,13 +193,14 @@
       "name_vi": "Tốc độ: mức 2.5 rps",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "buttkickers - speed=2.50 rps",
-      "threshold": 0.30000000000000004,
-      "window_supported": true,
-      "train_positive_samples": 382,
-      "validation_positive_samples": 67,
-      "calibrated": true
+      "threshold": 0.17500000000000002,
+      "window_supported": false,
+      "train_positive_samples": 2334,
+      "validation_positive_samples": 403,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "speed_3_00",
@@ -195,16 +208,17 @@
       "name_vi": "Tốc độ: mức 3 rps",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "buttkickers - speed=3.00 rps",
-      "threshold": 0.325,
-      "window_supported": true,
-      "train_positive_samples": 359,
-      "validation_positive_samples": 64,
-      "calibrated": true
+      "threshold": 0.35,
+      "window_supported": false,
+      "train_positive_samples": 2511,
+      "validation_positive_samples": 378,
+      "calibrated": true,
+      "weak_rep_label": true
     }
   ],
-  "best_epoch": 18,
+  "best_epoch": 24,
   "manifest_sha256": "23aeaf9eedad43cdecbf34a5219bdb77db5808df29664a85d80e3d4e3e8ad719",
   "split_counts": {
     "train": [
@@ -257,5 +271,14 @@
     ]
   },
   "threshold_source": "validation_only",
-  "onnx_sha256": "96c123bb0438d7aa4dbb03f2cf3d34a060f95f1a8b0d293cec92359401bd43a2"
+  "onnx_sha256": "ae1a42f96109a70490d9440a39caaee9f411babf5a33c3f46806d6d86f39bb23",
+  "base_schema_version": "qualcomm-buttkickers-14-192frames-context48-v1",
+  "requires_context": false,
+  "input_names": [
+    "skeleton"
+  ],
+  "input_scope": "rep",
+  "cut_version": "phase-confirmed-padding-v2-six-exercises",
+  "preprocess_version": "rep-skeleton64-v1",
+  "label_supervision": "parent_video_weak"
 }

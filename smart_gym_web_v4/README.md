@@ -1,12 +1,28 @@
 # Smart Gym Web V4 — chạy local
 
+## Sáu bài theo lượt, không ngữ cảnh
+
+Squat, chống đẩy, jumping jacks, gập bụng ngược, high knees và butt kickers
+nhận từng lượt đã hoàn thành từ bộ cắt SciPy;
+ST-GCN++ chỉ nhận skeleton, không nối vector ngữ cảnh. Camera hiển thị kết quả
+lượt gần nhất. Sau khi tải video lên và phân tích, ô chọn lượt cho phép xem
+kết quả cùng mốc thời gian từng lượt; nút Lưu JSON giữ cả danh sách kết quả.
+
+Vẫn chạy server và web bằng hai lệnh/bat riêng như dưới đây. Khởi động lại
+server cũ sau khi thay trọng số.
+Nhãn từng lượt được kế thừa từ video nguồn, không phải nhãn đã gán riêng cho
+mỗi lượt. Không coi kết quả phát lại tệp là đo độ trễ webcam thật.
+
 Bản web dùng lại mô hình trong `../smart_gym_test_rtmpose_v4/weights`. Không sao chép hoặc thay trọng số và ngưỡng. Camera được mở bởi trình duyệt trên máy người dùng; server (máy chủ) không mở webcam bằng OpenCV.
 
 Hai lựa chọn bổ sung là **High knees — nâng cao gối (31 nhãn)** và **Butt kickers — gót chạm mông (14 nhãn)**. Web hiển thị sáu lựa chọn, phím tắt **1–6**; bài chưa có trọng số được xác minh sẽ hiện trạng thái đang chuẩn bị và bị khóa. Các bài đang có vẫn dùng được trong thời gian chuẩn bị.
 
 Server kiểm tra mô hình mới khi web làm mới danh mục mỗi 10 giây. Khi trọng số, cấu hình nhãn và kết quả xác minh có cùng mã kiểm tra nội dung, bài mới tự được nạp mà không đặt lại phiên tập hiện tại. Nếu đang chạy server từ trước lần cập nhật mã này, cần khởi động lại một lần để dùng cơ chế mới.
 
-Với hai bài chạy, kết quả camera là dự đoán trên đoạn chuyển động gần đây; phân tích toàn video dùng đủ nhãn ngữ cảnh. Lượt chân hiển thị là số ước lượng từng chân nâng/gập rồi hạ, không dùng để gán lỗi hay thay thế quy ước tốc độ của nhãn nguồn.
+Với hai bài chạy, mỗi chân nâng/co rồi hạ là một lượt; trái rồi phải là hai lượt.
+Mỗi mẫu vẫn giữ đủ 17 khớp. Ô chọn lượt hiện chân trái/phải và tua tới lượt
+được chọn. Không dùng số đếm này để tự gán nhãn lỗi hoặc thay thế quy ước tốc
+độ của nguồn. Mô hình chỉ nhận skeleton 3×64×17, không nhận vector ngữ cảnh.
 
 ## Hai phần chạy riêng
 
@@ -64,9 +80,9 @@ Nếu camera không mở được, kiểm tra quyền truy cập và thử camer
 ## Sử dụng tệp video
 
 - Chọn **Tệp video → Chọn video**. Trình duyệt tự phát video tại máy. MP4/H.264 hoặc WebM thường phù hợp; định dạng server đọc được chưa chắc trình duyệt phát được.
-- **Bắt đầu phân tích**: xử lý theo thời gian phát, hiển thị khung xương và đếm lượt. Với V4, bảng là đoạn chuyển động gần đây, không phải nhãn của từng khung ảnh.
-- **Phân tích video**: gửi tệp tối đa 200 MB để server đánh giá toàn đoạn theo đúng đường xử lý V4. Có cho cả bốn bài V4. Khi phân tích, theo dõi trực tiếp được dừng và video được tạm dừng.
-- Bấm **Toàn video** để đọc kết quả cả đoạn, hoặc **Đoạn trực tiếp** để xem kết quả phiên đang theo dõi. Bảng toàn video không đổi theo hình đang phát.
+- **Bắt đầu phân tích**: xử lý theo thời gian phát, hiển thị khung xương và đếm lượt. Bảng cập nhật sau lượt hoàn thành, không phải nhãn của từng khung ảnh.
+- **Phân tích video**: gửi tệp tối đa 200 MB để server đọc hết thời lượng, cắt và phân tích từng lượt. Có cho cả sáu bài. Khi phân tích, theo dõi trực tiếp được dừng và video được tạm dừng.
+- Bấm **Các lượt trong video**, chọn lượt để đọc kết quả và tua tới thời điểm của lượt, hoặc **Lượt trực tiếp** để xem kết quả phiên đang theo dõi. Lưu JSON giữ toàn bộ danh sách lượt.
 - Tua video khi đang phân tích sẽ đặt lại phiên theo dõi để tránh nối hai đoạn chuyển động không liên tục.
 - Tệp upload được xử lý trong thư mục tạm và xóa khi hoàn tất. Kết quả và ảnh chỉ tải về khi bấm nút lưu.
 
@@ -74,9 +90,9 @@ Nếu camera không mở được, kiểm tra quyền truy cập và thử camer
 
 - Điểm được so với ngưỡng cố định trong tệp cấu hình, không chỉnh ngưỡng trên web.
 - **Màu cam:** nhãn lỗi được dự đoán. **Màu xanh:** thuộc tính/trạng thái được dự đoán; không phải khẳng định kỹ thuật đúng.
-- **N/A:** thiếu mẫu chọn ngưỡng hoặc nhãn cần phân tích toàn video.
+- **N/A:** chưa đủ mẫu để chọn ngưỡng hoặc thiếu dữ liệu quan sát.
 - Điểm không cộng thành 100%; chưa được hiệu chuẩn thành xác suất kết luận đúng.
-- Nhãn chưa xuất hiện không chứng minh toàn bộ động tác đúng. Chế độ đoạn ngắn và từng lượt chưa có đánh giá chuẩn tương đương toàn video.
+- Nhãn chưa xuất hiện không chứng minh toàn bộ động tác đúng. Nhãn lượt kế thừa từ video nguồn; chưa có nhãn lỗi từng lượt được xác minh độc lập. Nhãn tốc độ/trạng thái toàn video có thể thiếu bằng chứng khi nhìn riêng một lượt.
 
 ## FPS và độ trễ
 

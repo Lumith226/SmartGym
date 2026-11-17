@@ -50,6 +50,7 @@ class ExerciseRepTracker:
         # Tích hợp bộ xử lý 4 cải tiến cơ sinh học
         self.pose_processor = EnhancedPoseProcessor(self.current_exercise)
         self.running_counter=RunningRepCounter()
+        self.phase_cutter=None
 
     def reset(self, new_exercise: str = None):
         if new_exercise:
@@ -78,11 +79,13 @@ class ExerciseRepTracker:
         self.last_raw_frames_count = 0
         self.floor_side = None
         self.running_counter.reset()
+        self.phase_cutter=None
 
     def notify_missing(self, timestamp=None):
         now = time.monotonic() if timestamp is None else float(timestamp)
         if self.missing_since is None: self.missing_since = now
         if now-self.missing_since >= .75:
+            if self.phase_cutter is not None:self.phase_cutter.history.clear()
             self.state = 'CHỜ TOÀN THÂN' if self.current_exercise in ('squat','jump_jack') else 'READY'
             self.current_rep_frames = []
             self.pre_buffer.clear()
@@ -107,6 +110,27 @@ class ExerciseRepTracker:
         self.timestamp = time.monotonic() if timestamp is None else float(timestamp)
         if self.current_exercise not in ('push_up','situp'):
             self.missing_since = None
+        if self.current_exercise in ('squat','push_up','jump_jack','situp','high_knees','butt_kickers') and getattr(self.analyzer,'is_rep_model',lambda _:False)(self.current_exercise):
+            from scipy_rep_cutter import BufferedRepCutter
+            if self.phase_cutter is None:self.phase_cutter=BufferedRepCutter(self.current_exercise)
+            norm_kpts=np.asarray(raw_norm_kpts,np.float32).copy()
+            corrected=norm_kpts.copy();corrected[0]*=self.analyzer.frame_aspect_ratio
+            completed=self.phase_cutter.update(corrected,self.timestamp)
+            payloads=[]
+            for event in completed:
+                value=self.analyzer.predict_squat_sequence(event['keypoints'],event['end']-event['start'],scope='rep',_exercise=self.current_exercise)
+                value.update(rep_id=event['rep_id'],rep_interval={k:v for k,v in event.items() if k not in ('keypoints','times')})
+                self.last_result=value
+                tensor=__import__('rep_skeleton').prepare_skeleton(event['keypoints'])[0]
+                payloads.append(dict(result=value,rep_tensor_32=tensor,raw_frames_count=len(event['keypoints'])))
+            self.rep_count=self.phase_cutter.count
+            self.state='ĐÃ PHÂN TÍCH LƯỢT' if completed else 'CHỜ PHA XUẤT PHÁT / LƯỢT HOÀN THÀNH'
+            return dict(exercise=self.current_exercise,rep_count=self.rep_count,state=self.state,
+                        just_finished_rep=bool(completed),last_result=self.last_result if completed else None,
+                        smoothed_kpts=norm_kpts,need_full_body=False,indicator=None,
+                        completed_reps=payloads,
+                        rep_tensor_32=payloads[-1]['rep_tensor_32'] if payloads else None,
+                        raw_frames_count=(len(completed[-1]['keypoints']) if completed else 0))
         norm_kpts = self.smooth_kpts(raw_norm_kpts)
         kpts = norm_kpts[:2].copy()  # (2,17)
         if self.current_exercise in ('high_knees','butt_kickers'):

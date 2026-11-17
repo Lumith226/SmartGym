@@ -62,6 +62,28 @@ def test_window_uses_source_time_and_converts_width_coordinates(inference):
     assert response['keypoints'][0][0] == .5  # browser overlay keeps x / width
 
 
+def test_rep_models_keep_upload_support_without_window_inference(inference):
+    engine, _, run = inference
+    engine.analyzer.is_rep_model = lambda exercise: exercise == 'squat'
+    assert engine.supports_whole_video('squat')
+    assert not engine.supports_window('squat')
+    for i in range(30):
+        run(i, i / 10)
+    assert not engine.analyzer.calls
+
+
+def test_simultaneous_completed_reps_are_both_returned(inference):
+    engine,state,run=inference
+    engine.analyzer.is_rep_model=lambda _:True
+    values=[dict(rep_id=1,scope='rep'),dict(rep_id=2,scope='rep')]
+    state.tracker.rep_count=2
+    state.tracker.process_frame=lambda *args,**kwargs:dict(just_finished_rep=True,last_result=values[-1],
+        completed_reps=[dict(result=value) for value in values])
+    reply=run(1,.1)
+    assert reply['completed_rep_results']==values
+    assert reply['rep_count']==2 and reply['result']==values[-1]
+
+
 def test_lost_pose_clears_previous_result(inference):
     engine, state, run = inference
     for i in range(25):

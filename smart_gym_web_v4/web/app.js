@@ -97,12 +97,31 @@ function buildRows() {
   }
   S.resultKey = ""; renderResults(true);
 }
-function displayResult() { return S.view === "whole" ? S.whole : S.live; }
+function displayResult() {
+  if (S.view !== "whole") return S.live;
+  if (S.whole?.rep_results?.length && Number.isInteger(S.repSelection)) return S.whole.rep_results[S.repSelection];
+  return S.whole;
+}
 function renderResults(force = false) {
   const result = displayResult();
   const key = JSON.stringify([S.view, result]);
   if (!force && S.resultKey === key) return;
   S.resultKey = key;
+  const reps = S.view === "whole" ? (S.whole?.rep_results || []) : [];
+  $("rep-picker-wrap").hidden = !reps.length;
+  if (reps.length) {
+    $("rep-count").textContent = String(reps.length).padStart(2, "0");
+    const options = reps.map((rep, i) => {
+      const option = document.createElement("option"); option.value = i;
+      const span = rep.rep_interval;
+      const side = span?.side === "left" ? " · chân trái" : span?.side === "right" ? " · chân phải" : "";
+      option.textContent = `Lượt ${i+1}${side}${span ? ` · ${span.start.toFixed(2)}–${span.end.toFixed(2)} giây` : ""}`;
+      option.selected = i === (S.repSelection ?? reps.length-1); return option;
+    });
+    $("rep-picker").replaceChildren(...options);
+  }
+  $("live-view").textContent = exerciseInfo().input_scope === "rep" ? "Lượt trực tiếp" : "Đoạn trực tiếp";
+  $("whole-view").textContent = S.whole?.rep_results ? "Các lượt trong video" : "Toàn video";
   const labels = result?.label_results || [];
   const lookup = new Map(labels.map((row) => [row.key, row]));
   let errors = 0, attributes = 0;
@@ -128,12 +147,19 @@ function renderResults(force = false) {
   }
   $("live-view").classList.toggle("active", S.view === "live");
   $("whole-view").classList.toggle("active", S.view === "whole");
-  const insufficient = result?.status === "insufficient_data";
+  const insufficient = result?.status === "insufficient_data" || result?.status === "waiting_for_rep";
   $("result-summary").classList.toggle("warning", errors > 0 || insufficient);
   $("summary-title").textContent = !result ? "Đang chờ chuyển động" : insufficient ? "Chưa đủ dữ liệu quan sát" : errors ? `${errors} nhãn lỗi cần kiểm tra` : attributes ? `${attributes} thuộc tính / trạng thái được dự đoán` : "Chưa có nhãn vượt ngưỡng";
   $("summary-text").textContent = !result ? (exerciseInfo().version === "V3" ? "Hoàn thành một lượt để xem kết quả V3 của bài đang chọn." : "Kết quả xuất hiện khi có đủ chuỗi khớp. Một số nhãn chỉ áp dụng toàn video.") : insufficient ? result.feedback_vi || "Chưa thấy đủ khớp để đánh giá; hãy kiểm tra khung hình và ánh sáng." : result.review_notes?.[0] || (errors ? "Đối chiếu với chuyển động thực tế; đây là dự đoán của mô hình." : "Thuộc tính được dự đoán không phải kết luận toàn bộ động tác đúng.");
   $("result-scope").textContent = !result ? "Chưa có kết quả" : S.view === "whole" ? "Phạm vi: toàn video" : result.scope === "rep" || exerciseInfo().version === "V3" ? "Phạm vi: lượt gần nhất" : "Phạm vi: đoạn chuyển động gần đây";
-  $("quality-note").textContent = result?.quality ? `Khung mẫu có khớp dùng được: ${(result.quality.valid_frame_ratio * 100).toFixed(0)}%. Điểm chưa hiệu chuẩn thành xác suất đúng. N/A: thiếu khớp, cần toàn video hoặc thiếu mẫu xác thực.` : "Điểm của các nhãn độc lập, không cộng thành 100%. Không báo lỗi chưa xác nhận toàn bộ động tác đúng.";
+  $("quality-note").textContent = result?.quality ? `Khung mẫu có khớp dùng được: ${(result.quality.valid_frame_ratio * 100).toFixed(0)}%. Điểm chưa hiệu chuẩn thành xác suất đúng. N/A: thiếu khớp hoặc mẫu xác thực.` : "Điểm của các nhãn độc lập, không cộng thành 100%. Không báo lỗi chưa xác nhận toàn bộ động tác đúng.";
+  if (exerciseInfo().input_scope === "rep") {
+    $("result-scope").textContent = reps.length ? `Lượt ${(S.repSelection ?? reps.length-1)+1}/${reps.length}` : "Phân tích sau mỗi lượt hoàn thành";
+    if (!result || result.status === "waiting_for_rep") {
+      $("summary-title").textContent = "Chờ một lượt hoàn thành";
+      $("summary-text").textContent = "Về pha xuất phát, thực hiện động tác rồi trở lại để xem kết quả.";
+    }
+  }
   updateControls();
 }
 function clearObservations(clearWhole = false) {
@@ -209,7 +235,7 @@ async function connect() {
         S.analysisTimes.push(now); S.analysisTimes = S.analysisTimes.filter((t) => now - t < 2000);
         S.processed++;
         $("roundtrip-ms").textContent = `${Math.round(now - pending.captureAt)} ms`;
-        $("rep-count").textContent = String(message.rep_count).padStart(2, "0");
+        if (S.view !== "whole") $("rep-count").textContent = String(message.rep_count).padStart(2, "0");
         $("pose-status").textContent = message.found ? ({READY: "SẴN SÀNG", IN_REP: "ĐANG TRONG LƯỢT"}[message.state] || message.state) : "CHƯA THẤY KHỚP ĐỦ RÕ";
         renderResults();
       } else if (message.type === "error") {
@@ -245,7 +271,7 @@ async function startAnalysis() {
     try { await video.play(); } catch { notice("Bấm phát trên video trước khi phân tích.", "error"); return; }
   }
   S.view = "live"; configure(false); S.running = true;
-  notice(exerciseInfo().version === "V4" ? "Đang phân tích đoạn chuyển động gần đây. Chờ đủ khớp trước khi có kết quả." : "Đang theo dõi. Hoàn thành một lượt để xem kết quả V3.");
+  notice(exerciseInfo().input_scope === "rep" ? "Đang theo dõi từng lượt. Thực hiện động tác rồi trở về để xem kết quả." : exerciseInfo().version === "V4" ? "Đang phân tích đoạn chuyển động gần đây. Chờ đủ khớp trước khi có kết quả." : "Đang theo dõi. Hoàn thành một lượt để xem kết quả V3.");
   updateControls();
 }
 function stopMedia() {
@@ -411,15 +437,17 @@ async function analyzeWholeVideo() {
   if (!S.file || !S.connected || S.busy || exerciseInfo().version !== "V4") return;
   stopAnalysis(false); video.pause(); S.busy = true; updateControls();
   const started = performance.now();
-  notice("Đang gửi và phân tích toàn video. Server lấy mẫu chuỗi khớp theo đúng cấu hình V4…", "busy");
+  notice("Đang gửi và đọc video. Server xử lý theo cấu hình của bài đã chọn…", "busy");
   const timer = setInterval(() => notice(`Đang phân tích toàn video · ${Math.round((performance.now() - started)/1000)} giây. Camera trực tiếp tạm dừng trong bước này.`, "busy"), 1000);
   try {
     const body = new FormData(); body.append("exercise", S.exercise); body.append("file", S.file);
     const response = await fetch(`${S.api}/api/analyze-video`, {method: "POST", body, signal: AbortSignal.timeout(180000)});
     const payload = await response.json();
     if (!response.ok) throw new Error(typeof payload.detail === "string" ? payload.detail : "Không phân tích được video.");
-    S.whole = payload.result; S.view = "whole"; renderResults(true);
-    notice(`Đã phân tích toàn video trong ${payload.elapsed_seconds}s. Bảng mô tả cả đoạn; bấm phát video để đối chiếu.`);
+    S.whole = payload.result; S.repSelection = S.whole.rep_results?.length ? S.whole.rep_results.length-1 : null; S.view = "whole"; renderResults(true);
+    notice(payload.result.rep_results?.length
+      ? `Đã phân tích ${payload.result.rep_count} lượt. Chọn lượt để xem kết quả và đối chiếu thời điểm trong video.`
+      : `Đã phân tích toàn video trong ${payload.elapsed_seconds}s. Bảng mô tả cả đoạn; bấm phát video để đối chiếu.`);
   } catch (error) { notice(`Phân tích toàn video chưa hoàn tất: ${error.message}`, "error"); }
   finally { clearInterval(timer); S.busy = false; updateControls(); }
 }
@@ -451,7 +479,7 @@ $("pause-video").onclick = async () => { if (video.paused) await video.play(); e
 $("analyze-whole").onclick = analyzeWholeVideo;
 $("live-view").onclick = () => { S.view = "live"; renderResults(true); };
 $("whole-view").onclick = () => { if (S.whole) { S.view = "whole"; renderResults(true); } };
-$("export-json").onclick = () => download(new Blob([JSON.stringify({exercise: S.exercise, source: S.source, scope: S.view, result: displayResult()}, null, 2)], {type: "application/json"}), `smartgym_${S.exercise}_${S.view}_${Date.now()}.json`);
+$("export-json").onclick = () => download(new Blob([JSON.stringify({exercise: S.exercise, source: S.source, scope: S.view, result: (S.view === "whole" && S.whole?.rep_results ? S.whole : displayResult())}, null, 2)], {type: "application/json"}), `smartgym_${S.exercise}_${S.view}_${Date.now()}.json`);
 $("save-snapshot").onclick = () => {
   const image = document.createElement("canvas"); image.width = video.videoWidth; image.height = video.videoHeight;
   const c = image.getContext("2d");
@@ -467,6 +495,8 @@ video.addEventListener("play", () => { $("pause-video").textContent = "Tạm d�
 video.addEventListener("pause", () => { $("pause-video").textContent = "Tiếp tục video"; S.points = []; });
 video.addEventListener("ended", () => { stopAnalysis(false); $("pose-status").textContent = "HẾT VIDEO"; notice("Video đã kết thúc. Bấm Bắt đầu để phân tích lại hoặc xem kết quả toàn video."); });
 video.addEventListener("seeking", () => { if (S.source === "video" && S.running) configure(false); });
+video.addEventListener("seeked", updateControls);
+video.addEventListener("canplay", updateControls);
 video.addEventListener("error", () => { stopAnalysis(false); S.hasMedia = false; updateControls(); notice("Trình duyệt không đọc được video. Hãy thử tệp MP4 mã hóa H.264 hoặc WebM.", "error"); });
 document.addEventListener("keydown", (event) => {
   if (/input|select|textarea/i.test(event.target.tagName) || S.busy) return;
@@ -494,3 +524,13 @@ drawExercises(); buildRows(); mirror(); connect();
 listCameras().catch(() => {});
 if (video.requestVideoFrameCallback) video.requestVideoFrameCallback(onVideoFrame);
 requestAnimationFrame(animate);
+
+$("rep-picker").onchange = () => {
+  S.repSelection = Number($("rep-picker").value);
+  const interval = S.whole?.rep_results?.[S.repSelection]?.rep_interval;
+  if (interval && S.source === "video" && !S.running) {
+    video.pause();
+    video.currentTime = interval.peak;
+  }
+  renderResults(true);
+};

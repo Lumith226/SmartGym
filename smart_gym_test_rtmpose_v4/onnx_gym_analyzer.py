@@ -224,7 +224,7 @@ class ONNXGymAnalyzer:
             if not path.exists():
                 raise RuntimeError('Squat V4 14 nhãn chưa huấn luyện/xuất xong. Xem README.md để chạy pipeline.')
             contract = json.loads(path.read_text(encoding='utf-8'))
-            if contract['schema_version'] != SCHEMA_VERSION or [r['raw_label'] for r in contract['labels']] != RAW_LABELS:
+            if contract.get('base_schema_version', contract['schema_version']) != SCHEMA_VERSION or [r['raw_label'] for r in contract['labels']] != RAW_LABELS:
                 raise RuntimeError('Hợp đồng nhãn/tiền xử lý không khớp mô hình squat V4')
             model_path = Path(WEIGHTS_DIR) / EXERCISE_CONFIG['squat']['onnx_file']
             if sha256(model_path) != contract['onnx_sha256']:
@@ -236,13 +236,18 @@ class ONNXGymAnalyzer:
         if self.jumpjack_contract is None:
             path = Path(WEIGHTS_DIR) / 'jumpjack_v4_contract.json'
             contract = json.loads(path.read_text(encoding='utf-8'))
-            if contract['schema_version'] != jumpjack_schema.SCHEMA_VERSION or [r['raw_label'] for r in contract['labels']] != jumpjack_schema.RAW_LABELS:
+            if contract.get('base_schema_version', contract['schema_version']) != jumpjack_schema.SCHEMA_VERSION or [r['raw_label'] for r in contract['labels']] != jumpjack_schema.RAW_LABELS:
                 raise RuntimeError('Jumping-jacks label/preprocessing contract mismatch')
             model_path = Path(WEIGHTS_DIR) / EXERCISE_CONFIG['jump_jack']['onnx_file']
             if sha256(model_path) != contract['onnx_sha256']:
                 raise RuntimeError('Jumping-jacks model/contract hash mismatch')
             self.jumpjack_contract = contract
         return self.jumpjack_contract
+
+    def is_rep_model(self, exercise_type):
+        key=self.normalize_exercise(exercise_type)
+        if key not in V4_SCHEMAS:return False
+        return self.load_v4_contract(key).get('input_scope')=='rep'
 
     def predict_jumpjack_sequence(self, raw_sequence, duration_seconds, scope='video'):
         return self.predict_squat_sequence(raw_sequence, duration_seconds, scope, _exercise='jump_jack')
@@ -254,7 +259,7 @@ class ONNXGymAnalyzer:
         if key not in self.extra_contracts:
             schema=V4_SCHEMAS[key];stem=V4_STEMS[key]
             contract=json.loads((Path(WEIGHTS_DIR)/f'{stem}_v4_contract.json').read_text(encoding='utf-8'))
-            if contract['schema_version']!=schema.SCHEMA_VERSION or [r['raw_label'] for r in contract['labels']]!=schema.RAW_LABELS:
+            if contract.get('base_schema_version',contract['schema_version'])!=schema.SCHEMA_VERSION or [r['raw_label'] for r in contract['labels']]!=schema.RAW_LABELS:
                 raise RuntimeError('Nhãn hoặc tiền xử lý không khớp mô hình '+stem)
             if sha256(Path(WEIGHTS_DIR)/EXERCISE_CONFIG[key]['onnx_file'])!=contract['onnx_sha256']:
                 raise RuntimeError('Trọng số và ngưỡng không cùng phiên bản: '+stem)
@@ -273,15 +278,22 @@ class ONNXGymAnalyzer:
     def predict_buttkickers_sequence(self,raw_sequence,duration_seconds,scope='video'):
         return self.predict_squat_sequence(raw_sequence,duration_seconds,scope,_exercise='butt_kickers')
 
-    def predict_squat_sequence(self, raw_sequence, duration_seconds, scope='video', _exercise='squat'):
+    def predict_squat_sequence(self, raw_sequence, duration_seconds, scope='video', _exercise='squat', raw_times=None):
         """raw_sequence=(T,3,17), x/image_height,y/image_height; không chuẩn hóa trước."""
         if scope not in ('video', 'rep', 'window'):
             raise ValueError('Phạm vi phải là video, rep hoặc window')
         schema = V4_SCHEMAS[_exercise]
         LABELS, RAW_LABELS, SCHEMA_VERSION = schema.LABELS, schema.RAW_LABELS, schema.SCHEMA_VERSION
-        skeleton, context, quality = schema.prepare_input(raw_sequence, duration_seconds)
+        contract = self.load_v4_contract(_exercise)
+        rep_model = contract.get('input_scope') == 'rep'
+        if rep_model:
+            from rep_skeleton import prepare_skeleton
+            skeleton, quality = prepare_skeleton(raw_sequence, count=contract['frames'])
+            context = None
+        else:
+            skeleton, context, quality = schema.prepare_input(raw_sequence, duration_seconds)
         result = {'exercise':_exercise,'exercise_name_vi':'Squat V4 — 14 nhãn Qualcomm',
-                  'schema_version':SCHEMA_VERSION,'scope':scope,'is_multihead':True,
+                  'schema_version':contract['schema_version'],'scope':scope,'is_multihead':True,
                   'duration_seconds':float(duration_seconds),
                   'input_coordinate_system':'x/image_height,y/image_height,confidence',
                   'is_correct':None,'status':'insufficient_data','confidence':0.,
@@ -294,6 +306,30 @@ class ONNXGymAnalyzer:
                   'quality':quality,'biomechanics':{'min_knee_angle':quality['min_knee_angle'],
                                                    'max_torso_lean':quality['max_torso_lean']}}
         result['exercise_name_vi'] = EXERCISE_CONFIG[_exercise]['name_vi']
+        if rep_model and scope in ('video', 'window'):
+            if scope == 'video':
+                from scipy_rep_cutter import cut_reps
+                raw = np.asarray(raw_sequence, np.float32)
+                times = np.asarray(raw_times,float) if raw_times is not None else np.linspace(0, duration_seconds, len(raw))
+                events, _ = cut_reps(raw, times, _exercise)
+                results = []
+                for event in events:
+                    mask = (times >= event['start']) & (times <= event['end'])
+                    if mask.sum() < 3: continue
+                    value = self.predict_squat_sequence(raw[mask], event['end']-event['start'], 'rep', _exercise)
+                    value.update(rep_id=len(results)+1, rep_interval=event)
+                    results.append(value)
+                if results:
+                    result = dict(results[-1])
+                    result.update(scope='video_reps', rep_count=len(results), rep_results=results,
+                                  summary_semantics='Last completed rep shown; all rep results retained.')
+                    return result
+            result.update(rep_count=0, rep_results=[])
+            if quality['usable']:
+                result.update(status='waiting_for_rep', class_code='WAIT_FOR_REP',
+                              class_name_vi='Chờ một lượt hoàn thành',
+                              feedback_vi='Chưa có lượt hoàn chỉnh để phân tích.')
+                return result
         if not quality['usable']:
             result['label_results'] = [dict(key=r[0],raw_label=RAW_LABELS[i],name_vi=r[2],group_vi=r[3],
                                             kind=r[4],probability=None,threshold=None,detected=False,
@@ -302,10 +338,13 @@ class ONNXGymAnalyzer:
         contract = self.load_v4_contract(_exercise)
         result['exercise_name_vi'] = EXERCISE_CONFIG[_exercise]['name_vi']
         session, _ = self.get_session(_exercise)
-        if len(session.get_inputs()) != 2:
-            raise RuntimeError('Mô hình V4 cần hai đầu vào: khung xương và đặc trưng ngữ cảnh')
+        expected = 1 if rep_model else 2
+        if len(session.get_inputs()) != expected:
+            raise RuntimeError('Số đầu vào ONNX không khớp hợp đồng mô hình')
         start = time.perf_counter()
-        logits = session.run(None,{'skeleton':skeleton[None],'context':context[None]})[0][0]
+        inputs = {'skeleton': skeleton[None]}
+        if not rep_model: inputs['context'] = context[None]
+        logits = session.run(None, inputs)[0][0]
         if logits.shape != (len(LABELS),) or not np.isfinite(logits).all():
             raise RuntimeError(f'Đầu ra mô hình không đúng {len(LABELS)} nhãn hữu hạn')
         result['latency_ms'] = round((time.perf_counter()-start)*1000,2)

@@ -1,4 +1,4 @@
-"""Adapter for the existing models. No weight, threshold or training changes."""
+"""Local adapter for V4 clip models and completed-rep skeleton-only models."""
 from collections import deque
 from pathlib import Path
 import sys
@@ -29,6 +29,7 @@ def model_ready(key):
     if not model.is_file() or not contract.is_file():return False
     if key not in ('high_knees','butt_kickers'):return True
     verification=PROJECT/f'stgcn_squat_project/outputs/v4/verification_{stem}_v4.json'
+    if not verification.exists():verification=PROJECT/f'models/v4/verification_{stem}_v4.json'
     try:
         checked=json.loads(verification.read_text(encoding='utf-8'))
         cfg=json.loads(contract.read_text(encoding='utf-8'))
@@ -105,7 +106,8 @@ class InferenceEngine:
             if EXERCISE_CONFIG[key].get('is_multihead',False):
                 contract = self.analyzer.load_v4_contract(key)
                 row['version']='V4';row['label_count']=len(contract['labels'])
-                row['subtitle']='Nhiều nhãn Qualcomm'
+                row['input_scope']=contract.get('input_scope','window')
+                row['subtitle']='Phân tích từng lượt hoàn thành' if row['input_scope']=='rep' else 'Nhiều nhãn Qualcomm'
                 row['labels'] = [{k: label.get(k) for k in
                                   ('key', 'raw_label', 'name_vi', 'kind', 'threshold', 'rep_supported', 'window_supported', 'calibrated')}
                                  for label in contract['labels']]
@@ -121,6 +123,10 @@ class InferenceEngine:
     def supports_whole_video(self,exercise):
         from onnx_gym_analyzer import EXERCISE_CONFIG
         return exercise in ALLOWED_EXERCISES and EXERCISE_CONFIG[exercise].get('is_multihead',False)
+
+    def supports_window(self,exercise):
+        return (self.supports_whole_video(exercise)
+                and not getattr(self.analyzer,'is_rep_model',lambda _:False)(exercise))
 
     def process(self, state, meta, jpeg):
         started = time.perf_counter()
@@ -153,6 +159,7 @@ class InferenceEngine:
         pose_ms = (time.perf_counter() - pose_started) * 1000
         state.previous_center = self.pose.previous_center
         just_finished = False
+        completed_results=[]
         observed_state = state.tracker.state
         if found:
             state.last_found = timestamp
@@ -161,6 +168,8 @@ class InferenceEngine:
             just_finished = bool(info.get('just_finished_rep'))
             if just_finished:
                 state.latest_rep = info.get('last_result')
+                completed_results=[item['result'] for item in info.get('completed_reps',[])]
+                if not completed_results and state.latest_rep is not None:completed_results=[state.latest_rep]
             corrected = keypoints.copy()
             corrected[0] *= w / h
             state.history.append((timestamp, corrected))
@@ -171,7 +180,7 @@ class InferenceEngine:
                 state.history.popleft()
             if info.get('need_full_body') and state.exercise in ('push_up','situp'):
                 state.latest=state.latest_rep=None;state.history.clear()
-            elif self.supports_whole_video(state.exercise):
+            elif self.supports_window(state.exercise):
                 if (len(state.history) >= 20 and timestamp - state.history[0][0] >= 1
                         and timestamp - state.last_prediction >= .75):
                     from onnx_gym_analyzer import V4_STEMS
@@ -196,6 +205,7 @@ class InferenceEngine:
             'exercise': state.exercise, 'found': bool(found),
             'keypoints': keypoints.T.tolist() if found else [],
             'rep_count': state.tracker.rep_count, 'just_finished_rep': just_finished,
+            'completed_rep_results': completed_results,
             'state': observed_state if found else 'CHỜ KHỚP',
             'result': result, 'rep_result': state.latest_rep if found else None,
             'metrics': {'pose_ms': round(pose_ms, 2),

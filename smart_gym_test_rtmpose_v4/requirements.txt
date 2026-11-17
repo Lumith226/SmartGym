@@ -7,3 +7,4 @@ rtmlib==0.0.16
 torch==2.5.1
 scikit-learn==1.7.1
 matplotlib==3.10.5
+scipy==1.13.1

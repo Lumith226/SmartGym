@@ -60,13 +60,14 @@
 
       <aside class="results-card">
         <div class="card-header"><div><span class="tiny-label">03 / PHÂN TÍCH CHUYỂN ĐỘNG</span><h2>Kết quả quan sát</h2></div><span id="label-count" class="count-pill">14 nhãn</span></div>
-        <div class="result-view"><button id="live-view" class="active">Đoạn trực tiếp</button><button id="whole-view" disabled>Toàn video</button></div>
+        <div class="result-view"><button id="live-view" class="active">Lượt trực tiếp</button><button id="whole-view" disabled>Các lượt trong video</button></div>
         <div id="result-summary" class="result-summary"><span class="summary-icon">◎</span><div><strong id="summary-title">Đang chờ chuyển động</strong><p id="summary-text">Kết quả sẽ xuất hiện khi có đủ chuỗi khớp.</p></div></div>
         <div class="result-tools"><span id="result-scope">Chưa có kết quả</span><button id="export-json" class="text-button" disabled>Lưu JSON ↓</button></div>
+        <div id="rep-picker-wrap" hidden><label for="rep-picker">Xem kết quả từng lượt: </label><select id="rep-picker"></select></div>
         <div class="labels-scroll"><table class="label-table"><thead><tr><th>Nhãn quan sát</th><th>Điểm</th><th>Ngưỡng</th><th>AI</th></tr></thead><tbody id="label-rows"></tbody></table></div>
         <div class="legend"><span><i class="legend-error"></i>Lỗi dự đoán</span><span><i class="legend-attribute"></i>Thuộc tính</span><span><i class="legend-muted"></i>Chưa áp dụng</span></div>
         <p id="quality-note" class="quality-note">Điểm của các nhãn độc lập, không cộng thành 100%. Không báo lỗi chưa xác nhận toàn bộ động tác đúng.</p>
-        <div id="whole-video-tools" class="whole-video-tools" hidden><div><strong>Phân tích cả đoạn</strong><p>Đánh giá thêm các nhãn cần ngữ cảnh toàn video.</p></div><button id="analyze-whole" class="small-button" disabled>Phân tích video ↗</button></div>
+        <div id="whole-video-tools" class="whole-video-tools" hidden><div><strong>Xem lại từng lượt</strong><p>Đọc hết video, phân tích và chọn từng lượt để đối chiếu.</p></div><button id="analyze-whole" class="small-button" disabled>Phân tích video ↗</button></div>
       </aside>
     </div>
 

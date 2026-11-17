@@ -40,7 +40,9 @@ def model_ready(exercise):
         not is_v4(exercise) or (APP/f'weights/{V4_STEMS[exercise]}_v4_contract.json').is_file())
     if not exists or exercise not in ('high_knees','butt_kickers'):return exists
     try:
-        verified=json.loads((APP.parent/f'stgcn_squat_project/outputs/v4/verification_{V4_STEMS[exercise]}_v4.json').read_text(encoding='utf-8'))
+        verification=APP.parent/f'stgcn_squat_project/outputs/v4/verification_{V4_STEMS[exercise]}_v4.json'
+        if not verification.exists():verification=APP.parent/f'models/v4/verification_{V4_STEMS[exercise]}_v4.json'
+        verified=json.loads(verification.read_text(encoding='utf-8'))
         contract=json.loads((APP/f'weights/{V4_STEMS[exercise]}_v4_contract.json').read_text(encoding='utf-8'))
         return verified.get('passed') is True and verified.get('onnx_sha256')==contract.get('onnx_sha256')
     except (OSError,ValueError):return False
@@ -136,7 +138,7 @@ def render_dashboard(frame,result,rep_count=0,state='READY',source='',paused=Fal
     truth=set(comparison['ground_truth']) if comparison else None
     if not result:
         text(852,110,'Đã chọn: '+EXERCISE_NAMES[exercise],20,(100,230,185))
-        waiting=('Đang chờ đủ chuỗi khớp. Một số nhãn cần phân tích toàn video.' if is_v4(exercise)
+        waiting=('Đang chờ đủ chuyển động. Thực hiện động tác rồi trở về tư thế ban đầu để xem kết quả.' if is_v4(exercise)
                  else 'Đang chờ chuyển động. Hoàn thành một lượt để xem kết quả của bài đang chọn.')
         wrap(852,155,waiting,width=610,size=18)
         if not is_v4(exercise):
@@ -169,14 +171,16 @@ def render_dashboard(frame,result,rep_count=0,state='READY',source='',paused=Fal
             text(850,708,f"Khớp toàn bộ: {'CÓ' if comparison['exact_match'] else 'CHƯA'}",18)
             text(850,738,f"Bỏ sót: {len(comparison['missed'])} | Báo thừa: {len(comparison['extra'])}",18)
         text(850,776,'Vàng: bỏ sót nhãn gốc | Đỏ: dự đoán nhãn không được ghi',14)
-        text(850,802,'N/A: thiếu ngữ cảnh hoặc mẫu xác thực. Điểm chưa hiệu chuẩn.',14)
+        text(850,802,'N/A: thiếu dữ liệu hoặc mẫu xác thực. Điểm chưa hiệu chuẩn.',14)
+        if comparison and result.get('scope') in ('rep','video_reps'):
+            text(850,824,'Đối chiếu nhãn video nguồn, chưa có nhãn riêng từng lượt.',14)
     text(20,844,'[V] Video  [C] Camera  [P/Space] Dừng  [T] Toàn video/Rep  [R] Phát lại',16)
     text(20,871,'Bấm nút chọn bài hoặc phím 1–6 trong cửa sổ này. [S] Lưu ảnh  [Q/Esc] Thoát.',14)
     return cv2.cvtColor(np.array(image),cv2.COLOR_RGB2BGR)
 
 
 def main():
-    parser=argparse.ArgumentParser(description='Smart Gym V4: đánh giá nhiều nhãn Qualcomm cho bốn bài tập')
+    parser=argparse.ArgumentParser(description='Smart Gym V4: đánh giá nhiều nhãn Qualcomm cho sáu bài tập')
     parser.add_argument('--video',default='');parser.add_argument('--exercise',default='squat')
     parser.add_argument('--device',choices=['cuda','cpu'],default='cuda')
     parser.add_argument('--mode',default='balanced');parser.add_argument('--camera-id',type=int,default=None)
@@ -188,7 +192,7 @@ def main():
     if args.video and not Path(args.video).is_file():parser.error('Không tìm thấy video: '+args.video)
     analyzer=ONNXGymAnalyzer(args.device);exercise=analyzer.normalize_exercise(args.exercise)
     if exercise not in EXERCISES:parser.error('Bài tập không được hỗ trợ')
-    if not model_ready(exercise):parser.error('Mô hình bài này chưa xuất xong; xem outputs/v4/running_drills_pipeline_status.json')
+    if not model_ready(exercise):parser.error('Mô hình hoặc tệp xác minh chưa khớp; xem outputs/v4/rep_no_context/status.json')
     pose=RTMPoseTracker(mode=args.mode,device=args.device)
     if exercise=='squat':analyzer.load_squat_contract()
     elif exercise=='jump_jack':analyzer.load_jumpjack_contract()
@@ -213,7 +217,7 @@ def main():
         ok,frame=cap.read();cap.release()
         if whole is None:raise ValueError('Bài này chưa có mô hình V4 nhiều nhãn để phân tích toàn video')
         if args.snapshot and ok:
-            preview=render_dashboard(frame,whole,source=Path(source).name,view='Toàn video',exercise=exercise)
+            preview=render_dashboard(frame,whole,rep_count=whole.get('rep_count',0),source=Path(source).name,view=('Các lượt · hiển thị lượt cuối' if getattr(analyzer,'is_rep_model',lambda _:False)(exercise) else 'Toàn video'),exercise=exercise)
             Path(args.snapshot).parent.mkdir(parents=True,exist_ok=True)
             cv2.imencode('.png',preview)[1].tofile(args.snapshot)
         return
@@ -254,14 +258,17 @@ def main():
                         last_info=tracker.process_frame(last_kpts,timestamp=now)
                         if last_info.get('just_finished_rep'):
                             latest=last_info['last_result']
-                            logger.log_rep(tracker.rep_count,exercise,latest,last_info['rep_tensor_32'],
-                                           last_info['raw_frames_count'],Path(source).name if source else 'Webcam')
+                            payloads=last_info.get('completed_reps') or [dict(result=latest,rep_tensor_32=last_info['rep_tensor_32'],raw_frames_count=last_info['raw_frames_count'])]
+                            for item in payloads:
+                                value=item['result']
+                                logger.log_rep(value.get('rep_id',tracker.rep_count),exercise,value,item['rep_tensor_32'],
+                                               item['raw_frames_count'],Path(source).name if source else 'Webcam')
                         corrected=last_kpts.copy();corrected[0]*=w/h;history.append((now,corrected))
                         if exercise in ('high_knees','butt_kickers'):
                             while history and now-history[0][0]>8.:history.popleft()
                         if not source and last_info.get('need_full_body') and exercise in ('push_up','situp'):
                             history.clear();whole=None;latest=None
-                        elif not source and is_v4(exercise) and len(history)>=20 and time.monotonic()-last_window>3:
+                        elif not source and is_v4(exercise) and not getattr(analyzer,'is_rep_model',lambda _:False)(exercise) and len(history)>=20 and time.monotonic()-last_window>3:
                             samples=[item[1] for item in history]
                             predict=getattr(analyzer,'predict_'+V4_STEMS[exercise]+'_sequence')
                             whole=predict(samples,max(history[-1][0]-history[0][0],.1),scope='window')
@@ -273,6 +280,7 @@ def main():
             shown=frame.copy() if frame is not None else None
             if last_kpts is not None and shown is not None:draw_skeleton(shown,last_kpts)
             display=whole if show_whole and whole is not None else latest
+            if getattr(analyzer,'is_rep_model',lambda _:False)(exercise) and latest is not None:display=latest
             name=Path(source).name if source else (camera_state['message'] if camera_state else 'Camera chưa có hình')
             state='HẾT VIDEO' if eof else ('ĐANG MỞ CAMERA' if camera_state and camera_state['state']=='opening' else ('LỖI CAMERA' if camera_state and camera_state['state']=='error' else tracker.state))
             if not eof and last_info.get('need_full_body') and exercise in ('push_up','situp'):

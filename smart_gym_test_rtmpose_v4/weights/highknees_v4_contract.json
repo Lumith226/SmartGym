@@ -1,7 +1,7 @@
 {
-  "schema_version": "qualcomm-highknees-31-192frames-context48-v1",
-  "frames": 192,
-  "context_size": 48,
+  "schema_version": "qualcomm-highknees-31-192frames-context48-v1-rep-no-context-v1",
+  "frames": 64,
+  "context_size": 0,
   "coordinate_system": "x/image_height,y/image_height,confidence",
   "normalization": "sequence_median_pelvis_and_torso",
   "target_semantics": "presence_of_Qualcomm_annotation; absence_is_not_verified_correctness",
@@ -13,13 +13,14 @@
       "name_vi": "Gối không di chuyển thẳng lên xuống",
       "group_vi": "Chuyển động",
       "kind": "error",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - not straight",
-      "threshold": 0.25,
-      "window_supported": true,
-      "train_positive_samples": 253,
-      "validation_positive_samples": 44,
-      "calibrated": true
+      "threshold": 0.85,
+      "window_supported": false,
+      "train_positive_samples": 2189,
+      "validation_positive_samples": 358,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "not_in_place",
@@ -27,13 +28,14 @@
       "name_vi": "Di chuyển khỏi vị trí",
       "group_vi": "Chuyển động",
       "kind": "error",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - not in place",
-      "threshold": 0.5,
-      "window_supported": true,
-      "train_positive_samples": 261,
-      "validation_positive_samples": 46,
-      "calibrated": true
+      "threshold": 0.55,
+      "window_supported": false,
+      "train_positive_samples": 1773,
+      "validation_positive_samples": 291,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "arms_down",
@@ -41,13 +43,14 @@
       "name_vi": "Hai tay hạ xuống",
       "group_vi": "Chuyển động",
       "kind": "error",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - arms down",
-      "threshold": 0.45000000000000007,
-      "window_supported": true,
-      "train_positive_samples": 157,
-      "validation_positive_samples": 27,
-      "calibrated": true
+      "threshold": 0.375,
+      "window_supported": false,
+      "train_positive_samples": 1122,
+      "validation_positive_samples": 234,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "not_jumping",
@@ -55,13 +58,14 @@
       "name_vi": "Bước chân, không bật nhảy",
       "group_vi": "Chuyển động",
       "kind": "error",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - not jumping",
-      "threshold": 0.675,
-      "window_supported": true,
-      "train_positive_samples": 300,
-      "validation_positive_samples": 55,
-      "calibrated": true
+      "threshold": 0.65,
+      "window_supported": false,
+      "train_positive_samples": 1183,
+      "validation_positive_samples": 223,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "only_left_leg",
@@ -69,13 +73,14 @@
       "name_vi": "Chỉ nâng chân trái",
       "group_vi": "Chuyển động",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - only left leg",
-      "threshold": 0.5,
-      "window_supported": true,
-      "train_positive_samples": 228,
-      "validation_positive_samples": 40,
-      "calibrated": true
+      "threshold": 0.875,
+      "window_supported": false,
+      "train_positive_samples": 680,
+      "validation_positive_samples": 115,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "only_right_leg",
@@ -83,13 +88,14 @@
       "name_vi": "Chỉ nâng chân phải",
       "group_vi": "Chuyển động",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - only right leg",
-      "threshold": 0.15000000000000002,
-      "window_supported": true,
-      "train_positive_samples": 27,
-      "validation_positive_samples": 5,
-      "calibrated": true
+      "threshold": 0.7000000000000001,
+      "window_supported": false,
+      "train_positive_samples": 88,
+      "validation_positive_samples": 17,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "single_repetition",
@@ -97,13 +103,14 @@
       "name_vi": "Chỉ thực hiện một lượt",
       "group_vi": "Chuyển động",
       "kind": "context",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - single repetition",
-      "threshold": 0.225,
+      "threshold": 0.725,
       "window_supported": false,
-      "train_positive_samples": 260,
-      "validation_positive_samples": 46,
-      "calibrated": true
+      "train_positive_samples": 596,
+      "validation_positive_samples": 125,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "early_stopping",
@@ -111,13 +118,14 @@
       "name_vi": "Dừng bài sớm",
       "group_vi": "Chuyển động",
       "kind": "context",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - early stopping",
-      "threshold": 0.875,
+      "threshold": 0.45000000000000007,
       "window_supported": false,
-      "train_positive_samples": 263,
-      "validation_positive_samples": 46,
-      "calibrated": true
+      "train_positive_samples": 1045,
+      "validation_positive_samples": 193,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "angle_30_0",
@@ -125,13 +133,14 @@
       "name_vi": "Góc: mức 30° theo nguồn",
       "group_vi": "Góc gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - angle=30.0 degrees",
-      "threshold": 0.2,
-      "window_supported": true,
-      "train_positive_samples": 285,
-      "validation_positive_samples": 50,
-      "calibrated": true
+      "threshold": 0.775,
+      "window_supported": false,
+      "train_positive_samples": 451,
+      "validation_positive_samples": 92,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "angle_37_5",
@@ -139,13 +148,14 @@
       "name_vi": "Góc: mức 37.5° theo nguồn",
       "group_vi": "Góc gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - angle=37.5 degrees",
-      "threshold": 0.5,
-      "window_supported": true,
-      "train_positive_samples": 12,
-      "validation_positive_samples": 2,
-      "calibrated": true
+      "threshold": 0.15000000000000002,
+      "window_supported": false,
+      "train_positive_samples": 38,
+      "validation_positive_samples": 11,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "angle_45_0",
@@ -153,13 +163,14 @@
       "name_vi": "Góc: mức 45° theo nguồn",
       "group_vi": "Góc gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - angle=45.0 degrees",
-      "threshold": 0.625,
-      "window_supported": true,
-      "train_positive_samples": 201,
-      "validation_positive_samples": 35,
-      "calibrated": true
+      "threshold": 0.42500000000000004,
+      "window_supported": false,
+      "train_positive_samples": 1180,
+      "validation_positive_samples": 198,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "angle_52_5",
@@ -167,13 +178,14 @@
       "name_vi": "Góc: mức 52.5° theo nguồn",
       "group_vi": "Góc gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - angle=52.5 degrees",
-      "threshold": 0.4,
-      "window_supported": true,
-      "train_positive_samples": 28,
-      "validation_positive_samples": 5,
-      "calibrated": true
+      "threshold": 0.85,
+      "window_supported": false,
+      "train_positive_samples": 313,
+      "validation_positive_samples": 40,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "angle_60_0",
@@ -181,13 +193,14 @@
       "name_vi": "Góc: mức 60° theo nguồn",
       "group_vi": "Góc gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - angle=60.0 degrees",
-      "threshold": 0.8250000000000001,
-      "window_supported": true,
-      "train_positive_samples": 247,
-      "validation_positive_samples": 44,
-      "calibrated": true
+      "threshold": 0.475,
+      "window_supported": false,
+      "train_positive_samples": 2289,
+      "validation_positive_samples": 423,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "angle_75_0",
@@ -195,13 +208,14 @@
       "name_vi": "Góc: mức 75° theo nguồn",
       "group_vi": "Góc gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - angle=75.0 degrees",
-      "threshold": 0.325,
-      "window_supported": true,
-      "train_positive_samples": 93,
-      "validation_positive_samples": 16,
-      "calibrated": true
+      "threshold": 0.2,
+      "window_supported": false,
+      "train_positive_samples": 1017,
+      "validation_positive_samples": 171,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "angle_90_0",
@@ -209,13 +223,14 @@
       "name_vi": "Góc: mức 90° theo nguồn",
       "group_vi": "Góc gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - angle=90.0 degrees",
-      "threshold": 0.125,
-      "window_supported": true,
-      "train_positive_samples": 250,
-      "validation_positive_samples": 44,
-      "calibrated": true
+      "threshold": 0.42500000000000004,
+      "window_supported": false,
+      "train_positive_samples": 2371,
+      "validation_positive_samples": 442,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "angle_97_5",
@@ -223,13 +238,14 @@
       "name_vi": "Góc: mức 97.5° theo nguồn",
       "group_vi": "Góc gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - angle=97.5 degrees",
-      "threshold": 0.15000000000000002,
-      "window_supported": true,
-      "train_positive_samples": 15,
-      "validation_positive_samples": 3,
-      "calibrated": true
+      "threshold": 0.42500000000000004,
+      "window_supported": false,
+      "train_positive_samples": 154,
+      "validation_positive_samples": 29,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "angle_105_0",
@@ -237,13 +253,14 @@
       "name_vi": "Góc: mức 105° theo nguồn",
       "group_vi": "Góc gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - angle=105.0 degrees",
       "threshold": 0.5750000000000001,
-      "window_supported": true,
-      "train_positive_samples": 71,
-      "validation_positive_samples": 12,
-      "calibrated": true
+      "window_supported": false,
+      "train_positive_samples": 585,
+      "validation_positive_samples": 101,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "speed_0_50",
@@ -251,13 +268,14 @@
       "name_vi": "Tốc độ: mức 0.5 rps",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - speed=0.50 rps",
-      "threshold": 0.5,
-      "window_supported": true,
-      "train_positive_samples": 8,
-      "validation_positive_samples": 1,
-      "calibrated": true
+      "threshold": 1.01,
+      "window_supported": false,
+      "train_positive_samples": 29,
+      "validation_positive_samples": 0,
+      "calibrated": false,
+      "weak_rep_label": true
     },
     {
       "key": "speed_1_00",
@@ -265,13 +283,14 @@
       "name_vi": "Tốc độ: mức 1 rps",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - speed=1.00 rps",
-      "threshold": 0.5,
-      "window_supported": true,
-      "train_positive_samples": 250,
-      "validation_positive_samples": 44,
-      "calibrated": true
+      "threshold": 0.6,
+      "window_supported": false,
+      "train_positive_samples": 1185,
+      "validation_positive_samples": 201,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "speed_1_25",
@@ -279,13 +298,14 @@
       "name_vi": "Tốc độ: mức 1.25 rps",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - speed=1.25 rps",
       "threshold": 0.5,
-      "window_supported": true,
-      "train_positive_samples": 5,
-      "validation_positive_samples": 1,
-      "calibrated": true
+      "window_supported": false,
+      "train_positive_samples": 28,
+      "validation_positive_samples": 4,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "speed_1_50",
@@ -293,13 +313,14 @@
       "name_vi": "Tốc độ: mức 1.5 rps",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - speed=1.50 rps",
-      "threshold": 0.5,
-      "window_supported": true,
-      "train_positive_samples": 44,
-      "validation_positive_samples": 8,
-      "calibrated": true
+      "threshold": 0.725,
+      "window_supported": false,
+      "train_positive_samples": 320,
+      "validation_positive_samples": 54,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "speed_1_75",
@@ -307,13 +328,14 @@
       "name_vi": "Tốc độ: mức 1.75 rps",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - speed=1.75 rps",
-      "threshold": 0.5,
-      "window_supported": true,
-      "train_positive_samples": 19,
-      "validation_positive_samples": 3,
-      "calibrated": true
+      "threshold": 0.1,
+      "window_supported": false,
+      "train_positive_samples": 146,
+      "validation_positive_samples": 22,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "speed_2_00",
@@ -321,13 +343,14 @@
       "name_vi": "Tốc độ: mức 2 rps",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - speed=2.00 rps",
-      "threshold": 0.375,
-      "window_supported": true,
-      "train_positive_samples": 258,
-      "validation_positive_samples": 45,
-      "calibrated": true
+      "threshold": 0.45000000000000007,
+      "window_supported": false,
+      "train_positive_samples": 1846,
+      "validation_positive_samples": 352,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "speed_2_25",
@@ -335,13 +358,14 @@
       "name_vi": "Tốc độ: mức 2.25 rps",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - speed=2.25 rps",
-      "threshold": 0.55,
-      "window_supported": true,
-      "train_positive_samples": 81,
-      "validation_positive_samples": 14,
-      "calibrated": true
+      "threshold": 0.35,
+      "window_supported": false,
+      "train_positive_samples": 755,
+      "validation_positive_samples": 117,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "speed_2_50",
@@ -349,13 +373,14 @@
       "name_vi": "Tốc độ: mức 2.5 rps",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - speed=2.50 rps",
-      "threshold": 0.6,
-      "window_supported": true,
-      "train_positive_samples": 219,
-      "validation_positive_samples": 38,
-      "calibrated": true
+      "threshold": 0.25,
+      "window_supported": false,
+      "train_positive_samples": 1975,
+      "validation_positive_samples": 320,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "speed_2_75",
@@ -363,13 +388,14 @@
       "name_vi": "Tốc độ: mức 2.75 rps",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - speed=2.75 rps",
-      "threshold": 0.35,
-      "window_supported": true,
-      "train_positive_samples": 64,
-      "validation_positive_samples": 11,
-      "calibrated": true
+      "threshold": 0.55,
+      "window_supported": false,
+      "train_positive_samples": 574,
+      "validation_positive_samples": 86,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "speed_3_00",
@@ -377,13 +403,14 @@
       "name_vi": "Tốc độ: mức 3 rps",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - speed=3.00 rps",
-      "threshold": 0.17500000000000002,
-      "window_supported": true,
-      "train_positive_samples": 116,
-      "validation_positive_samples": 20,
-      "calibrated": true
+      "threshold": 0.275,
+      "window_supported": false,
+      "train_positive_samples": 1125,
+      "validation_positive_samples": 217,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "speed_3_25",
@@ -391,13 +418,14 @@
       "name_vi": "Tốc độ: mức 3.25 rps",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - speed=3.25 rps",
-      "threshold": 0.375,
-      "window_supported": true,
-      "train_positive_samples": 8,
+      "threshold": 0.9,
+      "window_supported": false,
+      "train_positive_samples": 95,
       "validation_positive_samples": 1,
-      "calibrated": true
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "speed_3_50",
@@ -405,13 +433,14 @@
       "name_vi": "Tốc độ: mức 3.5 rps",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - speed=3.50 rps",
-      "threshold": 0.875,
-      "window_supported": true,
-      "train_positive_samples": 33,
-      "validation_positive_samples": 6,
-      "calibrated": true
+      "threshold": 0.30000000000000004,
+      "window_supported": false,
+      "train_positive_samples": 417,
+      "validation_positive_samples": 78,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "speed_3_75",
@@ -419,13 +448,14 @@
       "name_vi": "Tốc độ: mức 3.75 rps",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - speed=3.75 rps",
-      "threshold": 0.5,
-      "window_supported": true,
-      "train_positive_samples": 4,
-      "validation_positive_samples": 1,
-      "calibrated": true
+      "threshold": 0.1,
+      "window_supported": false,
+      "train_positive_samples": 62,
+      "validation_positive_samples": 17,
+      "calibrated": true,
+      "weak_rep_label": true
     },
     {
       "key": "speed_4_00",
@@ -433,16 +463,17 @@
       "name_vi": "Tốc độ: mức 4 rps",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "high knees - speed=4.00 rps",
-      "threshold": 0.5,
-      "window_supported": true,
-      "train_positive_samples": 26,
-      "validation_positive_samples": 4,
-      "calibrated": true
+      "threshold": 0.25,
+      "window_supported": false,
+      "train_positive_samples": 315,
+      "validation_positive_samples": 65,
+      "calibrated": true,
+      "weak_rep_label": true
     }
   ],
-  "best_epoch": 42,
+  "best_epoch": 18,
   "manifest_sha256": "e555e459b6ff39b031f561a1039ddd8f5e7a3375ab60bb6180b296cc4981bd8a",
   "split_counts": {
     "train": [
@@ -546,5 +577,14 @@
     ]
   },
   "threshold_source": "validation_only",
-  "onnx_sha256": "54737eee419c7cca0b60be7656745460b494b83550a33c24841ff96276740228"
+  "onnx_sha256": "9e9fc4b7b0fae31c2622c59cef7e43859b731c6b5e717f0f4740fb66280d9132",
+  "base_schema_version": "qualcomm-highknees-31-192frames-context48-v1",
+  "requires_context": false,
+  "input_names": [
+    "skeleton"
+  ],
+  "input_scope": "rep",
+  "cut_version": "phase-confirmed-padding-v2-six-exercises",
+  "preprocess_version": "rep-skeleton64-v1",
+  "label_supervision": "parent_video_weak"
 }

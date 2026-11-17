@@ -1,133 +1,114 @@
-# Smart Gym V4 — Các bài tập đa nhãn Qualcomm
+# Smart Gym V4 — sáu bài đa nhãn, phân tích theo lượt
 
-Squat có 14 nhãn; chống đẩy 21 nhãn; jumping jacks (bật nhảy dang tay chân) 29 nhãn; gập bụng ngược 19 nhãn. Mỗi video có thể có nhiều nhãn đồng thời. Cả bốn bài yêu cầu đúng trọng số V4 và cấu hình nhãn đi kèm trong `weights`; thiếu bộ này sẽ báo lỗi thay vì tự chuyển về bản bốn lớp.
+## Cách xử lý hiện tại
 
-## Bổ sung high knees và butt kickers
+Video/camera → YOLOX-M tìm người → RTMPose-M tìm khớp → SciPy cắt lượt →
+chuẩn hóa khung xương → ST-GCN++ dự đoán nhiều nhãn độc lập.
 
-High knees (chạy nâng cao gối) có 31 nhãn; butt kickers (chạy gót chạm mông) có 14 nhãn gốc Qualcomm. Hai bài sử dụng 192 thời điểm lấy mẫu trên một video và 48 đặc trưng ngữ cảnh. 192 thời điểm không phải 192 FPS.
+| Phím | Bài | Mã dùng với --exercise | Nhãn |
+|---|---|---|---:|
+| 1 | Squat | squat | 14 |
+| 2 | Chống đẩy | push_up | 21 |
+| 3 | Jumping jacks | jump_jack | 29 |
+| 4 | Gập bụng ngược | situp | 19 |
+| 5 | High knees | high_knees | 31 |
+| 6 | Butt kickers | butt_kickers | 14 |
 
-Pipeline chuẩn bị dữ liệu, trích khớp, huấn luyện, kiểm tra ONNX và xuất ảnh:
+Mã `situp` là khóa giao diện kế thừa; dữ liệu của bài này là nhãn Qualcomm
+`reverse crunches` (gập bụng ngược), không phải bài gập thân sit-ups.
 
-```powershell
-python stgcn_model_training/train_pipeline/run_running_v4_pipeline.py
-```
+Cả sáu mô hình chỉ nhận một tensor `skeleton` dạng batch × 3 × 64 × 17,
+không nhận vector hay nhánh ngữ cảnh. Ba kênh là x/y/độ tin cậy, 17 khớp
+COCO, 64 là số thời điểm nội suy của một lượt, không phải FPS.
 
-Theo dõi `stgcn_model_training/outputs/v4/running_drills_pipeline_status.json` và `running_drills_pipeline.log`. Chỉ coi quá trình hoàn tất khi `complete` là `true` và có `completed_running_v4.json`. Không chạy thêm một pipeline trong khi pipeline hiện tại đang hoạt động.
+## Mở app
 
-Sau khi hoàn tất, chạy từ thư mục gốc dự án:
-
-```powershell
-python smart_gym_test_rtmpose_v4/app.py --exercise high_knees --device cuda
-python smart_gym_test_rtmpose_v4/app.py --exercise butt_kickers --device cuda
-python smart_gym_test_rtmpose_v4/app.py --exercise high_knees --video "duong_dan_video.mp4" --headless --output "ket_qua.json"
-```
-
-Phím **5** chọn high knees; phím **6** chọn butt kickers. Lượt chân là số ước lượng: mỗi lần một chân nâng/gập rồi hạ được tính một lượt. Bộ đếm không tạo nhãn lỗi và không định nghĩa lại rps của Qualcomm. Các nhãn ngữ cảnh như dừng sớm hoặc chỉ một lượt cần phân tích toàn video; những nhãn khác có thể được dự đoán trên đoạn camera gần đây.
-
-Trọng số lưu tại `stgcn_model_training/models/v4`, bản dùng thử tại `weights`; lịch sử học, loss, ma trận nhầm lẫn từng nhãn và báo cáo lưu trong `stgcn_model_training/outputs/v4`.
-
-Nguồn nhãn cố định: `stgcn_model_training/Dataset/Qualcom dataset/fine_grained_labels.json`. Tệp gốc chỉ được đọc; dữ liệu chuyển đổi lưu riêng trong `data/v4`. SHA-256 (mã kiểm tra nội dung) xác nhận tệp gốc không bị sửa.
-
-## Chạy giao diện
-
-Mở PowerShell trong thư mục `smart_gym_test_rtmpose_v4`:
+Từ thư mục gốc GYM, dùng môi trường Python đã cài thư viện và trọng số:
 
 ```powershell
-python app.py --exercise squat --video "test_videos_benchmark/squats/BACK_ROUNDING_00001672.mp4" --device cuda
-python app.py --exercise jump_jack --video "test_videos_benchmark/jumping_jacks/ARMS_INCOMPLETE_00001308.mp4" --device cuda
-python app.py --exercise jump_jack --device cuda --camera-id 0
+python smart_gym_test_rtmpose_v4/app.py
+python smart_gym_test_rtmpose_v4/app.py --exercise high_knees --camera-id 0
+python smart_gym_test_rtmpose_v4/app.py --video "duong_dan/video.mp4" --exercise butt_kickers
 ```
 
-Máy không có GPU NVIDIA dùng `--device cpu`. Sau khi huấn luyện xong, đóng và mở lại ứng dụng để nạp trọng số mới. Xem [giải thích giao diện](GIAI_THICH_GIAO_DIEN_V4.md).
+Có thể thêm `--device cpu` khi không dùng CUDA. CPU có thể chậm hơn; không suy
+FPS camera từ thời gian chạy riêng mô hình ONNX.
 
-Sau khi cập nhật mã, đóng cửa sổ V4 cũ rồi chạy lại lệnh trên. Bấm chuột vào cửa sổ V4 trước khi dùng phím; có thể bấm trực tiếp bốn nút chọn bài ở phía trên hình ảnh. Dòng **ĐANG CHỌN [số]: tên bài** và nút màu xanh xác nhận bài đang dùng. Chuyển bài sẽ xóa kết quả cũ và phát lại video từ đầu, kể cả khi video đã kết thúc. Cả bốn bài hỗ trợ bảng nhiều nhãn cho toàn video; khi dùng camera, chờ đủ đoạn chuyển động mới có kết quả. Một số nhãn thời gian chỉ áp dụng toàn video.
+Bấm 1–6 hoặc nút chọn bài trong cửa sổ app; tên bài đã chọn hiện phía trên.
+[V] chọn video, [C] camera, [P/Space] dừng/phát, [R] phát lại, [T] đổi chế độ
+xem kết quả, [S] lưu ảnh, [Q/Esc] thoát. Khi đổi trọng số cần tắt/mở lại app.
 
-Camera (máy quay) mở trong tiến trình riêng để tránh treo cửa sổ nếu driver (trình điều khiển thiết bị) không phản hồi. Giao diện hiển thị đang mở hoặc lỗi kết nối; vẫn có thể chọn bài, bấm V chọn video hay Q thoát. Bấm C sẽ đóng kết nối cũ trước khi thử lại. Có thể mất khoảng 30 giây khi tự tìm camera.
+Nếu camera không có hình, kiểm tra ứng dụng Camera của Windows rồi đóng nó
+trước khi thử lại. Có thể chọn camera khác bằng `--camera-id`.
 
-Trên máy đang kiểm tra: webcam thật **1080P Web Camera** là `--camera-id 0`; chỉ số 1 là OBS Virtual Camera (camera ảo OBS), chỉ số 2 là SplitCam Virtual Camera (camera ảo SplitCam). Không dùng hai camera ảo này để thay cho webcam thật. Nếu webcam 0 không có hình, đóng V4, thử ứng dụng Camera của Windows rồi đóng ứng dụng Camera trước khi mở lại V4. Khi Camera của Windows cũng không có hình, cần kiểm tra kết nối USB và thiết bị trước.
+## Cắt và phân tích lượt
 
-| Phím | Chức năng |
-|---|---|
-| V / C | Chọn video / máy quay |
-| P / Space | Tạm dừng hoặc tiếp tục |
-| T | Xem toàn video/cửa sổ trực tiếp hoặc lượt gần nhất |
-| R | Phát lại, xóa bộ đếm |
-| 1–4 | Squat / chống đẩy / jumping jacks / gập bụng ngược |
-| S | Lưu ảnh vào `logs` |
-| Q / Esc | Thoát |
+Bộ cắt phải quan sát pha trước, chuyển động và pha trở về; thêm đệm đầu/cuối
+để giảm hụt đoạn. Đoạn đầu/cuối dở dang hoặc nhún dưới ngưỡng có thể không tạo
+lượt. Một lượt được đếm không đồng nghĩa đúng kỹ thuật.
 
-Kết quả toàn video được tính trước khi phát, nên bảng giữ nguyên khi video chạy. Video dừng ở cuối để đọc kết quả.
+High knees và butt kickers đếm độc lập từng chân: một chân nâng/co rồi hạ là
+một lượt, trái rồi phải là hai lượt. Mỗi mẫu vẫn giữ đủ 17 khớp. Hai chân có
+thể hoàn tất trong cùng khung xử lý; cả hai được phân tích và ghi nhật ký,
+màn hình trực tiếp hiển thị kết quả gần nhất.
 
-## Kiểm tra và xuất ảnh giao diện
+Video tải từ tệp được đọc hết thời lượng, lấy khớp khoảng 12 ảnh/giây ở bốn
+bài chu kỳ cơ thể và 24 ảnh/giây ở hai bài chạy. Mỗi lượt đều nội suy về 64
+thời điểm. Kết quả JSON giữ `rep_results` của mọi lượt; app xem trước lượt
+cuối. Web cho chọn từng lượt để đối chiếu.
+
+Luồng trực tiếp tìm người/khớp từng ảnh; đường video theo lô dùng hộp người
+hợp nhất. Chúng không bảo đảm cho cùng tọa độ hoặc cùng số lượt. Chưa có
+phép đo webcam thật nếu báo cáo chỉ ghi kiểm tra phát lại/tải tệp.
+
+## Lưu JSON và ảnh không mở cửa sổ
 
 ```powershell
-python test_single_video.py --exercise jump_jack --video "test_videos_benchmark/jumping_jacks/ARMS_INCOMPLETE_00001308.mp4" --device cuda --output logs/single_jumpjack.json --snapshot logs/single_jumpjack.png
-python test_benchmark_models.py --exercise squat --device cuda
-python test_benchmark_models.py --exercise jumpjack --device cuda
-python test_benchmark_models.py --exercise pushup --device cuda
-python test_benchmark_models.py --exercise crunch --device cuda
+python smart_gym_test_rtmpose_v4/app.py --video "duong_dan/video.mp4" --exercise high_knees --headless --output "ket_qua.json" --snapshot "ket_qua.png"
 ```
 
-Kết quả: `logs/benchmark_squat_v4.json`, `logs/benchmark_jumpjack_v4.json` và CSV tương ứng. Ảnh ở `logs/benchmark_previews`, `logs/benchmark_previews_jumpjack`. Khớp benchmark chỉ lưu tại `logs/benchmark_pose_cache`, không dùng huấn luyện.
+Nhật ký camera/video phát trực tiếp được lưu trong `logs` của app.
+Trọng số ONNX và contract (cấu hình nhãn/ngưỡng) phải đi cùng nhau trong
+`weights`. Không trộn trọng số và ngưỡng từ hai lượt huấn luyện khác nhau.
+Bản đóng gói `SmartGym` dùng thư mục `models/v4` để tìm tệp xác minh nếu
+không có thư mục huấn luyện bên cạnh.
 
-## Huấn luyện và kiểm chứng
+## Đọc kết quả
 
-Chạy từ thư mục gốc GYM:
+Mỗi nhãn có điểm và ngưỡng riêng. Các điểm không cộng thành 100% và chưa
+được hiệu chuẩn thành xác suất kết luận đúng. Màu xanh/nhãn thuộc tính không
+chứng minh toàn bộ động tác đúng. Không ghi hoặc không dự đoán nhãn lỗi
+không có nghĩa đã xác minh không có lỗi.
 
-```powershell
-python stgcn_model_training/train_pipeline/run_qualcomm_v4_pipeline.py --exercise all --device cuda --epochs 70
-python stgcn_model_training/train_pipeline/audit_benchmark_isolation.py
-```
+Nhãn từng lượt được kế thừa toàn bộ từ video Qualcomm theo giả định giám sát
+yếu. Chưa có nhãn lỗi riêng cho từng lượt được xác minh độc lập. Nhãn tốc độ
+hoặc trạng thái toàn video có thể thiếu bằng chứng khi chỉ xem một lượt đã
+chuẩn hóa thời gian. Nhãn không đủ mẫu dương train/validation vẫn giữ trong
+danh mục nhưng hiện N/A, không tự chọn ngưỡng từ test.
 
-Chuỗi xử lý đọc đúng JSON đã chỉ định; loại benchmark theo mã video và nội dung khỏi **cả huấn luyện, xác thực và kiểm tra nội bộ**. Giữ tập kiểm tra gốc Qualcomm; tách xác thực chỉ từ huấn luyện gốc. Các bản sao nội dung không được vượt ranh giới tập.
+Đối chiếu nhãn gốc trong app là so lượt đang hiển thị với nhãn video cha,
+không phải chứng nhận nhãn từng lượt. Nhãn squat `knees over toes` có mâu
+thuẫn giữa tên và mô tả nguồn; giao diện giữ ghi chú đó.
 
-YOLOX-M (phát hiện người) và RTMPose-M (ước lượng khớp) dùng trọng số huấn luyện sẵn. Squat lấy 64 khung hình toàn video và 16 đặc trưng bổ sung; jumping jacks lấy 128 khung hình và 32 đặc trưng, gồm thông tin thời gian và nhịp chuyển động.
+## Trọng số, dữ liệu dẫn xuất và báo cáo
 
-ST-GCN++ (mạng đồ thị không gian và thời gian) được huấn luyện riêng từng bài từ đầu. Dùng weighted BCE (sai số nhị phân có trọng số), AdamW (thuật toán cập nhật trọng số) và early stopping (dừng sớm). Trọng số nhãn chỉ tính từ huấn luyện. Chọn mô hình bằng macro AP (độ chính xác trung bình theo xếp hạng nhãn) trên xác thực; chọn ngưỡng từng nhãn chỉ từ xác thực.
+Các đường dẫn dưới đây tính từ GYM:
 
-Chương trình kiểm kê lại benchmark trước bước học và dừng nếu phát hiện trùng. Đối chiếu phát hiện tệp nguyên nội dung dù đổi tên; chưa xác minh các bản đã mã hóa lại hoặc cắt ghép khác mã video. Benchmark chỉ dùng đánh giá sau khi cố định mô hình/ngưỡng.
+- `stgcn_model_training/models/v4`: trọng số PTH/ONNX và contract đang dùng.
+- `stgcn_model_training/models/v4/rep_no_context/<bài>`: trọng số theo lượt chạy.
+- `stgcn_model_training/data/v4_rep_no_context/<bài>`: chia tập, nguồn nhãn,
+  ranh giới lượt và tensor đã chuẩn bị; không sửa Dataset gốc.
+- `stgcn_model_training/outputs/v4/rep_no_context/BAO_CAO_6_BAI.md`: tổng hợp.
+- `stgcn_model_training/outputs/v4/rep_no_context/BAO_CAO_3_BAI_CON_LAI.md`:
+  kết quả gập bụng ngược, high knees và butt kickers.
+- Mỗi thư mục bài có loss, ma trận nhầm lẫn 2×2 từng nhãn, bảng F1/ngưỡng và
+  `HUONG_DAN_ANH_BAO_CAO_<BAI>_V4.md`.
 
-## Ảnh báo cáo và nơi lưu
+`stgcn_model_training` là liên kết tới `stgcn_squat_project`; hai đường dẫn
+cùng dữ liệu. Chi tiết mọi bước và tham số nằm ở `QUY_TRINH.md` và
+`QUY_TRINH_3_BAI_CON_LAI.md` trong thư mục kết quả.
 
-Xuất lại ảnh từ kết quả đã lưu, không huấn luyện hoặc đổi ngưỡng:
-
-```powershell
-python stgcn_model_training/train_pipeline/export_qualcomm_v4_figures.py --exercise all
-```
-
-| Thư mục dưới `stgcn_model_training` | Nội dung |
-|---|---|
-| `data/v4` | Danh sách chia tập, nhãn dẫn xuất, chú thích, khớp |
-| `models/v4` | Hai mô hình PTH, ONNX và cấu hình nhãn/ngưỡng |
-| `outputs/v4` | Đường sai số, ma trận nhầm lẫn, báo cáo, lịch sử học |
-
-Tên tệp chứa `squat` hoặc `jumpjack`. PNG 300 DPI (mật độ điểm ảnh để in); hình tổng hợp có SVG (phóng to không vỡ). Mỗi nhãn có ma trận 2×2 riêng. Hướng dẫn ảnh: `HUONG_DAN_ANH_BAO_CAO_SQUAT_V4.md` và `HUONG_DAN_ANH_BAO_CAO_JUMPJACK_V4.md` trong thư mục kết quả.
-
-`stgcn_model_training` là junction (liên kết thư mục) tới `stgcn_squat_project`; hai đường dẫn cùng dữ liệu.
-
-## Diễn giải nhãn
-
-Nhãn có nghĩa là chú thích Qualcomm được dự đoán xuất hiện. Không ghi nhãn không đồng nghĩa đã xác minh tư thế đúng. Điểm sigmoid (điểm độc lập từng nhãn) không cộng thành 100% và chưa hiệu chuẩn thành xác suất kết luận đúng.
-
-Các nhãn cần toàn video không tự suy ra từ một lượt/cửa sổ ngắn: giữ tư thế, bắt đầu muộn của squat; tốc độ, chỉ làm một lần và dừng sớm của jumping jacks. Nhãn không có mẫu dương huấn luyện hoặc xác thực được đánh dấu thiếu dữ liệu chọn ngưỡng, không tự báo có.
-
-ROM — range of motion (biên độ vận động) giữ nguyên thang Qualcomm; không tự chuyển thành độ góc hoặc mức đạt chuẩn. Nhãn squat `knees over toes` có tên nói gối vượt mũi chân nhưng mô tả gốc nói ngược lại; giao diện ghi rõ mâu thuẫn.
-
-Các tập độc lập theo video/nội dung; chưa chứng minh độc lập theo người tập. Chưa đánh giá thực tế máy quay trực tiếp hoặc độ chính xác đếm lượt với nhãn đếm lượt chuẩn.
-
-## Hai bài nằm sàn V4
-
-Chống đẩy dùng nhãn `pushups`; gập bụng ngược dùng `reverse crunches`, không thay thế bằng nhãn sit-ups (gập thân). Mô hình mới nhận 128 khung mẫu và 32 đặc trưng ngữ cảnh. Trọng số, ngưỡng và tiền xử lý phải đi cùng phiên bản.
-
-Khi thiếu khớp quan trọng, chương trình chờ quan sát rõ hơn thay vì kết luận đúng kỹ thuật. Bộ đếm ưu tiên một bên cơ thể có khớp đủ rõ; mất khớp hoặc đổi bên trong lượt không được tự tính thành lượt hoàn thành. Cơ chế này không sửa được khớp bị bộ tìm khớp đoán sai nhưng vẫn cho điểm tin cậy cao.
-
-Xem kết quả và giới hạn tại [báo cáo hai bài V4](../KET_QUA_CHONG_DAY_GAP_BUNG_V4.md). Ảnh loss (sai số), confusion matrix (ma trận nhầm lẫn) và bảng từng nhãn ở `../stgcn_model_training/outputs/v4`.
-
-Nếu cần chạy lại riêng hai bài mới, từ thư mục gốc GYM:
-
-```powershell
-python stgcn_model_training/train_pipeline/run_floor_v4_pipeline.py
-python stgcn_model_training/train_pipeline/finish_floor_v4.py
-```
-
-Lệnh thứ nhất trích xuất, huấn luyện tối đa 70 vòng, kiểm chứng và xuất ảnh. Lệnh thứ hai đánh giá video giữ riêng, xuất báo cáo và chạy kiểm thử chương trình. Chỉ chạy lại khi muốn huấn luyện/đánh giá lại; không cần chạy trước mỗi lần mở giao diện. Hai lệnh này không huấn luyện lại squat hoặc jumping jacks.
+Pipeline đang dùng là `train_pipeline/train_rep_no_context_v4.py`. Tùy chọn
+`--exercises` chọn bài; `--resume` bỏ qua bài đã hoàn tất và tái dùng dữ liệu
+đã chuẩn bị, không có nghĩa tự huấn luyện lại một bài đã xong. Các script
+huấn luyện V4 ngữ cảnh trước đây không tạo ra cùng loại trọng số hiện tại.

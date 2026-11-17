@@ -1,0 +1,18 @@
+{
+  "passed": true,
+  "onnx_sha256": "ae1a42f96109a70490d9440a39caaee9f411babf5a33c3f46806d6d86f39bb23",
+  "input_names": [
+    "skeleton"
+  ],
+  "input_shape": [
+    "batch",
+    3,
+    64,
+    17
+  ],
+  "requires_context": false,
+  "input_scope": "rep",
+  "cpu_onnx_probability_max_error": 9.5367431640625e-07,
+  "target_semantics": "All parent-video labels inherited by each rep; weak supervision.",
+  "note": "Numerical/runtime verification, not per-rep ground-truth accuracy."
+}

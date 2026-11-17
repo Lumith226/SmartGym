@@ -1,7 +1,7 @@
 {
-  "schema_version": "qualcomm-pushup-21-128frames-context32-v1",
-  "frames": 128,
-  "context_size": 32,
+  "schema_version": "qualcomm-pushup-21-128frames-context32-v1-rep-no-context-v1",
+  "frames": 64,
+  "context_size": 0,
   "coordinate_system": "x/image_height,y/image_height,confidence",
   "normalization": "sequence_median_pelvis_and_torso",
   "target_semantics": "presence_of_Qualcomm_annotation; absence_is_not_verified_correctness",
@@ -14,10 +14,12 @@
       "kind": "attribute",
       "rep_supported": true,
       "raw_label": "pushups - 90 degrees",
-      "threshold": 0.6,
-      "train_positive_samples": 427,
-      "validation_positive_samples": 75,
-      "calibrated": true
+      "threshold": 0.2,
+      "train_positive_samples": 841,
+      "validation_positive_samples": 165,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "too_deep",
@@ -27,10 +29,12 @@
       "kind": "error",
       "rep_supported": true,
       "raw_label": "pushups - deep",
-      "threshold": 0.35,
-      "train_positive_samples": 714,
-      "validation_positive_samples": 126,
-      "calibrated": true
+      "threshold": 0.2,
+      "train_positive_samples": 1111,
+      "validation_positive_samples": 200,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "shallow",
@@ -40,10 +44,12 @@
       "kind": "error",
       "rep_supported": true,
       "raw_label": "pushups - shallow",
-      "threshold": 0.5,
-      "train_positive_samples": 412,
-      "validation_positive_samples": 73,
-      "calibrated": true
+      "threshold": 0.35,
+      "train_positive_samples": 1019,
+      "validation_positive_samples": 172,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "insufficient",
@@ -53,10 +59,12 @@
       "kind": "error",
       "rep_supported": true,
       "raw_label": "pushups - insufficient",
-      "threshold": 0.55,
-      "train_positive_samples": 167,
-      "validation_positive_samples": 29,
-      "calibrated": true
+      "threshold": 0.42500000000000004,
+      "train_positive_samples": 369,
+      "validation_positive_samples": 66,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "shoulder_width",
@@ -66,10 +74,12 @@
       "kind": "attribute",
       "rep_supported": true,
       "raw_label": "pushups - shoulder-width",
-      "threshold": 0.55,
-      "train_positive_samples": 327,
-      "validation_positive_samples": 57,
-      "calibrated": true
+      "threshold": 0.30000000000000004,
+      "train_positive_samples": 661,
+      "validation_positive_samples": 117,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "wide",
@@ -79,10 +89,12 @@
       "kind": "attribute",
       "rep_supported": true,
       "raw_label": "pushups - wide",
-      "threshold": 0.6,
-      "train_positive_samples": 779,
-      "validation_positive_samples": 132,
-      "calibrated": true
+      "threshold": 0.42500000000000004,
+      "train_positive_samples": 1562,
+      "validation_positive_samples": 278,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "very_wide",
@@ -92,10 +104,12 @@
       "kind": "error",
       "rep_supported": true,
       "raw_label": "pushups - very wide",
-      "threshold": 0.5,
-      "train_positive_samples": 487,
-      "validation_positive_samples": 86,
-      "calibrated": true
+      "threshold": 0.25,
+      "train_positive_samples": 880,
+      "validation_positive_samples": 152,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "narrow",
@@ -105,10 +119,12 @@
       "kind": "error",
       "rep_supported": true,
       "raw_label": "pushups - narrow",
-      "threshold": 0.45000000000000007,
-      "train_positive_samples": 192,
-      "validation_positive_samples": 34,
-      "calibrated": true
+      "threshold": 0.9,
+      "train_positive_samples": 327,
+      "validation_positive_samples": 64,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "elevated_hips",
@@ -118,10 +134,12 @@
       "kind": "error",
       "rep_supported": true,
       "raw_label": "pushups - elevated hips",
-      "threshold": 0.775,
-      "train_positive_samples": 189,
-      "validation_positive_samples": 33,
-      "calibrated": true
+      "threshold": 0.42500000000000004,
+      "train_positive_samples": 331,
+      "validation_positive_samples": 66,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "butt_sinking",
@@ -131,10 +149,12 @@
       "kind": "error",
       "rep_supported": true,
       "raw_label": "pushups - butt sinking",
-      "threshold": 0.15000000000000002,
-      "train_positive_samples": 102,
-      "validation_positive_samples": 18,
-      "calibrated": true
+      "threshold": 0.775,
+      "train_positive_samples": 165,
+      "validation_positive_samples": 29,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "legs_on_floor",
@@ -144,10 +164,12 @@
       "kind": "error",
       "rep_supported": true,
       "raw_label": "pushups - legs on the floor",
-      "threshold": 0.325,
-      "train_positive_samples": 179,
-      "validation_positive_samples": 31,
-      "calibrated": true
+      "threshold": 0.42500000000000004,
+      "train_positive_samples": 278,
+      "validation_positive_samples": 51,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "side_to_side",
@@ -157,10 +179,12 @@
       "kind": "error",
       "rep_supported": true,
       "raw_label": "pushups - side to side",
-      "threshold": 0.5,
-      "train_positive_samples": 288,
-      "validation_positive_samples": 64,
-      "calibrated": true
+      "threshold": 0.17500000000000002,
+      "train_positive_samples": 717,
+      "validation_positive_samples": 149,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "child_pose_cheat",
@@ -170,10 +194,12 @@
       "kind": "error",
       "rep_supported": true,
       "raw_label": "pushups - child pose cheat",
-      "threshold": 0.5,
-      "train_positive_samples": 279,
-      "validation_positive_samples": 49,
-      "calibrated": true
+      "threshold": 0.6,
+      "train_positive_samples": 115,
+      "validation_positive_samples": 16,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "sloppy",
@@ -183,10 +209,12 @@
       "kind": "error",
       "rep_supported": true,
       "raw_label": "pushups - sloppy",
-      "threshold": 0.45000000000000007,
-      "train_positive_samples": 80,
-      "validation_positive_samples": 14,
-      "calibrated": true
+      "threshold": 0.65,
+      "train_positive_samples": 86,
+      "validation_positive_samples": 16,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "moving_head",
@@ -196,10 +224,12 @@
       "kind": "attribute",
       "rep_supported": true,
       "raw_label": "pushups - moving head",
-      "threshold": 0.7000000000000001,
-      "train_positive_samples": 50,
-      "validation_positive_samples": 9,
-      "calibrated": true
+      "threshold": 0.675,
+      "train_positive_samples": 101,
+      "validation_positive_samples": 20,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "head_down",
@@ -209,10 +239,12 @@
       "kind": "attribute",
       "rep_supported": true,
       "raw_label": "pushups - head down",
-      "threshold": 0.875,
-      "train_positive_samples": 48,
-      "validation_positive_samples": 8,
-      "calibrated": true
+      "threshold": 0.8250000000000001,
+      "train_positive_samples": 86,
+      "validation_positive_samples": 18,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "head_out_of_frame",
@@ -220,12 +252,14 @@
       "name_vi": "Đầu ra vào khung hình",
       "group_vi": "Quan sát",
       "kind": "visibility",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "pushups - head moving in an out of frame",
-      "threshold": 0.5,
-      "train_positive_samples": 269,
-      "validation_positive_samples": 47,
-      "calibrated": true
+      "threshold": 1.01,
+      "train_positive_samples": 9,
+      "validation_positive_samples": 0,
+      "calibrated": false,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "waiting_position",
@@ -233,12 +267,14 @@
       "name_vi": "Tư thế chờ chống tay",
       "group_vi": "Trạng thái video",
       "kind": "context",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "pushups - waiting position",
-      "threshold": 0.55,
-      "train_positive_samples": 279,
-      "validation_positive_samples": 49,
-      "calibrated": true
+      "threshold": 0.5,
+      "train_positive_samples": 3,
+      "validation_positive_samples": 1,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "early_stopping",
@@ -246,12 +282,14 @@
       "name_vi": "Dừng sớm",
       "group_vi": "Trạng thái video",
       "kind": "context",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "pushups - early stopping",
-      "threshold": 0.5750000000000001,
-      "train_positive_samples": 245,
-      "validation_positive_samples": 43,
-      "calibrated": true
+      "threshold": 0.325,
+      "train_positive_samples": 209,
+      "validation_positive_samples": 36,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "fast",
@@ -259,12 +297,14 @@
       "name_vi": "Thực hiện nhanh",
       "group_vi": "Tốc độ",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "pushups - fast",
-      "threshold": 0.525,
-      "train_positive_samples": 163,
-      "validation_positive_samples": 28,
-      "calibrated": true
+      "threshold": 0.375,
+      "train_positive_samples": 526,
+      "validation_positive_samples": 96,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "not_visible",
@@ -274,13 +314,15 @@
       "kind": "visibility",
       "rep_supported": true,
       "raw_label": "pushups - not visible",
-      "threshold": 0.42500000000000004,
+      "threshold": 0.775,
       "train_positive_samples": 84,
-      "validation_positive_samples": 15,
-      "calibrated": true
+      "validation_positive_samples": 11,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     }
   ],
-  "best_epoch": 37,
+  "best_epoch": 33,
   "manifest_sha256": "bd8883bf073068ec766a6aded0a0f3435836c43f2de83d60e1ef59abc01027f1",
   "split_counts": {
     "train": [
@@ -354,5 +396,14 @@
     ]
   },
   "threshold_source": "validation_only",
-  "onnx_sha256": "a61e117cd9563881cf0b1654f2f2c0c7c3733dfe802496bc59405556dd29226c"
+  "onnx_sha256": "4c48197245c4fddd035a7c6a6864c364aa9713fdb7c5e70b1217b16fa8bbb10e",
+  "base_schema_version": "qualcomm-pushup-21-128frames-context32-v1",
+  "requires_context": false,
+  "input_names": [
+    "skeleton"
+  ],
+  "input_scope": "rep",
+  "cut_version": "phase-confirmed-padding-v1",
+  "preprocess_version": "rep-skeleton64-v1",
+  "label_supervision": "parent_video_weak"
 }

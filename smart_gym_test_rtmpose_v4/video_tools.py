@@ -34,7 +34,11 @@ def analyze_squat_video(path, pose_tracker, analyzer, cache_dir=None, exercise='
     path = Path(path)
     import importlib
     schema = importlib.import_module(exercise+'_schema')
-    fingerprint = sha256(path)+':'+schema.SCHEMA_VERSION
+    from onnx_gym_analyzer import V4_STEMS
+    model_key = next(k for k,v in V4_STEMS.items() if v==exercise)
+    rep_model = getattr(analyzer,'is_rep_model',lambda _:False)(model_key)
+    sample_hz=24 if exercise in ('highknees','buttkickers') else 12
+    fingerprint = sha256(path)+':'+schema.SCHEMA_VERSION+(f':dense-rep{sample_hz}-v1' if rep_model else '')
     cached = Path(cache_dir)/(fingerprint.split(':')[0]+'_'+exercise+'.npz') if cache_dir else None
     raw, info = None, None
     if cached and cached.exists():
@@ -42,14 +46,18 @@ def analyze_squat_video(path, pose_tracker, analyzer, cache_dir=None, exercise='
             if str(data['fingerprint'])==fingerprint:
                 raw=data['raw'];info=json.loads(str(data['info']))
     if raw is None:
-        frames,info=schema.sample_video(path)
-        pose_tracker.reset()
-        raw=np.array(pose_tracker.process_clip(frames),dtype=np.float32)
+        if rep_model:
+            raw,info=sample_rep_video(path,pose_tracker,sample_hz=sample_hz)
+        else:
+            frames,info=schema.sample_video(path)
+            pose_tracker.reset()
+            raw=np.array(pose_tracker.process_clip(frames),dtype=np.float32)
         if cached:
             cached.parent.mkdir(parents=True,exist_ok=True)
             np.savez_compressed(cached,raw=raw,info=json.dumps(info),fingerprint=fingerprint)
     predict=getattr(analyzer,'predict_'+exercise+'_sequence')
-    result=predict(raw,info['duration_seconds'],scope='video')
+    result=(analyzer.predict_squat_sequence(raw,info['duration_seconds'],scope='video',_exercise=model_key,raw_times=info['sample_times'])
+            if rep_model else predict(raw,info['duration_seconds'],scope='video'))
     result['source']={'file':path.name,**info}
     xy=raw[:,:2].transpose(0,2,1)
     angles=np.full((len(raw),2),np.nan)
@@ -66,9 +74,16 @@ def analyze_squat_video(path, pose_tracker, analyzer, cache_dir=None, exercise='
         elevation=(raw[:,1,5]+raw[:,1,6]-raw[:,1,9]-raw[:,1,10])/2
         elevation[~valid]=-np.inf
         preview=int(np.argmax(elevation)) if valid.any() else len(raw)//2
+    if rep_model and result.get('rep_results'):
+        # The dashboard shows the final completed rep, so its still image must
+        # come from that rep rather than an unrelated extreme elsewhere.
+        peak=result['rep_results'][-1]['rep_interval']['peak']
+        preview=int(np.argmin(np.abs(np.asarray(info['sample_times'])-peak)))
     result['source']['preview_sample_index']=preview
     result['source']['preview_frame_index']=int(round(info['sample_times'][preview]*info['fps']))
     result['comparison']=compare_labels(result,ground_truth(path,exercise))
+    if rep_model and result['comparison'] is not None:
+        result['comparison']['semantics']='Last rep compared with parent video labels; weak supervision, not verified rep ground truth.'
     return result,raw
 
 
@@ -99,3 +114,27 @@ def print_result(result):
         print('BÁO THỪA:',comparison['extra'])
         print('KHỚP TOÀN BỘ:',comparison['exact_match'])
     print('Chất lượng pose:',result.get('quality'))
+
+
+def sample_rep_video(path,pose_tracker,sample_hz=12):
+    """Read full duration at bounded sample rate, preserving timestamps."""
+    cap=cv2.VideoCapture(str(path));fps=float(cap.get(cv2.CAP_PROP_FPS))
+    if not cap.isOpened() or fps<=0:raise ValueError('Không đọc được video/FPS')
+    frames=[];raw=[];times=[];i=0;next_t=0.;h=w=0
+    pose_tracker.reset()
+    try:
+        while cap.grab():
+            if i/fps+1e-8>=next_t:
+                ok,frame=cap.retrieve()
+                if not ok:raise ValueError('Không giải mã được khung hình')
+                h,w=frame.shape[:2];scale=min(1.,640/max(h,w))
+                if scale<1:frame=cv2.resize(frame,(round(w*scale),round(h*scale)))
+                frames.append(frame);times.append(i/fps);next_t+=1/sample_hz
+                if len(frames)>=96:
+                    raw.extend(pose_tracker.process_clip(frames));frames.clear()
+            i+=1
+        if frames:raw.extend(pose_tracker.process_clip(frames))
+    finally:cap.release()
+    if len(raw)<2:raise ValueError('Video thiếu dữ liệu khớp')
+    return np.asarray(raw,np.float32),dict(fps=fps,total_frames=i,duration_seconds=i/fps,
+              sample_times=times,width=w,height=h,extraction=f'full-duration bounded batches <={sample_hz}Hz')

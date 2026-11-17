@@ -1,7 +1,7 @@
 {
-  "schema_version": "qualcomm-jumpjack-29-128frames-context32-v1",
-  "frames": 128,
-  "context_size": 32,
+  "schema_version": "qualcomm-jumpjack-29-128frames-context32-v1-rep-no-context-v1",
+  "frames": 64,
+  "context_size": 0,
   "coordinate_system": "x/image_height,y/image_height,confidence",
   "normalization": "sequence_median_pelvis_and_torso",
   "target_semantics": "presence_of_Qualcomm_annotation; absence_is_not_verified_correctness",
@@ -14,10 +14,12 @@
       "kind": "error",
       "rep_supported": true,
       "raw_label": "jumping jacks - only arms",
-      "threshold": 0.5,
-      "train_positive_samples": 307,
-      "validation_positive_samples": 54,
-      "calibrated": true
+      "threshold": 0.325,
+      "train_positive_samples": 758,
+      "validation_positive_samples": 129,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "only_legs",
@@ -27,10 +29,12 @@
       "kind": "error",
       "rep_supported": true,
       "raw_label": "jumping jacks - only legs",
-      "threshold": 0.625,
-      "train_positive_samples": 313,
-      "validation_positive_samples": 51,
-      "calibrated": true
+      "threshold": 0.725,
+      "train_positive_samples": 44,
+      "validation_positive_samples": 4,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "not_jumping",
@@ -40,10 +44,12 @@
       "kind": "error",
       "rep_supported": true,
       "raw_label": "jumping jacks - not jumping",
-      "threshold": 0.475,
-      "train_positive_samples": 311,
-      "validation_positive_samples": 55,
-      "calibrated": true
+      "threshold": 0.75,
+      "train_positive_samples": 603,
+      "validation_positive_samples": 109,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "puppet_dance",
@@ -53,10 +59,12 @@
       "kind": "error",
       "rep_supported": true,
       "raw_label": "jumping jacks - puppet dance",
-      "threshold": 0.5,
-      "train_positive_samples": 167,
-      "validation_positive_samples": 29,
-      "calibrated": true
+      "threshold": 0.75,
+      "train_positive_samples": 48,
+      "validation_positive_samples": 8,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "opposite",
@@ -66,10 +74,12 @@
       "kind": "error",
       "rep_supported": true,
       "raw_label": "jumping jacks - opposite",
-      "threshold": 0.1,
-      "train_positive_samples": 159,
-      "validation_positive_samples": 28,
-      "calibrated": true
+      "threshold": 0.5,
+      "train_positive_samples": 432,
+      "validation_positive_samples": 73,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "not_synchronized",
@@ -79,10 +89,12 @@
       "kind": "error",
       "rep_supported": true,
       "raw_label": "jumping jacks - not synchronized",
-      "threshold": 0.17500000000000002,
-      "train_positive_samples": 55,
-      "validation_positive_samples": 10,
-      "calibrated": true
+      "threshold": 0.65,
+      "train_positive_samples": 125,
+      "validation_positive_samples": 19,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "single_repetition",
@@ -90,12 +102,14 @@
       "name_vi": "Chỉ thực hiện một lần",
       "group_vi": "Chuyển động",
       "kind": "context",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "jumping jacks - single repetition",
-      "threshold": 0.4,
-      "train_positive_samples": 155,
-      "validation_positive_samples": 27,
-      "calibrated": true
+      "threshold": 0.775,
+      "train_positive_samples": 148,
+      "validation_positive_samples": 28,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "early_stopping",
@@ -103,12 +117,14 @@
       "name_vi": "Dừng sớm",
       "group_vi": "Chuyển động",
       "kind": "context",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "jumping jacks - early stopping",
-      "threshold": 0.2,
-      "train_positive_samples": 101,
-      "validation_positive_samples": 18,
-      "calibrated": true
+      "threshold": 0.55,
+      "train_positive_samples": 192,
+      "validation_positive_samples": 35,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "arms_rom_1_0",
@@ -118,10 +134,12 @@
       "kind": "attribute",
       "rep_supported": true,
       "raw_label": "jumping jacks - arms_rom=1.0",
-      "threshold": 0.875,
-      "train_positive_samples": 35,
-      "validation_positive_samples": 6,
-      "calibrated": true
+      "threshold": 0.85,
+      "train_positive_samples": 44,
+      "validation_positive_samples": 8,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "arms_rom_1_5",
@@ -131,10 +149,12 @@
       "kind": "attribute",
       "rep_supported": true,
       "raw_label": "jumping jacks - arms_rom=1.5",
-      "threshold": 0.45000000000000007,
-      "train_positive_samples": 27,
-      "validation_positive_samples": 4,
-      "calibrated": true
+      "threshold": 0.85,
+      "train_positive_samples": 49,
+      "validation_positive_samples": 5,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "arms_rom_2_0",
@@ -144,10 +164,12 @@
       "kind": "attribute",
       "rep_supported": true,
       "raw_label": "jumping jacks - arms_rom=2.0",
-      "threshold": 0.30000000000000004,
-      "train_positive_samples": 243,
-      "validation_positive_samples": 43,
-      "calibrated": true
+      "threshold": 0.6,
+      "train_positive_samples": 490,
+      "validation_positive_samples": 101,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "arms_rom_2_5",
@@ -157,10 +179,12 @@
       "kind": "attribute",
       "rep_supported": true,
       "raw_label": "jumping jacks - arms_rom=2.5",
-      "threshold": 0.5,
-      "train_positive_samples": 19,
-      "validation_positive_samples": 3,
-      "calibrated": true
+      "threshold": 0.875,
+      "train_positive_samples": 53,
+      "validation_positive_samples": 4,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "arms_rom_3_0",
@@ -170,10 +194,12 @@
       "kind": "attribute",
       "rep_supported": true,
       "raw_label": "jumping jacks - arms_rom=3.0",
-      "threshold": 0.675,
-      "train_positive_samples": 263,
-      "validation_positive_samples": 46,
-      "calibrated": true
+      "threshold": 0.625,
+      "train_positive_samples": 810,
+      "validation_positive_samples": 119,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "arms_rom_3_5",
@@ -183,10 +209,12 @@
       "kind": "attribute",
       "rep_supported": true,
       "raw_label": "jumping jacks - arms_rom=3.5",
-      "threshold": 0.42500000000000004,
-      "train_positive_samples": 15,
-      "validation_positive_samples": 3,
-      "calibrated": true
+      "threshold": 0.15000000000000002,
+      "train_positive_samples": 54,
+      "validation_positive_samples": 11,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "arms_rom_4_0",
@@ -196,10 +224,12 @@
       "kind": "attribute",
       "rep_supported": true,
       "raw_label": "jumping jacks - arms_rom=4.0",
-      "threshold": 0.17500000000000002,
-      "train_positive_samples": 532,
-      "validation_positive_samples": 97,
-      "calibrated": true
+      "threshold": 0.42500000000000004,
+      "train_positive_samples": 1609,
+      "validation_positive_samples": 255,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "legs_rom_1_0",
@@ -209,10 +239,12 @@
       "kind": "attribute",
       "rep_supported": true,
       "raw_label": "jumping jacks - legs_rom=1.0",
-      "threshold": 0.875,
-      "train_positive_samples": 193,
-      "validation_positive_samples": 34,
-      "calibrated": true
+      "threshold": 0.55,
+      "train_positive_samples": 607,
+      "validation_positive_samples": 96,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "legs_rom_1_5",
@@ -223,9 +255,11 @@
       "rep_supported": true,
       "raw_label": "jumping jacks - legs_rom=1.5",
       "threshold": 1.01,
-      "train_positive_samples": 2,
+      "train_positive_samples": 4,
       "validation_positive_samples": 0,
-      "calibrated": false
+      "calibrated": false,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "legs_rom_2_0",
@@ -235,10 +269,12 @@
       "kind": "attribute",
       "rep_supported": true,
       "raw_label": "jumping jacks - legs_rom=2.0",
-      "threshold": 0.42500000000000004,
-      "train_positive_samples": 302,
-      "validation_positive_samples": 53,
-      "calibrated": true
+      "threshold": 0.475,
+      "train_positive_samples": 728,
+      "validation_positive_samples": 120,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "legs_rom_2_5",
@@ -248,10 +284,12 @@
       "kind": "attribute",
       "rep_supported": true,
       "raw_label": "jumping jacks - legs_rom=2.5",
-      "threshold": 0.5,
-      "train_positive_samples": 39,
-      "validation_positive_samples": 7,
-      "calibrated": true
+      "threshold": 0.25,
+      "train_positive_samples": 92,
+      "validation_positive_samples": 17,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "legs_rom_3_0",
@@ -261,10 +299,12 @@
       "kind": "attribute",
       "rep_supported": true,
       "raw_label": "jumping jacks - legs_rom=3.0",
-      "threshold": 0.525,
-      "train_positive_samples": 505,
-      "validation_positive_samples": 89,
-      "calibrated": true
+      "threshold": 0.42500000000000004,
+      "train_positive_samples": 1395,
+      "validation_positive_samples": 220,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "legs_rom_3_5",
@@ -275,9 +315,11 @@
       "rep_supported": true,
       "raw_label": "jumping jacks - legs_rom=3.5",
       "threshold": 1.01,
-      "train_positive_samples": 2,
+      "train_positive_samples": 7,
       "validation_positive_samples": 0,
-      "calibrated": false
+      "calibrated": false,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "legs_rom_4_0",
@@ -287,10 +329,12 @@
       "kind": "attribute",
       "rep_supported": true,
       "raw_label": "jumping jacks - legs_rom=4.0",
-      "threshold": 0.1,
-      "train_positive_samples": 96,
-      "validation_positive_samples": 17,
-      "calibrated": true
+      "threshold": 0.525,
+      "train_positive_samples": 270,
+      "validation_positive_samples": 43,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "speed_0_25",
@@ -298,12 +342,14 @@
       "name_vi": "Tốc độ 0.25 lần/giây",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "jumping jacks - speed=0.25 rps",
       "threshold": 0.5,
-      "train_positive_samples": 4,
+      "train_positive_samples": 8,
       "validation_positive_samples": 1,
-      "calibrated": true
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "speed_0_50",
@@ -311,12 +357,14 @@
       "name_vi": "Tốc độ 0.5 lần/giây",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "jumping jacks - speed=0.50 rps",
-      "threshold": 0.9,
-      "train_positive_samples": 349,
-      "validation_positive_samples": 61,
-      "calibrated": true
+      "threshold": 0.5750000000000001,
+      "train_positive_samples": 725,
+      "validation_positive_samples": 120,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "speed_0_75",
@@ -324,12 +372,14 @@
       "name_vi": "Tốc độ 0.75 lần/giây",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "jumping jacks - speed=0.75 rps",
-      "threshold": 0.1,
-      "train_positive_samples": 347,
-      "validation_positive_samples": 60,
-      "calibrated": true
+      "threshold": 0.35,
+      "train_positive_samples": 913,
+      "validation_positive_samples": 143,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "speed_1_00",
@@ -337,12 +387,14 @@
       "name_vi": "Tốc độ 1 lần/giây",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "jumping jacks - speed=1.00 rps",
-      "threshold": 0.875,
-      "train_positive_samples": 186,
-      "validation_positive_samples": 33,
-      "calibrated": true
+      "threshold": 0.42500000000000004,
+      "train_positive_samples": 561,
+      "validation_positive_samples": 92,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "speed_1_25",
@@ -350,12 +402,14 @@
       "name_vi": "Tốc độ 1.25 lần/giây",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "jumping jacks - speed=1.25 rps",
-      "threshold": 0.15000000000000002,
-      "train_positive_samples": 50,
-      "validation_positive_samples": 9,
-      "calibrated": true
+      "threshold": 0.7000000000000001,
+      "train_positive_samples": 217,
+      "validation_positive_samples": 39,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "speed_1_50",
@@ -363,12 +417,14 @@
       "name_vi": "Tốc độ 1.5 lần/giây",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "jumping jacks - speed=1.50 rps",
-      "threshold": 0.4,
-      "train_positive_samples": 9,
-      "validation_positive_samples": 1,
-      "calibrated": true
+      "threshold": 0.42500000000000004,
+      "train_positive_samples": 53,
+      "validation_positive_samples": 6,
+      "calibrated": true,
+      "window_supported": false,
+      "weak_rep_label": true
     },
     {
       "key": "speed_1_75",
@@ -376,15 +432,17 @@
       "name_vi": "Tốc độ 1.75 lần/giây",
       "group_vi": "Tốc độ gốc",
       "kind": "attribute",
-      "rep_supported": false,
+      "rep_supported": true,
       "raw_label": "jumping jacks - speed=1.75 rps",
       "threshold": 1.01,
-      "train_positive_samples": 1,
+      "train_positive_samples": 8,
       "validation_positive_samples": 0,
-      "calibrated": false
+      "calibrated": false,
+      "window_supported": false,
+      "weak_rep_label": true
     }
   ],
-  "best_epoch": 69,
+  "best_epoch": 16,
   "manifest_sha256": "549fcde0a97384144663e9af9460b4de8b38c0e6f2ddf0bd3e49621934838d09",
   "split_counts": {
     "train": [
@@ -482,5 +540,14 @@
     ]
   },
   "threshold_source": "validation_only",
-  "onnx_sha256": "2af00a3ae132e3e684d44a04d49ed471e8e54f0d7ef71536aad0861535d7633f"
+  "onnx_sha256": "04c10f7d3f82112675dfa1ead50e7ab36c63b1d6751366776e4a66b48425ceac",
+  "base_schema_version": "qualcomm-jumpjack-29-128frames-context32-v1",
+  "requires_context": false,
+  "input_names": [
+    "skeleton"
+  ],
+  "input_scope": "rep",
+  "cut_version": "phase-confirmed-padding-v1",
+  "preprocess_version": "rep-skeleton64-v1",
+  "label_supervision": "parent_video_weak"
 }
