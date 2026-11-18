@@ -1,2 +1,9 @@
 * text=auto
 *.sql text eol=lf
+
+# Preserve the evaluated R3 runtime bytes and release hashes across Windows/Linux.
+services/kb_rag/kb_service/*.py -text whitespace=cr-at-eol,-blank-at-eof
+services/kb_rag/data/releases/** -text -diff
+services/kb_rag/data/export/** -text -diff
+*.onnx binary
+*.pth binary

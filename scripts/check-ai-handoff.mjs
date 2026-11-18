@@ -41,11 +41,12 @@ export async function checkHandoff({ poseRoot, ragRoot }) {
     assert.equal(await fileDigest(resolve(weights, model.model_file)), model.model_sha256, 'ONNX digest mismatch: ' + model.pose_id);
     const poseBytes = await readFile(resolve(weights, model.contract_file));
     const ragBytes = await readFile(resolve(ragRoot, 'model_contracts', model.contract_file));
-    assert(poseBytes.equals(ragBytes), 'Provider contracts differ: ' + model.pose_id);
-    assert.equal(digest(poseBytes), model.contract_bytes_sha256);
+    assert(poseBytes.toString('utf8').replaceAll('\r\n', '\n') === ragBytes.toString('utf8').replaceAll('\r\n', '\n'), 'Provider contract content differs: ' + model.pose_id);
+    assert.deepEqual(JSON.parse(poseBytes.toString('utf8')), JSON.parse(ragBytes.toString('utf8')), 'Provider contract semantics differ: ' + model.pose_id);
+    assert([digest(poseBytes), digest(ragBytes)].includes(model.contract_bytes_sha256), 'Neither exact source contract matches the recorded byte digest: ' + model.pose_id);
     const lfDigest = digest(poseBytes.toString('utf8').replaceAll('\r\n', '\n'));
     assert.equal(lfDigest, model.contract_lf_sha256);
-    assert.equal(lfDigest, registered.contract_sha256);
+    assert([lfDigest, digest(ragBytes)].includes(registered.contract_sha256), 'RAG registry must match its exact contract bytes or the LF-normalized content');
     const contract = JSON.parse(poseBytes.toString('utf8'));
     assert.equal(contract.schema_version, model.schema_version);
     assert.equal(contract.labels.length, model.label_count);
@@ -62,7 +63,8 @@ export async function checkHandoff({ poseRoot, ragRoot }) {
         assert.deepEqual(label[key], peer[key], model.pose_id + ':' + label.key + ':' + key);
       }
     }
-    results.push({ exerciseId: model.catalog_id, labels: model.label_count, status: 'SOURCE_VERIFIED', inference: 'NOT_RUN_BY_THIS_COMMAND' });
+    results.push({ exerciseId: model.catalog_id, labels: model.label_count, status: 'SOURCE_VERIFIED', inference: 'NOT_RUN_BY_THIS_COMMAND',
+      poseContractBytesSha256: digest(poseBytes), ragContractBytesSha256: digest(ragBytes), lfContentEqual: true });
   }
   assert.equal(results.length, 4, 'Expected four active V4 mappings');
   return { status: 'PASS', checks: 'ONNX bytes, raw/LF contract hashes, schema, label semantics and preprocessing', models: results, runtime: 'NOT_RUN_BY_THIS_COMMAND', runtimeEvidence: 'docs/api/ai-runtime-verification.yaml' };

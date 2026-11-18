@@ -1,24 +1,37 @@
-# SmartGym Web
+# SmartGym — Web, KB/KG/RAG và chatbot
 
-SmartGym là nền tảng tập luyện tiếng Việt gồm thư viện bài tập và bản đồ cơ, quản lý chương trình và lịch tập, nhật ký tiến độ, phòng tập, trợ lý hỏi đáp và CMS quản trị nội dung.
+Bản bàn giao tích hợp giao diện Next.js, BFF, sáu backend NestJS và dịch vụ Python KB/RAG. **Không kèm code hoặc trọng số model tư thế**; API/contract và phần kết nối tới provider riêng vẫn được giữ. KB hỗ trợ tri thức sáu bài tập.
 
-## Chạy trên máy mới
+Hướng dẫn chính: [Bàn giao và chạy trên máy khác](docs/guides/BAN_GIAO_CHAY_MAY_KHAC.md).
 
-Đọc [hướng dẫn cài đặt bằng Docker](docs/guides/GETTING_STARTED.md) để chuẩn bị cấu hình, dữ liệu và tài sản AI rồi mở [SmartGym cục bộ](https://127.0.0.1:3100). Bản clone có mã nguồn và migration. Tài khoản, bài tập đã nhập, tệp media và model AI cần được chuẩn bị riêng.
+## Chạy nhanh
 
-## Cấu trúc repository
+Chuẩn bị Docker Desktop, Git/OpenSSL, Node.js24 và Ollama. Tải hai model ngôn ngữ/embedding qua Ollama, sau đó:
 
-Thành viên phụ trách Pose hoặc RAG xem [hướng dẫn bàn giao AI](docs/guides/AI_HANDOFF.md) để lấy đúng nhánh và kết nối với Web.
+```powershell
+ollama pull qwen3.5:9b
+ollama pull qwen3-embedding:0.6b
+node scripts/setup-integrated.mjs
+node scripts/start-integrated.mjs --build
+```
 
-| Thư mục | Nội dung |
+Mở **https://127.0.0.1:3100/hoi-dap**. Script sinh cấu hình riêng cho từng máy; không commit `.env` hoặc `.local`. Khi mới clone, chat kiến thức chạy độc lập với video. Bật video bằng provider riêng theo hướng dẫn bàn giao.
+
+## Cấu trúc
+
+| Thư mục | Vai trò |
 |---|---|
-| [frontend/](frontend/) | Next.js App Router, giao diện người dùng, CMS và BFF |
-| [backend/apps/](backend/apps/) | 6 service NestJS gồm Identity, Catalog, Workout, Progress, Notification và Pose. RAG là service thứ bảy, chạy từ nguồn bàn giao. |
-| [infra/](infra/) | Docker Compose, Dockerfiles và cấu hình hạ tầng |
-| [scripts/](scripts/) | Chuẩn bị cấu hình, xác minh hợp đồng và vận hành |
-| [tests/](tests/) | Kiểm thử hợp đồng, tích hợp, hệ thống và trình duyệt |
-| [docs/](docs/README.md) | Hướng dẫn chạy, thiết kế hệ thống và trạng thái nghiệm thu |
+| `frontend/` | Giao diện, BFF, nguồn tham khảo và kết nối kết quả video |
+| `backend/apps/` | Identity, Catalog, Workout, Progress, Notification, Pose |
+| `services/kb_rag/` | Toàn bộ mã KB/RAG, contract, fixture, snapshot/vector R3 và Cypher |
+| `infra/` | Docker Compose, Dockerfile và wrapper triển khai |
+| `scripts/` | Thiết lập, chạy, kiểm tra hợp đồng và tiện ích phát triển |
+| `docs/` | Hướng dẫn bàn giao, API, kiến trúc, quyết định thiết kế và giới hạn |
 
-Build toàn bộ backend bằng `pnpm --filter @smartgym/backend build`. Build riêng Catalog bằng `pnpm --filter @smartgym/backend exec nest build catalog`. Cấu hình các ứng dụng ở [backend/nest-cli.json](backend/nest-cli.json).
+## Dữ liệu và trạng thái
 
-Khi sửa mã, đọc [hướng dẫn phát triển, kiểm thử](docs/guides/DEVELOPMENT.md). Xem tình trạng từng tính năng ở [bảng công việc](docs/planning/TASKS.md).
+KB `kb_ddae6f149e7b9f57`:12 hồ sơ,284 đoạn,38 tiêu chí,468 nút,567 cạnh. Neo4j được khôi phục từ bản Cypher đã đóng gói, không cần tải lại sách hoặc chạy embedding. [Nguồn và quyền sử dụng](docs/THIRD_PARTY_NOTICES.md).
+
+Lượt119 câu đã lưu trước bàn giao:83 đạt,10 giới hạn hợp lệ,26 cần sửa qua rà phát triển. [Giới hạn hiện có](docs/KNOWN_LIMITATIONS.md). Không mô tả chatbot là đã trả lời đúng mọi câu hỏi. [Các kiểm tra đóng gói thực tế](docs/handoff-verification.json).
+
+Các báo cáo Word, PDF lớn, dataset, tài khoản/video, khóa bí mật và môi trường Python/Node cài sẵn không được đẩy lên. Nhật ký kế hoạch và rà soát cũ đã được lược bỏ; giữ tài liệu API/thiết kế cần cho thành viên phát triển. Nhánh gốc `SmartGym_Web` và các nhánh model được giữ riêng.

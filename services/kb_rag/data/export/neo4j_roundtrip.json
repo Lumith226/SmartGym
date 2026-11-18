@@ -1,0 +1,23 @@
+{
+  "kb_version": "kb_ddae6f149e7b9f57",
+  "two_imports_completed": true,
+  "exact_properties_match": true,
+  "exact_edge_triples_match": true,
+  "previous_versions_preserved": true,
+  "actual_nodes": 468,
+  "actual_edges": 567,
+  "earlier_versions": [
+    {
+      "version": "kb_a3a9fc4465797bf3",
+      "nodes": 311
+    },
+    {
+      "version": "kb_ac24aa0fa08fe21f",
+      "nodes": 460
+    },
+    {
+      "version": "kb_63e0352b8a122980",
+      "nodes": 467
+    }
+  ]
+}

@@ -1,0 +1,45 @@
+{
+  "date": "2026-11-18",
+  "scope": "New handoff packaging verification; no new technical-answer LLM evaluation",
+  "kb_version": "kb_ddae6f149e7b9f57",
+  "runtime_revision": "6ce23ba72145c329",
+  "checks": {
+    "rag_unit_tests": {"passed": 132, "failed": 0, "environment": "Existing Windows Python runtime; fixtures and mocks"},
+    "chat_bff_integration_tests": {"passed": 17, "failed": 0, "environment": "Disposable Node 24.22.3 container; mTLS provider/Pose fixtures"},
+    "docker_rag_image_build": "passed; pinned Python requirements installed",
+    "docker_web_image_build": "passed; Node24 Next.js production build",
+    "compose_default_config": "passed",
+    "compose_external_pose_config": "passed; external provider not started or validated",
+    "clean_git_checkout_setup": "passed at a different path containing spaces; .env.example placeholders replaced; R3 module bytes unchanged",
+    "setup_repeat": "passed; existing .env hash unchanged",
+    "staged_secret_artifact_scan": "passed; generated credentials/private keys, model weights, datasets and document reports excluded",
+    "release_byte_hashes": "snapshot and Cypher match manifest in worktree and staged Git blobs",
+    "isolated_neo4j_restore": {
+      "nodes": 468,
+      "edges": 567,
+      "exact_node_properties_match_snapshot_exporter": true,
+      "exact_edge_triples_match_snapshot": true,
+      "second_restore_no_duplicates": true
+    },
+    "docker_rag_mtls_health": "passed; KB ready and runtime revision matched",
+    "anonymous_internal_api": "401 for source inventory and runtime status without bearer token",
+    "authenticated_source_inventory": {"sources": 12},
+    "smalltalk": {"request": "cảm ơn bạn", "reply": "Không có gì, chúc bạn tập tốt nhé!", "generation_used": false}
+  },
+  "historical_answer_review": {
+    "run_id": "run_20261118T065753Z",
+    "questions": 119,
+    "passed": 83,
+    "valid_limitations": 10,
+    "needs_fixing": 26,
+    "rerun_for_packaging": false,
+    "expert_validation": false
+  },
+  "not_verified_in_this_handoff": [
+    "Fresh end-to-end startup of every web/backend service on another physical machine",
+    "New LLM technical answers, all119 questions, performance or expert accuracy",
+    "External pose provider or all six exercise video pipelines",
+    "User database/media migration or automatic Catalog-to-KB updates"
+  ],
+  "test_containers": "Only the separate smartgym-integrated RAG and Neo4j were started for verification, then stopped; volumes retained"
+}

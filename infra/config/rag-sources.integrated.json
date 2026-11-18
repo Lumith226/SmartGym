@@ -1,0 +1,134 @@
+[
+  {
+    "id": "ace_squat",
+    "rightsStatus": "APPROVED",
+    "kind": "HTML",
+    "allowedOrigins": [
+      "https://www.acefitness.org"
+    ],
+    "publisher": "American Council on Exercise",
+    "license": "Copyright ACE; keep original attribution; do not redistribute full source without checking rights.",
+    "approvalScope": "Existing academic corpus citation display; not expert approval or a grant to redistribute full documents"
+  },
+  {
+    "id": "ace_pushup",
+    "rightsStatus": "APPROVED",
+    "kind": "HTML",
+    "allowedOrigins": [
+      "https://www.acefitness.org"
+    ],
+    "publisher": "American Council on Exercise",
+    "license": "Copyright ACE; keep original attribution; do not redistribute full source without checking rights.",
+    "approvalScope": "Existing academic corpus citation display; not expert approval or a grant to redistribute full documents"
+  },
+  {
+    "id": "ace_reverse_crunch",
+    "rightsStatus": "APPROVED",
+    "kind": "HTML",
+    "allowedOrigins": [
+      "https://www.acefitness.org"
+    ],
+    "publisher": "American Council on Exercise",
+    "license": "Copyright ACE; keep original attribution; do not redistribute full source without checking rights.",
+    "approvalScope": "Existing academic corpus citation display; not expert approval or a grant to redistribute full documents"
+  },
+  {
+    "id": "qld_jumping_jacks",
+    "rightsStatus": "APPROVED",
+    "kind": "HTML",
+    "allowedOrigins": [
+      "https://hw.qld.gov.au"
+    ],
+    "publisher": "Health and Wellbeing Queensland (upstream source)",
+    "license": "Short attributed excerpt and developer paraphrase; original publisher retains rights.",
+    "approvalScope": "Existing academic corpus citation display; not expert approval or a grant to redistribute full documents"
+  },
+  {
+    "id": "openstax_anatomy",
+    "rightsStatus": "APPROVED",
+    "kind": "BOOK",
+    "allowedOrigins": [
+      "https://openstax.org"
+    ],
+    "publisher": "OpenStax, Rice University",
+    "license": "CC BY-NC-SA 4.0",
+    "approvalScope": "Existing academic corpus citation display; not expert approval or a grant to redistribute full documents"
+  },
+  {
+    "id": "ace_knee_pushup",
+    "rightsStatus": "APPROVED",
+    "kind": "HTML",
+    "allowedOrigins": [
+      "https://www.acefitness.org"
+    ],
+    "publisher": "American Council on Exercise",
+    "license": "Copyright ACE; retain attribution; local academic reference.",
+    "approvalScope": "Existing academic corpus citation display; not expert approval or a grant to redistribute full documents"
+  },
+  {
+    "id": "nasm_jumping_jacks",
+    "rightsStatus": "APPROVED",
+    "kind": "HTML",
+    "allowedOrigins": [
+      "https://www.nasm.org"
+    ],
+    "publisher": "National Academy of Sports Medicine",
+    "license": "Copyright NASM; retain attribution; local academic reference.",
+    "approvalScope": "Existing academic corpus citation display; not expert approval or a grant to redistribute full documents"
+  },
+  {
+    "id": "ohio_movement_library",
+    "rightsStatus": "APPROVED",
+    "kind": "HTML",
+    "allowedOrigins": [
+      "https://www.ohio.edu"
+    ],
+    "publisher": "Ohio University WellWorks",
+    "license": "Copyright Ohio University; retain attribution; selected local academic reference.",
+    "approvalScope": "Existing academic corpus citation display; not expert approval or a grant to redistribute full documents"
+  },
+  {
+    "id": "cdc_intensity",
+    "rightsStatus": "APPROVED",
+    "kind": "HTML",
+    "allowedOrigins": [
+      "https://www.cdc.gov"
+    ],
+    "publisher": "US Centers for Disease Control and Prevention",
+    "license": "US CDC public guidance; retain source; check third-party material separately.",
+    "approvalScope": "Existing academic corpus citation display; not expert approval or a grant to redistribute full documents"
+  },
+  {
+    "id": "nsca_movement_progressions",
+    "rightsStatus": "APPROVED",
+    "kind": "BOOK",
+    "allowedOrigins": [
+      "https://www.nsca.com"
+    ],
+    "publisher": "National Strength and Conditioning Association",
+    "license": "Copyright NSCA 2023; user-provided publisher PDF; selected local academic reference.",
+    "approvalScope": "Existing academic corpus citation display; not expert approval or a grant to redistribute full documents"
+  },
+  {
+    "id": "hhs_physical_activity_2018",
+    "rightsStatus": "APPROVED",
+    "kind": "BOOK",
+    "allowedOrigins": [
+      "https://odphp.health.gov"
+    ],
+    "publisher": "US Department of Health and Human Services",
+    "license": "US HHS government publication; retain attribution; check third-party images separately.",
+    "approvalScope": "Existing academic corpus citation display; not expert approval or a grant to redistribute full documents"
+  },
+  {
+    "id": "smartgym_model_protocol",
+    "rightsStatus": "APPROVED",
+    "kind": "HTML",
+    "allowedOrigins": [
+      "https://github.com"
+    ],
+    "publisher": "SmartGym project — verified technical documentation",
+    "license": "User-provided project documentation; retain commit and file attribution.",
+    "approvalScope": "Existing academic corpus citation display; not expert approval or a grant to redistribute full documents"
+  }
+]

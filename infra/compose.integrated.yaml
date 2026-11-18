@@ -1,0 +1,55 @@
+# Compose >=2.24.4. The default handoff runs web + KB/RAG without a pose provider.
+services:
+  ollama:
+    profiles: [managed-ollama-not-default]
+  pose-engine:
+    profiles: [local-pose-models-not-included]
+  pose-worker:
+    profiles: [external-pose-worker-not-default]
+  pose:
+    environment:
+      POSE_LIVE_ENABLED: "false"
+      POSE_UPLOAD_ENABLED: "false"
+    depends_on: !override
+      pose-db: {condition: service_healthy}
+      pose-bucket-init: {condition: service_completed_successfully}
+      identity: {condition: service_started}
+  web:
+    environment:
+      BFF_POSE_LIVE_ENABLED: "false"
+      BFF_POSE_STUDIO_ENGINE_ORIGIN: ""
+  rag:
+    image: smartgym/rag:integrated
+    build:
+      dockerfile: infra/docker/Dockerfile.rag-integrated
+    extra_hosts: ["host.docker.internal:host-gateway"]
+    environment:
+      KB_GRAPH_BACKEND: neo4j
+      KB_RETRIEVAL_MODE: hybrid
+      OLLAMA_THINK: "false"
+      OLLAMA_BASE_URL: ${SMARTGYM_OLLAMA_ORIGIN:-http://host.docker.internal:11434}
+      NEO4J_URI: bolt://neo4j:7687
+      NEO4J_USER: neo4j
+      NEO4J_PASSWORD: ${NEO4J_PASSWORD:?Run setup-integrated.mjs}
+    depends_on: !override
+      neo4j: {condition: service_healthy}
+  neo4j:
+    image: neo4j:5.26-community
+    environment:
+      NEO4J_AUTH: neo4j/${NEO4J_PASSWORD:?Run setup-integrated.mjs}
+      NEO4J_server_memory_heap_initial__size: 256m
+      NEO4J_server_memory_heap_max__size: 512m
+      NEO4J_server_memory_pagecache_size: 256m
+    ports:
+      - "127.0.0.1:${SMARTGYM_NEO4J_HTTP_PORT:-7475}:7474"
+      - "127.0.0.1:${SMARTGYM_NEO4J_BOLT_PORT:-7688}:7687"
+    volumes: [integrated-neo4j-data:/data]
+    healthcheck:
+      test: ["CMD-SHELL", "wget -q -O /dev/null http://localhost:7474 || exit 1"]
+      interval: 10s
+      timeout: 5s
+      start_period: 30s
+      retries: 12
+    mem_limit: 1536m
+volumes:
+  integrated-neo4j-data:

@@ -355,7 +355,7 @@ function project(output, task, config, provider = 'ollama') {
           ? 'Qwen 2.5'
           : text(output.model_version, 300) && text(output.model_version, 300) !== 'none'
             ? text(output.model_version, 300)
-            : 'Ollama (Qwen 2.5)',
+            : 'Phản hồi hệ thống',
     references,
     user_notices: output.user_notices
       .filter((v) => typeof v === 'string' && !unsafeText.test(v))

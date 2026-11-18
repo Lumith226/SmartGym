@@ -1,0 +1,3 @@
+# SmartGym integrated handoff
+
+For any KB, KG, Neo4j, RAG, chatbot or video-to-chat work, first read `docs/CHUONG_4_KG_RAG_RULES_PLAN.md`. Follow current user scope; no pose-model implementation/weights are included in this handoff. Do not copy local secrets, datasets, user sessions or private media into Git. Keep KB snapshot, embeddings, Cypher and contracts version-consistent. Keep fixture tests and historical119-question results distinct from new runtime verification. Preserve the R3 module fingerprint when changing deployment wrappers; method changes need explicit review and new validation. Read `docs/guides/BAN_GIAO_CHAY_MAY_KHAC.md` for setup and external-provider boundaries.

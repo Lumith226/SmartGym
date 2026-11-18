@@ -1,0 +1,355 @@
+[
+  {
+    "id": "ace_squat",
+    "title": "Bodyweight Squat",
+    "publisher": "American Council on Exercise",
+    "url": "https://www.acefitness.org/resources/everyone/exercise-library/135/bodyweight-squat/",
+    "file": "ace_squat.html",
+    "format": "html",
+    "exercise_codes": [
+      "SQUAT"
+    ],
+    "selector": "ace_steps",
+    "license": "Copyright ACE; keep original attribution; do not redistribute full source without checking rights.",
+    "include_exercise_metadata": true
+  },
+  {
+    "id": "ace_pushup",
+    "title": "Push-up",
+    "publisher": "American Council on Exercise",
+    "url": "https://www.acefitness.org/resources/everyone/exercise-library/41/push-up/",
+    "file": "ace_pushup.html",
+    "format": "html",
+    "exercise_codes": [
+      "PUSHUP"
+    ],
+    "selector": "ace_steps",
+    "license": "Copyright ACE; keep original attribution; do not redistribute full source without checking rights.",
+    "include_exercise_metadata": true
+  },
+  {
+    "id": "ace_reverse_crunch",
+    "title": "Reverse Ab Crunch",
+    "publisher": "American Council on Exercise",
+    "url": "https://www.acefitness.org/resources/everyone/exercise-library/76/reverse-crunch/",
+    "file": "ace_reverse_crunch.html",
+    "format": "html",
+    "exercise_codes": [
+      "REVERSE_CRUNCH"
+    ],
+    "selector": "ace_steps",
+    "license": "Copyright ACE; keep original attribution; do not redistribute full source without checking rights.",
+    "include_exercise_metadata": true
+  },
+  {
+    "id": "qld_jumping_jacks",
+    "title": "Jumping jacks — source notes",
+    "publisher": "Health and Wellbeing Queensland (upstream source)",
+    "url": "https://hw.qld.gov.au/physical-activity/jumping-jacks/",
+    "file": "qld_jumping_jacks.notes.txt",
+    "format": "txt",
+    "exercise_codes": [
+      "JUMPING_JACK"
+    ],
+    "local_note": "qld_jumping_jacks.txt",
+    "acquisition": "Developer notes from inspected publisher page: short exact excerpt plus Vietnamese paraphrase. Not a raw downloaded HTML page.",
+    "review_status": "developer_draft; domain_review_pending",
+    "license": "Short attributed excerpt and developer paraphrase; original publisher retains rights."
+  },
+  {
+    "id": "nsca_programming",
+    "title": "Foundations of Fitness Programming",
+    "publisher": "National Strength and Conditioning Association",
+    "url": "https://www.nsca.com/contentassets/8323553f698a466a98220b21d9eb9a65/foundationsoffitnessprogramming_201508.pdf",
+    "file": "nsca_foundations.pdf",
+    "format": "pdf",
+    "exercise_codes": [],
+    "optional": true,
+    "license": "Copyright NSCA; academic reference; obtain only with permitted access; do not redistribute full source without checking rights."
+  },
+  {
+    "id": "openstax_anatomy",
+    "title": "Anatomy and Physiology 2e",
+    "publisher": "OpenStax, Rice University",
+    "url": "https://openstax.org/details/books/anatomy-and-physiology-2e",
+    "file": "anatomy-and-physiology-2e_-_WEB.pdf",
+    "format": "pdf",
+    "manual_download": true,
+    "acquisition": "User-provided PDF; publisher, title, copyright and sections verified inside this file.",
+    "publication_year": 2026,
+    "verified_total_pdf_pages": 1347,
+    "copyright_pdf_page": 4,
+    "exercise_codes": [],
+    "page_ranges": [
+      [
+        353,
+        369
+      ],
+      [
+        385,
+        408
+      ],
+      [
+        425,
+        429
+      ],
+      [
+        433,
+        470
+      ]
+    ],
+    "page_sections": [
+      {
+        "start": 353,
+        "end": 357,
+        "title": "9.5 Types of Body Movements"
+      },
+      {
+        "start": 358,
+        "end": 369,
+        "title": "9.6 Anatomy of Selected Synovial Joints"
+      },
+      {
+        "start": 385,
+        "end": 386,
+        "title": "10.1 Overview of Muscle Tissues"
+      },
+      {
+        "start": 387,
+        "end": 391,
+        "title": "10.2 Skeletal Muscle"
+      },
+      {
+        "start": 392,
+        "end": 399,
+        "title": "10.3 Muscle Fiber Contraction and Relaxation"
+      },
+      {
+        "start": 400,
+        "end": 404,
+        "title": "10.4 Nervous System Control of Muscle Tension"
+      },
+      {
+        "start": 405,
+        "end": 405,
+        "title": "10.5 Types of Muscle Fibers"
+      },
+      {
+        "start": 406,
+        "end": 408,
+        "title": "10.6 Exercise and Muscle Performance"
+      },
+      {
+        "start": 425,
+        "end": 429,
+        "title": "11.1 Interactions of Skeletal Muscles, Their Fascicle Arrangement, and Their Lever Systems"
+      },
+      {
+        "start": 433,
+        "end": 443,
+        "title": "11.3 Axial Muscles of the Head, Neck, and Back"
+      },
+      {
+        "start": 444,
+        "end": 450,
+        "title": "11.4 Axial Muscles of the Abdominal Wall, and Thorax"
+      },
+      {
+        "start": 451,
+        "end": 461,
+        "title": "11.5 Muscles of the Pectoral Girdle and Upper Limbs"
+      },
+      {
+        "start": 462,
+        "end": 470,
+        "title": "11.6 Appendicular Muscles of the Pelvic Girdle and Lower Limbs"
+      }
+    ],
+    "license": "CC BY-NC-SA 4.0",
+    "attribution": "Access for free at openstax.org.",
+    "printed_page_note": "Selected content pages have a 16-page offset in this verified file. Stored pdf_page is always the 1-based file position."
+  },
+  {
+    "id": "ace_knee_pushup",
+    "title": "Bent Knee Push-up",
+    "publisher": "American Council on Exercise",
+    "url": "https://www.acefitness.org/resources/everyone/exercise-library/13/bent-knee-push-up/",
+    "file": "ace_knee_pushup.html",
+    "format": "html",
+    "exercise_codes": [
+      "PUSHUP"
+    ],
+    "selector": "ace_steps",
+    "license": "Copyright ACE; retain attribution; local academic reference.",
+    "include_exercise_metadata": true
+  },
+  {
+    "id": "nasm_jumping_jacks",
+    "title": "Jumping Jacks",
+    "publisher": "National Academy of Sports Medicine",
+    "url": "https://www.nasm.org/resource-center/exercise-library/jumping-jacks",
+    "file": "nasm_jumping_jacks.html",
+    "format": "html",
+    "exercise_codes": [
+      "JUMPING_JACK"
+    ],
+    "selector": "nasm_sections",
+    "extra_headings": [
+      "Are jumping jacks appropriate for all fitness levels?",
+      "Common Mistakes",
+      "Muscles Worked",
+      "How many jumping jacks should be performed for cardiovascular benefits?",
+      "What are the cardiovascular benefits of jumping jacks?"
+    ],
+    "license": "Copyright NASM; retain attribution; local academic reference."
+  },
+  {
+    "id": "ohio_movement_library",
+    "title": "Movement Library — High Knees, Butt Kickers and Jumping Jacks",
+    "publisher": "Ohio University WellWorks",
+    "url": "https://www.ohio.edu/wellworks/movement-library",
+    "file": "ohio_movement_library.html",
+    "format": "html",
+    "selector": "named_paragraphs",
+    "section_exercises": {
+      "High Knees": [
+        "HIGH_KNEES"
+      ],
+      "Butt Kickers": [
+        "BUTT_KICKERS"
+      ],
+      "Jumping Jacks": [
+        "JUMPING_JACK"
+      ]
+    },
+    "exercise_codes": [
+      "HIGH_KNEES",
+      "BUTT_KICKERS",
+      "JUMPING_JACK"
+    ],
+    "license": "Copyright Ohio University; retain attribution; selected local academic reference.",
+    "review_scope": "Exercise descriptions only; walking/running variations are not a universal progression or cadence prescription."
+  },
+  {
+    "id": "cdc_intensity",
+    "title": "How to Measure Physical Activity Intensity",
+    "publisher": "US Centers for Disease Control and Prevention",
+    "url": "https://www.cdc.gov/physical-activity-basics/measuring/index.html",
+    "file": "cdc_intensity.html",
+    "format": "html",
+    "exercise_codes": [],
+    "general_guidance": true,
+    "publication_year": 2025,
+    "license": "US CDC public guidance; retain source; check third-party material separately.",
+    "review_scope": "General aerobic effort, talk test, relative versus absolute intensity; not exercise-specific cadence."
+  },
+  {
+    "id": "nsca_movement_progressions",
+    "title": "Progressive Strategies for Teaching Fundamental Resistance Training Movement Patterns",
+    "publisher": "National Strength and Conditioning Association",
+    "url": "https://www.nsca.com/contentassets/3d09f06f0b4c4f6fbd8cc382ed1f3d4a/ptq-10.2.1-progressive-strategies-for-teaching-fundamental-resistance-training-movement-patterns.pdf",
+    "file": "ptq-10.2.1-progressive-strategies-for-teaching-fundamental-resistance-training-movement-patterns.pdf",
+    "format": "pdf",
+    "publication_year": 2023,
+    "verified_total_pdf_pages": 12,
+    "page_ranges": [
+      [
+        1,
+        4
+      ],
+      [
+        6,
+        6
+      ]
+    ],
+    "page_sections": [
+      {
+        "start": 1,
+        "end": 3,
+        "title": "Teaching progressions, instruction, cueing and feedback"
+      },
+      {
+        "start": 4,
+        "end": 4,
+        "title": "Figure 1 — Squat exercise progression"
+      },
+      {
+        "start": 6,
+        "end": 6,
+        "title": "Figure 3 — Horizontal push exercise progression"
+      }
+    ],
+    "exercise_codes": [],
+    "general_guidance": true,
+    "manual_download": true,
+    "license": "Copyright NSCA 2023; user-provided publisher PDF; selected local academic reference.",
+    "review_scope": "Sample teaching progressions and cueing; not universally applicable personal prescriptions.",
+    "printed_page_note": "File page 1 is printed page 6. File pages are always stored as locators."
+  },
+  {
+    "id": "hhs_physical_activity_2018",
+    "title": "Physical Activity Guidelines for Americans 2nd edition — Adults, Safety and Intensity",
+    "publisher": "US Department of Health and Human Services",
+    "url": "https://odphp.health.gov/sites/default/files/2019-09/Physical_Activity_Guidelines_2nd_edition.pdf",
+    "file": "Physical_Activity_Guidelines_2nd_edition.pdf",
+    "format": "pdf",
+    "publication_year": 2018,
+    "verified_total_pdf_pages": 118,
+    "page_ranges": [
+      [
+        56,
+        65
+      ],
+      [
+        88,
+        93
+      ],
+      [
+        108,
+        112
+      ]
+    ],
+    "page_sections": [
+      {
+        "start": 56,
+        "end": 65,
+        "title": "Chapter 4 — Active Adults, ages 18–64"
+      },
+      {
+        "start": 88,
+        "end": 93,
+        "title": "Chapter 7 — Active and Safe"
+      },
+      {
+        "start": 108,
+        "end": 112,
+        "title": "Appendix 1 — Intensity, Bouts and Steps"
+      }
+    ],
+    "exercise_codes": [],
+    "general_guidance": true,
+    "manual_download": true,
+    "license": "US HHS government publication; retain attribution; check third-party images separately.",
+    "review_scope": "General adult activity and gradual progression, not a personalized six-exercise program."
+  },
+  {
+    "id": "smartgym_model_protocol",
+    "title": "SmartGym V4 — Ý nghĩa nhãn, phạm vi quan sát và quy ước đếm",
+    "publisher": "SmartGym project — verified technical documentation",
+    "url": "https://github.com/Lumith226/SmartGym/blob/4de4d6d0becc8db7dfc5c119782cbd316466c1b7/smart_gym_web_v4/README.md",
+    "file": "smartgym_model_protocol_20261118_v2.txt",
+    "format": "txt",
+    "exercise_codes": [],
+    "general_guidance": true,
+    "license": "User-provided project documentation; retain commit and file attribution.",
+    "source_role": "technical_system_description_not_exercise_prescription",
+    "review_scope": "Facts about software labels, score and count conventions; not scientific training thresholds.",
+    "protocol_revision": "2026-11-18-v2",
+    "acquisition": "Local code/contract inspection; software classification and measurement semantics, not an exercise prescription.",
+    "code_references": [
+      "kb_service/v4.py",
+      "label_catalog_v4.json",
+      "model_contracts/"
+    ]
+  }
+]

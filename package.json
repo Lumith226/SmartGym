@@ -6,7 +6,7 @@
     "node": ">=24 <25"
   },
   "scripts": {
-    "start:local": "node --env-file=.env scripts/start-compose-local.mjs",
+    "start:local": "node scripts/start-integrated.mjs",
     "setup:pose-autostart": "powershell.exe -NoProfile -ExecutionPolicy Bypass -File scripts/install-pose-autostart.ps1",
     "build": "pnpm --filter @smartgym/backend --filter @smartgym/web build",
     "test": "pnpm --filter @smartgym/catalog test && pnpm --filter @smartgym/identity test && pnpm --filter @smartgym/notification test",
@@ -46,7 +46,9 @@
     "lint:chat-bff": "eslint frontend/server/chat.mjs",
     "typecheck:chat-bff": "pnpm --filter @smartgym/web exec tsc -p tsconfig.chat-bff.json",
     "format:chat-bff": "prettier --single-quote --write frontend/server/chat.mjs",
-    "format:check:chat-bff": "prettier --single-quote --check frontend/server/chat.mjs"
+    "format:check:chat-bff": "prettier --single-quote --check frontend/server/chat.mjs",
+    "setup:integrated": "node scripts/setup-integrated.mjs",
+    "start:integrated": "node scripts/start-integrated.mjs"
   },
   "devDependencies": {
     "@apidevtools/swagger-parser": "13.1.0",

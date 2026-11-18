@@ -1,0 +1,13 @@
+{
+  "kb_version": "kb_ddae6f149e7b9f57",
+  "nodes": 468,
+  "edges": 567,
+  "sources": 12,
+  "chunks": 284,
+  "criteria": 38,
+  "model_labels": 128,
+  "cypher_sha256": "66f8fddff75a20245b38445eff7e03bf1674071651f200da8c9ee19e281aa548",
+  "snapshot_sha256": "a0d627e1d26acecccad12bf9c6a5bd85b778cbd806e4c548f5ccae9875657476",
+  "contains_dialogue_trace": false,
+  "import_verified": true
+}

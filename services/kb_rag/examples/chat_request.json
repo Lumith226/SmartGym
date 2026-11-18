@@ -1,0 +1,14 @@
+{
+  "message": "Khi chống đẩy hông nâng cao, tôi cần chú ý tiêu chí kỹ thuật nào?",
+  "exercise_code": "PUSHUP",
+  "observation": {
+    "exercise_code": "PUSHUP",
+    "labels": ["HIP_TOO_HIGH"],
+    "unit": "window",
+    "observation_status": "sufficient",
+    "simulated": true,
+    "model_version": null
+  },
+  "top_k": 5,
+  "generate": true
+}

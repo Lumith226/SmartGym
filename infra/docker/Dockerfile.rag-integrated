@@ -1,0 +1,12 @@
+FROM python:3.12-slim-bookworm
+WORKDIR /app
+COPY --from=rag-source requirements.lock.txt ./
+RUN pip install --no-cache-dir -r requirements.lock.txt
+COPY --from=rag-source kb_service ./kb_service
+COPY --from=rag-source capabilities.json claims.json label_catalog_v4.json label_knowledge_map.json sources.json ./
+COPY --from=rag-source model_contracts ./model_contracts
+COPY --from=rag-source data/export /kb-export
+COPY infra/rag/integrated_app.py infra/rag/integrated_entry.py ./
+ENV PYTHONDONTWRITEBYTECODE=1 PYTHONUNBUFFERED=1
+USER 1000:1000
+ENTRYPOINT ["python", "integrated_entry.py"]

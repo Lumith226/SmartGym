@@ -1,0 +1,18 @@
+[
+ {"id":"sq01","question":"Cách thực hiện squat và giữ lưng thế nào?","exercise_code":"SQUAT","expected_sources":["ace_squat"]},
+ {"id":"sq02","question":"Khi squat đầu gối cần hướng về đâu?","exercise_code":"SQUAT","expected_sources":["ace_squat"]},
+ {"id":"sq03","question":"Squat nên chú ý gì khi hạ người và gót chân bắt đầu nhấc?","exercise_code":"SQUAT","expected_sources":["ace_squat"]},
+ {"id":"pu01","question":"Khi chống đẩy hông cao hoặc võng lưng cần chú ý gì?","exercise_code":"PUSHUP","expected_sources":["ace_pushup"]},
+ {"id":"pu02","question":"Khoảng cách tay khi chống đẩy và tư thế đầu ra sao?","exercise_code":"PUSHUP","expected_sources":["ace_pushup"]},
+ {"id":"pu03","question":"How should the torso be held during a push-up?","exercise_code":"PUSHUP","expected_sources":["ace_pushup"]},
+ {"id":"rc01","question":"Gập bụng ngược có cần nâng hông khỏi thảm không?","exercise_code":"REVERSE_CRUNCH","expected_sources":["ace_reverse_crunch"]},
+ {"id":"rc02","question":"Hạ xuống có kiểm soát khi gập bụng ngược như thế nào?","exercise_code":"REVERSE_CRUNCH","expected_sources":["ace_reverse_crunch"]},
+ {"id":"rc03","question":"How do the hips and pelvis move in a reverse crunch?","exercise_code":"REVERSE_CRUNCH","expected_sources":["ace_reverse_crunch"]},
+ {"id":"jj01","question":"Khi jumping jacks tay và chân phối hợp ra sao?","exercise_code":"JUMPING_JACK","expected_sources":["qld_jumping_jacks"]},
+ {"id":"jj02","question":"Khi jumping jacks cần tiếp đất thế nào?","exercise_code":"JUMPING_JACK","expected_sources":["qld_jumping_jacks"]},
+ {"id":"jj03","question":"Starting position and steps for jumping jacks?","exercise_code":"JUMPING_JACK","expected_sources":["qld_jumping_jacks"]},
+ {"id":"book01","question":"Cơ chủ vận, cơ đối kháng và cơ hiệp đồng có vai trò gì trong vận động?","expected_sources":["openstax_anatomy"]},
+ {"id":"book02","question":"Gấp khớp và duỗi khớp được mô tả như thế nào?","expected_sources":["openstax_anatomy"]},
+ {"id":"out01","question":"Giá bitcoin hôm nay?","expected_sources":[]},
+ {"id":"out02","question":"Viết chương trình mã hóa AES cho tôi","expected_sources":[]}
+]

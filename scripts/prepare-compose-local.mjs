@@ -1,6 +1,6 @@
 import { execFile } from 'node:child_process';
 import { createHash, randomBytes, X509Certificate } from 'node:crypto';
-import { access, mkdir, readFile, writeFile } from 'node:fs/promises';
+import { access, mkdir, readFile, writeFile, readdir } from 'node:fs/promises';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { promisify } from 'node:util';
@@ -145,13 +145,18 @@ await saveIfMissing(join(directory, 'pose.engine.env'), envText({
   POSE_ENGINE_TLS_CA_FILE: '/run/secrets/engine-ca.crt',
 }));
 const ragPath = resolve(root, process.env.SMARTGYM_RAG_SOURCE || '../smart-gym-ai/services/kb_rag');
-const revisionFiles = ['app.py', 'knowledge.py', 'chatbot.py', 'presentation.py', 'grounding.py', 'observation_chat.py'];
+const revisionFiles = process.env.SMARTGYM_RAG_PRESERVE_RELEASE === 'true'
+  ? (await readdir(join(ragPath, 'kb_service'))).filter(f => f.endsWith('.py')).sort()
+  : ['app.py', 'knowledge.py', 'chatbot.py', 'presentation.py', 'grounding.py', 'observation_chat.py'];
 const revision = createHash('sha256').update(Buffer.concat(await Promise.all(
   revisionFiles.map(file => readFile(join(ragPath, 'kb_service', file))),
 ))).digest('hex').slice(0, 16);
 const ragTokenFile = join(directory, 'web', 'rag-token');
 await saveIfMissing(ragTokenFile, secret());
-await prepareComposeRagIndex(join(ragPath, 'data', 'index'), join(directory, 'rag-index'), join(directory, 'web', 'rag-sources.json'));
+await prepareComposeRagIndex(process.env.SMARTGYM_RAG_INDEX_DIR || join(ragPath, 'data', 'index'), join(directory, 'rag-index'), join(directory, 'web', 'rag-sources.json'), {
+  approvedSourceFile: process.env.SMARTGYM_RAG_SOURCES_FILE,
+  preserveVersion: process.env.SMARTGYM_RAG_PRESERVE_RELEASE === 'true',
+});
 await saveIfMissing(join(directory, 'rag.provider.env'), envText({ KB_INTERNAL_TOKEN: (await readFile(ragTokenFile, 'utf8')).trim() }));
 await saveIfMissing(join(directory, 'web.rag.env'), envText({
   BFF_RAG_ORIGIN: 'https://rag:8010', BFF_RAG_RUNTIME_REVISION: revision, ...certs('BFF_RAG_TLS', 'client'),

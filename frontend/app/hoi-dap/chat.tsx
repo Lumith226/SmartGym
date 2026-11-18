@@ -42,6 +42,7 @@ export type Task = 'knowledge' | 'score' | 'summary' | 'practice';
 
 export type Reference = {
   number: number;
+  chunk_id: string;
   title: string;
   publisher: string;
   url: string | null;
@@ -133,26 +134,26 @@ const PROMPT_SUGGESTIONS = [
   {
     icon: Dumbbell,
     title: 'Kỹ thuật Squat chuẩn',
-    desc: 'Cách mở gối, vị trí chân và gồng core tránh đau lưng.',
-    prompt: 'Hướng dẫn chi tiết kỹ thuật Squat đúng chuẩn, cách mở gối và gồng bụng (bracing) để tránh chấn thương cột sống?',
+    desc: 'Tìm hướng dẫn có nguồn về chân, hông và thân người.',
+    prompt: 'Khi bắt đầu squat, tôi nên đặt chân và di chuyển hông như thế nào theo tài liệu?',
   },
   {
     icon: Calendar,
-    title: 'Lịch tập Push - Pull - Legs',
-    desc: 'Thiết kế giáo án 4 buổi/tuần cân bằng các nhóm cơ.',
-    prompt: 'Hãy thiết kế cho tôi một lịch tập Push - Pull - Legs 4 buổi/tuần cho người đã tập 6 tháng, mục tiêu tăng cơ giảm mỡ tối ưu.',
+    title: 'So sánh hai động tác',
+    desc: 'Hiểu chuyển động của High Knees và Butt Kickers.',
+    prompt: 'Chuyển động chân trong nâng cao gối và gót hướng về mông khác nhau thế nào?',
   },
   {
     icon: Flame,
-    title: 'Tính Calo & Macro',
-    desc: 'Xác định lượng Protein, Carb, Fat cần nạp mỗi ngày.',
-    prompt: 'Tôi nặng 68kg, cao 1m72, tập 4 buổi/tuần. Hãy tính TDEE và phân bổ Macro (Protein/Carb/Fat) cho giai đoạn siết cơ nhẹ.',
+    title: 'Tốc độ và thời lượng',
+    desc: 'Phân biệt thời gian tập với số lần lặp mỗi phút.',
+    prompt: 'Tài liệu nói tập jumping jack trong 30–60 giây thì đó là thời lượng hay tốc độ lặp?',
   },
   {
     icon: Activity,
-    title: 'Khắc phục đau khớp gối',
-    desc: 'Bài tập bổ trợ củng cố cơ đùi trước và dây chằng.',
-    prompt: 'Tôi thường bị mỏi và đau khớp gối sau khi tập chân. Có những bài tập bổ trợ và bài giãn cơ nào giúp khắc phục?',
+    title: 'Kiểm soát reverse crunch',
+    desc: 'Tìm hiểu pha nâng hông và hạ người có kiểm soát.',
+    prompt: 'Khi gập bụng ngược, tôi cần di chuyển xương chậu và kiểm soát pha hạ như thế nào?',
   },
 ];
 
@@ -161,9 +162,11 @@ const CURRENT_CHAT_KEY = 'smartgym_user_active_chat_id';
 
 function FormattedContent({
   content,
+  references = [],
   onCitationClick,
 }: {
   content: string;
+  references?: Reference[];
   onCitationClick?: (cid: string) => void;
 }) {
   const paragraphs = content.split(/\n{2,}/);
@@ -196,14 +199,21 @@ function FormattedContent({
         );
       } else if (token.startsWith('[') && token.endsWith(']')) {
         const rawTag = token.slice(1, -1);
+        const reference = references.find((ref) => ref.chunk_id === rawTag || String(ref.number) === rawTag);
+        if (!reference) {
+          parts.push(token);
+          lastIndex = regex.lastIndex;
+          continue;
+        }
         parts.push(
           <button
             key={match.index}
             type="button"
-            onClick={() => onCitationClick?.(rawTag)}
+            onClick={() => onCitationClick?.(String(reference.number))}
+            aria-label={`Mở nguồn ${reference.number}`}
             className="inline-flex items-center mx-0.5 px-1.5 py-0.5 rounded bg-muted hover:bg-accent text-primary font-mono text-[11px] font-medium border border-border transition cursor-pointer"
           >
-            [{rawTag.length > 15 ? rawTag.slice(0, 10) + '…' : rawTag}]
+            [{reference.number}]
           </button>,
         );
       }
@@ -994,12 +1004,15 @@ export function Chat({
                           <p className="font-semibold text-foreground">Chi tiết xử lý mô hình:</p>
                           <p>• Trạng thái: {turn.answer.status}</p>
                           <p>• Chế độ: {taskLabels[turn.answer.task] || turn.answer.task}</p>
-                          <p>• Số tài liệu khoa học trích dẫn: {turn.answer.references?.length ?? 0}</p>
+                          <p>• Số đoạn tài liệu trích dẫn: {turn.answer.references?.length ?? 0}</p>
                         </Card>
                       )}
 
                       {/* Nội dung trả lời chính */}
-                      <FormattedContent content={turn.content} />
+                      <FormattedContent content={turn.content} references={turn.answer?.references} onCitationClick={(number) => {
+                        setOpenReferences((prev) => ({ ...prev, [index]: true }));
+                        requestAnimationFrame(() => document.getElementById(`chat-source-${index}-${number}`)?.scrollIntoView({ block: 'nearest' }));
+                      }} />
 
                       {/* Danh mục tài liệu trích dẫn khoa học (References) nếu có */}
                       {hasReferences && (
@@ -1017,7 +1030,7 @@ export function Chat({
                             className="flex items-center gap-1.5 text-xs font-medium text-primary hover:text-primary/90 h-8 px-2"
                           >
                             <BookOpen className="h-3.5 w-3.5" />
-                            <span>Nguồn tài liệu khoa học ({turn.answer!.references.length})</span>
+                            <span>Nguồn tham khảo ({turn.answer!.references.length})</span>
                             <ChevronDown
                               className={cn(
                                 'h-3 w-3 transition-transform',
@@ -1029,7 +1042,7 @@ export function Chat({
                           {openReferences[index] && (
                             <Card className="mt-2 space-y-2 p-3 text-xs">
                               {turn.answer!.references.map((ref, rIdx) => (
-                                <div key={rIdx} className="space-y-1 border-b border-border/50 pb-2 last:border-b-0 last:pb-0">
+                                <div key={rIdx} id={`chat-source-${index}-${ref.number}`} className="space-y-1 border-b border-border/50 pb-2 last:border-b-0 last:pb-0">
                                   <div className="flex items-center justify-between text-foreground font-medium">
                                     <span>
                                       [{ref.number}] {ref.title}
@@ -1046,7 +1059,7 @@ export function Chat({
                                     )}
                                   </div>
                                   <p className="text-[11px] text-muted-foreground">
-                                    NXB: {ref.publisher} {ref.section ? `• ${ref.section}` : ''}
+                                    NXB: {ref.publisher} {ref.section ? `• ${ref.section}` : ''} {ref.pdf_page ? `• Trang PDF ${ref.pdf_page}` : ''}
                                   </p>
                                   {ref.excerpt && (
                                     <p className="text-[11.5px] text-muted-foreground italic bg-muted/50 p-2 rounded-md">
